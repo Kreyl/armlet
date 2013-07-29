@@ -59,7 +59,7 @@ public:
 static Lustra_t Lustra;
 
 // Lcd
-static uint16_t Framebuf[LCD_W*LCD_H];
+//static uint16_t Framebuf[LCD_W*LCD_H];
 static bool LcdHasChanged;
 #define LCD_REDRAW_MS   99
 

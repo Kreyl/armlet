@@ -18,7 +18,7 @@
 #define VS_XCS          3
 #define VS_XDCS         8
 #define VS_RST          4
-#define VS_DREQ         5
+#define VS_DREQ         0
 #define VS_XCLK         13
 #define VS_SO           14
 #define VS_SI           15

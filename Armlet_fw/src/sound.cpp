@@ -82,18 +82,22 @@ void Sound_t::Init() {
     PinSetupAlterFunc(VS_GPIO, VS_SI,   omPushPull, pudNone, VS_AF);
 
     // ==== SPI init ====
-    VS_SPI_RCC_EN();
-    // NoCRC, FullDuplex, 8bit, MSB, Baudrate, Master, ClkLowIdle(CPOL=0),
-    // FirstEdge(CPHA=0), NSS software controlled and is 1
-    //VS_SPI->CR1 = SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_MSTR | SPI_BAUDRATE_DIV4;
-    VS_SPI->CR2 = 0;
-    VS_SPI->I2SCFGR &= ~((uint16_t)SPI_I2SCFGR_I2SMOD);
-    VS_SPI->CR1 |= SPI_CR1_SPE; // Enable SPI
+//    VS_SPI_RCC_EN();
+//    // NoCRC, FullDuplex, 8bit, MSB, Baudrate, Master, ClkLowIdle(CPOL=0),
+//    // FirstEdge(CPHA=0), NSS software controlled and is 1
+//    VS_SPI->CR1 = SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_MSTR | SPI_BAUDRATE_DIV4;
+//    VS_SPI->CR2 = 0;
+//    VS_SPI->I2SCFGR &= ~((uint16_t)SPI_I2SCFGR_I2SMOD);
+//    VS_SPI->CR1 |= SPI_CR1_SPE; // Enable SPI
+    SpiSetup(VS_SPI, boMSB, cpolIdleLow, cphaFirstEdge, sbFdiv4);
+    SpiEnable(VS_SPI);
 
     // ==== Init VS ====
     Rst_Hi();
     Clk.MCO1Enable(mco1HSE, mcoDiv1);   // Only after reset, as pins are grounded when Rst is Lo
-    chThdSleepMicroseconds(450);
+    //chThdSleepMicroseconds(450);
+    Delay_ms(450);      // Do not use os' delay system as os is not initialized yet
+
 //    CmdWrite(VS_REG_MODE, (VS_SM_SDINEW | VS_SM_RESET));    // Perform software reset
     CmdWrite(VS_REG_MODE, 0x0802);  // Native SPI mode, Layer I + II enabled
     CmdWrite(VS_REG_CLOCKF, 0x8000 + (12000000/2000));    // x4, XTALI = 12.288 MHz

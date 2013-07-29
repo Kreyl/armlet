@@ -74,8 +74,8 @@ void Init() {
 //    IR.RxInit();
 //    Power.Init();
 //    PillInit();
-    //Sound.Init();
-    //Sound.Play("alive.wav");
+    Sound.Init();
+    Sound.Play("sylvans.mp3");
 //    rLevel1.Init(ID);
 //    App.Init();
 }
