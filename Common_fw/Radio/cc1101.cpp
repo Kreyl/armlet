@@ -23,8 +23,8 @@ void cc1101_t::Init() {
     CsHi();
 
     // ==== SPI ====    MSB first, master, ClkLowIdle, FirstEdge, Baudrate=f/2
-    SpiSetup(CC_SPI, boMSB, cpolIdleLow, cphaFirstEdge, sbFdiv2);
-    SpiEnable(CC_SPI);
+    Spi_t::Setup(CC_SPI, boMSB, cpolIdleLow, cphaFirstEdge, sbFdiv2);
+    Spi_t::Enable(CC_SPI);
 
     // ==== Init CC ====
     CReset();

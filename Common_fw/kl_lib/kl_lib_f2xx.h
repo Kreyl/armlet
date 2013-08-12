@@ -46,7 +46,7 @@
 
 enum BitOrder_t {boMSB, boLSB};
 enum LowHigh_t  {Low, High};
-enum RiseFall_t {Rising, Falling};
+enum RiseFall_t {Rising, Falling, RisingFalling};
 
 // Simple pseudofunctions
 #define TRIM_VALUE(v, Max)  { if(v > Max) v = Max; }
@@ -204,6 +204,70 @@ public:
     void Off() { *PCCR = 0; }
 };
 
+// ==== Irq pin ====
+class IrqPin_t {
+private:
+    uint32_t IrqVect;
+    uint16_t IPin;
+    GPIO_TypeDef *IGPIO;
+public:
+    inline void SetupFront(RiseFall_t Front) {
+        uint32_t msk = 1 << IPin;
+        switch(Front) {
+            case Rising:
+                EXTI->FTSR &= ~msk; // Falling trigger disabled
+                EXTI->RTSR |=  msk; // Rising trigger enabled
+                break;
+            case Falling:
+                EXTI->FTSR |=  msk; // Falling trigger enabled
+                EXTI->RTSR &= ~msk; // Rising trigger disabled
+                break;
+            case RisingFalling:
+                EXTI->FTSR |=  msk; // Falling trigger enabled
+                EXTI->RTSR |=  msk; // Rising trigger enabled
+                break;
+        }
+    }
+    inline void Init(GPIO_TypeDef *PGPIO, uint16_t N, RiseFall_t Front) {
+        // Setup inner variables
+        IGPIO = PGPIO;
+        IPin = N;
+        IrqVect = EXTI0_IRQn + IPin;
+        if((N >= 5) and (N <=9)) IrqVect = EXTI9_5_IRQn;
+        else if(N >= 10) IrqVect = EXTI15_10_IRQn;
+        // Enable sys cfg controller
+        rccEnableAPB2(RCC_APB2ENR_SYSCFGEN, FALSE);
+        uint8_t Shift = N * 4;
+        __IO uint32_t  *PExtiCr = &SYSCFG->EXTICR[0];
+        if     (N > 3 ) { PExtiCr = &SYSCFG->EXTICR[1]; Shift = (N - 4) * 4; }
+        else if(N > 7 ) { PExtiCr = &SYSCFG->EXTICR[2]; Shift = (N - 8) * 4; }
+        else if(N > 11) { PExtiCr = &SYSCFG->EXTICR[3]; Shift = (N - 12) * 4; }
+
+        // Clear EXTIx-related bits
+        uint32_t msk = 0x000F << Shift;
+        *PExtiCr &= ~msk;
+        // Write GPIO-related bits
+        if     (IGPIO == GPIOA) msk = 0x0 << Shift;
+        else if(IGPIO == GPIOB) msk = 0x1 << Shift;
+        else if(IGPIO == GPIOC) msk = 0x2 << Shift;
+        else if(IGPIO == GPIOD) msk = 0x3 << Shift;
+        else if(IGPIO == GPIOE) msk = 0x4 << Shift;
+        *PExtiCr |= msk;
+
+        // Configure EXTI line
+        msk = 1 << N;
+        EXTI->IMR  |=  msk;      // Interrupt mode enabled
+        EXTI->EMR  &= ~msk;      // Event mode disabled
+        SetupFront(Front);
+    }
+    // Enable/disable NVIC vector
+    inline void Enable(uint8_t Priority) { nvicEnableVector(IrqVect, CORTEX_PRIORITY_MASK(Priority)); }
+    inline void Disable() { nvicDisableVector(IrqVect); }
+    inline void GenerateIrq() { EXTI->SWIER |= 1 << IPin; }
+    // Standard pin functions
+    inline bool IsHi() { return PinIsSet(IGPIO, IPin); }
+};
+
 // ================================= Random ====================================
 uint32_t Random(uint32_t TopValue);
 
@@ -272,29 +336,28 @@ enum SpiBaudrate_t {
     sbFdiv256 = 0b111,
 };
 
-static inline void SpiSetup(
-        SPI_TypeDef *Spi,
-        BitOrder_t BitOrder,
-        CPOL_t CPOL,
-        CPHA_t CPHA,
-        SpiBaudrate_t Baudrate
-        ) {
-    // Clocking
-    if      (Spi == SPI1) { rccEnableSPI1(FALSE); }
-    else if (Spi == SPI2) { rccEnableSPI2(FALSE); }
-    else if (Spi == SPI3) { rccEnableSPI3(FALSE); }
-    // Mode: Master, NSS software controlled and is 1, 8bit, NoCRC, FullDuplex
-    Spi->CR1 = SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_MSTR;
-    if(BitOrder == boLSB) Spi->CR1 |= SPI_CR1_LSBFIRST;     // MSB/LSB
-    if(CPOL == cpolIdleHigh) Spi->CR1 |= SPI_CR1_CPOL;      // CPOL
-    if(CPHA == cphaSecondEdge) Spi->CR1 |= SPI_CR1_CPHA;    // CPHA
-    Spi->CR1 |= ((uint16_t)Baudrate) << 3;                  // Baudrate
-    Spi->CR2 = 0;
-    Spi->I2SCFGR &= ~((uint16_t)SPI_I2SCFGR_I2SMOD);        // Disable I2S
-}
-
-static inline void SpiEnable (SPI_TypeDef *Spi) { Spi->CR1 |=  SPI_CR1_SPE; }
-static inline void SpiDisable(SPI_TypeDef *Spi) { Spi->CR1 &= ~SPI_CR1_SPE; }
+class Spi_t {
+public:
+    static inline void Setup(SPI_TypeDef *Spi, BitOrder_t BitOrder,
+            CPOL_t CPOL, CPHA_t CPHA, SpiBaudrate_t Baudrate) {
+        // Clocking
+        if      (Spi == SPI1) { rccEnableSPI1(FALSE); }
+        else if (Spi == SPI2) { rccEnableSPI2(FALSE); }
+        else if (Spi == SPI3) { rccEnableSPI3(FALSE); }
+        // Mode: Master, NSS software controlled and is 1, 8bit, NoCRC, FullDuplex
+        Spi->CR1 = SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_MSTR;
+        if(BitOrder == boLSB) Spi->CR1 |= SPI_CR1_LSBFIRST;     // MSB/LSB
+        if(CPOL == cpolIdleHigh) Spi->CR1 |= SPI_CR1_CPOL;      // CPOL
+        if(CPHA == cphaSecondEdge) Spi->CR1 |= SPI_CR1_CPHA;    // CPHA
+        Spi->CR1 |= ((uint16_t)Baudrate) << 3;                  // Baudrate
+        Spi->CR2 = 0;
+        Spi->I2SCFGR &= ~((uint16_t)SPI_I2SCFGR_I2SMOD);        // Disable I2S
+    }
+    static inline void Enable (SPI_TypeDef *Spi) { Spi->CR1 |=  SPI_CR1_SPE; }
+    static inline void Disable(SPI_TypeDef *Spi) { Spi->CR1 &= ~SPI_CR1_SPE; }
+    static inline void EnableTxDma(SPI_TypeDef *Spi) { Spi->CR2 |= SPI_CR2_TXDMAEN; }
+    static inline void WaitBsyHi2Lo(SPI_TypeDef *Spi) { while(Spi->SR & SPI_SR_BSY); }
+};
 
 // =============================== I2C =========================================
 class i2c_t {

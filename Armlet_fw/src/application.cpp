@@ -27,8 +27,6 @@
 
 //#define DEMONSTRATE
 
-
-
 void LcdRedraw();
 
 App_t App;
@@ -148,12 +146,12 @@ static msg_t AppThread(void *arg) {
             uint16_t w = IR.RxWord;
             Lustra.SetID(w >> 8);
           //  #ifdef DEMONSTRATE
-//            Uart.Printf("IR ID=%u\r", Lustra.IDForApp);
+            Uart.Printf("IR ID=%u\r", Lustra.IDForApp);
            // Beeper.Beep(ShortBeep);
            // #endif
         }
 
-        if(EvtMsk & EVTMASK_TIMER) { STimers.Iterate(); } // if timer
+//        if(EvtMsk & EVTMASK_TIMER) { STimers.Iterate(); } // if timer
     } // while 1
     return 0;
 }

@@ -25,7 +25,7 @@
 							<option id="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.option.target.processor.557042681" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
 							<option id="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.option.target.thumb.1076202382" name="Thumb (-mthumb)" superClass="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.option.target.thumb" value="true" valueType="boolean"/>
 							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.elf.platform.debug.715915378" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.elf.platform.debug"/>
-							<builder buildPath="${workspace_loc:/rock_fw_eclipse/Debug}" id="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.elf.builder.debug.1762047410" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="ARM Yagarto Windows GNU Make builder" superClass="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.elf.builder.debug">
+							<builder buildPath="${workspace_loc:/rock_fw_eclipse/Debug}" id="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.elf.builder.debug.1762047410" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="ARM Yagarto Windows GNU Make builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.elf.builder.debug">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>

@@ -14,7 +14,6 @@
 #endif
 // Variables
 Lcd_t Lcd;
-//static char CharBuf[198];
 
 // Pin driving functions
 #define LCD_DELAY   Delay_ms(1);
@@ -27,17 +26,6 @@ __attribute__ ((always_inline)) static inline void DC_Lo()  { PinClear(LCD_GPIO,
 static inline void WR_Hi()   { PinSet  (LCD_GPIO, LCD_WR);   LCD_DELAY}
 static inline void RD_Hi()   { PinSet  (LCD_GPIO, LCD_RD);   LCD_DELAY}
 //__attribute__ ((always_inline)) static inline void RD_Lo()  { PinClear(LCD_GPIO, LCD_RD);   LCD_DELAY}
-
-// ==== Lcd Thread ====
-//static WORKING_AREA(waLcdThread, 128);
-//static msg_t LcdThread(void *arg) {
-//    (void)arg;
-//    chRegSetThreadName("Lcd");
-//    while(1) {
-//        chThdSleepMilliseconds(999);
-//    } // while 1
-//    return 0;
-//}
 
 void Lcd_t::Init() {
     // Backlight
@@ -77,7 +65,7 @@ void Lcd_t::Init() {
     WriteCmd(0x13);         // Normal Display Mode ON
     WriteCmd(0x36, 0xA0);   // Display mode: Y inv, X none-inv, Row/Col exchanged
 
-    //Cls(clBlack);
+    Cls(clBlack);
 
     //PutBitmap(45, 45, 27, 36, (uint16_t*)0x08000000);
 //
@@ -85,8 +73,6 @@ void Lcd_t::Init() {
 //    GetBitmap(45, 45, 10, 10, Buf);
 //    for(uint8_t i=0; i<100; i++) Uart.Printf("%04X ", Buf[i]);
 //    Uart.Printf("\r");
-    // ======= Create and start thread =======
-    //chThdCreateStatic(waLcdThread, sizeof(waLcdThread), NORMALPRIO, LcdThread, NULL);
 }
 
 void Lcd_t::Shutdown(void) {
@@ -131,72 +117,79 @@ void Lcd_t::WriteCmd(uint8_t ACmd, uint8_t AData) {
 }
 
 // ================================= Printf ====================================
-//uint16_t Lcd_t::PutChar(uint8_t x, uint8_t y, char c, Color_t ForeClr, Color_t BckClr) {
-//    char *PFont = (char*)Font8x8;  // Font to use
-//    // Read font params
-//    uint8_t nCols = PFont[0];
-//    uint8_t nRows = PFont[1];
-//    uint16_t nBytes = PFont[2];
-    // Get pointer to the first byte of the desired character
-//    const char *PChar = Font8x8 + (nBytes * (c - 0x1F));
-    // Iterate rows of the char
-//    uint8_t row, col;
-//    for(uint8_t row = 0; row < nRows; row++) {
-//        if((y+row) >= LCD_H) break;
-//        uint8_t PixelRow = *PChar++;
-//        // loop on each pixel in the row (left to right)
-//        uint8_t Mask = 0x80;
-//        for (col = 0; col < nCols; col++) {
-//            if((x+col) >= LCD_W) break;
-//            PackedBuf[y+row][x+col] = (PixelRow & Mask)? ForeClr : BckClr;
-//            Mask >>= 1;
-//        } // col
-//    } // row
-//    // Mark area as changed
-//    uint8_t xaStart = x / AREA_W;
-//    uint8_t yaStart = y / AREA_H;
-//    uint8_t xaEnd = (x+nCols) / AREA_W;
-//    uint8_t yaEnd = (y+nRows) / AREA_H;
-//    for(row = yaStart; row<=yaEnd; row++)
-//        for(col = xaStart; col<=xaEnd; col++)
-//            Changed[row][col] = true;
-//    // Return next pixel to right
-//    return x+nCols;
-//}
-
-//void Lcd_t::Printf(uint8_t x, uint8_t y, const Color_t ForeClr, const Color_t BckClr, const char *S, ...) {
-//    // Printf to buffer
-//    va_list args;
-//    va_start(args, S);
-//    uint32_t Cnt = tiny_vsprintf(CharBuf, S, args);
-//    va_end(args);
-//    // Draw what printed
-//    for(uint32_t i=0; i<Cnt; i++) {
-//        x = PutChar(x, y, CharBuf[i], ForeClr, BckClr);
-//        if(x>160) break;
-//    }
-//}
-
-// ================================ Graphics ===================================
-__attribute__ ((always_inline)) static inline void SetBounds(uint8_t xStart, uint8_t xEnd, uint8_t yStart, uint8_t yEnd) {
+__attribute__ ((always_inline)) static inline void SetBounds(uint8_t Left, uint8_t Width, uint8_t Top, uint8_t Height) {
     // Set column bounds
     WriteByte(0x2A);
     DC_Hi();
-    WriteByte(0x00);            // }
-    WriteByte(LCD_X_0+xStart);  // } Col addr start
-    WriteByte(0x00);            // }
-    WriteByte(LCD_X_0+xEnd-1);  // } Col addr end
+    WriteByte(0x00);                    // }
+    WriteByte(LCD_X_0+Left);            // } Col addr start
+    WriteByte(0x00);                    // }
+    WriteByte(LCD_X_0+Left+Width-1);    // } Col addr end
     DC_Lo();
     // Set row bounds
     WriteByte(0x2B);
     DC_Hi();
-    WriteByte(0x00);            // }
-    WriteByte(LCD_Y_0+yStart);  // } Row addr start = 0
-    WriteByte(0x00);            // }
-    WriteByte(LCD_Y_0+yEnd-1);  // } Row addr end
+    WriteByte(0x00);                    // }
+    WriteByte(LCD_Y_0+Top);             // } Row addr start = 0
+    WriteByte(0x00);                    // }
+    WriteByte(LCD_Y_0+Top+Height-1);    // } Row addr end
     DC_Lo();
 }
 
+#if LCD_PRINTF
+uint16_t Lcd_t::PutChar(uint8_t x, uint8_t y, char c, Color_t ForeClr, Color_t BckClr) {
+    char *PFont = (char*)Font8x8;  // Font to use
+    // Read font params
+    uint8_t nCols = PFont[0];
+    uint8_t nRows = PFont[1];
+    uint16_t nBytes = PFont[2];
+    SetBounds(x, nCols, y, nRows);
+    // Get pointer to the first byte of the desired character
+    const char *PChar = Font8x8 + (nBytes * (c - 0x1F));
+    // Write RAM
+    WriteByte(0x2C);    // Memory write
+    DC_Hi();
+    // Iterate rows of the char
+    uint8_t row, col;
+    for(row = 0; row < nRows; row++) {
+        if((y+row) >= LCD_H) break;
+        uint8_t PixelRow = *PChar++;
+        // loop on each pixel in the row (left to right)
+        for(col=0; col < nCols; col+=2) {
+            if((x+col) >= LCD_W) break;
+            // Two pixels at one time
+            uint16_t Clr1 = (PixelRow & 0x80)? ForeClr : BckClr;
+            PixelRow <<= 1;
+            uint16_t Clr2 = (PixelRow & 0x80)? ForeClr : BckClr;
+            PixelRow <<= 1;
+            uint8_t b1 = (uint8_t)(Clr1 >> 4);       // RRRR-GGGG
+            uint8_t b2 = (uint8_t)(((Clr1 & 0x00F) << 4) | (Clr2 >> 8));  // BBBB-RRRR
+            uint8_t b3 = (uint8_t)(Clr2 & 0x0FF);    // GGGG-BBBB
+            WriteByte(b1);
+            WriteByte(b2);
+            WriteByte(b3);
+        } // col
+    } // row
+    DC_Lo();
+    // Return next pixel to right
+    return x+nCols;
+}
+
+void Lcd_t::Printf(uint8_t x, uint8_t y, const Color_t ForeClr, const Color_t BckClr, const char *S, ...) {
+    // Printf to buffer
+    va_list args;
+    va_start(args, S);
+    uint32_t Cnt = tiny_vsprintf(CharBuf, LCD_CHARBUF_SZ, S, args);
+    va_end(args);
+    // Draw what printed
+    for(uint32_t i=0; i<Cnt; i++) {
+        x = PutChar(x, y, CharBuf[i], ForeClr, BckClr);
+        if(x>160) break;
+    }
+}
+#endif
+
+// ================================ Graphics ===================================
 void Lcd_t::Cls(Color_t Color) {
     SetBounds(0, LCD_W, 0, LCD_H);
     // Prepare variables

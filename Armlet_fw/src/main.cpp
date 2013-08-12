@@ -67,6 +67,7 @@ void Init() {
     Uart.Printf("ID=%u\r", ID);
 
 //    Lcd.Init();
+
 //    KeysInit();
 //    Beeper.Init();
 //    Vibro.Init();
@@ -75,7 +76,7 @@ void Init() {
 //    Power.Init();
 //    PillInit();
     Sound.Init();
-    Sound.Play("sylvans.mp3");
+    //Sound.Play("sylvans.mp3");
 //    rLevel1.Init(ID);
 //    App.Init();
 }

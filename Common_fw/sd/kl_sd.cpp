@@ -26,7 +26,7 @@ void sd_t::Init() {
     // Power pin
     PinSetupOut(GPIOC, 4, omPushPull, pudNone);
     PinClear(GPIOC, 4); // Power on
-    Delay_ms(450);      // Do not use os' delay system as os is not initialized yet
+    chThdSleepMicroseconds(450);
 
     FRESULT err;
     sdcInit();

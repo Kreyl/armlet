@@ -12,6 +12,8 @@
 #include "kl_lib_f2xx.h"
 #include <string.h>
 
+#define LCD_PRINTF      TRUE
+
 // ================================ Defines ====================================
 #define LCD_GPIO        GPIOE
 #define LCD_DC          8
@@ -46,18 +48,28 @@ enum Color_t {
 #define LCD_W               160 // } Pixels count
 #define LCD_TOP_BRIGHTNESS  100 // i.e. 100%
 
+#if LCD_PRINTF
+#define LCD_CHARBUF_SZ  198
+#endif
+
 class Lcd_t {
 private:
     PwmPin_t BckLt;
     void WriteCmd(uint8_t ACmd);
     void WriteCmd(uint8_t ACmd, uint8_t AData);
+#if LCD_PRINTF
+    char CharBuf[LCD_CHARBUF_SZ];
+#endif
 public:
     // General use
     void Init();
     void Shutdown();
     void Brightness(uint16_t Brightness)  { BckLt.On(Brightness); }
     // High-level
-//    void Printf(uint8_t x, uint8_t y, Color_t ForeClr, Color_t BckClr, const char *S, ...);
+#if LCD_PRINTF
+    uint16_t PutChar(uint8_t x, uint8_t y, char c, Color_t ForeClr, Color_t BckClr);
+    void Printf(uint8_t x, uint8_t y, Color_t ForeClr, Color_t BckClr, const char *S, ...);
+#endif
     void Cls(Color_t Color);
     void GetBitmap(uint8_t x0, uint8_t y0, uint8_t Width, uint8_t Height, uint16_t *PBuf);
     void PutBitmap(uint8_t x0, uint8_t y0, uint8_t Width, uint8_t Height, uint16_t *PBuf);
