@@ -77,6 +77,7 @@ void Init() {
 //    PillInit();
     Sound.Init();
     //Sound.Play("sylvans.mp3");
+    Sound.Play("alive.wav");
 //    rLevel1.Init(ID);
 //    App.Init();
 }

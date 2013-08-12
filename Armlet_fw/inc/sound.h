@@ -55,7 +55,7 @@
 #define VS_REG_AIADDR       0x0A
 #define VS_REG_VOL          0x0B
 
-enum sndState_t {sndStopped, sndPlaying, sndWritingZeroes, sndMustStop};
+enum sndState_t {sndStopped, sndPlaying, sndWritingZeroes};
 
 union VsCmd_t {
     struct {
@@ -72,9 +72,9 @@ union VsCmd_t {
 struct VsBuf_t {
     uint8_t Data[VS_DATA_BUF_SZ], *PData;
     UINT DataSz;
-    void ReadFromFile(FIL *PFile) {
-        f_read(PFile, Data, VS_DATA_BUF_SZ, &DataSz);
+    FRESULT ReadFromFile(FIL *PFile) {
         PData = Data;   // Set pointer at beginning
+        return f_read(PFile, Data, VS_DATA_BUF_SZ, &DataSz);
     }
 };
 
@@ -84,26 +84,38 @@ private:
     Mailbox CmdBox;
     VsCmd_t ICmd;
     VsBuf_t Buf1, Buf2, *PBuf;
+    uint32_t ZeroesCount;
+    Thread *PThread;
     uint8_t CmdRead(uint8_t AAddr, uint16_t *AData);
     uint8_t CmdWrite(uint8_t AAddr, uint16_t AData);
     void AddCmd(uint8_t AAddr, uint16_t AData);
     void StopNow();
-    void PrepareToReadNextChunk();
+    inline void StartTransmissionIfNotBusy() {
+        if(IDmaIdle and IDreq.IsHi()) {
+            IDreq.Enable(IRQ_PRIO_MEDIUM);
+            IDreq.GenerateIrq();    // Do not call SendNexData directly because of its interrupt context
+        }
+    }
+    void SendZeroes();
     FIL IFile;
-    // Flags
     bool IDmaIdle;
 public:
     sndState_t State;
     void Init();
     void Play(const char* AFilename);
-    void Stop() { State = sndMustStop; }
+    //void Stop() { State = sndMustStop; }
+    // 0...254
+    void SetVolume(uint8_t Volume) {
+        if(Volume == 0xFF) Volume = 0xFE;
+        Volume = 0xFE - Volume; // Transform Volume to attenuation
+        AddCmd(VS_REG_VOL, ((Volume * 256) + Volume));
+    }
     // Inner use
     IrqPin_t IDreq;
     void IrqDreqHandler();
-    void IrqDmaTcHandler();
     void ISendDataTask();
     void ISendNextData();
-    //void SetVolume(uint8_t Attenuation) { AddCmd(VS_REG_VOL, ((Attenuation*256)+Attenuation)); }
+    void IrqDmaHandler();
 };
 
 extern Sound_t Sound;
