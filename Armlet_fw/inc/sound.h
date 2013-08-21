@@ -66,6 +66,8 @@ union VsCmd_t {
     msg_t Msg;
 };
 
+#define VS_VOLUME_STEP          4
+#define VS_INITIAL_ATTENUATION  0x33
 #define VS_CMD_BUF_SZ   4
 #define VS_DATA_BUF_SZ  512    // bytes. Must be multiply of 512.
 
@@ -78,6 +80,10 @@ struct VsBuf_t {
     }
 };
 
+// Event mask to wake from IRQ
+#define VS_EVT_READ_NEXT    (eventmask_t)1
+#define VS_EVT_PLAY_END     (eventmask_t)2
+
 class Sound_t {
 private:
     msg_t CmdBuf[VS_CMD_BUF_SZ];
@@ -89,9 +95,9 @@ private:
     uint8_t CmdRead(uint8_t AAddr, uint16_t *AData);
     uint8_t CmdWrite(uint8_t AAddr, uint16_t AData);
     void AddCmd(uint8_t AAddr, uint16_t AData);
-    void StopNow();
     inline void StartTransmissionIfNotBusy() {
         if(IDmaIdle and IDreq.IsHi()) {
+//            Uart.Printf("T");
             IDreq.Enable(IRQ_PRIO_MEDIUM);
             IDreq.GenerateIrq();    // Do not call SendNexData directly because of its interrupt context
         }
@@ -99,21 +105,32 @@ private:
     void SendZeroes();
     FIL IFile;
     bool IDmaIdle;
+    int16_t IAttenuation;
 public:
     sndState_t State;
     void Init();
     void Play(const char* AFilename);
-    //void Stop() { State = sndMustStop; }
+    void Stop() { chEvtSignal(PThread, VS_EVT_PLAY_END); }
     // 0...254
-    void SetVolume(uint8_t Volume) {
-        if(Volume == 0xFF) Volume = 0xFE;
-        Volume = 0xFE - Volume; // Transform Volume to attenuation
-        AddCmd(VS_REG_VOL, ((Volume * 256) + Volume));
+    void SetVolume(uint8_t AVolume) {
+        if(AVolume == 0xFF) AVolume = 0xFE;
+        IAttenuation = 0xFE - AVolume; // Transform Volume to attenuation
+        AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
+    }
+    void VolumeIncrease() {
+        IAttenuation -= VS_VOLUME_STEP;
+        if(IAttenuation < 0) IAttenuation = 0;
+        AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
+    }
+    void VolumeDecrease() {
+        IAttenuation += VS_VOLUME_STEP;
+        if(IAttenuation > 0x8F) IAttenuation = 0x8F;
+        AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
     }
     // Inner use
     IrqPin_t IDreq;
     void IrqDreqHandler();
-    void ISendDataTask();
+    void ITask();
     void ISendNextData();
     void IrqDmaHandler();
 };

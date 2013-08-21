@@ -13,7 +13,8 @@ KeyStatus_t KeyStatus[KEYS_CNT];
 
 // ==== Keys Thread ====
 static WORKING_AREA(waKeysThread, 128);
-static msg_t KeysThread(void *arg) {
+__attribute__((noreturn))
+static void KeysThread(void *arg) {
     (void)arg;
     chRegSetThreadName("Keys");
 
@@ -36,7 +37,6 @@ static msg_t KeysThread(void *arg) {
 
         if(FHasChanged) chEvtBroadcast(&EvtSrcKey);
     }
-    return 0;
 }
 
 // ==== Keys methods ====
@@ -44,7 +44,7 @@ void KeysInit() {
     chEvtInit(&EvtSrcKey);
     for(uint8_t i=0; i<KEYS_CNT; i++) PinSetupIn(KEY_GPIO, KeyPin[i], pudPullUp);
     // Create and start thread
-    chThdCreateStatic(waKeysThread, sizeof(waKeysThread), NORMALPRIO, KeysThread, NULL);
+    chThdCreateStatic(waKeysThread, sizeof(waKeysThread), NORMALPRIO, (tfunc_t)KeysThread, NULL);
 }
 
 void KeysRegisterEvt(EventListener *PEvtLstnr, uint8_t EvtMask) {

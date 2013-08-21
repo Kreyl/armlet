@@ -90,7 +90,7 @@
  * @note    Unaligned transfers are much slower.
  */
 #if !defined(STM32_SDC_SDIO_UNALIGNED_SUPPORT) || defined(__DOXYGEN__)
-#define STM32_SDC_SDIO_UNALIGNED_SUPPORT    TRUE
+#define STM32_SDC_SDIO_UNALIGNED_SUPPORT    FALSE
 #endif
 
 #if STM32_ADVANCED_DMA || defined(__DOXYGEN__)

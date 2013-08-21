@@ -17,7 +17,6 @@
 class sd_t {
 private:
     FATFS SDC_FS;
-    uint8_t fbuff[1024];
 public:
     bool IsReady;
     FIL File;

@@ -58,7 +58,7 @@ int main() {
 }
 
 void Init() {
-    Uart.Init(115200);
+    Uart.Init(256000);
     Uart.Printf("Armlet3\r");
     SD.Init();
     // Read config
@@ -68,7 +68,7 @@ void Init() {
 
 //    Lcd.Init();
 
-//    KeysInit();
+    KeysInit();
 //    Beeper.Init();
 //    Vibro.Init();
 //    IR.TxInit();
@@ -76,8 +76,8 @@ void Init() {
 //    Power.Init();
 //    PillInit();
     Sound.Init();
-    //Sound.Play("sylvans.mp3");
-    Sound.Play("alive.wav");
+    Sound.Play("sylvans.mp3");
+//    Sound.Play("alive.wav");
 //    rLevel1.Init(ID);
-//    App.Init();
+    App.Init();
 }

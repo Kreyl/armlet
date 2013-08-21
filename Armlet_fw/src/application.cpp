@@ -22,7 +22,7 @@
 #include "lvl1_assym.h"
 #include "evt_mask.h"
 #include "kl_sd.h"
-
+#include "sound.h"
 //#include "ArmletApi.h"
 
 //#define DEMONSTRATE
@@ -85,8 +85,9 @@ struct Med_t {
 static Med_t Med;
 
 // =============================== Threads ==================================
-static WORKING_AREA(waAppThread, 10000);
-static msg_t AppThread(void *arg) {
+static WORKING_AREA(waAppThread, 128);
+__attribute__((noreturn))
+static void AppThread(void *arg) {
     (void)arg;
     chRegSetThreadName("App");
 
@@ -96,16 +97,37 @@ static msg_t AppThread(void *arg) {
     // Events
     uint32_t EvtMsk;
     KeysRegisterEvt(&EvtListenerKeys, EVTMASK_KEYS);
-    rLevel1.RegisterEvtRx(&EvtLstnrRadioRx, EVTMASK_RADIO_RX);
-    PillRegisterEvtChange(&EvtListenerPill, EVTMASK_PILL);
-    IR.RegisterEvt(&EvtListenerIR, EVTMASK_IR);
+//    rLevel1.RegisterEvtRx(&EvtLstnrRadioRx, EVTMASK_RADIO_RX);
+//    PillRegisterEvtChange(&EvtListenerPill, EVTMASK_PILL);
+//    IR.RegisterEvt(&EvtListenerIR, EVTMASK_IR);
 //    chEvtRegisterMask(&IEvtSrcTmr, &EvtListenerTmr, EVTMASK_TIMER);
 
     while(1) {
         EvtMsk = chEvtWaitAny(EVTMASK_RADIO_RX | EVTMASK_KEYS | EVTMASK_PILL | EVTMASK_IR | EVTMASK_TIMER);
 
         if(EvtMsk &EVTMASK_KEYS) {
-//            for(uint8_t i=0; i<KEYS_CNT; i++) {
+            if(KeyStatus[0].HasChanged) {
+                if(KeyStatus[0].State == ksPressed) {
+                    Sound.VolumeIncrease();
+                }
+            }
+            if(KeyStatus[1].HasChanged) {
+                if(KeyStatus[1].State == ksPressed) {
+                    Sound.VolumeDecrease();
+                }
+            }
+            if(KeyStatus[2].HasChanged) {
+                if(KeyStatus[2].State == ksPressed) {
+                    Sound.Stop();
+                }
+            }
+            if(KeyStatus[3].HasChanged) {
+                if(KeyStatus[3].State == ksPressed) {
+                    Sound.Play("sylvans.mp3");
+                }
+            }
+
+            //            for(uint8_t i=0; i<KEYS_CNT; i++) {
 //                if(KeyStatus[i].HasChanged) {
 //                    if(KeyStatus[i].State == ksReleased) ArmletApi::OnButtonRelease(i);
 //                    else {
@@ -120,7 +142,7 @@ static msg_t AppThread(void *arg) {
 //            } // for
         } // keys
 
-        if(EvtMsk & EVTMASK_RADIO_RX) {
+//        if(EvtMsk & EVTMASK_RADIO_RX) {
 //            while(rLevel1.GetReceivedPkt(&SRxPkt) == OK) {
 //                #ifdef DEMONSTRATE
 //                Uart.Printf("%A\r", SRxPkt.Data, SRxPkt.Length, ' ');
@@ -129,9 +151,9 @@ static msg_t AppThread(void *arg) {
 //                //rLevel1.AddPktToTx(0, SRxPkt.Data, SRxPkt.Length);
 //                ArmletApi::OnRadioPacket(SRxPkt.Data, SRxPkt.Length);
 //            }
-        } // if evtmsk
+//        } // if evtmsk
 
-        if(EvtMsk & EVTMASK_PILL) {
+//        if(EvtMsk & EVTMASK_PILL) {
 //            #ifdef DEMONSTRATE
 //            Beeper.Beep(ShortBeep);
 //            #endif
@@ -140,20 +162,19 @@ static msg_t AppThread(void *arg) {
 //                Pill[0].Read((uint8_t*)&Med, sizeof(Med_t));
 //                ArmletApi::OnPillConnect(Med.CureID, Med.Charges);
 //            }
-        }
+//        }
 
-        if(EvtMsk & EVTMASK_IR) {
-            uint16_t w = IR.RxWord;
-            Lustra.SetID(w >> 8);
-          //  #ifdef DEMONSTRATE
-            Uart.Printf("IR ID=%u\r", Lustra.IDForApp);
-           // Beeper.Beep(ShortBeep);
-           // #endif
-        }
+//        if(EvtMsk & EVTMASK_IR) {
+//            uint16_t w = IR.RxWord;
+//            Lustra.SetID(w >> 8);
+//          //  #ifdef DEMONSTRATE
+//            Uart.Printf("IR ID=%u\r", Lustra.IDForApp);
+//           // Beeper.Beep(ShortBeep);
+//           // #endif
+//        }
 
 //        if(EvtMsk & EVTMASK_TIMER) { STimers.Iterate(); } // if timer
     } // while 1
-    return 0;
 }
 
 static WORKING_AREA(waLcdThread, 128);
@@ -201,8 +222,8 @@ void UartCmdCallback(uint8_t CmdCode, uint8_t *PData, uint32_t Length) {
 void App_t::Init() {
     chEvtInit(&IEvtSrcTmr);
 
-    chThdCreateStatic(waLcdThread, sizeof(waLcdThread), LOWPRIO, LcdThread, NULL);
-    chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, AppThread, NULL);
+//    chThdCreateStatic(waLcdThread, sizeof(waLcdThread), LOWPRIO, LcdThread, NULL);
+    chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
 }
 
 // Fill radiopkt with current data
