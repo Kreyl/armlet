@@ -3,19 +3,14 @@
 
 Sound_t Sound;
 
+// Mode register
+#define VS_MODE_REG_VALUE   0x0802  // Native SDI mode, Layer I + II enabled
+
 // After file end, send several zeroes
 #define ZERO_SEQ_LEN        128
 static const uint8_t SZero = 0;
 
 static uint8_t ReadWriteByte(uint8_t AByte);
-
-// Pin operations
-static inline void Rst_Lo()   { PinClear(VS_GPIO, VS_RST); }
-static inline void Rst_Hi()   { PinSet(VS_GPIO, VS_RST); }
-static inline void XCS_Lo()   { PinClear(VS_GPIO, VS_XCS); }
-static inline void XCS_Hi()   { PinSet(VS_GPIO, VS_XCS); }
-static inline void XDCS_Lo()  { PinClear(VS_GPIO, VS_XDCS); }
-static inline void XDCS_Hi()  { PinSet(VS_GPIO, VS_XDCS); }
 
 // ================================= IRQ =======================================
 extern "C" {
@@ -40,7 +35,7 @@ void Sound_t::IrqDmaHandler() {
 }
 
 // =========================== Implementation ==================================
-static WORKING_AREA(waSoundThread, 256);
+static WORKING_AREA(waSoundThread, 1024);
 __attribute__((noreturn))
 static void SoundThread(void *arg) {
     chRegSetThreadName("Sound");
@@ -49,27 +44,32 @@ static void SoundThread(void *arg) {
 
 void Sound_t::ITask() {
     eventmask_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-    if((State != sndPlaying) or (IFile.fs == 0)) return;    // if file is closed
+    // Play new request
+    if(EvtMsk & VS_EVT_COMPLETED) {
+//        Uart.Printf("cmp\r");
+        AddCmd(VS_REG_MODE, 0x0004);
+        if(IFilename != NULL) IPlayNew();
+    }
     // Stop request
-    if(EvtMsk & VS_EVT_PLAY_END) {
-//        Uart.Printf("E");
-        State = sndWritingZeroes;
-        ZeroesCount = ZERO_SEQ_LEN;
-        f_close(&IFile);
-        StartTransmissionIfNotBusy();
+    else if(EvtMsk & VS_EVT_STOP) {
+//        Uart.Printf("Stop\r");
+        PrepareToStop();
     }
     // Data read request
-    else {
+    else if(EvtMsk & VS_EVT_READ_NEXT) {
         FRESULT rslt;
-        if     (Buf1.DataSz == 0) { /*Uart.Printf("1"); */rslt = Buf1.ReadFromFile(&IFile); }
-        else if(Buf2.DataSz == 0) { /*Uart.Printf("2"); */rslt = Buf2.ReadFromFile(&IFile); }
-        if(f_eof(&IFile) or (rslt != FR_OK)) {
-//            Uart.Printf("C");
-            State = sndWritingZeroes;
-            ZeroesCount = ZERO_SEQ_LEN;
-            f_close(&IFile);
+        bool EofAtStart = f_eof(&IFile);
+        // Read next if not EOF
+        if(!EofAtStart) {
+            if     (Buf1.DataSz == 0) { /*Uart.Printf("1"); */rslt = Buf1.ReadFromFile(&IFile); }
+            else if(Buf2.DataSz == 0) { /*Uart.Printf("2"); */rslt = Buf2.ReadFromFile(&IFile); }
         }
-        StartTransmissionIfNotBusy();
+        // Check if was EOF or if error occured during reading. Do not do it if EOF occured during reading.
+        if((rslt != FR_OK) or EofAtStart) {
+//            Uart.Printf("C");
+            PrepareToStop();
+        }
+        else StartTransmissionIfNotBusy();
     }
 }
 
@@ -113,41 +113,45 @@ void Sound_t::Init() {
     IDreq.Init(VS_GPIO, VS_DREQ, Rising);
 
 //   CmdWrite(VS_REG_MODE, (VS_SM_SDINEW | VS_SM_RESET));    // Perform software reset
-    AddCmd(VS_REG_MODE, 0x0802);  // Native SPI mode, Layer I + II enabled
-    AddCmd(VS_REG_CLOCKF, 0x8000 + (12000000/2000));
-    AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
+//    AddCmd(VS_REG_MODE, VS_MODE_REG_VALUE);
+//    AddCmd(VS_REG_CLOCKF, 0x8000 + (12000000/2000));
+//    AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
 //    CmdWrite(VS_REG_MIXERVOL, (VS_SMV_ACTIVE | VS_SMV_GAIN2));
-//    CmdWrite(VS_REG_RECCTRL, VS_SARC_DREQ512);
-    chThdSleepMilliseconds(45);
+//    CmdWrite(VS_REG_RECCTRL, VS_SARC_DREQ512);    // VS1103 only
+    //chThdSleepMilliseconds(45);
 
     // ==== Thread ====
     PThread = chThdCreateStatic(waSoundThread, sizeof(waSoundThread), NORMALPRIO, (tfunc_t)SoundThread, NULL);
+    //StartTransmissionIfNotBusy();   // Send init commands
 }
 
-void Sound_t::Play(const char* AFilename) {
-    if(State == sndPlaying) Stop();
+void Sound_t::IPlayNew() {
+    AddCmd(VS_REG_MODE, VS_MODE_REG_VALUE);
+    AddCmd(VS_REG_CLOCKF, 0x8000 + (12000000/2000));
+    AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
+
     FRESULT rslt;
-    // Open file
-    Uart.Printf("Play %S\r", AFilename);
-    rslt = f_open(&IFile, AFilename, FA_READ+FA_OPEN_EXISTING);
+    // Open new file
+    Uart.Printf("Play %S\r", IFilename);
+    rslt = f_open(&IFile, IFilename, FA_READ+FA_OPEN_EXISTING);
+    IFilename = NULL;
     if (rslt != FR_OK) {
-        if (rslt == FR_NO_FILE) Uart.Printf("%S: file not found\r", AFilename);
+        if (rslt == FR_NO_FILE) Uart.Printf("%S: not found\r", IFilename);
         else Uart.Printf("OpenFile error: %u", rslt);
+        Stop();
         return;
     }
     // Check if zero file
     if (IFile.fsize == 0) {
         f_close(&IFile);
         Uart.Printf("Empty file\r");
+        Stop();
         return;
     }
-    Uart.Printf("1\r");
     // Initially, fill both buffers
     if(Buf1.ReadFromFile(&IFile) != OK) { Stop(); return; }
-    Uart.Printf("2\r");
     // Fill second buffer if needed
     if(Buf1.DataSz == VS_DATA_BUF_SZ) Buf2.ReadFromFile(&IFile);
-    Uart.Printf("3\r");
 
     PBuf = &Buf1;
     State = sndPlaying;
@@ -175,7 +179,7 @@ void Sound_t::ISendNextData() {
     msg_t msg = chMBFetchI(&CmdBox, &ICmd.Msg);
     chSysUnlockFromIsr();
     if(msg == RDY_OK) {
-        Uart.Printf("vCmd: %A\r", &ICmd, 4, ' ');
+//        Uart.Printf("vCmd: %A\r", &ICmd, 4, ' ');
         XCS_Lo();   // Start Cmd transmission
         dmaStreamSetMemory0(VS_DMA, &ICmd);
         dmaStreamSetTransactionSize(VS_DMA, sizeof(VsCmd_t));
@@ -211,18 +215,29 @@ void Sound_t::ISendNextData() {
         }
     }
     else if(State == sndWritingZeroes) {
-        Uart.Printf("vZ\r");
+//        Uart.Printf("Z");
         if(ZeroesCount == 0) { // Was writing zeroes, now all over
             State = sndStopped;
             IDmaIdle = true;
-            Uart.Printf("vEnd\r");
+//            Uart.Printf("vEnd\r");
+            chSysLockFromIsr();
+            chEvtSignalI(PThread, VS_EVT_COMPLETED);
+            chSysUnlockFromIsr();
         }
         else SendZeroes();
     }
     else {
-//        Uart.Printf("CmdEnd\r");
-        IDmaIdle = true;
+//        Uart.Printf("I\r");
+        if(!IDreq.IsHi()) IDreq.Enable(IRQ_PRIO_MEDIUM);
+        else IDmaIdle = true;
     }
+}
+
+void Sound_t::PrepareToStop() {
+    State = sndWritingZeroes;
+    ZeroesCount = ZERO_SEQ_LEN;
+    if(IFile.fs != 0) f_close(&IFile);
+    StartTransmissionIfNotBusy();
 }
 
 void Sound_t::SendZeroes() {

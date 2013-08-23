@@ -82,7 +82,8 @@ struct VsBuf_t {
 
 // Event mask to wake from IRQ
 #define VS_EVT_READ_NEXT    (eventmask_t)1
-#define VS_EVT_PLAY_END     (eventmask_t)2
+#define VS_EVT_STOP         (eventmask_t)2
+#define VS_EVT_COMPLETED    (eventmask_t)4
 
 class Sound_t {
 private:
@@ -92,6 +93,14 @@ private:
     VsBuf_t Buf1, Buf2, *PBuf;
     uint32_t ZeroesCount;
     Thread *PThread;
+    // Pin operations
+    inline void Rst_Lo()   { PinClear(VS_GPIO, VS_RST); }
+    inline void Rst_Hi()   { PinSet(VS_GPIO, VS_RST); }
+    inline void XCS_Lo()   { PinClear(VS_GPIO, VS_XCS); }
+    inline void XCS_Hi()   { PinSet(VS_GPIO, VS_XCS); }
+    inline void XDCS_Lo()  { PinClear(VS_GPIO, VS_XDCS); }
+    inline void XDCS_Hi()  { PinSet(VS_GPIO, VS_XDCS); }
+    // Cmds
     uint8_t CmdRead(uint8_t AAddr, uint16_t *AData);
     uint8_t CmdWrite(uint8_t AAddr, uint16_t AData);
     void AddCmd(uint8_t AAddr, uint16_t AData);
@@ -102,15 +111,24 @@ private:
             IDreq.GenerateIrq();    // Do not call SendNexData directly because of its interrupt context
         }
     }
+    void PrepareToStop();
     void SendZeroes();
+    void IPlayNew();
     FIL IFile;
     bool IDmaIdle;
     int16_t IAttenuation;
+    const char* IFilename;
 public:
     sndState_t State;
     void Init();
-    void Play(const char* AFilename);
-    void Stop() { chEvtSignal(PThread, VS_EVT_PLAY_END); }
+    void Play(const char* AFilename) {
+        IFilename = AFilename;
+        chEvtSignal(PThread, VS_EVT_STOP);
+    }
+    void Stop() {
+        IFilename = NULL;
+        chEvtSignal(PThread, VS_EVT_STOP);
+    }
     // 0...254
     void SetVolume(uint8_t AVolume) {
         if(AVolume == 0xFF) AVolume = 0xFE;

@@ -123,7 +123,7 @@ static void AppThread(void *arg) {
             }
             if(KeyStatus[3].HasChanged) {
                 if(KeyStatus[3].State == ksPressed) {
-                    Sound.Play("sylvans.mp3");
+                    Sound.Play("alive.wav");
                 }
             }
 
