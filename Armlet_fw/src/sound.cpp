@@ -35,7 +35,7 @@ void Sound_t::IrqDmaHandler() {
 }
 
 // =========================== Implementation ==================================
-static WORKING_AREA(waSoundThread, 1024);
+static WORKING_AREA(waSoundThread, 272);
 __attribute__((noreturn))
 static void SoundThread(void *arg) {
     chRegSetThreadName("Sound");
