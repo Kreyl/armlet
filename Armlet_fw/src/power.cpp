@@ -74,8 +74,11 @@ void Pwr_t::Task() {
         uint32_t tmp = 2 * rslt * ADC_VREF_MV / 4095;   // 2 because of resistor divider
         Power.Voltage_mV = (uint16_t)tmp;
         // Calculate percent
-        Power.RemainingPercent = mV2Percent(tmp);
-//        Uart.Printf("Adc=%u; U=%u; %=%u\r", rslt, Power.Voltage_mV, Power.RemainingPercent);
+        tmp = mV2Percent(tmp);
+        if(tmp != Power.RemainingPercent) {
+            Power.RemainingPercent = tmp;
+            Uart.Printf("Adc=%u; U=%u; %=%u\r", rslt, Power.Voltage_mV, Power.RemainingPercent);
+        }
     }
 }
 
