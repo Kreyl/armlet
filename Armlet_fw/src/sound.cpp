@@ -1,6 +1,8 @@
 #include "sound.h"
 #include <string.h>
 
+#if SOUND_ENABLED
+
 Sound_t Sound;
 
 // Mode register
@@ -287,3 +289,5 @@ uint8_t Sound_t::CmdWrite(uint8_t AAddr, uint16_t AData) {
     XCS_Hi();                       // End transmission
     return OK;
 }
+
+#endif // #if SOUND_ENABLED

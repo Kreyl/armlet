@@ -106,27 +106,6 @@ static void AppThread(void *arg) {
         EvtMsk = chEvtWaitAny(EVTMASK_RADIO_RX | EVTMASK_KEYS | EVTMASK_PILL | EVTMASK_IR | EVTMASK_TIMER);
 
         if(EvtMsk &EVTMASK_KEYS) {
-            if(KeyStatus[0].HasChanged) {
-                if(KeyStatus[0].State == ksPressed) {
-                    Sound.VolumeIncrease();
-                }
-            }
-            if(KeyStatus[1].HasChanged) {
-                if(KeyStatus[1].State == ksPressed) {
-                    Sound.VolumeDecrease();
-                }
-            }
-            if(KeyStatus[2].HasChanged) {
-                if(KeyStatus[2].State == ksPressed) {
-                    Sound.Stop();
-                }
-            }
-            if(KeyStatus[3].HasChanged) {
-                if(KeyStatus[3].State == ksPressed) {
-                    Sound.Play("sylvans.mp3");
-                }
-            }
-
             //            for(uint8_t i=0; i<KEYS_CNT; i++) {
 //                if(KeyStatus[i].HasChanged) {
 //                    if(KeyStatus[i].State == ksReleased) ArmletApi::OnButtonRelease(i);
