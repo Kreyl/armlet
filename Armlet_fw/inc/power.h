@@ -22,22 +22,21 @@
 
 // Adc
 #define ADC_CHNL            10
-// Constants
-#define BAT_0_PERCENT_MV    3650
-#define BAT_100_PERCENT_MV  4140
 #define ADC_VREF_MV         3300
 
 class Pwr_t {
 private:
     Adc_t Adc;
-    EventSource IEvtSrcPwrChange;
+    bool WasExternal;
+//    EventSource IEvtSrcPwrChange;
+    uint8_t mV2Percent(uint16_t mV);
 public:
     void Task();
     bool ExternalPwrOn() { return  PinIsSet(PWR_EXTERNAL_GPIO, PWR_EXTERNAL_PIN); }
     bool IsCharging()    { return !PinIsSet(PWR_CHARGING_GPIO, PWR_CHARGING_PIN); }
     uint16_t Voltage_mV;
     uint8_t RemainingPercent;
-    void RegisterEvtChange(EventListener *PEvtLstnr, uint8_t EvtMask) { chEvtRegisterMask(&IEvtSrcPwrChange, PEvtLstnr, EvtMask); }
+//    void RegisterEvtChange(EventListener *PEvtLstnr, uint8_t EvtMask) { chEvtRegisterMask(&IEvtSrcPwrChange, PEvtLstnr, EvtMask); }
     void Init();
     void EnterStandby();
 };

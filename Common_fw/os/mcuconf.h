@@ -50,7 +50,7 @@
 #define STM32_ADC_ADC1_DMA_STREAM           STM32_DMA_STREAM_ID(2, 4)
 #define STM32_ADC_ADC2_DMA_STREAM           STM32_DMA_STREAM_ID(2, 2)
 #define STM32_ADC_ADC3_DMA_STREAM           STM32_DMA_STREAM_ID(2, 1)
-#define STM32_ADC_ADC1_DMA_PRIORITY         1   // KL: made 1 = Low prio, was 2
+#define STM32_ADC_ADC1_DMA_PRIORITY         1   // KL: Not used
 #define STM32_ADC_ADC2_DMA_PRIORITY         2
 #define STM32_ADC_ADC3_DMA_PRIORITY         2
 #define STM32_ADC_IRQ_PRIORITY              9   // KL: lowered  from 6 to 9

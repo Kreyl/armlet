@@ -14,6 +14,26 @@
 Pwr_t Power;
 static Thread *PThr;
 
+// Table of charge
+struct mVPercent_t {
+    uint16_t mV;
+    uint8_t Percent;
+};
+
+static const mVPercent_t mVPercentTable[] = {
+        {4100, 100},
+        {4000, 90},
+        {3900, 80},
+        {3850, 70},
+        {3800, 60},
+        {3780, 50},
+        {3740, 40},
+        {3700, 30},
+        {3670, 20},
+        {3640, 10}
+};
+#define mVPercentTableSz    countof(mVPercentTable)
+
 // ============================== Implementation ===============================
 static WORKING_AREA(waPwrThread, 128);
 static void PwrThread(void *arg) {
@@ -21,64 +41,52 @@ static void PwrThread(void *arg) {
     Power.Task();
 }
 
+uint8_t Pwr_t::mV2Percent(uint16_t mV) {
+    for(uint8_t i=0; i<mVPercentTableSz; i++)
+        if(mV >= mVPercentTable[i].mV) return mVPercentTable[i].Percent;
+    return 0;
+}
+
 void Pwr_t::Task() {
-    bool WasExternal = false;
     while(1) {
         chThdSleepMilliseconds(PWR_MEASUREMENT_INTERVAL_MS);
         // Check if power src changed
         if(WasExternal and !ExternalPwrOn()) {
             WasExternal = false;
-            chEvtBroadcast(&IEvtSrcPwrChange);
+//            chEvtBroadcast(&IEvtSrcPwrChange);
             Uart.Printf("Disconnected\r");
         }
         else if(!WasExternal and ExternalPwrOn()) {
             WasExternal = true;
-            chEvtBroadcast(&IEvtSrcPwrChange);
+//            chEvtBroadcast(&IEvtSrcPwrChange);
             Uart.Printf("Connected\r");
         }
 
-        //if(IsCharging()) Uart.Printf("Charging\r");
+//        if(IsCharging()) Uart.Printf("Charging\r");
 
         // ==== ADC ====
+        Adc.Measure();
         uint32_t rslt = 0;
-        Adc.Init();
-        for(uint8_t i=0; i<8; i++) {
-            Adc.StartConversion();
-            while(!Adc.ConversionCompleted()) chThdSleepMilliseconds(20);
-            rslt += Adc.Result();
-        }
-        Adc.Disable();
-        Adc.ClockOff();
-        rslt /= 8;    // Calc average
+        for(uint8_t i=0; i<ADC_BUF_SZ; i++) rslt += Adc.Result[i];
+        rslt /= ADC_BUF_SZ;    // Calc average
 
         // Calculate voltage
-//        int32_t tmp = 2 * v * ADC_VREF_MV / 4095;
-//        Power.Voltage_mV = (uint16_t)tmp;
-//        // Calculate percent
-//        tmp = ((tmp - BAT_0_PERCENT_MV) * 100) / (BAT_100_PERCENT_MV - BAT_0_PERCENT_MV);
-//        if(tmp < 0) tmp = 0;
-//        if(tmp > 100) tmp = 100;
-//        Power.RemainingPercent = (uint8_t)tmp;
-        Uart.Printf("Adc=%u; U=%u; %=%u\r", rslt, Power.Voltage_mV, Power.RemainingPercent);
+        uint32_t tmp = 2 * rslt * ADC_VREF_MV / 4095;   // 2 because of resistor divider
+        Power.Voltage_mV = (uint16_t)tmp;
+        // Calculate percent
+        Power.RemainingPercent = mV2Percent(tmp);
+//        Uart.Printf("Adc=%u; U=%u; %=%u\r", rslt, Power.Voltage_mV, Power.RemainingPercent);
     }
 }
 
-// ADC end conversion callback
-//void AdcCalback(ADCDriver *adcp, adcsample_t *buffer, size_t n) {
-//    (void) buffer; (void) n;
-//    chSysLockFromIsr();
-//    if(PThr->p_state == THD_STATE_SUSPENDED) chSchReadyI(PThr);
-//    chSysUnlockFromIsr();
-//}
-
-// Adc is initialized within HAL init
 void Pwr_t::Init() {
     // GPIO
     PinSetupIn(PWR_EXTERNAL_GPIO, PWR_EXTERNAL_PIN, pudPullDown);
     PinSetupIn(PWR_CHARGING_GPIO, PWR_CHARGING_PIN, pudPullUp);
     PinSetupAnalog(PWR_BATTERY_GPIO, PWR_BATTERY_PIN);
+    Adc.Init();
     // Event
-    chEvtInit(&IEvtSrcPwrChange);
+//    chEvtInit(&IEvtSrcPwrChange);
     // Create and start thread
     PThr = chThdCreateStatic(waPwrThread, sizeof(waPwrThread), LOWPRIO, (tfunc_t)PwrThread, NULL);
 }
