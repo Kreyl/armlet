@@ -93,6 +93,11 @@ private:
     VsBuf_t Buf1, Buf2, *PBuf;
     uint32_t ZeroesCount;
     Thread *PThread;
+    EventSource IEvtSrcPlayEnd;
+    FIL IFile;
+    bool IDmaIdle;
+    int16_t IAttenuation;
+    const char* IFilename;
     // Pin operations
     inline void Rst_Lo()   { PinClear(VS_GPIO, VS_RST); }
     inline void Rst_Hi()   { PinSet(VS_GPIO, VS_RST); }
@@ -114,10 +119,6 @@ private:
     void PrepareToStop();
     void SendZeroes();
     void IPlayNew();
-    FIL IFile;
-    bool IDmaIdle;
-    int16_t IAttenuation;
-    const char* IFilename;
 public:
     sndState_t State;
     void Init();
@@ -145,6 +146,7 @@ public:
         if(IAttenuation > 0x8F) IAttenuation = 0x8F;
         AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
     }
+    void RegisterEvtPlayEnd(EventListener *PEvtLstnr, uint8_t EvtMask) { chEvtRegisterMask(&IEvtSrcPlayEnd, PEvtLstnr, EvtMask); }
     // Inner use
     IrqPin_t IDreq;
     void IrqDreqHandler();
