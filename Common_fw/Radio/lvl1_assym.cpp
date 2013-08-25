@@ -326,11 +326,10 @@ void rLevel1_t::Shutdown() {
 
 // ================================= Thread ====================================
 static WORKING_AREA(warLvl1Thread, 1024);
-static msg_t rLvl1Thread(void *arg) {
-    (void)arg;
+__attribute__ ((__noreturn__))
+static void rLvl1Thread(void *arg) {
     chRegSetThreadName("rLvl1");
     while(1) rLevel1.Task();
-    return 0;
 }
 
 // ================================= Common ====================================
@@ -365,7 +364,7 @@ void rLevel1_t::Init(uint16_t ASelfID) {
     CC.SetChannel(1);
 #endif
     // Init thread. High priority is required to satisfy timings.
-    PThr = chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, rLvl1Thread, NULL);
+    PThr = chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);
 }
 
 #ifdef GATE

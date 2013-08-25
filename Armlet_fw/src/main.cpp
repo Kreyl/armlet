@@ -49,7 +49,11 @@ int main() {
     if(ClkResult) Uart.Printf("Clock failure\r");
 
     while(TRUE) {
-        chThdSleepMilliseconds(999);
+        //chThdSleepMilliseconds(999);
+        chSysLock();
+        chSchGoSleepS(THD_STATE_SUSPENDED); // Forever
+        chSysUnlock();
+
         // Ctrl-Alt-Del
 //        if(!PinIsSet(KEY_GPIO, 3) and !PinIsSet(KEY_GPIO, 4) and !PinIsSet(KEY_GPIO, 9)) {
 //            REBOOT();
@@ -73,7 +77,7 @@ void Init() {
 //    Vibro.Init();
 //    IR.TxInit();
 //    IR.RxInit();
-//    Power.Init();
+    Power.Init();
 //    PillInit();
 //    Sound.Init();
 //    Sound.Play("alive.wav");

@@ -72,7 +72,9 @@ enum RiseFall_t {Rising, Falling, RisingFalling};
 #define REBOOT()                SCB_AIRCR = AIRCR_VECTKEY | 0x04
 
 // ============================ Simple delay ===================================
+__attribute__ ((always_inline))
 static inline void DelayLoop(volatile uint32_t ACounter) { while(ACounter--); }
+__attribute__ ((always_inline))
 static inline void Delay_ms(uint32_t Ams) {
     volatile uint32_t __ticks = (Clk.AHBFreqHz / 4000) * Ams;
     DelayLoop(__ticks);
@@ -106,7 +108,7 @@ static inline void PinToggle (GPIO_TypeDef *PGpioPort, const uint16_t APinNumber
 // Check state
 static inline bool PinIsSet(GPIO_TypeDef *PGpioPort, const uint16_t APinNumber) { return (PGpioPort->IDR & (uint32_t)(1<<APinNumber)); }
 // Setup
-static inline void PinClockEnable(GPIO_TypeDef *PGpioPort) {
+static void PinClockEnable(GPIO_TypeDef *PGpioPort) {
     if     (PGpioPort == GPIOA) RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     else if(PGpioPort == GPIOB) RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     else if(PGpioPort == GPIOC) RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;

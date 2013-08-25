@@ -9,6 +9,7 @@
 #define POWER_H_
 
 #include "kl_lib_f2xx.h"
+#include "adc_f2.h"
 
 #define PWR_EXTERNAL_PIN    9
 #define PWR_EXTERNAL_GPIO   GPIOA
@@ -20,7 +21,7 @@
 #define PWR_MEASUREMENT_INTERVAL_MS    999
 
 // Adc
-#define ADC_CHNL    10
+#define ADC_CHNL            10
 // Constants
 #define BAT_0_PERCENT_MV    3650
 #define BAT_100_PERCENT_MV  4140
@@ -28,6 +29,7 @@
 
 class Pwr_t {
 private:
+    Adc_t Adc;
     EventSource IEvtSrcPwrChange;
 public:
     void Task();

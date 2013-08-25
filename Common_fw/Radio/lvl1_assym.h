@@ -165,7 +165,7 @@ public:
     uint8_t GetTransmittedState(rPktIDState_t *PState) { return ITransmitted.Get(PState); }
     void RegisterEvtTx(EventListener *PEvtLstnr, uint8_t EvtMask) { chEvtRegisterMask(&IEvtSrcRadioTxEnd, PEvtLstnr, EvtMask); }
     // Inner use
-    inline void Task();
+    inline void Task() __attribute__((always_inline));
 };
 
 extern rLevel1_t rLevel1;

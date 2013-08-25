@@ -14,47 +14,11 @@
 Pwr_t Power;
 static Thread *PThr;
 
-// Adc callback function
-//static void AdcCalback(ADCDriver *adcp, adcsample_t *buffer, size_t n);
-// Total number of channels to be sampled by a single ADC operation
-#define ADC_GRP1_NUM_CHANNELS   1
-// Depth of the conversion buffer, channels are sampled four times each
-#define ADC_GRP1_BUF_DEPTH      4
-// ADC samples buffer
-//static adcsample_t ISamples[ADC_GRP1_NUM_CHANNELS * ADC_GRP1_BUF_DEPTH];
-
-// ADC conversion group
-// Mode:        Linear buffer, 4 samples of 1 channel, SW triggered.
-// Channels:    IN11   (48 cycles sample time)
-//static const ADCConversionGroup AdcGrpCfg = {
-//    FALSE,
-//    ADC_GRP1_NUM_CHANNELS,
-//    AdcCalback,         // Callback function associated to the group
-//    NULL,               // Error callback
-//    // ==== HW dependent part ====
-//    // ADC CR1 register initialization data
-//    0,
-//    // ADC CR2 register initialization data
-//    ADC_CR2_SWSTART,    // Start conversion on ADC start
-//    // ADC SMPR1: sample times for channels 10...18.
-//    ADC_SMPR1_SMP_AN10(ADC_SAMPLE_56),
-//    // ADC SMPR2: sample times for channels 0...9.
-//    0,
-//    //  ADC SQR1: Conversion group sequence 13...16 + sequence length
-//    ADC_SQR1_NUM_CH(ADC_GRP1_NUM_CHANNELS),
-//    // ADC SQR2: Conversion group sequence 7...12
-//    0,
-//    // ADC SQR3: Conversion group sequence 1...6
-//    ADC_SQR3_SQ1_N(ADC_CHANNEL_IN10)
-//};
-
 // ============================== Implementation ===============================
 static WORKING_AREA(waPwrThread, 128);
-static msg_t PwrThread(void *arg) {
-    (void)arg;
+static void PwrThread(void *arg) {
     chRegSetThreadName("Pwr");
     Power.Task();
-    return 0;
 }
 
 void Pwr_t::Task() {
@@ -65,26 +29,29 @@ void Pwr_t::Task() {
         if(WasExternal and !ExternalPwrOn()) {
             WasExternal = false;
             chEvtBroadcast(&IEvtSrcPwrChange);
-            //Uart.Printf("Disconnected\r");
+            Uart.Printf("Disconnected\r");
         }
         else if(!WasExternal and ExternalPwrOn()) {
             WasExternal = true;
             chEvtBroadcast(&IEvtSrcPwrChange);
-            //Uart.Printf("Connected\r");
+            Uart.Printf("Connected\r");
         }
 
         //if(IsCharging()) Uart.Printf("Charging\r");
 
         // ==== ADC ====
-//        adcStart(&ADCD1, NULL);
-//        adcStartConversion(&ADCD1, &AdcGrpCfg, ISamples, ADC_GRP1_BUF_DEPTH);
-//        chSysLock();
-//        chSchGoSleepS(THD_STATE_SUSPENDED); // Will wake by Conversion completed Irq
-//        chSysUnlock();
-//        adcStop(&ADCD1);    // Stop ADC to save power
-//
-//        adcsample_t v = (ISamples[0] + ISamples[1] + ISamples[2] + ISamples[3]) / 4;
-//        // Calculate voltage
+        uint32_t rslt = 0;
+        Adc.Init();
+        for(uint8_t i=0; i<8; i++) {
+            Adc.StartConversion();
+            while(!Adc.ConversionCompleted()) chThdSleepMilliseconds(20);
+            rslt += Adc.Result();
+        }
+        Adc.Disable();
+        Adc.ClockOff();
+        rslt /= 8;    // Calc average
+
+        // Calculate voltage
 //        int32_t tmp = 2 * v * ADC_VREF_MV / 4095;
 //        Power.Voltage_mV = (uint16_t)tmp;
 //        // Calculate percent
@@ -92,7 +59,7 @@ void Pwr_t::Task() {
 //        if(tmp < 0) tmp = 0;
 //        if(tmp > 100) tmp = 100;
 //        Power.RemainingPercent = (uint8_t)tmp;
-//        //Uart.Printf("Adc=%u; U=%u; %=%u\r", v, Power.Voltage_mV, Power.RemainingPercent);
+        Uart.Printf("Adc=%u; U=%u; %=%u\r", rslt, Power.Voltage_mV, Power.RemainingPercent);
     }
 }
 
@@ -109,11 +76,11 @@ void Pwr_t::Init() {
     // GPIO
     PinSetupIn(PWR_EXTERNAL_GPIO, PWR_EXTERNAL_PIN, pudPullDown);
     PinSetupIn(PWR_CHARGING_GPIO, PWR_CHARGING_PIN, pudPullUp);
-    PinSetupAnalog(PWR_BATTERY_GPIO,  PWR_BATTERY_PIN);
+    PinSetupAnalog(PWR_BATTERY_GPIO, PWR_BATTERY_PIN);
     // Event
     chEvtInit(&IEvtSrcPwrChange);
     // Create and start thread
-    PThr = chThdCreateStatic(waPwrThread, sizeof(waPwrThread), LOWPRIO, PwrThread, NULL);
+    PThr = chThdCreateStatic(waPwrThread, sizeof(waPwrThread), LOWPRIO, (tfunc_t)PwrThread, NULL);
 }
 
 //static RTCWakeup wakeupspec;

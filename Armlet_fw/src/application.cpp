@@ -88,7 +88,6 @@ static Med_t Med;
 static WORKING_AREA(waAppThread, 128);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
-    (void)arg;
     chRegSetThreadName("App");
 
     // Init shell
