@@ -115,7 +115,7 @@ void Pwr_t::EnterStandby() {
 
 void ShutdownPeriphery() {
     // Shutdown periphery
-    KeysShutdown();
+    Keys.Shutdown();
     Beeper.Shutdown();
     Vibro.Shutdown();
     IR.Shutdown();

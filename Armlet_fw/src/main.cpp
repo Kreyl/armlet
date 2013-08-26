@@ -70,9 +70,10 @@ void Init() {
     iniReadUint32("Radio", "ID", "settings.ini", &ID);
     Uart.Printf("ID=%u\r", ID);
 
-//    Lcd.Init();
+    Lcd.Init();
+    Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
 
-    KeysInit();
+    Keys.Init();
 //    Beeper.Init();
 //    Vibro.Init();
 //    IR.TxInit();
@@ -82,5 +83,5 @@ void Init() {
 //    Sound.Init();
 //    Sound.Play("alive.wav");
 //    rLevel1.Init(ID);
-    App.Init();
+    AppInit();
 }

@@ -8,16 +8,13 @@
 #include "keys.h"
 #include "ch.h"
 
-EventSource EvtSrcKey;
-KeyStatus_t KeyStatus[KEYS_CNT];
+Keys_t Keys;
 
 // ==== Keys Thread ====
 static WORKING_AREA(waKeysThread, 128);
 __attribute__((noreturn))
 static void KeysThread(void *arg) {
-    (void)arg;
     chRegSetThreadName("Keys");
-
     uint8_t i;
     KeyState_t Now;
     bool FHasChanged;
@@ -27,30 +24,21 @@ static void KeysThread(void *arg) {
         FHasChanged = false;
         for(i=0; i<KEYS_CNT; i++) {
             Now = PinIsSet(KEY_GPIO, KeyPin[i])? ksReleased : ksPressed;
-            if(KeyStatus[i].State != Now) {
-                KeyStatus[i].State = Now;
-                KeyStatus[i].HasChanged = true;
+            if(Keys.Status[i].State != Now) {
+                Keys.Status[i].State = Now;
+                Keys.Status[i].HasChanged = true;
 //                Uart.Printf("Key %u\r", i);
                 FHasChanged = true;
             }
         } // for
-
-        if(FHasChanged) chEvtBroadcast(&EvtSrcKey);
-    }
+        if(FHasChanged) chEvtBroadcast(&Keys.EvtSrcKey);
+    } // while 1
 }
 
 // ==== Keys methods ====
-void KeysInit() {
+void Keys_t::Init() {
     chEvtInit(&EvtSrcKey);
     for(uint8_t i=0; i<KEYS_CNT; i++) PinSetupIn(KEY_GPIO, KeyPin[i], pudPullUp);
     // Create and start thread
     chThdCreateStatic(waKeysThread, sizeof(waKeysThread), NORMALPRIO, (tfunc_t)KeysThread, NULL);
-}
-
-void KeysRegisterEvt(EventListener *PEvtLstnr, uint8_t EvtMask) {
-    chEvtRegisterMask(&EvtSrcKey, PEvtLstnr, EvtMask);
-}
-
-void KeysShutdown() {
-    for(uint8_t i=0; i<KEYS_CNT; i++) PinSetupAnalog(KEY_GPIO, KeyPin[i]);
 }

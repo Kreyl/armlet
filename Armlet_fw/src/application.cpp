@@ -29,15 +29,50 @@
 
 void LcdRedraw();
 
-App_t App;
-
 static EventListener EvtLstnrRadioRx, EvtListenerKeys, EvtListenerPill, EvtListenerIR, EvtListenerTmr;
 static EventSource IEvtSrcTmr;
 static rPktWithData_t<RRX_PKT_DATA_SZ> SRxPkt;
 
+static Thread *PAppThd;
+
+// ============================= Keys lock / unlock ============================
+#define KEYLOCKER1              KEY_X   // }
+#define KEYLOCKER2              KEY_Z   // } Keys locking
+#define AUTOLOCK_TIMEOUT_MS     4500
+static void KeylockTmrCallback(void *p);
+
+class Keylock_t {
+private:
+    VirtualTimer VTimer;
+public:
+    bool Locked;
+    void TimerSet() { chVTSet(&VTimer, MS2ST(AUTOLOCK_TIMEOUT_MS), KeylockTmrCallback, NULL); }
+    void TimerReset() { chVTReset(&VTimer); }
+    void Lock();
+    void Unlock();
+};
+static Keylock_t Keylock;
+
+// Timer callback
+void KeylockTmrCallback(void *p) {
+    chSysLockFromIsr();
+    chEvtSignalI(PAppThd, EVTMASK_KEYLOCK);
+    chSysUnlockFromIsr();
+}
+
+void Keylock_t::Lock() {
+    Locked = true;
+    Uart.Printf("Lock\r");
+}
+
+void Keylock_t::Unlock() {
+    Locked = false;
+    Uart.Printf("Unlock\r");
+}
+
 //static uint8_t AppState[APP_STATE_LEN];
 
-// Lustra
+// =================================== Lustra ==================================
 #define LUSTRA_RADIO_RESET_CNT  40  // How many times to wait to reset lustra number
 class Lustra_t {
 public:
@@ -69,6 +104,8 @@ struct TmrData_t {
     VirtualTimer VirTmr;
     bool Fired;
 };
+
+// ================================== Timers ===================================
 class ITmr_t {
 public:
     TmrData_t Tmrs[TMR_CNT];
@@ -78,13 +115,48 @@ public:
     ITmr_t() : Cnt(0) {}
 };
 static ITmr_t STimers;
-// Pill
-struct Med_t {
-    int CureID, Charges;
-} __attribute__ ((__packed__));
-static Med_t Med;
 
-// =============================== Threads ==================================
+// ================================= Pill ======================================
+//struct Med_t {
+//    int CureID, Charges;
+//} __attribute__ ((__packed__));
+//static Med_t Med;
+
+// =========================== Event handlers ==================================
+static inline void KeysHandler() {
+    Keylock.TimerReset();   // Reset timer as Any key pressed or released
+    if(Keylock.Locked) {
+        // Just unlock, do not handle pressed keys
+        //if(Keys.AnyPressed()) Keylock.Unlock();   // Check if any key pressed, not released, not holded
+        if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
+            Keylock.Unlock();
+            Keylock.TimerSet(); // Start autolock timer
+        }
+    }
+    // Check if lock
+    else if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
+        Keylock.Lock();
+    }
+    // Not locked, not lock pressed
+    else {
+        for(uint8_t i=0; i<KEYS_CNT; i++) {
+            if(Keys.Status[i].HasChanged) {
+                if(Keys.Status[i].State == ksReleased) { /*ArmletApi::OnButtonRelease(i); */ }
+                else {
+                    #ifdef DEMONSTRATE
+                    Beeper.Beep(ShortBeep);
+                    #endif
+                    Vibro.Vibrate(ShortBrr);
+                    //ArmletApi::OnButtonPress(i);
+                }
+            }
+        } // for
+        Keylock.TimerSet(); // Start autolock timer
+    } // if not locked
+    Keys.Reset();
+}
+
+// =============================== Threads =====================================
 static WORKING_AREA(waAppThread, 128);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
@@ -95,30 +167,18 @@ static void AppThread(void *arg) {
 
     // Events
     uint32_t EvtMsk;
-    KeysRegisterEvt(&EvtListenerKeys, EVTMASK_KEYS);
+    Keys.RegisterEvt(&EvtListenerKeys, EVTMASK_KEYS);
 //    rLevel1.RegisterEvtRx(&EvtLstnrRadioRx, EVTMASK_RADIO_RX);
 //    PillRegisterEvtChange(&EvtListenerPill, EVTMASK_PILL);
 //    IR.RegisterEvt(&EvtListenerIR, EVTMASK_IR);
 //    chEvtRegisterMask(&IEvtSrcTmr, &EvtListenerTmr, EVTMASK_TIMER);
 
     while(1) {
-        EvtMsk = chEvtWaitAny(EVTMASK_RADIO_RX | EVTMASK_KEYS | EVTMASK_PILL | EVTMASK_IR | EVTMASK_TIMER);
+        EvtMsk = chEvtWaitAny(EVTMASK_RADIO_RX | EVTMASK_KEYS | EVTMASK_PILL | EVTMASK_IR | EVTMASK_TIMER | EVTMASK_KEYLOCK);
 
-        if(EvtMsk &EVTMASK_KEYS) {
-            //            for(uint8_t i=0; i<KEYS_CNT; i++) {
-//                if(KeyStatus[i].HasChanged) {
-//                    if(KeyStatus[i].State == ksReleased) ArmletApi::OnButtonRelease(i);
-//                    else {
-//                        #ifdef DEMONSTRATE
-//                        Beeper.Beep(ShortBeep);
-//                        #endif
-//                        Vibro.Vibrate(ShortBrr);
-//                        ArmletApi::OnButtonPress(i);
-//                    }
-//                    KeyStatus[i].HasChanged = false;
-//                }
-//            } // for
-        } // keys
+        if(EvtMsk & EVTMASK_KEYS) KeysHandler();
+
+        if(EvtMsk & EVTMASK_KEYLOCK) Keylock.Lock();
 
 //        if(EvtMsk & EVTMASK_RADIO_RX) {
 //            while(rLevel1.GetReceivedPkt(&SRxPkt) == OK) {
@@ -157,7 +217,6 @@ static void AppThread(void *arg) {
 
 static WORKING_AREA(waLcdThread, 128);
 static msg_t LcdThread(void *arg) {
-    (void)arg;
     chRegSetThreadName("Lcd");
     while(1) {
         chThdSleepMilliseconds(LCD_REDRAW_MS);
@@ -197,11 +256,11 @@ void UartCmdCallback(uint8_t CmdCode, uint8_t *PData, uint32_t Length) {
 }
 
 // =============================== App class ===================================
-void App_t::Init() {
+void AppInit() {
     chEvtInit(&IEvtSrcTmr);
-
 //    chThdCreateStatic(waLcdThread, sizeof(waLcdThread), LOWPRIO, LcdThread, NULL);
-    chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
+    PAppThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
+    Keylock.TimerSet();
 }
 
 // Fill radiopkt with current data

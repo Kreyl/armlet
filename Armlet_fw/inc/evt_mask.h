@@ -15,6 +15,6 @@
 #define EVTMASK_PILL        EVENT_MASK(3)
 #define EVTMASK_IR          EVENT_MASK(4)
 #define EVTMASK_TIMER       EVENT_MASK(5)
-
+#define EVTMASK_KEYLOCK     EVENT_MASK(6)
 
 #endif /* EVT_MASK_H_ */

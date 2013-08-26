@@ -8,13 +8,6 @@
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
 
-class App_t {
-private:
-
-public:
-    void Init();
-};
-
-extern App_t App;
+void AppInit();
 
 #endif /* APPLICATION_H_ */
