@@ -63,11 +63,13 @@ void KeylockTmrCallback(void *p) {
 void Keylock_t::Lock() {
     Locked = true;
     Uart.Printf("Lock\r");
+    Lcd.Shutdown();
 }
 
 void Keylock_t::Unlock() {
     Locked = false;
     Uart.Printf("Unlock\r");
+    Lcd.Init();
 }
 
 //static uint8_t AppState[APP_STATE_LEN];
@@ -130,7 +132,8 @@ static inline void KeysHandler() {
         //if(Keys.AnyPressed()) Keylock.Unlock();   // Check if any key pressed, not released, not holded
         if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
             Keylock.Unlock();
-            Keylock.TimerSet(); // Start autolock timer
+            Keylock.TimerSet();     // Start autolock timer
+            Vibro.Vibrate(ShortBrr);
         }
     }
     // Check if lock

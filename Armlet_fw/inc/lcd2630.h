@@ -62,9 +62,11 @@ private:
 #endif
 public:
     // General use
+    uint16_t Brightness;
     void Init();
     void Shutdown();
-    void Brightness(uint16_t Brightness)  { BckLt.On(Brightness); }
+    void SetBrightness(uint16_t ABrightness)  { BckLt.On(Brightness = ABrightness); }
+
     // High-level
 #if LCD_PRINTF
     uint16_t PutChar(uint8_t x, uint8_t y, char c, Color_t ForeClr, Color_t BckClr);

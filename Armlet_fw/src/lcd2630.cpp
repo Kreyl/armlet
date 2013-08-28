@@ -16,30 +16,32 @@
 Lcd_t Lcd;
 
 // Pin driving functions
-#define LCD_DELAY   Delay_ms(1);
-static inline void XRES_Hi() { PinSet  (LCD_GPIO, LCD_XRES); LCD_DELAY}
-static inline void XRES_Lo() { PinClear(LCD_GPIO, LCD_XRES); LCD_DELAY}
-static inline void XCS_Hi () { PinSet  (LCD_GPIO, LCD_XCS);  LCD_DELAY}
-static inline void XCS_Lo () { PinClear(LCD_GPIO, LCD_XCS);  LCD_DELAY}
-__attribute__ ((always_inline)) static inline void DC_Hi()  { PinSet  (LCD_GPIO, LCD_DC);   LCD_DELAY}
-__attribute__ ((always_inline)) static inline void DC_Lo()  { PinClear(LCD_GPIO, LCD_DC);   LCD_DELAY}
-static inline void WR_Hi()   { PinSet  (LCD_GPIO, LCD_WR);   LCD_DELAY}
-static inline void RD_Hi()   { PinSet  (LCD_GPIO, LCD_RD);   LCD_DELAY}
+#define LCD_DELAY()   DelayLoop(18)
+static inline void XRES_Hi() { PinSet  (LCD_GPIO, LCD_XRES); LCD_DELAY(); }
+static inline void XRES_Lo() { PinClear(LCD_GPIO, LCD_XRES); LCD_DELAY(); }
+static inline void XCS_Hi () { PinSet  (LCD_GPIO, LCD_XCS);  LCD_DELAY(); }
+static inline void XCS_Lo () { PinClear(LCD_GPIO, LCD_XCS);  LCD_DELAY(); }
+__attribute__ ((always_inline)) static inline void DC_Hi()  { PinSet  (LCD_GPIO, LCD_DC);   LCD_DELAY(); }
+__attribute__ ((always_inline)) static inline void DC_Lo()  { PinClear(LCD_GPIO, LCD_DC);   LCD_DELAY(); }
+static inline void WR_Hi()   { PinSet  (LCD_GPIO, LCD_WR);   LCD_DELAY(); }
+static inline void RD_Hi()   { PinSet  (LCD_GPIO, LCD_RD);   LCD_DELAY(); }
 //__attribute__ ((always_inline)) static inline void RD_Lo()  { PinClear(LCD_GPIO, LCD_RD);   LCD_DELAY}
 
 void Lcd_t::Init() {
-    // Backlight
-    BckLt.Init(LCD_BCKLT_GPIO, LCD_BCKLT_PIN, LCD_BCKLT_TMR, LCD_BCKLT_CHNL, LCD_TOP_BRIGHTNESS);
-    PinSetupOut(LCD_GPIO, LCD_DC,   omPushPull, pudNone, ps100MHz);
-    PinSetupOut(LCD_GPIO, LCD_WR,   omPushPull, pudNone, ps100MHz);
-    PinSetupOut(LCD_GPIO, LCD_RD,   omPushPull, pudNone, ps100MHz);
-    PinSetupOut(LCD_GPIO, LCD_XRES, omPushPull, pudNone, ps100MHz);
-    PinSetupOut(LCD_GPIO, LCD_XCS,  omPushPull, pudNone, ps100MHz);
-    // Configure data bus as outputs
-    for(uint8_t i=0; i<8; i++) PinSetupOut(LCD_GPIO, i, omPushPull, pudNone, ps100MHz);
-
+    // Init pins if not setup
+    if(Brightness == 0) {
+        BckLt.Init(LCD_BCKLT_GPIO, LCD_BCKLT_PIN, LCD_BCKLT_TMR, LCD_BCKLT_CHNL, LCD_TOP_BRIGHTNESS);
+        PinSetupOut(LCD_GPIO, LCD_DC,   omPushPull, pudNone, ps100MHz);
+        PinSetupOut(LCD_GPIO, LCD_WR,   omPushPull, pudNone, ps100MHz);
+        PinSetupOut(LCD_GPIO, LCD_RD,   omPushPull, pudNone, ps100MHz);
+        PinSetupOut(LCD_GPIO, LCD_XRES, omPushPull, pudNone, ps100MHz);
+        PinSetupOut(LCD_GPIO, LCD_XCS,  omPushPull, pudNone, ps100MHz);
+        // Configure data bus as outputs
+        for(uint8_t i=0; i<8; i++) PinSetupOut(LCD_GPIO, i, omPushPull, pudNone, ps100MHz);
+        Brightness = LCD_TOP_BRIGHTNESS;
+    }
     // ======= Init LCD =======
-    Brightness(LCD_TOP_BRIGHTNESS);
+    SetBrightness(Brightness);
     XCS_Hi();
     XRES_Lo();  // }
     XRES_Hi();  // } Reset display
@@ -49,7 +51,7 @@ void Lcd_t::Init() {
     XCS_Lo();   // Interface is always enabled
 
     WriteCmd(0x11);         // Sleep out
-    Delay_ms(207);
+    chThdSleepMilliseconds(18);
     WriteCmd(0x13);         // Normal Display Mode ON
 
 #ifdef LCD_18BIT
@@ -78,7 +80,7 @@ void Lcd_t::Init() {
 void Lcd_t::Shutdown(void) {
     XRES_Lo();
     XCS_Lo();
-    Brightness(0);
+    BckLt.Off();
 }
 
 // =============================== Local use ===================================
