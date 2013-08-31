@@ -33,7 +33,6 @@
 class Pill_t {
 private:
     uint8_t IAddr;
-    BinarySemaphore ISem;
 public:
     bool Connected;
     void Init(uint8_t IcAddr);
@@ -43,7 +42,9 @@ public:
 };
 
 void PillInit();
-void PillRegisterEvtChange(EventListener *PEvtLstnr, uint8_t EvtMask);
+void PillChecker();
+
+extern bool PillsHaveChanged;
 
 extern Pill_t Pill[PILL_CNT];
 

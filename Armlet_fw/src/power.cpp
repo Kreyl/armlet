@@ -54,12 +54,12 @@ void Pwr_t::Task() {
         if(WasExternal and !ExternalPwrOn()) {
             WasExternal = false;
 //            chEvtBroadcast(&IEvtSrcPwrChange);
-            Uart.Printf("Disconnected\r");
+            Uart.Printf("ExtPwr Disconnected\r");
         }
         else if(!WasExternal and ExternalPwrOn()) {
             WasExternal = true;
 //            chEvtBroadcast(&IEvtSrcPwrChange);
-            Uart.Printf("Connected\r");
+            Uart.Printf("ExtPwr Connected\r");
         }
 
 //        if(IsCharging()) Uart.Printf("Charging\r");

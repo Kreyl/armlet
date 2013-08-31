@@ -74,12 +74,12 @@ void Init() {
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
 
     Keys.Init();
-//    Beeper.Init();
-//    Vibro.Init();
+    Beeper.Init();
+    Vibro.Init();
 //    IR.TxInit();
-//    IR.RxInit();
+    IR.RxInit();
     Power.Init();
-//    PillInit();
+    PillInit();
 //    Sound.Init();
 //    Sound.Play("alive.wav");
 //    rLevel1.Init(ID);

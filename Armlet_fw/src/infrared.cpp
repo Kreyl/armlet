@@ -45,11 +45,9 @@ void Infrared_t::IRxEdgeIrq() {
 
 // =============================== Implementation ==============================
 static WORKING_AREA(waIRRxThread, 128);
-static msg_t IRRxThread(void *arg) {
-    (void)arg;
+static void IRRxThread(void *arg) {
     chRegSetThreadName("IRRx");
     IR.IRxTask();
-    return 0;
 }
 
 void Infrared_t::IStartPkt() {
@@ -67,7 +65,9 @@ void Infrared_t::IRxTask() {
             //Uart.Printf("%u\r", Msg);
             PieceType_t Piece = ProcessInterval(Msg);
             switch(Piece) {
-                case ptHeader: IStartPkt(); break;
+                case ptHeader:
+                    IStartPkt();
+                    break;
                 case ptOne:
                     if(IReceivingData) IAppend(1);
                     else ICancelPkt();
@@ -150,7 +150,7 @@ void Infrared_t::RxInit() {
     // ==== Input queue ====
     chMBInit(&imailbox, IRxBuf, IR_RXBUF_SZ);
     // ==== Receiving thread ====
-    chThdCreateStatic(waIRRxThread, sizeof(waIRRxThread), NORMALPRIO, IRRxThread, NULL);
+    chThdCreateStatic(waIRRxThread, sizeof(waIRRxThread), NORMALPRIO, (tfunc_t)IRRxThread, NULL);
 
     // ==== IRQ ==== PC5
     rccEnableAPB2(RCC_APB2ENR_SYSCFGEN, FALSE); // Enable sys cfg controller

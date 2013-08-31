@@ -41,7 +41,6 @@ void Lcd_t::Init() {
         Brightness = LCD_TOP_BRIGHTNESS;
     }
     // ======= Init LCD =======
-    SetBrightness(Brightness);
     XCS_Hi();
     XRES_Lo();  // }
     XRES_Hi();  // } Reset display
@@ -51,7 +50,6 @@ void Lcd_t::Init() {
     XCS_Lo();   // Interface is always enabled
 
     WriteCmd(0x11);         // Sleep out
-    chThdSleepMilliseconds(18);
     WriteCmd(0x13);         // Normal Display Mode ON
 
 #ifdef LCD_18BIT
@@ -68,6 +66,7 @@ void Lcd_t::Init() {
     WriteCmd(0x36, 0xA0);   // Display mode: Y inv, X none-inv, Row/Col exchanged
 
     Cls(clBlack);
+    SetBrightness(Brightness);
 
     //PutBitmap(45, 45, 27, 36, (uint16_t*)0x08000000);
 //
