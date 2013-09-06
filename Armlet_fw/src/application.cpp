@@ -31,7 +31,7 @@ static EventListener EvtLstnrRadioRx, EvtListenerKeys, EvtListenerIR, EvtListene
 static EventSource IEvtSrcTmr;
 static rPktWithData_t<RRX_PKT_DATA_SZ> SRxPkt;
 static uint8_t AppState[APP_STATE_LEN];
-
+static bool LcdHasChanged;
 static Thread *PAppThd;
 
 #if 1 // =============================== Lustra ================================
@@ -124,6 +124,7 @@ private:
     VirtualTimer VTimer;
 public:
     bool Locked;
+    bool UnlockOnRelease;
     void TimerSet() { chVTSet(&VTimer, MS2ST(AUTOLOCK_TIMEOUT_MS), KeylockTmrCallback, NULL); }
     void TimerReset() { chVTReset(&VTimer); }
     void Lock();
@@ -148,12 +149,12 @@ void Keylock_t::Unlock() {
     Locked = false;
     Uart.Printf("Unlock\r");
     Lcd.Init();
+    LcdHasChanged = true;
 }
 #endif
 
 #if 1 // ================================= LCD =================================
 static uint16_t Framebuf[LCD_W*LCD_H];
-static bool LcdHasChanged;
 #define LCD_REDRAW_MS   99
 
 static WORKING_AREA(waLcdThread, 128);
@@ -162,7 +163,7 @@ static void LcdThread(void *arg) {
     chRegSetThreadName("Lcd");
     while(1) {
         chThdSleepMilliseconds(LCD_REDRAW_MS);
-        if(LcdHasChanged /*and !Keylock.Locked*/) LcdRedraw();
+        if(LcdHasChanged and !Keylock.Locked) LcdRedraw();
     } // while 1
 }
 #endif
@@ -171,8 +172,11 @@ static void LcdThread(void *arg) {
 static inline void KeysHandler() {
     Keylock.TimerReset();   // Reset timer as Any key pressed or released
     if(Keylock.Locked) {
-        // Just unlock, do not handle pressed keys
-        if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
+        // Prepare to unlock
+        if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) Keylock.UnlockOnRelease = true;
+        // Unlock if prepared and keys released
+        else if((KEYLOCKER1.State == ksReleased) and (KEYLOCKER2.State == ksReleased) and Keylock.UnlockOnRelease) {
+            Keylock.UnlockOnRelease = false;
             Keylock.Unlock();
             Keylock.TimerSet();     // Start autolock timer
             Vibro.Vibrate(ShortBrr);
