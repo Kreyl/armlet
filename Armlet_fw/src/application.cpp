@@ -223,7 +223,7 @@ static void AppThread(void *arg) {
 
         if(EvtMsk & EVTMASK_KEYS) KeysHandler();
 
-        //if(EvtMsk & EVTMASK_KEYLOCK) Keylock.Lock(); // DEBUG
+        if(EvtMsk & EVTMASK_KEYLOCK) Keylock.Lock(); // DEBUG
 
         if(EvtMsk & EVTMASK_NEWSECOND) {
             //Uart.Printf("%02u:%02u:%02u\r", Time.H, Time.M, Time.S);
