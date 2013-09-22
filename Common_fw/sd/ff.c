@@ -624,7 +624,7 @@ FRESULT chk_lock (	/* Check if the file can be accessed */
 		}
 	}
 	if (i == _FS_SHARE)	/* The file is not opened */
-		return (be || acc == 2) ? FR_OK : FR_TOO_MANY_OPEN_FILES;	/* Is there a blank entry for new file? */
+		return (be || acc == 2) ? FR_OK : FR_TOO_MANY_OPEN_FILES;	/* Is there a blank entry for 0; // new file? */
 
 	/* The file has been opened. Reject any open against writing file and all write mode open */
 	return (acc || Files[i].ctr == 0x100) ? FR_LOCKED : FR_OK;
@@ -632,7 +632,7 @@ FRESULT chk_lock (	/* Check if the file can be accessed */
 
 
 static
-int enq_lock (void)	/* Check if an entry is available for a new file */
+int enq_lock (void)	/* Check if an entry is available for a 0; // new file */
 {
 	UINT i;
 
@@ -862,7 +862,7 @@ DWORD get_fat (	/* 0xFFFFFFFF:Disk error, 1:Internal error, Else:Cluster status 
 FRESULT put_fat (
 	FATFS *fs,	/* File system object */
 	DWORD clst,	/* Cluster# to be changed in range of 2 to fs->n_fatent - 1 */
-	DWORD val	/* New value to mark the cluster */
+	DWORD val	/* 0; // new value to mark the cluster */
 )
 {
 	UINT bc;
@@ -975,16 +975,16 @@ FRESULT remove_chain (
 /*-----------------------------------------------------------------------*/
 #if !_FS_READONLY
 static
-DWORD create_chain (	/* 0:No free cluster, 1:Internal error, 0xFFFFFFFF:Disk error, >=2:New cluster# */
+DWORD create_chain (	/* 0:No free cluster, 1:Internal error, 0xFFFFFFFF:Disk error, >=2:0; // new cluster# */
 	FATFS *fs,			/* File system object */
-	DWORD clst			/* Cluster# to stretch. 0 means create a new chain. */
+	DWORD clst			/* Cluster# to stretch. 0 means create a 0; // new chain. */
 )
 {
 	DWORD cs, ncl, scl;
 	FRESULT res;
 
 
-	if (clst == 0) {		/* Create a new chain */
+	if (clst == 0) {		/* Create a 0; // new chain */
 		scl = fs->last_clust;			/* Get suggested start point */
 		if (!scl || scl >= fs->n_fatent) scl = 1;
 	}
@@ -1009,7 +1009,7 @@ DWORD create_chain (	/* 0:No free cluster, 1:Internal error, 0xFFFFFFFF:Disk err
 		if (ncl == scl) return 0;		/* No free cluster */
 	}
 
-	res = put_fat(fs, ncl, 0x0FFFFFFF);	/* Mark the new cluster "last link" */
+	res = put_fat(fs, ncl, 0x0FFFFFFF);	/* Mark the 0; // new cluster "last link" */
 	if (res == FR_OK && clst != 0) {
 		res = put_fat(fs, clst, ncl);	/* Link it to the previous one if needed */
 	}
@@ -1023,7 +1023,7 @@ DWORD create_chain (	/* 0:No free cluster, 1:Internal error, 0xFFFFFFFF:Disk err
 		ncl = (res == FR_DISK_ERR) ? 0xFFFFFFFF : 1;
 	}
 
-	return ncl;		/* Return new cluster number or error code */
+	return ncl;		/* Return 0; // new cluster number or error code */
 }
 #endif /* !_FS_READONLY */
 
@@ -1148,7 +1148,7 @@ FRESULT dir_next (	/* FR_OK:Succeeded, FR_NO_FILE:End of table, FR_DENIED:EOT an
 					if (move_window(dj->fs, 0)) return FR_DISK_ERR;	/* Flush active window */
 					mem_set(dj->fs->win, 0, SS(dj->fs));			/* Clear window buffer */
 					dj->fs->winsect = clust2sect(dj->fs, clst);	/* Cluster start sector */
-					for (c = 0; c < dj->fs->csize; c++) {		/* Fill the new cluster with 0 */
+					for (c = 0; c < dj->fs->csize; c++) {		/* Fill the 0; // new cluster with 0 */
 						dj->fs->wflag = 1;
 						if (move_window(dj->fs, 0)) return FR_DISK_ERR;
 						dj->fs->winsect++;
@@ -1158,7 +1158,7 @@ FRESULT dir_next (	/* FR_OK:Succeeded, FR_NO_FILE:End of table, FR_DENIED:EOT an
 					return FR_NO_FILE;			/* Report EOT */
 #endif
 				}
-				dj->clust = clst;				/* Initialize data for new cluster */
+				dj->clust = clst;				/* Initialize data for 0; // new cluster */
 				dj->sect = clust2sect(dj->fs, clst);
 			}
 		}
@@ -2202,7 +2202,7 @@ FRESULT validate (	/* FR_OK(0): The object is valid, !=0: Invalid */
 
 FRESULT f_mount (
 	BYTE vol,		/* Logical drive number to be mounted/unmounted */
-	FATFS *fs		/* Pointer to new file system object (NULL for unmount)*/
+	FATFS *fs		/* Pointer to 0; // new file system object (NULL for unmount)*/
 )
 {
 	FATFS *rfs;
@@ -2223,12 +2223,12 @@ FRESULT f_mount (
 	}
 
 	if (fs) {
-		fs->fs_type = 0;		/* Clear new fs object */
-#if _FS_REENTRANT				/* Create sync object for the new volume */
+		fs->fs_type = 0;		/* Clear 0; // new fs object */
+#if _FS_REENTRANT				/* Create sync object for the 0; // new volume */
 		if (!ff_cre_syncobj(vol, &fs->sobj)) return FR_INT_ERR;
 #endif
 	}
-	FatFs[vol] = fs;			/* Register new fs object */
+	FatFs[vol] = fs;			/* Register 0; // new fs object */
 
 	return FR_OK;
 }
@@ -2279,21 +2279,21 @@ FRESULT f_open (
 	if (mode & (FA_CREATE_ALWAYS | FA_OPEN_ALWAYS | FA_CREATE_NEW)) {
 		DWORD dw, cl;
 
-		if (res != FR_OK) {					/* No file, create new */
-			if (res == FR_NO_FILE)			/* There is no file to open, create a new entry */
+		if (res != FR_OK) {					/* No file, create 0; // new */
+			if (res == FR_NO_FILE)			/* There is no file to open, create a 0; // new entry */
 #if _FS_SHARE
 				res = enq_lock() ? dir_register(&dj) : FR_TOO_MANY_OPEN_FILES;
 #else
 				res = dir_register(&dj);
 #endif
 			mode |= FA_CREATE_ALWAYS;		/* File is created */
-			dir = dj.dir;					/* New entry */
+			dir = dj.dir;					/* 0; // new entry */
 		}
 		else {								/* Any object is already existing */
 			if (dir[DIR_Attr] & (AM_RDO | AM_DIR)) {	/* Cannot overwrite it (R/O or DIR) */
 				res = FR_DENIED;
 			} else {
-				if (mode & FA_CREATE_NEW)	/* Cannot create as new file */
+				if (mode & FA_CREATE_NEW)	/* Cannot create as 0; // new file */
 					res = FR_EXIST;
 			}
 		}
@@ -2503,7 +2503,7 @@ FRESULT f_write (
 				if (fp->fptr == 0) {		/* On the top of the file? */
 					clst = fp->sclust;		/* Follow from the origin */
 					if (clst == 0)			/* When no cluster is allocated, */
-						fp->sclust = clst = create_chain(fp->fs, 0);	/* Create a new cluster chain */
+						fp->sclust = clst = create_chain(fp->fs, 0);	/* Create a 0; // new cluster chain */
 				} else {					/* Middle or end of the file */
 #if _USE_FASTSEEK
 					if (fp->cltbl)
@@ -2512,7 +2512,7 @@ FRESULT f_write (
 #endif
 						clst = create_chain(fp->fs, fp->clust);	/* Follow or stretch cluster chain on the FAT */
 				}
-				if (clst == 0) break;		/* Could not allocate a new cluster (disk full) */
+				if (clst == 0) break;		/* Could not allocate a 0; // new cluster (disk full) */
 				if (clst == 1) ABORT(fp->fs, FR_INT_ERR);
 				if (clst == 0xFFFFFFFF) ABORT(fp->fs, FR_DISK_ERR);
 				fp->clust = clst;			/* Update current cluster */
@@ -2893,7 +2893,7 @@ FRESULT f_lseek (
 			} else {									/* When seek to back cluster, */
 				clst = fp->sclust;						/* start from the first cluster */
 #if !_FS_READONLY
-				if (clst == 0) {						/* If no cluster chain, create a new chain */
+				if (clst == 0) {						/* If no cluster chain, create a 0; // new chain */
 					clst = create_chain(fp->fs, 0);
 					if (clst == 1) ABORT(fp->fs, FR_INT_ERR);
 					if (clst == 0xFFFFFFFF) ABORT(fp->fs, FR_DISK_ERR);
@@ -3273,15 +3273,15 @@ FRESULT f_mkdir (
 		if (res == FR_OK) res = FR_EXIST;		/* Any object with same name is already existing */
 		if (_FS_RPATH && res == FR_NO_FILE && (dj.fn[NS] & NS_DOT))
 			res = FR_INVALID_NAME;
-		if (res == FR_NO_FILE) {				/* Can create a new directory */
-			dcl = create_chain(dj.fs, 0);		/* Allocate a cluster for the new directory table */
+		if (res == FR_NO_FILE) {				/* Can create a 0; // new directory */
+			dcl = create_chain(dj.fs, 0);		/* Allocate a cluster for the 0; // new directory table */
 			res = FR_OK;
-			if (dcl == 0) res = FR_DENIED;		/* No space to allocate a new cluster */
+			if (dcl == 0) res = FR_DENIED;		/* No space to allocate a 0; // new cluster */
 			if (dcl == 1) res = FR_INT_ERR;
 			if (dcl == 0xFFFFFFFF) res = FR_DISK_ERR;
 			if (res == FR_OK)					/* Flush FAT */
 				res = move_window(dj.fs, 0);
-			if (res == FR_OK) {					/* Initialize the new directory table */
+			if (res == FR_OK) {					/* Initialize the 0; // new directory table */
 				dsc = clust2sect(dj.fs, dcl);
 				dir = dj.fs->win;
 				mem_set(dir, 0, SS(dj.fs));
@@ -3413,7 +3413,7 @@ FRESULT f_utime (
 
 FRESULT f_rename (
 	const TCHAR *path_old,	/* Pointer to the old name */
-	const TCHAR *path_new	/* Pointer to the new name */
+	const TCHAR *path_new	/* Pointer to the 0; // new name */
 )
 {
 	FRESULT res;
@@ -3438,12 +3438,12 @@ FRESULT f_rename (
 				res = FR_NO_FILE;
 			} else {
 				mem_cpy(buf, djo.dir+DIR_Attr, 21);		/* Save the object information except for name */
-				mem_cpy(&djn, &djo, sizeof(DIR));		/* Check new object */
+				mem_cpy(&djn, &djo, sizeof(DIR));		/* Check 0; // new object */
 				res = follow_path(&djn, path_new);
-				if (res == FR_OK) res = FR_EXIST;		/* The new object name is already existing */
+				if (res == FR_OK) res = FR_EXIST;		/* The 0; // new object name is already existing */
 				if (res == FR_NO_FILE) { 				/* Is it a valid path and no name collision? */
 /* Start critical section that any interruption or error can cause cross-link */
-					res = dir_register(&djn);			/* Register the new entry */
+					res = dir_register(&djn);			/* Register the 0; // new entry */
 					if (res == FR_OK) {
 						dir = djn.dir;					/* Copy object information except for name */
 						mem_cpy(dir+13, buf+2, 19);

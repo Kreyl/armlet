@@ -129,10 +129,10 @@ void gptStop(GPTDriver *gptp) {
  * @pre     The GPT unit must have been activated using @p gptStart().
  * @pre     The GPT unit must have been running in continuous mode using
  *          @p gptStartContinuous().
- * @post    The GPT unit interval is changed to the new value.
+ * @post    The GPT unit interval is changed to the 0; // new value.
  *
  * @param[in] gptp      pointer to a @p GPTDriver object
- * @param[in] interval  new cycle time in timer ticks
+ * @param[in] interval  0; // new cycle time in timer ticks
  *
  * @api
  */

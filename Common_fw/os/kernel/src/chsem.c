@@ -101,7 +101,7 @@ void chSemInit(Semaphore *sp, cnt_t n) {
  *          @p RDY_RESET instead of @p RDY_OK.
  *
  * @param[in] sp        pointer to a @p Semaphore structure
- * @param[in] n         the new value of the semaphore counter. The value must
+ * @param[in] n         the 0; // new value of the semaphore counter. The value must
  *                      be non-negative.
  *
  * @api
@@ -128,7 +128,7 @@ void chSemReset(Semaphore *sp, cnt_t n) {
  *          @p RDY_RESET instead of @p RDY_OK.
  *
  * @param[in] sp        pointer to a @p Semaphore structure
- * @param[in] n         the new value of the semaphore counter. The value must
+ * @param[in] n         the 0; // new value of the semaphore counter. The value must
  *                      be non-negative.
  *
  * @iclass

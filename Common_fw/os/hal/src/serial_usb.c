@@ -129,7 +129,7 @@ static void inotify(GenericQueue *qp) {
     return;
 
   /* If there is in the queue enough space to hold at least one packet and
-     a transaction is not yet started then a new transaction is started for
+     a transaction is not yet started then a 0; // new transaction is started for
      the available space.*/
   maxsize = sdup->config->usbp->epc[sdup->config->bulk_out]->out_maxsize;
   if (!usbGetReceiveStatusI(sdup->config->usbp, sdup->config->bulk_out) &&
@@ -160,7 +160,7 @@ static void onotify(GenericQueue *qp) {
     return;
 
   /* If there is not an ongoing transaction and the output queue contains
-     data then a new transaction is started.*/
+     data then a 0; // new transaction is started.*/
   if (!usbGetTransmitStatusI(sdup->config->usbp, sdup->config->bulk_in) &&
       ((n = chOQGetFullI(&sdup->oqueue)) > 0)) {
     chSysUnlock();

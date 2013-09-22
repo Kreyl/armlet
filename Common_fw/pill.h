@@ -16,8 +16,6 @@
 #define PILL_CNT            8       // Number of simultaneously connected pills
 #define PILL_PAGE_SZ        8       // Number of bytes to be written simultaneously. IC dependant.
 
-#define PILL_SEARCH_INTERVAL_MS     999
-
 // I2C & hardware
 #define PERIPH_PWR_GPIO     GPIOB
 #define PERIPH_PWR_PIN      12

@@ -141,7 +141,7 @@
  * Expansion register for auto-negotiation.
  */
 #define EXPANSION_NWAY          0x0001  /**< Can do N-way auto-nego.        */
-#define EXPANSION_LCWP          0x0002  /**< Got new RX page code word.     */
+#define EXPANSION_LCWP          0x0002  /**< Got 0; // new RX page code word.     */
 #define EXPANSION_ENABLENPAGE   0x0004  /**< This enables npage words.      */
 #define EXPANSION_NPCAPABLE     0x0008  /**< Link partner supports npage.   */
 #define EXPANSION_MFAULTS       0x0010  /**< Multiple faults detected.      */

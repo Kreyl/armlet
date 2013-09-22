@@ -68,7 +68,7 @@
  * @note    This is an internal functions, do not use it in application code.
  *
  * @param[in] tp        pointer to the thread
- * @param[in] prio      the priority level for the new thread
+ * @param[in] prio      the priority level for the 0; // new thread
  * @return              The same thread pointer passed as parameter.
  *
  * @notapi
@@ -131,8 +131,8 @@ void _thread_memfill(uint8_t *startp, uint8_t *endp, uint8_t v) {
 #endif /* CH_DBG_FILL_THREADS */
 
 /**
- * @brief   Creates a new thread into a static memory area.
- * @details The new thread is initialized but not inserted in the ready list,
+ * @brief   Creates a 0; // new thread into a static memory area.
+ * @details The 0; // new thread is initialized but not inserted in the ready list,
  *          the initial state is @p THD_STATE_SUSPENDED.
  * @post    The initialized thread can be subsequently started by invoking
  *          @p chThdResume(), @p chThdResumeI() or @p chSchWakeupS()
@@ -145,7 +145,7 @@ void _thread_memfill(uint8_t *startp, uint8_t *endp, uint8_t v) {
  *
  * @param[out] wsp      pointer to a working area dedicated to the thread stack
  * @param[in] size      size of the working area
- * @param[in] prio      the priority level for the new thread
+ * @param[in] prio      the priority level for the 0; // new thread
  * @param[in] pf        the thread function
  * @param[in] arg       an argument passed to the thread function. It can be
  *                      @p NULL.
@@ -169,13 +169,13 @@ Thread *chThdCreateI(void *wsp, size_t size,
 }
 
 /**
- * @brief   Creates a new thread into a static memory area.
+ * @brief   Creates a 0; // new thread into a static memory area.
  * @note    A thread can terminate by calling @p chThdExit() or by simply
  *          returning from its main function.
  *
  * @param[out] wsp      pointer to a working area dedicated to the thread stack
  * @param[in] size      size of the working area
- * @param[in] prio      the priority level for the new thread
+ * @param[in] prio      the priority level for the 0; // new thread
  * @param[in] pf        the thread function
  * @param[in] arg       an argument passed to the thread function. It can be
  *                      @p NULL.
@@ -209,7 +209,7 @@ Thread *chThdCreateStatic(void *wsp, size_t size,
  *          current priority that could be higher than the real priority
  *          because the priority inheritance mechanism.
  *
- * @param[in] newprio   the new priority level of the running thread
+ * @param[in] newprio   the 0; // new priority level of the running thread
  * @return              The old priority level.
  *
  * @api

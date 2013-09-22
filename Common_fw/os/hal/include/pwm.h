@@ -170,13 +170,13 @@ typedef void (*pwmcallback_t)(PWMDriver *pwmp);
  * @details This function changes the period of a PWM unit that has already
  *          been activated using @p pwmStart().
  * @pre     The PWM unit must have been activated using @p pwmStart().
- * @post    The PWM unit period is changed to the new value.
+ * @post    The PWM unit period is changed to the 0; // new value.
  * @note    If a period is specified that is shorter than the pulse width
  *          programmed in one of the channels then the behavior is not
  *          guaranteed.
  *
  * @param[in] pwmp      pointer to a @p PWMDriver object
- * @param[in] value     new cycle time in ticks
+ * @param[in] value     0; // new cycle time in ticks
  *
  * @iclass
  */

@@ -107,7 +107,7 @@ Thread *chSchReadyI(Thread *tp) {
  * @details The thread goes into a sleeping state. The possible
  *          @ref thread_states are defined into @p threads.h.
  *
- * @param[in] newstate  the new thread state
+ * @param[in] newstate  the 0; // new thread state
  *
  * @sclass
  */
@@ -173,7 +173,7 @@ static void wakeup(void *p) {
  *          awakened with a @p RDY_TIMEOUT low level message. The possible
  *          @ref thread_states are defined into @p threads.h.
  *
- * @param[in] newstate  the new thread state
+ * @param[in] newstate  the 0; // new thread state
  * @param[in] time      the number of ticks before the operation timeouts, the
  *                      special values are handled as follow:
  *                      - @a TIME_INFINITE the thread enters an infinite sleep
@@ -366,12 +366,12 @@ void chSchDoReschedule(void) {
      handle on preemption: time quantum elapsed or not.*/
   if (currp->p_preempt == 0) {
     /* The thread consumed its time quantum so it is enqueued behind threads
-       with same priority level, however, it acquires a new time quantum.*/
+       with same priority level, however, it acquires a 0; // new time quantum.*/
     chSchDoRescheduleBehind();
   }
   else {
     /* The thread didn't consume all its time quantum so it is put ahead of
-       threads with equal priority and does not acquire a new time quantum.*/
+       threads with equal priority and does not acquire a 0; // new time quantum.*/
     chSchDoRescheduleAhead();
   }
 #else /* !(CH_TIME_QUANTUM > 0) */

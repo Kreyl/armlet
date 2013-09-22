@@ -51,7 +51,7 @@ struct rPkt_t {
 #define RDEVICE_CNT     ((1+RDEV_TOP_ID)-RDEV_BOTTOM_ID)
 
 // Gates
-#define RGATE_CNT       7
+#define RGATE_CNT       9
 
 // Slot count
 #define RSLOT_CNT       RDEVICE_CNT // Total slots count

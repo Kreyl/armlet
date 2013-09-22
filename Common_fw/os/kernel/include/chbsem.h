@@ -185,9 +185,9 @@ typedef struct  {
  *          @p RDY_RESET instead of @p RDY_OK.
  *
  * @param[in] bsp       pointer to a @p BinarySemaphore structure
- * @param[in] taken     new state of the binary semaphore
- *                      - @a FALSE, the new state is not taken.
- *                      - @a TRUE, the new state is taken.
+ * @param[in] taken     0; // new state of the binary semaphore
+ *                      - @a FALSE, the 0; // new state is not taken.
+ *                      - @a TRUE, the 0; // new state is taken.
  *                      .
  *
  * @api
@@ -202,9 +202,9 @@ typedef struct  {
  * @note    This function does not reschedule.
  *
  * @param[in] bsp       pointer to a @p BinarySemaphore structure
- * @param[in] taken     new state of the binary semaphore
- *                      - @a FALSE, the new state is not taken.
- *                      - @a TRUE, the new state is taken.
+ * @param[in] taken     0; // new state of the binary semaphore
+ *                      - @a FALSE, the 0; // new state is not taken.
+ *                      - @a TRUE, the 0; // new state is taken.
  *                      .
  *
  * @iclass

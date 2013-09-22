@@ -45,7 +45,7 @@
  *
  * @param[in] tp        pointer to the thread
  * @return              The same thread pointer passed as parameter
- *                      representing the new reference.
+ *                      representing the 0; // new reference.
  *
  * @api
  */
@@ -106,7 +106,7 @@ void chThdRelease(Thread *tp) {
 
 #if CH_USE_HEAP || defined(__DOXYGEN__)
 /**
- * @brief   Creates a new thread allocating the memory from the heap.
+ * @brief   Creates a 0; // new thread allocating the memory from the heap.
  * @pre     The configuration options @p CH_USE_DYNAMIC and @p CH_USE_HEAP
  *          must be enabled in order to use this function.
  * @note    A thread can terminate by calling @p chThdExit() or by simply
@@ -117,7 +117,7 @@ void chThdRelease(Thread *tp) {
  * @param[in] heapp     heap from which allocate the memory or @p NULL for the
  *                      default heap
  * @param[in] size      size of the working area to be allocated
- * @param[in] prio      the priority level for the new thread
+ * @param[in] prio      the priority level for the 0; // new thread
  * @param[in] pf        the thread function
  * @param[in] arg       an argument passed to the thread function. It can be
  *                      @p NULL.
@@ -156,7 +156,7 @@ Thread *chThdCreateFromHeap(MemoryHeap *heapp, size_t size,
 
 #if CH_USE_MEMPOOLS || defined(__DOXYGEN__)
 /**
- * @brief   Creates a new thread allocating the memory from the specified
+ * @brief   Creates a 0; // new thread allocating the memory from the specified
  *          memory pool.
  * @pre     The configuration options @p CH_USE_DYNAMIC and @p CH_USE_MEMPOOLS
  *          must be enabled in order to use this function.
@@ -166,7 +166,7 @@ Thread *chThdCreateFromHeap(MemoryHeap *heapp, size_t size,
  *          terminates but when a @p chThdWait() is performed.
  *
  * @param[in] mp        pointer to the memory pool object
- * @param[in] prio      the priority level for the new thread
+ * @param[in] prio      the priority level for the 0; // new thread
  * @param[in] pf        the thread function
  * @param[in] arg       an argument passed to the thread function. It can be
  *                      @p NULL.

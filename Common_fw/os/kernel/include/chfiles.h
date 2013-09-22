@@ -157,7 +157,7 @@ typedef struct {
  * @brief   Moves the file current pointer to an absolute position.
  *
  * @param[in] ip        pointer to a @p BaseFileStream or derived class
- * @param[in] offset    new absolute position
+ * @param[in] offset    0; // new absolute position
  * @return              The operation status.
  * @retval FILE_OK      no error.
  * @retval FILE_ERROR   operation failed.

@@ -116,7 +116,7 @@ void Sound_t::Init() {
     // ==== DREQ IRQ ====
     IDreq.Init(VS_GPIO, VS_DREQ, Rising);
 
-//   CmdWrite(VS_REG_MODE, (VS_SM_SDINEW | VS_SM_RESET));    // Perform software reset
+//   CmdWrite(VS_REG_MODE, (VS_SM_SDInew | VS_SM_RESET));    // Perform software reset
 //    AddCmd(VS_REG_MODE, VS_MODE_REG_VALUE);
 //    AddCmd(VS_REG_CLOCKF, 0x8000 + (12000000/2000));
 //    AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));

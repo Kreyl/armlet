@@ -184,7 +184,7 @@ void extChannelDisable(EXTDriver *extp, expchannel_t channel) {
  *
  * @param[in] extp      pointer to the @p EXTDriver object
  * @param[in] channel   channel to be changed
- * @param[in] extcp     new configuration for the channel
+ * @param[in] extcp     0; // new configuration for the channel
  *
  * @iclass
  */

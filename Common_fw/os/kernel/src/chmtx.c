@@ -138,7 +138,7 @@ void chMtxLockS(Mutex *mp) {
       /* The following states need priority queues reordering.*/
       switch (tp->p_state) {
       case THD_STATE_WTMTX:
-        /* Re-enqueues the mutex owner with its new priority.*/
+        /* Re-enqueues the mutex owner with its 0; // new priority.*/
         prio_insert(dequeue(tp), (ThreadsQueue *)tp->p_u.wtobjp);
         tp = ((Mutex *)tp->p_u.wtobjp)->m_owner;
         continue;
@@ -154,7 +154,7 @@ void chMtxLockS(Mutex *mp) {
 #if CH_USE_MESSAGES && CH_USE_MESSAGES_PRIORITY
       case THD_STATE_SNDMSGQ:
 #endif
-        /* Re-enqueues tp with its new priority on the queue.*/
+        /* Re-enqueues tp with its 0; // new priority on the queue.*/
         prio_insert(dequeue(tp), (ThreadsQueue *)tp->p_u.wtobjp);
         break;
 #endif
@@ -163,7 +163,7 @@ void chMtxLockS(Mutex *mp) {
         /* Prevents an assertion in chSchReadyI().*/
         tp->p_state = THD_STATE_CURRENT;
 #endif
-        /* Re-enqueues tp with its new priority on the ready list.*/
+        /* Re-enqueues tp with its 0; // new priority on the ready list.*/
         chSchReadyI(dequeue(tp));
         break;
       }

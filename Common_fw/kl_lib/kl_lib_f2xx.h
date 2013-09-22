@@ -126,7 +126,7 @@ static inline void PinSetupOut(
     PinClockEnable(PGpioPort);
     // Setup mode
     PGpioPort->MODER &= ~(0b11 << (APinNumber*2));  // clear previous bits
-    PGpioPort->MODER |= 0b01 << (APinNumber*2);     // Set new bits
+    PGpioPort->MODER |= 0b01 << (APinNumber*2);     // Set 0; // new bits
     // Setup output type
     PGpioPort->OTYPER &= ~(1<<APinNumber);
     PGpioPort->OTYPER |= (uint32_t)PinOutMode << APinNumber;
@@ -154,7 +154,7 @@ static inline void PinSetupAnalog(GPIO_TypeDef *PGpioPort, const uint16_t APinNu
     // Clock
     PinClockEnable(PGpioPort);
     // Setup mode
-    PGpioPort->MODER |= 0b11 << (APinNumber*2);  // Set new bits
+    PGpioPort->MODER |= 0b11 << (APinNumber*2);  // Set 0; // new bits
     // Setup Pull-Up or Pull-Down
     PGpioPort->PUPDR &= ~(0b11 << (APinNumber*2)); // clear previous bits
     PGpioPort->PUPDR |= (uint32_t)pudNone << (APinNumber*2);
@@ -170,7 +170,7 @@ static inline void PinSetupAlterFunc(
     PinClockEnable(PGpioPort);
     // Setup mode
     PGpioPort->MODER &= ~(0b11 << (APinNumber*2));  // clear previous bits
-    PGpioPort->MODER |= 0b10 << (APinNumber*2);     // Set new bits
+    PGpioPort->MODER |= 0b10 << (APinNumber*2);     // Set 0; // new bits
     // Setup output type
     PGpioPort->OTYPER &= ~(1<<APinNumber);
     PGpioPort->OTYPER |= (uint32_t)PinOutMode << APinNumber;
@@ -191,7 +191,7 @@ static inline void PinSetupAlterFunc(
 static inline void PinFastOutPP(GPIO_TypeDef *PGpioPort, const uint16_t APinNumber) {
     // Setup mode
     PGpioPort->MODER &= ~(0b11 << (APinNumber*2));  // clear previous bits
-    PGpioPort->MODER |= 0b01 << (APinNumber*2);     // Set new bits
+    PGpioPort->MODER |= 0b01 << (APinNumber*2);     // Set 0; // new bits
 }
 
 class PwmPin_t {

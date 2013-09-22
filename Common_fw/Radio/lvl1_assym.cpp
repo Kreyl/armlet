@@ -77,14 +77,14 @@ void rLevel1_t::Task() {
     chSysLock();
     chSchGoSleepS(THD_STATE_SUSPENDED); // Will wake up by rTmr
     chSysUnlock();
-    // ==== Sleep ended, transmit new pkt ====
+    // ==== Sleep ended, transmit 0; // new pkt ====
     if(++SlotN >= RSLOT_CNT) SlotN = 0;
     PktTx.SlotN = SlotN;
-    // If not transmitting long pkt already, try to get new data pkt
+    // If not transmitting long pkt already, try to get 0; // new data pkt
     if((ITxHdr.State == OK) or (ITxHdr.State == FAILURE) or (ITxHdr.State == BUSY)) {
         if(ITxBuf.Get((uint8_t*)&ITxHdr, sizeof(rPktHeader_t)) == OK) ITxHdr.State = NEW;   // Will not be transmitted until correct slot
     }
-    // Transmit data if new and in correct slot, or if first pkt is already sent
+    // Transmit data if 0; // new and in correct slot, or if first pkt is already sent
     if(((ITxHdr.State == NEW) and InsideCorrectSlot()) or (ITxHdr.State == IN_PROGRESS)) PrepareDataPkt();
     else PreparePingPkt();
 
@@ -231,7 +231,7 @@ void rLevel1_t::IEndRx(uint8_t ARslt) {
 }
 
 uint8_t rLevel1_t::HandleRxDataPkt() {
-    if(RxPktState != IN_PROGRESS) IStartRx();  // Start new reception
+    if(RxPktState != IN_PROGRESS) IStartRx();  // Start 0; // new reception
     // Check if this pkt is last
     if(!(PktRx.Srv & R_NXTSLT)) {   // No NXT_SLT => last pkt
         // Get effective length

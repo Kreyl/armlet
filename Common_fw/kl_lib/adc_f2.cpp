@@ -65,7 +65,7 @@ void Adc_t::ChannelConfig(AdcChnl_t ACfg) {
     if(ACfg.N <= 9) {
         Offset = ACfg.N * 3;
         ADC1->SMPR2 &= ~((uint32_t)0b111 << Offset);    // Clear bits
-        ADC1->SMPR2 |= ACfg.SampleTime << Offset;       // Set new bits
+        ADC1->SMPR2 |= ACfg.SampleTime << Offset;       // Set 0; // new bits
     }
     else {
         Offset = (ACfg.N - 10) * 3;
