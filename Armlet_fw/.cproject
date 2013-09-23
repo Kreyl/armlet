@@ -25,7 +25,7 @@
 							<option id="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.option.target.processor.557042681" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
 							<option id="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.option.target.thumb.1076202382" name="Thumb (-mthumb)" superClass="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.option.target.thumb" value="true" valueType="boolean"/>
 							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.elf.platform.debug.715915378" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.elf.platform.debug"/>
-							<builder buildPath="${workspace_loc:/rock_fw_eclipse/Debug}" id="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.elf.builder.debug.1762047410" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="ARM Yagarto Windows GNU Make builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.elf.builder.debug">
+							<builder buildPath="${workspace_loc:/rock_fw_eclipse/Debug}" id="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.elf.builder.debug.1762047410" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="ARM Yagarto Windows GNU Make builder" parallelBuildOn="false" superClass="org.eclipse.cdt.cross.arm.gnu.yagarto.windows.elf.builder.debug">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
@@ -57,6 +57,7 @@
 									<listOptionValue builtIn="false" value="../../Common_fw/os/hal/platforms/STM32F4xx"/>
 									<listOptionValue builtIn="false" value="../../Common_fw/os/hal/platforms/STM32"/>
 									<listOptionValue builtIn="false" value="../../Common_fw/os/ports/common/ARMCMx/CMSIS/include"/>
+									<listOptionValue builtIn="false" value="../usb"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.std.810702603" name="Language Standard" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.std" value="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.std.gnu99" valueType="enumerated"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.shortenums.1479849223" name="Short enumerations (-fshort-enums)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.shortenums" value="false" valueType="boolean"/>
@@ -84,10 +85,7 @@
 									<listOptionValue builtIn="false" value="../../Common_fw/os/hal/platforms/STM32F4xx"/>
 									<listOptionValue builtIn="false" value="../../Common_fw/os/hal/platforms/STM32"/>
 									<listOptionValue builtIn="false" value="../../Common_fw/os/ports/common/ARMCMx/CMSIS/include"/>
-									<listOptionValue builtIn="false" value="&quot;D:\Nute\Armlet\PriceOfHonor2\ArmletShell\ShellApi&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;D:\Nute\Armlet\PriceOfHonor2\ArmletShell\MiddleWareLib&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;D:\Nute\Armlet\PriceOfHonor2\ArmletShell\PriceOfHonor2&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;D:\Nute\Armlet\PriceOfHonor2\ArmletShell\3KShellLib&quot;"/>
+									<listOptionValue builtIn="false" value="../usb"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.packstruct.656188834" name="Pack structures (-fpack-struct)" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.packstruct" value="false" valueType="boolean"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.shortenums.1113447329" name="Short enumerations (-fshort-enums)" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.shortenums" value="false" valueType="boolean"/>

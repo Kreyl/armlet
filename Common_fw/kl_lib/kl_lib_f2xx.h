@@ -30,6 +30,8 @@
 #define FALSE 0
 #endif
 
+typedef void (*ftVoidVoid)(void);
+
 // Return values
 #define OK              0
 #define FAILURE         1

@@ -20,6 +20,7 @@
 #include "cmd_uart.h"
 #include "power.h"
 #include "pill.h"
+#include "usb_f2.h"
 
 #include "ff.h"
 
@@ -33,8 +34,8 @@ int main() {
     Clk.SetupFlashLatency(16);  // Setup Flash Latency for clock in MHz
     // 12 MHz/6 = 2; 2*192 = 384; 384/8 = 48 (preAHB divider); 384/8 = 48 (USB clock)
     Clk.SetupPLLDividers(6, 192, pllSysDiv8, 8);
-    // 48/4 = 12 MHz core clock. APB1 & APB2 clock derive on AHB clock
-    Clk.SetupBusDividers(ahbDiv4, apbDiv1, apbDiv1);
+    // 48/2 = 24 MHz core clock. APB1 & APB2 clock derive on AHB clock
+    Clk.SetupBusDividers(ahbDiv2, apbDiv1, apbDiv1);
     if((ClkResult = Clk.SwitchToPLL()) == 0) Clk.HSIDisable();
     Clk.UpdateFreqValues();
     Clk.LSIEnable();        // To allow RTC to run
@@ -53,33 +54,38 @@ int main() {
 //        chSchGoSleepS(THD_STATE_SUSPENDED); // Forever
 //        chSysUnlock();
         // Ctrl-Alt-Del
-        if(!PinIsSet(KEY_GPIO, 3) and !PinIsSet(KEY_GPIO, 4) and !PinIsSet(KEY_GPIO, 9)) {
-            REBOOT();
-        }
+//        if(!PinIsSet(KEY_GPIO, 3) and !PinIsSet(KEY_GPIO, 4) and !PinIsSet(KEY_GPIO, 9)) {
+//            REBOOT();
+//        }
     }
 }
 
 void Init() {
     Uart.Init(115200);
-    Uart.Printf("Armlet3\r");
-    SD.Init();
+    Uart.Printf("UsbDiscovery\r");
+//    SD.Init();
     // Read config
-    uint32_t ID=0;
-    iniReadUint32("Radio", "ID", "settings.ini", &ID);
-    Uart.Printf("ID=%u\r", ID);
+//    uint32_t ID=0;
+//    iniReadUint32("Radio", "ID", "settings.ini", &ID);
+//    Uart.Printf("ID=%u\r", ID);
 
-    Lcd.Init();
+//    Lcd.Init();
     //Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
 
-    Keys.Init();
-    Beeper.Init();
-    Vibro.Init();
+    Usb.Init();
+    Usb.Disconnect();
+    chThdSleepMilliseconds(450);
+    Usb.Connect();
+
+//    Keys.Init();
+//    Beeper.Init();
+//    Vibro.Init();
 //    IR.TxInit();
-    IR.RxInit();
-    Power.Init();
-    PillInit();
+//    IR.RxInit();
+//    Power.Init();
+//    PillInit();
 //    Sound.Init();
 //    Sound.Play("alive.wav");
-    rLevel1.Init(ID);
-    AppInit();
+//    rLevel1.Init(ID);
+//    AppInit();
 }
