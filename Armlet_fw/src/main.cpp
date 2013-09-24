@@ -73,7 +73,6 @@ void Init() {
     //Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
 
     Usb.Init();
-    Usb.Disconnect();
     chThdSleepMilliseconds(450);
     Usb.Connect();
 

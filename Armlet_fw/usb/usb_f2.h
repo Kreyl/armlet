@@ -84,10 +84,12 @@ private:
     };
     uint8_t Ep1OutBuf[EP0_SZ];
     void IReset();
+    void ISetAddress(uint8_t AAddr) { OTG_FS->DCFG = (OTG_FS->DCFG & ~DCFG_DAD_MASK) | DCFG_DAD(AAddr); }
     void IRamInit();
     void ICtrHandlerIN(uint16_t EpID);
     void ICtrHandlerOUT(uint16_t EpID, uint16_t Epr);
     void RxFifoFlush();
+    void TxFifoFlush();
     void SetupPktHandler();
     EpState_t DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen);
     void PrepareInTransaction(uint8_t *Ptr, uint32_t ALen);
@@ -104,7 +106,7 @@ public:
 //    inline void AssignEpOutQueue(uint8_t EpID, InputQueue *PQueue) { Ep[EpID].POutQueue = PQueue; }
     // Inner use
 
-//    void IIrqHandler();
+    void IIrqHandler();
 //    inline void IStartReception(uint8_t EpID) { Ep[EpID].StartOutTransaction(); }
 //    uint16_t IGetSetupAddr() { return SetupReq.wValue; }
     friend class Ep_t;

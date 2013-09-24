@@ -23,11 +23,16 @@
 #include "evt_mask.h"
 #include "kl_sd.h"
 #include "sound.h"
+
+#define ARMLET_BASE_EN  0
+
+#if ARMLET_BASE_EN   // Armlet base
 #include "ArmletApi.h"
 #include "Common.h"
 
 #include "kl_allocator.h"
 #include "ThreeKShell.h"
+#endif
 
 void LcdRedraw();
 
@@ -37,7 +42,9 @@ static rPktWithData_t<RRX_PKT_DATA_SZ> SRxPkt;
 
 // Lcd
 static uint16_t Framebuf[LCD_W*LCD_H];
+#if ARMLET_BASE_EN
 static uint8_t AppState[APP_STATE_LEN];
+#endif
 static bool LcdHasChanged;
 #define LCD_REDRAW_MS   99
 
@@ -66,7 +73,7 @@ public:
 static Lustra_t Lustra;
 #endif
 
-#if 1 // ========================== Application Timers =========================
+#if ARMLET_BASE_EN // ========================== Application Timers =========================
 #define TMR_CNT     11
 struct TmrData_t {
     ArmletApi::TIMER_PROC* Callback;
@@ -205,7 +212,7 @@ void Keylock_t::Unlock() {
 }
 #endif
 
-#if 1 // =========================== Key handler ===============================
+#if ARMLET_BASE_EN // =========================== Key handler ===============================
 static inline void KeysHandler() {
     Keylock.TimerReset();   // Reset timer as Any key pressed or released
     if(Keylock.Locked) {
@@ -241,12 +248,12 @@ static inline void KeysHandler() {
 }
 #endif
 
-#if 1 // ============================= Threads =================================
+#if ARMLET_BASE_EN // ============================= Threads =================================
 static WORKING_AREA(waAppThread, 10000);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
     chRegSetThreadName("App");
-    ArmletApi::InitializeShell();
+    //ArmletApi::InitializeShell();
     // Events
     uint32_t EvtMsk;
     Keys.RegisterEvt(&EvtListenerKeys, EVTMASK_KEYS);
@@ -269,7 +276,7 @@ static void AppThread(void *arg) {
                 if(Pill[0].Connected) {
                     Uart.Printf("Pill connected\r");
                     Pill[0].Read((uint8_t*)&Med, sizeof(Med_t));
-                    ArmletApi::OnPillConnect(Med.CureID, Med.Charges);
+                    //ArmletApi::OnPillConnect(Med.CureID, Med.Charges);
                 }
             }
             // Print gate info
@@ -282,7 +289,7 @@ static void AppThread(void *arg) {
             while(rLevel1.GetReceivedPkt(&SRxPkt) == OK) {
                 Uart.Printf("Rx: %A\r", SRxPkt.Data, SRxPkt.Length, ' ');
                 rLevel1.AddPktToTx(0, SRxPkt.Data, SRxPkt.Length);
-                ArmletApi::OnRadioPacket(SRxPkt.Data, SRxPkt.Length);
+             //   ArmletApi::OnRadioPacket(SRxPkt.Data, SRxPkt.Length);
             }
         } // if evtmsk
 
@@ -339,7 +346,7 @@ void UartCmdCallback(uint8_t CmdCode, uint8_t *PData, uint32_t Length) {
 }
 #endif
 
-#if 1 // ============================ App class ================================
+#if ARMLET_BASE_EN // ============================ App class ================================
 void AppInit() {
     chEvtInit(&IEvtSrcTmr);
     chThdCreateStatic(waLcdThread, sizeof(waLcdThread), LOWPRIO, (tfunc_t)LcdThread, NULL);
@@ -355,12 +362,12 @@ void AppInit() {
 // Fill radiopkt with current data
 void RFillPkt(uint8_t *Ptr, uint8_t *PLen) {
     *Ptr++ = Lustra.IDForRadio;
-    memcpy(Ptr, AppState, APP_STATE_LEN);
-    *PLen = APP_STATE_LEN+1;    // state len and lustra
+//    memcpy(Ptr, AppState, APP_STATE_LEN);
+//    *PLen = APP_STATE_LEN+1;    // state len and lustra
 }
 #endif
 
-#if 1 // =============================== API ===================================
+#if ARMLET_BASE_EN // =============================== API ===================================
 #if 0 // Dummy
 bool ArmletApi::InitializeShell() { return false; }
 void ArmletApi::OnButtonPress(int button_id) { }
@@ -390,7 +397,7 @@ int ArmletApi::snprintf(char* buf, int bufSz, char* fmt,...) {
 
 unsigned char ArmletApi::GetBatteryLevel() { return Power.RemainingPercent; }
 
-#if 1 // ==== Display ====
+#if ARMLET_BASE_EN // ==== Display ====
 void LcdRedraw() {
     if(!Keylock.Locked) {
         Lcd.PutBitmap(0, 0, LCD_W, LCD_H, Framebuf);
@@ -448,7 +455,7 @@ void ArmletApi::GetRadioStatus(int* gate_id, int* signal_level) {
 unsigned int ArmletApi::GetRandom(unsigned int max) { return Random(max); }
 #endif
 
-#if 1 // =========================== File operations ===========================
+#if ARMLET_BASE_EN // ==================== File operations =====================
 // return false in case of failure, true in case of success
 // Try to open. In case of failure, create new file if bCreate is true, otherwise return error.
 bool ArmletApi::OpenFile(FILE* file, const char* filename, bool bCreate) {
