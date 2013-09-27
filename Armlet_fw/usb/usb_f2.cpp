@@ -122,10 +122,10 @@ CH_IRQ_HANDLER(STM32_OTG1_HANDLER) {
 } // extern C
 
 void Usb_t::IIrqHandler() {
-    uint32_t sts, src;
+    uint32_t irqs, src;
     // Get irq flag
-    sts = OTG_FS->GINTSTS & OTG_FS->GINTMSK;
-    OTG_FS->GINTSTS = sts;
+    irqs = OTG_FS->GINTSTS & OTG_FS->GINTMSK;
+    OTG_FS->GINTSTS = irqs;
     Uart.Printf("Irq: %X %u\r\n", sts, chTimeNow());
 
 //    Uart.Printf("i=%X\r", istr);
