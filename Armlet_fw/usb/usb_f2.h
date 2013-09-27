@@ -83,7 +83,9 @@ private:
         UsbSetupReq_t SetupReq;
     };
     uint8_t Ep1OutBuf[EP0_SZ];
-    void IReset();
+    // Initialization
+    void IDeviceReset();
+    void IEndpointsDisable();
     void ISetAddress(uint8_t AAddr) { OTG_FS->DCFG = (OTG_FS->DCFG & ~DCFG_DAD_MASK) | DCFG_DAD(AAddr); }
     void IRamInit();
     void ICtrHandlerIN(uint16_t EpID);
@@ -142,6 +144,9 @@ extern Usb_t Usb;
 
 #if 1 // ============================ stm32f2 related ==========================
 #define EP_TYPE_CONTROL
+
+
+
 #endif
 
 #endif /* KL_USB_F2_H_ */

@@ -9,6 +9,13 @@
 
 #define TRDT        3   // AHB clock = 24, => TRDT = 4 * (24/48) +1
 
+// Ep0 size bits
+#if (EP0_SZ == 8)
+#define EP0_SZ_BITS ((uint32_t)0b11)
+#elif (EP0_SZ == 64)
+#define EP0_SZ_BITS ((uint32_t)0b00)
+#endif
+
 Usb_t Usb;
 
 void Usb_t::Init() {
@@ -19,25 +26,16 @@ void Usb_t::Init() {
     // OTG FS clock enable and reset
     rccEnableOTG_FS(FALSE);
     rccResetOTG_FS();
+
     // Enable IRQ
     nvicEnableVector(STM32_OTG1_NUMBER, CORTEX_PRIORITY_MASK(IRQ_PRIO_LOW));
-    OTG_FS->GCCFG = GCCFG_PWRDWN /*| GCCFG_NOVBUSSENS*/;    // Power on
-    IReset();
-}
 
-void Usb_t::Shutdown() {
-    OTG_FS->PCGCCTL |= PCGCCTL_STPPCLK | PCGCCTL_GATEHCLK; // Stop PHY clock, gate HCLK
-}
-
-void Usb_t::IReset() {
-    Uart.Printf("Rst\r");
-    State = usConnected;
     // ==== OTG init ====
-    OTG_FS->GAHBCFG &= ~(GAHBCFG_GINTMSK | GAHBCFG_TXFELVL);    // Disable interrupts, interrupts on TXFIFOs half empty
     // Forced device mode, USB turn-around time = TRDT_VALUE, Full Speed 1.1 PHY, 0 tuning
     OTG_FS->GUSBCFG = GUSBCFG_FDMOD | GUSBCFG_TRDT(TRDT) | GUSBCFG_PHYSEL | 0;
-    OTG_FS->DCFG = 0x02200000 | DCFG_DSPD_FS11; // Full-speed (other options are not available, though), NZLSOHSK=0 => send rcvd pkt to app
+    OTG_FS->DCFG = 0x02200000 | DCFG_DSPD_FS11; // Full-speed (other options are not available, though)
     OTG_FS->PCGCCTL = 0;    // Nothing is stopped or gated
+    OTG_FS->GCCFG = GCCFG_PWRDWN /*| GCCFG_NOVBUSSENS*/;    // Power on
 
     // Core reset and delay of at least 3 PHY cycles
     OTG_FS->GRSTCTL = GRSTCTL_CSRST;
@@ -49,20 +47,49 @@ void Usb_t::IReset() {
     __NOP();
     __NOP();
 
-    ISetAddress(0); // Reset device address to zero
-
+    OTG_FS->GAHBCFG &= ~(GAHBCFG_GINTMSK | GAHBCFG_TXFELVL);    // Disable interrupts, interrupts on TXFIFOs half empty
+    IEndpointsDisable();
     // Disable all Device Interrupts, only the USB Reset interrupt is required initially
     OTG_FS->DIEPMSK  = 0;
     OTG_FS->DOEPMSK  = 0;
     OTG_FS->DAINTMSK = 0;
-    // GINTMSK_OTGM - really needed??
-    OTG_FS->GINTMSK  = GINTMSK_ENUMDNEM | GINTMSK_USBRSTM | GINTMSK_OTGM /*| GINTMSK_USBSUSPM | GINTMSK_ESUSPM  |*/;
+    OTG_FS->GINTMSK  = GINTMSK_ENUMDNEM | GINTMSK_USBRSTM /*| GINTMSK_USBSUSPM | GINTMSK_ESUSPM  |*/;
     OTG_FS->GINTSTS  = 0xFFFFFFFF;      // Clear all pending IRQs, if any
-    IRamInit();
     OTG_FS->GAHBCFG |= GAHBCFG_GINTMSK; // Global interrupts enable
+}
 
-    for(uint8_t i=0; i<EP_CNT; i++) Ep[i].Init(&EpCfg[i]);
-    Ep[0].State = esSetup;
+void Usb_t::Shutdown() {
+    OTG_FS->PCGCCTL |= PCGCCTL_STPPCLK | PCGCCTL_GATEHCLK; // Stop PHY clock, gate HCLK
+}
+
+void Usb_t::IDeviceReset() {
+    Uart.Printf("Rst\r");
+    State = usConnected;
+    TxFifoFlush(); // TX FIFO flush
+    // Force all EPs in NAK mode and clear irqs
+    for (uint8_t i = 0; i <= EP_CNT; i++) {
+        OTG_FS->ie[i].DIEPCTL = DIEPCTL_SNAK;
+        OTG_FS->oe[i].DOEPCTL = DOEPCTL_SNAK;
+        OTG_FS->ie[i].DIEPINT = 0xFF;
+        OTG_FS->oe[i].DOEPINT = 0xFF;
+    }
+    // Disable and clear all EPs irqs
+    OTG_FS->DAINT = 0xFFFFFFFF;
+    OTG_FS->DAINTMSK = DAINTMSK_OEPM(0) | DAINTMSK_IEPM(0);
+
+    IRamInit();     // Setup RAM
+    ISetAddress(0); // Reset device address to zero
+
+    // Enable EP irqs
+    OTG_FS->GINTMSK  |= GINTMSK_RXFLVLM | GINTMSK_OEPM  | GINTMSK_IEPM;
+    OTG_FS->DIEPMSK   = DIEPMSK_TOCM    | DIEPMSK_XFRCM;
+    OTG_FS->DOEPMSK   = DOEPMSK_STUPM   | DOEPMSK_XFRCM;
+
+    // Init EP0
+    OTG_FS->oe[0].DOEPTSIZ = 0;
+    OTG_FS->oe[0].DOEPCTL = DOEPCTL_USBAEP | DOEPCTL_EPTYP_CTRL | EP0_SZ_BITS;
+    OTG_FS->ie[0].DIEPTSIZ = 0;
+    OTG_FS->ie[0].DIEPCTL = DIEPCTL_USBAEP | DIEPCTL_EPTYP_CTRL | DIEPCTL_TXFNUM(0) | EP0_SZ_BITS;
 }
 
 void Usb_t::IRamInit() {
@@ -112,6 +139,28 @@ void Usb_t::TxFifoFlush() {
 //    OTG_FS->DCTL |= DCTL_CGINAK;
 }
 
+void Usb_t::IEndpointsDisable() {
+    for(uint8_t i=0; i<EP_CNT; i++) {
+        // IN: Disable only if enabled
+        if((OTG_FS->ie[i].DIEPCTL & DIEPCTL_EPENA) != 0) {
+            OTG_FS->ie[i].DIEPCTL = DIEPCTL_EPDIS;
+            while(!(OTG_FS->ie[i].DIEPINT & DIEPINT_EPDISD)); // Wait for endpoint disable
+        }
+        else OTG_FS->ie[i].DIEPCTL = 0;
+        OTG_FS->ie[i].DIEPTSIZ = 0;
+        OTG_FS->ie[i].DIEPINT = 0xFFFFFFFF;
+        // OUT: Disable only if enabled
+        if((OTG_FS->oe[i].DOEPCTL & DOEPCTL_EPENA) != 0) {
+            OTG_FS->oe[i].DOEPCTL = DOEPCTL_EPDIS;
+            while(!(OTG_FS->oe[i].DOEPINT & DOEPINT_OTEPDIS)); // Wait for endpoint disable
+        }
+        else OTG_FS->oe[i].DOEPCTL = 0;
+        OTG_FS->oe[i].DOEPTSIZ = 0;
+        OTG_FS->oe[i].DOEPINT = 0xFFFFFFFF;
+    } // for
+    OTG_FS->DAINTMSK = DAINTMSK_OEPM(0) | DAINTMSK_IEPM(0);
+}
+
 #if 1 // =============================== IRQ ===================================
 extern "C" {
 CH_IRQ_HANDLER(STM32_OTG1_HANDLER) {
@@ -122,27 +171,27 @@ CH_IRQ_HANDLER(STM32_OTG1_HANDLER) {
 } // extern C
 
 void Usb_t::IIrqHandler() {
-    uint32_t irqs, src;
+    uint32_t irqs;
     // Get irq flag
     irqs = OTG_FS->GINTSTS & OTG_FS->GINTMSK;
     OTG_FS->GINTSTS = irqs;
-    Uart.Printf("Irq: %X %u\r\n", sts, chTimeNow());
+    Uart.Printf("Irq: %X\r", irqs);
 
-//    Uart.Printf("i=%X\r", istr);
-//    if(istr & ISTR_RESET) {
-//        Uart.Printf("Rst\r");
-//        IReset();
-//        STM32_USB->ISTR = ~ISTR_RESET;
-//    }
-//    while(istr & ISTR_CTR) {
-////        Uart.Printf("Ctr\r");
+    if(irqs & GINTSTS_USBRST) {
+        IDeviceReset();
+    }
+    if(irqs & GINTSTS_ENUMDNE) {
+        (void)OTG_FS->DSTS;     // FIXME: really needed?
+    }
+
+//    while(irqs & ISTR_CTR) {
+//        Uart.Printf("Ctr\r");
 //        uint16_t EpID = istr & ISTR_EP_ID_MASK;
 //        uint16_t epr = STM32_USB->EPR[EpID];
 //        if(epr & EPR_CTR_TX) ICtrHandlerIN(EpID);
 //        if(epr & EPR_CTR_RX) ICtrHandlerOUT(EpID, epr);
 //        istr = STM32_USB->ISTR;
 //    }
-//    STM32_USB->ISTR = 0;
 }
 
 #endif
