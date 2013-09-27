@@ -31,24 +31,24 @@ private:
 public:
     EpState_t State;
     Thread *PThread;
-//    uint8_t *Ptr1In, *Ptr2In;       // }
-//    uint32_t Length1In, Length2In;  // } To allow two-buffer transmission
-//    bool TransmitFinalZeroPkt;
+    uint8_t *PtrIn;
+    uint32_t LengthIn;
+    bool TransmitFinalZeroPkt;
 //    InputQueue *POutQueue;
     void Init(const EpCfg_t *PCfg);
-//    void StallIn()  { EPR_SET_STAT_TX(Indx, EPR_STAT_TX_STALL); }
-//    void StallOut() { EPR_SET_STAT_RX(Indx, EPR_STAT_RX_STALL); }
-//    void FillInBuf();
-//    inline void StartInTransaction()  { EPR_SET_STAT_TX(Indx, EPR_STAT_TX_VALID); }
-//    inline void StartOutTransaction() { EPR_SET_STAT_RX(Indx, EPR_STAT_RX_VALID); }
-//    void TransmitDataChunk() { FillInBuf(); StartInTransaction(); }
-//    void TransmitZeroPkt();
+    void StallIn()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_STALL; }
+    void StallOut() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_STALL; }
+    void FillInBuf();
+    inline void StartInTransaction()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_EPENA | DIEPCTL_CNAK; }
+    inline void StartOutTransaction() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_CNAK; }
+    void TransmitDataChunk() { FillInBuf(); StartInTransaction(); }
+    void TransmitZeroPkt();
 //    void ReceiveZeroPkt();
-//    void ReadToBuf(uint8_t *PDstBuf, uint16_t Len);
+    void ReadToBuf(uint8_t *PDstBuf, uint16_t Len);
 //    void ReadToQueue(uint16_t Len);
 //    uint16_t GetRxDataLength();
 //    void FlushRx(uint16_t Len);
-//    ftVoidVoid cbEndTransaction;
+    ftVoidVoid cbEndTransaction;
     void ResumeWaitingThd(msg_t ReadyMsg);
 };
 #endif
@@ -83,10 +83,11 @@ private:
         UsbSetupReq_t SetupReq;
     };
     uint8_t Ep1OutBuf[EP0_SZ];
+    // Rx thread
+    Thread *PRxThd;
     // Initialization
     void IDeviceReset();
     void IEndpointsDisable();
-    void ISetAddress(uint8_t AAddr) { OTG_FS->DCFG = (OTG_FS->DCFG & ~DCFG_DAD_MASK) | DCFG_DAD(AAddr); }
     void IRamInit();
     void ICtrHandlerIN(uint16_t EpID);
     void ICtrHandlerOUT(uint16_t EpID, uint16_t Epr);
@@ -107,8 +108,10 @@ public:
 //    uint8_t WaitTransactionEnd(uint8_t EpID);
 //    inline void AssignEpOutQueue(uint8_t EpID, InputQueue *PQueue) { Ep[EpID].POutQueue = PQueue; }
     // Inner use
-
     void IIrqHandler();
+    void IRxHandler();
+    uint16_t IGetSetupAddr() { return SetupReq.wValue; }
+    void ISetAddress(uint8_t AAddr) { OTG_FS->DCFG = (OTG_FS->DCFG & ~DCFG_DAD_MASK) | DCFG_DAD(AAddr); }
 //    inline void IStartReception(uint8_t EpID) { Ep[EpID].StartOutTransaction(); }
 //    uint16_t IGetSetupAddr() { return SetupReq.wValue; }
     friend class Ep_t;
