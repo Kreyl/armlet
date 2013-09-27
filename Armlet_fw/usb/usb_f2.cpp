@@ -33,7 +33,7 @@ void Usb_t::IReset() {
     Uart.Printf("Rst\r");
     State = usConnected;
     // ==== OTG init ====
-    OTG_FS->GAHBCFG &= ~(GAHBCFG_GINTMSK | GAHBCFG_TXFELVL);    // Mask interrupts, interrupts on TXFIFOs half empty
+    OTG_FS->GAHBCFG &= ~(GAHBCFG_GINTMSK | GAHBCFG_TXFELVL);    // Disable interrupts, interrupts on TXFIFOs half empty
     // Forced device mode, USB turn-around time = TRDT_VALUE, Full Speed 1.1 PHY, 0 tuning
     OTG_FS->GUSBCFG = GUSBCFG_FDMOD | GUSBCFG_TRDT(TRDT) | GUSBCFG_PHYSEL | 0;
     OTG_FS->DCFG = 0x02200000 | DCFG_DSPD_FS11; // Full-speed (other options are not available, though), NZLSOHSK=0 => send rcvd pkt to app
@@ -58,9 +58,8 @@ void Usb_t::IReset() {
     // GINTMSK_OTGM - really needed??
     OTG_FS->GINTMSK  = GINTMSK_ENUMDNEM | GINTMSK_USBRSTM | GINTMSK_OTGM /*| GINTMSK_USBSUSPM | GINTMSK_ESUSPM  |*/;
     OTG_FS->GINTSTS  = 0xFFFFFFFF;      // Clear all pending IRQs, if any
-    OTG_FS->GAHBCFG |= GAHBCFG_GINTMSK; // Global interrupts enable
-
     IRamInit();
+    OTG_FS->GAHBCFG |= GAHBCFG_GINTMSK; // Global interrupts enable
 
     for(uint8_t i=0; i<EP_CNT; i++) Ep[i].Init(&EpCfg[i]);
     Ep[0].State = esSetup;
@@ -72,9 +71,8 @@ void Usb_t::IRamInit() {
     tmp &= 0xFFFF0000;  // Clear lower bits, save upper ones
     tmp |= USB_RX_SZ_WORDS;
     OTG_FS->GRXFSIZ = tmp;
-    RxFifoFlush();
     // ==== TX FIFO ====
-    uint32_t TxAddr = USB_RX_SZ_WORDS;
+    uint32_t TxAddr = USB_RX_SZ_WORDS;  // FIXME: Really words, not bytes?
     uint32_t RamSz;
     // Ep0 TX
     RamSz = ((EP0_SZ / 4) < 16)? 16 : (EP0_SZ / 4); // Min size is 16 words
@@ -82,7 +80,7 @@ void Usb_t::IRamInit() {
     TxAddr += RamSz;
     // Other endpoints
     for(uint8_t i=1; i<EP_CNT; i++) {
-        if(EpCfg[i].InMaxsize != 0) {
+        if(EpCfg[i].InMaxsize != 0) {   // Configure RAM for only IN eps
             RamSz = ((EpCfg[i].InMaxsize / 4) < 16)? 16 : (EpCfg[i].InMaxsize / 4); // Min size is 16 words
             OTG_FS->DIEPTXF[i-1] = (uint32_t)((RamSz << 16) | TxAddr);
             TxAddr += RamSz;
