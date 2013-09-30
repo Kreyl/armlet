@@ -38,10 +38,20 @@ public:
     void Init(const EpCfg_t *PCfg);
     void StallIn()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_STALL; }
     void StallOut() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_STALL; }
+    inline bool FifoEmtyIRQEnabled()    { return (OTG_FS->DIEPEMPMSK & (1 << Indx)); }
+    inline void EnableInFifoEmptyIRQ()  { OTG_FS->DIEPEMPMSK |=  (1 << Indx); }
+    inline void DisableInFifoEmptyIRQ() { OTG_FS->DIEPEMPMSK &= ~(1 << Indx); }
     void FillInBuf();
-    inline void StartInTransaction()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_EPENA | DIEPCTL_CNAK; }
+    inline void PrepareInTransaction() {
+        //uint32_t pcnt = (LengthIn + EpCfg[Indx].InMaxsize - 1) / EpCfg[Indx].InMaxsize;
+        OTG_FS->ie[Indx].DIEPTSIZ = DIEPTSIZ_PKTCNT(1/*pcnt*/) | LengthIn;
+    }
+    inline void StartInTransaction()  {
+        OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_EPENA | DIEPCTL_CNAK;   // Enable Ep and clear NAK
+        EnableInFifoEmptyIRQ();
+    }
     inline void StartOutTransaction() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_CNAK; }
-    void TransmitDataChunk() { FillInBuf(); StartInTransaction(); }
+    //void TransmitDataChunk() { FillInBuf(); StartInTransaction(); }
     void TransmitZeroPkt();
 //    void ReceiveZeroPkt();
     void ReadToBuf(uint8_t *PDstBuf, uint16_t Len);
@@ -68,7 +78,7 @@ struct UsbSetupReq_t {
 } __attribute__ ((__packed__));
 
 #if 1 // ============================ Usb_t ====================================
-#define USB_RX_SZ_WORDS     256 // => Sz_in_bytes = 256*4 = 1024; 256 is maximum
+#define USB_RX_SZ_WORDS     128//256 // => Sz_in_bytes = 256*4 = 1024; 256 is maximum
 #define USB_TX_SZ
 
 
@@ -91,6 +101,8 @@ private:
     void IRamInit();
     void ICtrHandlerIN(uint16_t EpID);
     void ICtrHandlerOUT(uint16_t EpID, uint16_t Epr);
+    void IEpOutHandler(uint8_t EpID);
+    void IEpInHandler(uint8_t EpID);
     void RxFifoFlush();
     void TxFifoFlush();
     void SetupPktHandler();
