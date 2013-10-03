@@ -211,7 +211,7 @@
 #define STM32_HAS_DMA2          TRUE
 
 /* ETH attributes.*/
-#define STM32_HAS_ETH           TRUE
+#define STM32_HAS_ETH           FALSE
 
 /* EXTI attributes.*/
 #define STM32_EXTI_NUM_CHANNELS 23
@@ -511,7 +511,7 @@
 /**
  * @brief   Type of the realtime free counter value.
  */
-//@KL typedef uint32_t halrtcnt_t;
+typedef uint32_t halrtcnt_t;
 
 /*===========================================================================*/
 /* Driver macros.                                                            */

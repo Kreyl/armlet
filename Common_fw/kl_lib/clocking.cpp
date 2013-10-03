@@ -144,7 +144,12 @@ uint8_t Clk_t::SwitchToPLL() {
 // Disable PLL first!
 // InputDiv_M: 2...63;  Multi_N:  2...432;
 // SysDiv_P: sd2,4,6,8; UsbDiv_Q: 2...15.
-uint8_t Clk_t::SetupPLLDividers(uint8_t InputDiv_M, uint16_t Multi_N, PllSysDiv_P_t SysDiv_P, uint8_t UsbDiv_Q) {
+uint8_t Clk_t::SetupPLLDividers(
+        uint8_t InputDiv_M,
+        uint16_t Multi_N,
+        PllSysDiv_P_t SysDiv_P,
+        uint8_t UsbDiv_Q
+        ) {
     if(RCC->CR & RCC_CR_PLLON) return 1;    // PLL must be disabled to change dividers
     RCC->PLLCFGR =
             RCC_PLLCFGR_PLLSRC_HSE |        // Use only HSE as src

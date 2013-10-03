@@ -36,12 +36,12 @@
 
 void LcdRedraw();
 
-static EventListener EvtLstnrRadioRx, EvtListenerKeys, EvtListenerIR, EvtListenerTmr;
-static EventSource IEvtSrcTmr;
-static rPktWithData_t<RRX_PKT_DATA_SZ> SRxPkt;
+//static EventListener EvtLstnrRadioRx, EvtListenerKeys, EvtListenerIR, EvtListenerTmr;
+//static EventSource IEvtSrcTmr;
+//static rPktWithData_t<RRX_PKT_DATA_SZ> SRxPkt;
 
 // Lcd
-static uint16_t Framebuf[LCD_W*LCD_H];
+//static uint16_t Framebuf[LCD_W*LCD_H];
 #if ARMLET_BASE_EN
 static uint8_t AppState[APP_STATE_LEN];
 #endif
@@ -169,7 +169,7 @@ void TimeTmrCallback(void *p) {
 struct Med_t {
     int CureID, Charges;
 } __attribute__ ((__packed__));
-static Med_t Med;
+//static Med_t Med;
 #endif
 
 #if 1 // ========================== Keys lock / unlock =========================
@@ -188,7 +188,7 @@ public:
     void Lock();
     void Unlock();
 };
-static Keylock_t Keylock;
+//static Keylock_t Keylock;
 
 // Timer callback
 void KeylockTmrCallback(void *p) {

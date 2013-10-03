@@ -21,13 +21,6 @@ enum EpState_t {esIdle, esSetup, esDataIn, esDataOut, esStatusIn, esStatusOut, e
 class Ep_t {
 private:
     uint8_t Indx;
-    void Enable() {}
-    void Disable() {}
-    void SetType(uint16_t AType) {}
-    void NakOutSet()   {}
-    void NakInSet()    {}
-    void NakOutClear() {}
-    void NakInClear()  {}
 public:
     EpState_t State;
     Thread *PThread;
@@ -43,8 +36,8 @@ public:
     inline void DisableInFifoEmptyIRQ() { OTG_FS->DIEPEMPMSK &= ~(1 << Indx); }
     void FillInBuf();
     inline void PrepareInTransaction() {
-        //uint32_t pcnt = (LengthIn + EpCfg[Indx].InMaxsize - 1) / EpCfg[Indx].InMaxsize;
-        OTG_FS->ie[Indx].DIEPTSIZ = DIEPTSIZ_PKTCNT(1/*pcnt*/) | LengthIn;
+        uint32_t pcnt = (LengthIn + EpCfg[Indx].InMaxsize - 1) / EpCfg[Indx].InMaxsize;
+        OTG_FS->ie[Indx].DIEPTSIZ = DIEPTSIZ_PKTCNT(pcnt) | LengthIn;
     }
     inline void StartInTransaction()  {
         OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_EPENA | DIEPCTL_CNAK;   // Enable Ep and clear NAK
@@ -53,7 +46,7 @@ public:
     inline void StartOutTransaction() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_CNAK; }
     //void TransmitDataChunk() { FillInBuf(); StartInTransaction(); }
     void TransmitZeroPkt();
-//    void ReceiveZeroPkt();
+    void ReceivePkt();
     void ReadToBuf(uint8_t *PDstBuf, uint16_t Len);
 //    void ReadToQueue(uint16_t Len);
 //    uint16_t GetRxDataLength();
@@ -79,7 +72,7 @@ struct UsbSetupReq_t {
 
 #if 1 // ============================ Usb_t ====================================
 #define USB_RX_SZ_WORDS     128//256 // => Sz_in_bytes = 256*4 = 1024; 256 is maximum
-#define USB_TX_SZ
+//#define USB_TX_SZ
 
 
 enum UsbState_t {usDisconnected, usConnected, usConfigured};
@@ -93,8 +86,6 @@ private:
         UsbSetupReq_t SetupReq;
     };
     uint8_t Ep1OutBuf[EP0_SZ];
-    // Rx thread
-    Thread *PRxThd;
     // Initialization
     void IDeviceReset();
     void IEndpointsDisable();
@@ -111,7 +102,7 @@ private:
 public:
     UsbState_t State;
     void Init();
-    void Connect()    { OTG_FS->GCCFG |=  GCCFG_VBUSBSEN; }
+    void Connect()    { OTG_FS->GCCFG |=  GCCFG_VBUSBSEN | GCCFG_NOVBUSSENS; }
     void Disconnect() { OTG_FS->GCCFG &= ~GCCFG_VBUSBSEN; }
     void Shutdown();
     // Data operations

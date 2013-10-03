@@ -21,24 +21,32 @@
 #include "power.h"
 #include "pill.h"
 #include "usb_f2.h"
-
 #include "ff.h"
 
 #include "application.h"
+
+//#include "usbd_cdc_core.h"
+//#include "usbd_core.h"
+//#include "usbd_usr.h"
+//#include "usb_conf.h"
+//#include "usbd_desc.h"
+
+
+//USB_OTG_CORE_HANDLE     USB_OTG_dev;
 
 static inline void Init();
 
 int main() {
     // ==== Setup clock ====
     uint8_t ClkResult = 1;
-    Clk.SetupFlashLatency(16);  // Setup Flash Latency for clock in MHz
+    Clk.SetupFlashLatency(48);  // Setup Flash Latency for clock in MHz
     // 12 MHz/6 = 2; 2*192 = 384; 384/8 = 48 (preAHB divider); 384/8 = 48 (USB clock)
     Clk.SetupPLLDividers(6, 192, pllSysDiv8, 8);
     // 48/2 = 24 MHz core clock. APB1 & APB2 clock derive on AHB clock
-    Clk.SetupBusDividers(ahbDiv2, apbDiv1, apbDiv1);
+    Clk.SetupBusDividers(ahbDiv1, apbDiv2, apbDiv2);
     if((ClkResult = Clk.SwitchToPLL()) == 0) Clk.HSIDisable();
     Clk.UpdateFreqValues();
-    Clk.LSIEnable();        // To allow RTC to run
+//    Clk.LSIEnable();        // To allow RTC to run
 
     // ==== Init OS ====
     halInit();
@@ -47,6 +55,17 @@ int main() {
     Init();
     // Report problem with clock if any
     if(ClkResult) Uart.Printf("Clock failure\r");
+
+//    PinSetupAlterFunc(GPIOA, 11, omOpenDrain, pudNone, AF10);
+//    PinSetupAlterFunc(GPIOA, 12, omOpenDrain, pudNone, AF10);
+//    PinSetupIn(GPIOA, 9, pudPullDown);
+//    // OTG FS clock enable and reset
+//    rccEnableOTG_FS(FALSE);
+//    rccResetOTG_FS();
+//
+//
+//    USBD_Init(&USB_OTG_dev, USB_OTG_FS_CORE_ID, &USR_desc, &USBD_CDC_cb, &USR_cb);
+
 
     while(TRUE) {
         chThdSleepMilliseconds(999);
@@ -62,7 +81,8 @@ int main() {
 
 void Init() {
     Uart.Init(115200);
-    Uart.Printf("UsbDiscovery\r");
+    Uart.Printf("UsbDiscovery Sys=%u usb=%u\r", Clk.AHBFreqHz, Clk.UsbSdioFreqHz);
+
 //    SD.Init();
     // Read config
 //    uint32_t ID=0;
@@ -71,7 +91,7 @@ void Init() {
 
 //    Lcd.Init();
     //Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
-
+//
     Usb.Init();
     chThdSleepMilliseconds(450);
     Usb.Connect();

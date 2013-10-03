@@ -298,7 +298,7 @@ void Vector13C(void) __attribute__((weak, alias("_unhandled_exception")));
 void Vector140(void) __attribute__((weak, alias("_unhandled_exception")));
 void Vector144(void) __attribute__((weak, alias("_unhandled_exception")));
 void Vector148(void) __attribute__((weak, alias("_unhandled_exception")));
-void Vector14C(void) __attribute__((weak, alias("_unhandled_exception")));
+//void Vector14C(void) __attribute__((weak, alias("_unhandled_exception")));    // USB OTG
 void Vector150(void) __attribute__((weak, alias("_unhandled_exception")));
 void Vector154(void) __attribute__((weak, alias("_unhandled_exception")));
 void Vector158(void) __attribute__((weak, alias("_unhandled_exception")));
