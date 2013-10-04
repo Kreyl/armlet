@@ -44,6 +44,7 @@ int main() {
     Clk.SetupPLLDividers(6, 192, pllSysDiv8, 8);
     // 48/2 = 24 MHz core clock. APB1 & APB2 clock derive on AHB clock
     Clk.SetupBusDividers(ahbDiv1, apbDiv2, apbDiv2);
+    //Clk.SetupBusDividers(ahbDiv2, apbDiv1, apbDiv1);
     if((ClkResult = Clk.SwitchToPLL()) == 0) Clk.HSIDisable();
     Clk.UpdateFreqValues();
 //    Clk.LSIEnable();        // To allow RTC to run

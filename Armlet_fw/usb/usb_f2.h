@@ -55,7 +55,6 @@ public:
 //    void ReadToQueue(uint16_t Len);
 //    uint16_t GetRxDataLength();
 //    void FlushRx(uint16_t Len);
-    ftVoidVoid cbEndTransaction;
     void ResumeWaitingThd(msg_t ReadyMsg);
 };
 #endif

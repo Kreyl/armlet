@@ -7,7 +7,7 @@
 
 #include "usb_f2.h"
 
-#define TRDT        3   // AHB clock = 24, => TRDT = 4 * (24/48) +1
+#define TRDT        0xF  // AHB clock = 24, => TRDT = 4 * (24/48) +1
 
 // Ep0 size bits
 #if (EP0_SZ == 8)
@@ -47,6 +47,7 @@ void Usb_t::Init() {
     // ==== OTG init ====
     // Forced device mode, USB turn-around time = TRDT_VALUE, Full Speed 1.1 PHY, 0 tuning
     OTG_FS->GUSBCFG = GUSBCFG_FDMOD | GUSBCFG_TRDT(TRDT) | GUSBCFG_PHYSEL | 0;
+    chThdSleepMilliseconds(27);
     OTG_FS->DCFG = 0x02200000 | DCFG_DSPD_FS11; // Full-speed (other options are not available, though)
     OTG_FS->PCGCCTL = 0;    // Nothing is stopped or gated
     OTG_FS->GCCFG = GCCFG_PWRDWN /*| GCCFG_NOVBUSSENS*/;    // Power on
@@ -55,12 +56,10 @@ void Usb_t::Init() {
     // Core reset and delay of at least 3 PHY cycles
     OTG_FS->GRSTCTL = GRSTCTL_CSRST;
     while((OTG_FS->GRSTCTL & GRSTCTL_CSRST) != 0);
-    __NOP();
-    __NOP();
+    chThdSleepMilliseconds(1);
     // Wait AHB idle condition
     while((OTG_FS->GRSTCTL & GRSTCTL_AHBIDL) == 0);
-    __NOP();
-    __NOP();
+    chThdSleepMilliseconds(1);
 
     OTG_FS->GAHBCFG &= ~(GAHBCFG_GINTMSK | GAHBCFG_TXFELVL);    // Disable interrupts, interrupts on TXFIFOs half empty
     IEndpointsDisable();
@@ -79,7 +78,7 @@ void Usb_t::Shutdown() {
 }
 
 void Usb_t::IDeviceReset() {
-    Uart.Printf("Rst\r");
+//    Uart.Printf("Rst\r");
     State = usConnected;
     TxFifoFlush(); // TX FIFO flush
     // Force all EPs in NAK mode and clear irqs
@@ -174,44 +173,12 @@ void Usb_t::IEndpointsDisable() {
     OTG_FS->DAINTMSK = DAINTMSK_OEPM(0) | DAINTMSK_IEPM(0);
 }
 
-// Only receives data, does not process it
-void Usb_t::IRxHandler() {
-    uint32_t sts, cnt, EpID;
-//    Ep_t *PEp;
-    sts = OTG_FS->GRXSTSP;
-//    Uart.Printf("Rx sts=%X\r", sts);
-    Uart.Printf("Rx%u Pkt sts: %X; Len: %u\r", sts&0xF, (sts>>17)&0xF, (sts>>4)&0x7FF);
-    switch (sts & GRXSTSP_PKTSTS_MASK) {
-        case GRXSTSP_SETUP_DATA:
-//            cnt = (sts & GRXSTSP_BCNT_MASK) >> GRXSTSP_BCNT_OFF;
-//            EpID = sts & GRXSTSP_EPNUM_MASK;
-            Ep[0].ReadToBuf(Ep0OutBuf, 8);
-            Ep[0].PktState = psDataPkt;
-            break;
-        case GRXSTSP_OUT_DATA:
-          cnt = (sts & GRXSTSP_BCNT_MASK) >> GRXSTSP_BCNT_OFF;
-          EpID = sts & GRXSTSP_EPNUM_MASK;
-          if(cnt == 0) {
-              Ep[EpID].PktState = psZeroPkt;
-          }
-          else {
-              Ep[EpID].PktState = psDataPkt;
-              // TODO: read data
-          }
-          // TODO: read to queue
-          break;
-        case GRXSTSP_SETUP_COMP:    // Setup transaction completed
-        case GRXSTSP_OUT_GLOBAL_NAK:
-        case GRXSTSP_OUT_COMP:
-        default: break;
-    } // switch
-}
 #endif
 
 #if 1 // =========================== High level ================================
 void Usb_t::SetupPktHandler() {
-    EP0_PRINT("Setup\r");
-    Uart.Printf("%A\r", Ep0OutBuf, 8, ' ');
+//    EP0_PRINT("Setup\r");
+//    Uart.Printf("%A\r", Ep0OutBuf, 8, ' ');
     // Try to handle request
     uint8_t *FPtr;
     uint32_t FLength;
@@ -220,14 +187,12 @@ void Usb_t::SetupPktHandler() {
     // Prepare to next transaction
     switch(Ep[0].State) {
         case esInData:
-            Uart.Printf("esInData\r");
             Ep[0].PtrIn = FPtr;
             Ep[0].LengthIn = FLength;
             Ep[0].PrepareInTransaction();   // May not fill fifo here
             Ep[0].StartInTransaction();
             break;
         case esOutStatus:
-            Uart.Printf("esOutStatus\r");
             Ep[0].TransmitZeroPkt();
             break;
         default:
@@ -237,22 +202,9 @@ void Usb_t::SetupPktHandler() {
     } // switch
 }
 
-// ==== Ep0 callbacks ====
-static void SetAddress() {
-    uint32_t Addr = Usb.IGetSetupAddr();
-    Uart.Printf("SetAddr %u\r", Addr);
-    Usb.ISetAddress(Addr);
-    Uart.Printf("Dcfg %X\r", OTG_FS->DCFG);
-}
-static void SetStateConfigured() {
-    Uart.Printf("UsbConfigured\r");
-    Usb.State = usConfigured;
-    // Allow OUT communications
-//    Usb.IStartReception(EP_BULK_OUT_INDX);
-}
-
 EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
     uint8_t Recipient = SetupReq.bmRequestType & USB_RTYPE_RECIPIENT_MASK;
+    uint32_t Addr;
     if(Recipient == USB_RTYPE_RECIPIENT_DEVICE) {
         //Uart.Printf("Dev\r\n");
         switch(SetupReq.bRequest) {
@@ -263,10 +215,10 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
                 return esInData;
                 break;
             case USB_REQ_SET_ADDRESS:
-                EP0_PRINT("SetAddr\r");
+                Addr = IGetSetupAddr();
+                EP0_PRINT_V1("SetAddr %u\r", Addr);
                 *PLen = 0;
-                //Ep[0].cbEndTransaction = SetAddress;
-                SetAddress();
+                ISetAddress(Addr);
                 return esOutStatus;
                 break;
             case USB_REQ_GET_DESCRIPTOR:
@@ -286,7 +238,8 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
             case USB_REQ_SET_CONFIGURATION:
                 EP0_PRINT_V1("SetCnf %u\r", SetupReq.wValue);
                 *PLen = 0;
-                Ep[0].cbEndTransaction = SetStateConfigured;
+                Uart.Printf("*******UsbConfigured\r");
+                Usb.State = usConfigured;
                 return esOutStatus;
                 break;
             default: break;
@@ -361,23 +314,20 @@ void Usb_t::IIrqHandler() {
 void Usb_t::IEpOutHandler(uint8_t EpID) {
     uint32_t epint = OTG_FS->oe[EpID].DOEPINT;  // Read IRQs
     OTG_FS->oe[EpID].DOEPINT = 0xFF;      // Reset IRQs
-    Uart.Printf("=== out %u: %X\r\n", EpID, epint);
+//    Uart.Printf("=== out %u: %X\r\n", EpID, epint);
     // Setup pkt handler
     if((epint & DOEPINT_STUP) and (OTG_FS->DOEPMSK & DOEPMSK_STUPM)) {
         Ep[0].State = esSetup; // In case of setup pkt, reset stage to Setup
-        Uart.Printf("esSetup\r");
         SetupPktHandler();
         Ep[0].PktState = psNoPkt;
     }
-
     // Receive transfer complete
     if((epint & DOEPINT_XFRC) and (OTG_FS->DOEPMSK & DOEPMSK_XFRCM)) {
-        Uart.Printf("Out XFR cmp\r\n");
+//        Uart.Printf("Out XFR cmp\r\n");
         if(EpID == 0) {
             if(Ep[0].PktState == psZeroPkt) {
                 Ep[0].PktState = psNoPkt;
                 Ep[0].State = esSetup;
-                Uart.Printf("esSetup\r");
                 Ep[0].ReceivePkt();
             }
         }
@@ -387,33 +337,26 @@ void Usb_t::IEpOutHandler(uint8_t EpID) {
 void Usb_t::IEpInHandler(uint8_t EpID) {
     uint32_t epint = OTG_FS->ie[EpID].DIEPINT;
     OTG_FS->ie[EpID].DIEPINT = 0xFF;   // Reset IRQs
-    Uart.Printf("=== in %X i%X\r\n", EpID, epint);
+//    Uart.Printf("=== in %X i%X\r\n", EpID, epint);
     Ep_t *ep = &Ep[EpID];
     // Transmit transfer complete
     if((epint & DIEPINT_XFRC) and (OTG_FS->DIEPMSK & DIEPMSK_XFRCM)) {
-        Uart.Printf("In XFRC\r\n");
+//        Uart.Printf("In XFRC\r\n");
         if(EpID == 0) {
             switch(ep->State) {
                 case esInData:
-                    Uart.Printf("esInData\r");
                     if((ep->LengthIn != 0) or ep->TransmitFinalZeroPkt) {
                         ep->FillInBuf(); // Transfer not completed
                         ep->StartInTransaction();
                     }
                     else {  // Buf len == 0
                         ep->State = esInStatus; // Receive zero pkt
-                        Uart.Printf("esInStatus\r");
                         ep->ReceivePkt();
                     }
                     break;
 
                 case esOutStatus:
-                    Uart.Printf("esOutStatus\r");
-                    if(ep->cbEndTransaction != NULL) ep->cbEndTransaction();
-                    ep->cbEndTransaction = NULL;
-                    ep->State = esSetup;
-                    Uart.Printf("esSetup\r");
-//                    ep->ReceivePkt();
+                    ep->State = esSetup;    // No need to explicitly start reception
                     break;
 
                 default:
@@ -427,11 +370,43 @@ void Usb_t::IEpInHandler(uint8_t EpID) {
     }
     // TX FIFO empty
     if((epint & DIEPINT_TXFE) and Ep[EpID].InFifoEmptyIRQEnabled()) {
-        Uart.Printf("In TXFE\r");
+//        Uart.Printf("In TXFE\r");
         Ep[EpID].FillInBuf();
     } // if txfe
 }
 
+// Only receives data, does not process it
+void Usb_t::IRxHandler() {
+    uint32_t sts, cnt, EpID;
+//    Ep_t *PEp;
+    sts = OTG_FS->GRXSTSP;
+//    Uart.Printf("Rx sts=%X\r", sts);
+//    Uart.Printf("Rx%u Pkt sts: %X; Len: %u\r", sts&0xF, (sts>>17)&0xF, (sts>>4)&0x7FF);
+    switch (sts & GRXSTSP_PKTSTS_MASK) {
+        case GRXSTSP_SETUP_DATA:
+//            cnt = (sts & GRXSTSP_BCNT_MASK) >> GRXSTSP_BCNT_OFF;
+//            EpID = sts & GRXSTSP_EPNUM_MASK;
+            Ep[0].ReadToBuf(Ep0OutBuf, 8);
+            Ep[0].PktState = psDataPkt;
+            break;
+        case GRXSTSP_OUT_DATA:
+          cnt = (sts & GRXSTSP_BCNT_MASK) >> GRXSTSP_BCNT_OFF;
+          EpID = sts & GRXSTSP_EPNUM_MASK;
+          if(cnt == 0) {
+              Ep[EpID].PktState = psZeroPkt;
+          }
+          else {
+              Ep[EpID].PktState = psDataPkt;
+              // TODO: read data
+          }
+          // TODO: read to queue
+          break;
+        case GRXSTSP_SETUP_COMP:    // Setup transaction completed
+        case GRXSTSP_OUT_GLOBAL_NAK:
+        case GRXSTSP_OUT_COMP:
+        default: break;
+    } // switch
+}
 #endif
 
 #if 1 // ============================ Endpoints ================================
@@ -474,7 +449,7 @@ void Ep_t::ReadToBuf(uint8_t *PDstBuf, uint16_t Len) {
 
 // Fill USB memory with BufIn's data
 void Ep_t::FillInBuf() {
-    Uart.Printf("In%u: %A\r", Indx, PtrIn, LengthIn, ' ');
+//    Uart.Printf("In%u: %A\r", Indx, PtrIn, LengthIn, ' ');
     // Prepare variables
     volatile uint32_t *pDst = OTG_FS->FIFO[0];
     uint16_t WrittenBytesCnt = 0;
@@ -495,12 +470,12 @@ void Ep_t::FillInBuf() {
 }
 
 void Ep_t::TransmitZeroPkt() {
-    Uart.Printf("Tx0\r");
+//    Uart.Printf("Tx0\r");
     OTG_FS->ie[Indx].DIEPTSIZ = DIEPTSIZ_PKTCNT(1) | DIEPTSIZ_XFRSIZ(0);
     OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_EPENA | DIEPCTL_CNAK;   // Enable Ep and clear NAK
 }
 void Ep_t::ReceivePkt() {
-    Uart.Printf("Rx\r");
+//    Uart.Printf("Rx\r");
     OTG_FS->oe[Indx].DOEPTSIZ = DOEPTSIZ_STUPCNT(3) | DOEPTSIZ_PKTCNT(1) | (3*8);//EpCfg[Indx].OutMaxsize;
     StartOutTransaction();
 }
