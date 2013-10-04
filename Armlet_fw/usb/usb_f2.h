@@ -16,13 +16,15 @@
 #include "stm32_otg.h"
 
 #if 1 // ========================== Endpoint ===================================
-enum EpState_t {esIdle, esSetup, esDataIn, esDataOut, esStatusIn, esStatusOut, esError};
+enum EpState_t {esIdle, esSetup, esInData, esOutData, esInStatus, esOutStatus, esError};
+enum EpPktState_t {psNoPkt, psDataPkt, psZeroPkt};
 
 class Ep_t {
 private:
     uint8_t Indx;
 public:
     EpState_t State;
+    EpPktState_t PktState;
     Thread *PThread;
     uint8_t *PtrIn;
     uint32_t LengthIn;
@@ -34,6 +36,8 @@ public:
     inline bool FifoEmtyIRQEnabled()    { return (OTG_FS->DIEPEMPMSK & (1 << Indx)); }
     inline void EnableInFifoEmptyIRQ()  { OTG_FS->DIEPEMPMSK |=  (1 << Indx); }
     inline void DisableInFifoEmptyIRQ() { OTG_FS->DIEPEMPMSK &= ~(1 << Indx); }
+    inline bool InFifoEmptyIRQEnabled() { return (OTG_FS->DIEPEMPMSK & DIEPEMPMSK_INEPTXFEM(Indx)); }
+
     void FillInBuf();
     inline void PrepareInTransaction() {
         uint32_t pcnt = (LengthIn + EpCfg[Indx].InMaxsize - 1) / EpCfg[Indx].InMaxsize;
