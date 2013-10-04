@@ -15,6 +15,11 @@
 extern "C" {
 #endif
 
+// Sizes
+#define EP0_SZ              64
+#define EP_INTERRUPT_SZ     8
+#define EP_BULK_SZ          64
+
 typedef struct {
     uint8_t Indx;
     uint16_t Type;
@@ -22,12 +27,12 @@ typedef struct {
     uint16_t OutMaxsize;
 } EpCfg_t;
 
-#define EP_CNT              4
+#define EP_CNT                  4   // Control, Notification, In & Out
 extern const EpCfg_t EpCfg[EP_CNT];
 // See descriptors.c
-#define EP_INTERRUPT_INDX   1
-#define EP_BULK_OUT_INDX    2
-#define EP_BULK_IN_INDX     3
+#define EP_NOTIFICATION_INDX    1
+#define EP_BULK_OUT_INDX        2
+#define EP_BULK_IN_INDX         3
 
 void GetDescriptor(uint8_t Type, uint8_t Indx, uint8_t **PPtr, uint32_t *PLen);
 
@@ -45,7 +50,8 @@ enum USB_DescriptorTypes_t {
     dtCSEndpoint                = 0x25, // class specific endpoint descriptor
 };
 
-// Descriptor types
+#if 1 // ================= Standard descriptor types ===========================
+// Device
 typedef struct {
     uint8_t  bLength;               // Size of the descriptor, in bytes
     uint8_t  bDescriptorType;       // Type of the descriptor
@@ -63,6 +69,7 @@ typedef struct {
     uint8_t  bNumConfigurations;    // Total number of configurations supported by the device
 } __attribute__ ((__packed__)) DeviceDescriptor_t ;
 
+// Configuration header
 typedef struct {
     uint8_t  bLength;               // Size of the descriptor, in bytes
     uint8_t  bDescriptorType;       // Type of the descriptor
@@ -74,6 +81,7 @@ typedef struct {
     uint8_t  bMaxPower;             // Maximum power consumption of the device
 } __attribute__ ((__packed__)) ConfigHeader_t;
 
+// Interface descriptor
 typedef struct {
     uint8_t  bLength;                // Size of the descriptor, in bytes
     uint8_t  bDescriptorType;        // Type of the descriptor, given by the specific class
@@ -86,31 +94,7 @@ typedef struct {
     uint8_t  iInterface;             // Index of the string descriptor describing the interface
 } __attribute__ ((__packed__)) InterfaceDescriptor_t;
 
-typedef struct {
-    uint8_t  bLength;                // Size of the descriptor, in bytes
-    uint8_t  bDescriptorType;        // Type of the descriptor, given by the specific class
-    uint16_t bcdCCID;                // Integrated Circuit(s) Cards Interface Devices Specification Release Number in binary coded decimal
-    uint8_t  bMaxSlotIndex;
-    uint8_t  bVoltageSupport;
-    uint32_t dwProtocols;
-    uint32_t dwDefaultClock;
-    uint32_t dwMaximumClock;
-    uint8_t  bNumClockSupported;
-    uint32_t dwDataRate;
-    uint32_t dwMaxDataRate;
-    uint8_t  bNumDataRatesSupported;
-    uint32_t dwMaxIFSD;
-    uint32_t dwSynchProtocols;
-    uint32_t dwMechanical;
-    uint32_t dwFeatures;
-    uint32_t dwMaxCCIDMessageLength;
-    uint8_t  bClassGetResponse;
-    uint8_t  bClassEnvelope;
-    uint16_t wLcdLayout;
-    uint8_t  bPinSupport;
-    uint8_t  bMaxCCIDBusySlots;
-} __attribute__ ((__packed__)) SCRFuncDescriptor_t;
-
+// Endpoint descriptor
 typedef struct {
     uint8_t  bLength;           // Size of the descriptor, in bytes
     uint8_t  bDescriptorType;   // Type of the descriptor, given by the specific class
@@ -121,19 +105,50 @@ typedef struct {
 } __attribute__ ((__packed__)) EndpointDescriptor_t;
 
 typedef struct {
-    ConfigHeader_t          ConfigHeader;       // Standard config header
-    InterfaceDescriptor_t   SCR_Interface;      // Standard interface descriptor
-    SCRFuncDescriptor_t     SCR_Functional;     // USB-ICC class specific descriptor
-    EndpointDescriptor_t    InterruptEndpoint;
-    EndpointDescriptor_t    DataOutEndpoint;
-    EndpointDescriptor_t    DataInEndpoint;
-} __attribute__ ((__packed__)) ConfigDescriptor_t;
-
-typedef struct {
     uint8_t  bLength;                // Size of the descriptor, in bytes
     uint8_t  bDescriptorType;        // Type of the descriptor, given by the specific class
     uint16_t  bString[];
 } __attribute__ ((__packed__)) StringDescriptor_t;
+#endif
+
+#if 1 // ========================== CDC descriptors ============================
+typedef struct {
+    uint8_t  bFunctionLength;   // Size of the descriptor, in bytes
+    uint8_t  bDescriptorType;   // Type of the descriptor, either a value in USB_DescriptorTypes_t or a value given by the specific class.
+    uint8_t  bDescriptorSubType;// Sub type value used to distinguish between CDC class-specific descriptors, must be CDC_DSUBTYPE_CSInterface_Header.
+    uint16_t bcdCDC;            // Version number of the CDC specification implemented by the device, encoded in BCD format.
+} __attribute__ ((__packed__)) CDCFuncHeader_t;
+
+typedef struct {
+    uint8_t bFunctionLength;    // Size of the descriptor, in bytes.
+    uint8_t bDescriptorType;    // Type of the descriptor, either a value in USB_DescriptorTypes_t or a value given by the specific class.
+    uint8_t bDescriptorSubType; // Sub type value used to distinguish between CDC class-specific descriptors, must be CDC_DSUBTYPE_CSInterface_ACM.
+    uint8_t bmCapabilities;     // Capabilities of the ACM interface, given as a bit mask. For most devices, this should be set to a fixed value of 0x06 - for other capabilities, refer to the CDC ACM specification.
+} __attribute__ ((__packed__)) CDCFuncACM_t;
+
+typedef struct {
+    uint8_t bFunctionLength;    // Size of the descriptor, in bytes.
+    uint8_t bDescriptorType;
+    uint8_t bDescriptorSubType; // Sub type value used to distinguish between CDC class-specific descriptors, must be CDC_DSUBTYPE_CSInterface_Union.
+    uint8_t bMasterInterface;   // Interface number of the CDC Control interface.
+    uint8_t bSlaveInterface0;   // Interface number of the CDC Data interface.
+} __attribute__ ((__packed__)) CDCFuncUnion_t;
+
+typedef struct {
+    ConfigHeader_t          ConfigHeader;       // Standard config header
+    // CDC Control Interface
+    InterfaceDescriptor_t   CCI_Interface;      // Standard interface descriptor
+    CDCFuncHeader_t         FuncHeader;
+    CDCFuncACM_t            FuncAcm;
+    CDCFuncUnion_t          FuncUnion;
+    EndpointDescriptor_t    NotificationEndpoint;
+    // CDC Data Interface
+    InterfaceDescriptor_t   DCI_Interface;      // Standard interface descriptor
+    EndpointDescriptor_t    DataOutEndpoint;
+    EndpointDescriptor_t    DataInEndpoint;
+} __attribute__ ((__packed__)) ConfigDescriptor_t;
+#endif
+
 
 #ifdef __cplusplus
 }
