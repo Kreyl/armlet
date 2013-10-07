@@ -178,18 +178,19 @@ void Usb_t::IEndpointsDisable() {
 #if 1 // =========================== High level ================================
 void Usb_t::SetupPktHandler() {
 //    EP0_PRINT("Setup\r");
-//    Uart.Printf("%A\r", Ep0OutBuf, 8, ' ');
+    Uart.Printf("%A\r", Ep0OutBuf, 8, ' ');
     // Try to handle request
     uint8_t *FPtr;
     uint32_t FLength;
-    if((SetupReq.bmRequestType & 0x60) != 0) Ep[0].State = esError;   // Non-standard request
-    else Ep[0].State = DefaultReqHandler(&FPtr, &FLength);
+    Ep[0].State = DefaultReqHandler(&FPtr, &FLength);
+    // If standard request handler failed, try handle it in application
+    if(Ep[0].State == esError) Ep[0].State = NonStandardControlRequestHandler(&FPtr, &FLength);
     // Prepare to next transaction
     switch(Ep[0].State) {
         case esInData:
             Ep[0].PtrIn = FPtr;
             Ep[0].LengthIn = FLength;
-            Ep[0].PrepareInTransaction();   // May not fill fifo here
+            Ep[0].PrepareInTransaction();   // Just prepare; may not fill fifo here
             Ep[0].StartInTransaction();
             break;
         case esOutStatus:
@@ -203,9 +204,9 @@ void Usb_t::SetupPktHandler() {
 }
 
 EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
-    uint8_t Recipient = SetupReq.bmRequestType & USB_RTYPE_RECIPIENT_MASK;
+    uint8_t Recipient = SetupReq.bmRequestType & USB_REQTYPE_RECIPIENT_MASK;
     uint32_t Addr;
-    if(Recipient == USB_RTYPE_RECIPIENT_DEVICE) {
+    if(Recipient == USB_REQTYPE_RECIPIENT_DEVICE) {
         //Uart.Printf("Dev\r\n");
         switch(SetupReq.bRequest) {
             case USB_REQ_GET_STATUS:    // Just return the current status word
@@ -245,29 +246,33 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
             default: break;
         } // switch
     }
-    else if(Recipient == USB_RTYPE_RECIPIENT_INTERFACE) {
-        if(SetupReq.bRequest == USB_REQ_GET_STATUS) {
-            EP0_PRINT("InterfGetSta\r");
-//            *Ptr = (uint8_t*)ZeroStatus;
-//            *PLen = 2;
-//            return OK;
-        }
-    }
-    else if(Recipient == USB_RTYPE_RECIPIENT_ENDPOINT) {
-        EP0_PRINT("Ep\r");
-        switch(SetupReq.bRequest) {
-            case USB_REQ_SYNCH_FRAME:
-//                *Ptr = (uint8_t*)ZeroStatus;
-//                *PLen = 2;
-//                return OK;
-                break;
-            case USB_REQ_GET_STATUS:
-                break;
-        }
-    }
+//    else if(Recipient == USB_RTYPE_RECIPIENT_INTERFACE) {
+//        if(SetupReq.bRequest == USB_REQ_GET_STATUS) {
+//            EP0_PRINT("InterfGetSta\r");
+////            *Ptr = (uint8_t*)ZeroStatus;
+////            *PLen = 2;
+////            return OK;
+//        }
+//    }
+//    else if(Recipient == USB_RTYPE_RECIPIENT_ENDPOINT) {
+//        EP0_PRINT("Ep\r");
+//        switch(SetupReq.bRequest) {
+//            case USB_REQ_SYNCH_FRAME:
+////                *Ptr = (uint8_t*)ZeroStatus;
+////                *PLen = 2;
+////                return OK;
+//                break;
+//            case USB_REQ_GET_STATUS:
+//                break;
+//        }
+//    }
     return esError;
 }
 
+__attribute__((weak))
+EpState_t Usb_t::NonStandardControlRequestHandler(uint8_t **PPtr, uint32_t *PLen) {
+    return esError;
+}
 #endif
 
 #if 1 // =============================== IRQ ===================================
@@ -284,7 +289,7 @@ void Usb_t::IIrqHandler() {
     // Get irq flag
     irqs = OTG_FS->GINTSTS & OTG_FS->GINTMSK;
     OTG_FS->GINTSTS = irqs;
-    Uart.Printf("Irq: %X\r", irqs);
+//    Uart.Printf("Irq: %X\r", irqs);
 
     // Reset
     if(irqs & GINTSTS_USBRST) IDeviceReset();
@@ -300,14 +305,14 @@ void Usb_t::IIrqHandler() {
         if(src & (1 << 0)) IEpInHandler(0);
         if(src & (1 << 1)) IEpInHandler(1);
         if(src & (1 << 2)) IEpInHandler(2);
-        if(src & (1 << 3)) IEpInHandler(3);
+//        if(src & (1 << 3)) IEpInHandler(3);
     }
     if(irqs & GINTSTS_OEPINT) {
         uint32_t src = OTG_FS->DAINT;
         if(src & (1 << 16)) IEpOutHandler(0);
         if(src & (1 << 17)) IEpOutHandler(1);
         if(src & (1 << 18)) IEpOutHandler(2);
-        if(src & (1 << 19)) IEpOutHandler(3);
+//        if(src & (1 << 19)) IEpOutHandler(3);
     }
 }
 

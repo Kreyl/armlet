@@ -93,13 +93,14 @@ private:
     void IDeviceReset();
     void IEndpointsDisable();
     void IRamInit();
-    void ICtrHandlerIN(uint16_t EpID);
-    void ICtrHandlerOUT(uint16_t EpID, uint16_t Epr);
     void IEpOutHandler(uint8_t EpID);
     void IEpInHandler(uint8_t EpID);
     void RxFifoFlush();
     void TxFifoFlush();
     void SetupPktHandler();
+    void IRxHandler();
+    uint16_t IGetSetupAddr() { return SetupReq.wValue; }
+    void ISetAddress(uint8_t AAddr) { OTG_FS->DCFG = (OTG_FS->DCFG & ~DCFG_DAD_MASK) | DCFG_DAD(AAddr); }
     EpState_t DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen);
     void PrepareInTransaction(uint8_t *Ptr, uint32_t ALen);
 public:
@@ -109,17 +110,14 @@ public:
     void Disconnect() { OTG_FS->GCCFG &= ~GCCFG_VBUSBSEN; }
     void Shutdown();
     // Data operations
+    EpState_t NonStandardControlRequestHandler(uint8_t **PPtr, uint32_t *PLen);
 //    void StartTransmitBuf(uint8_t EpID, uint8_t *Ptr, uint32_t ALen) { StartTransmitTwoBufs(EpID, Ptr, ALen, NULL, 0); }
 //    void StartTransmitTwoBufs(uint8_t EpID, uint8_t *Ptr1, uint32_t ALen1, uint8_t *Ptr2, uint32_t ALen2);
 //    uint8_t WaitTransactionEnd(uint8_t EpID);
 //    inline void AssignEpOutQueue(uint8_t EpID, InputQueue *PQueue) { Ep[EpID].POutQueue = PQueue; }
     // Inner use
     void IIrqHandler();
-    void IRxHandler();
-    uint16_t IGetSetupAddr() { return SetupReq.wValue; }
-    void ISetAddress(uint8_t AAddr) { OTG_FS->DCFG = (OTG_FS->DCFG & ~DCFG_DAD_MASK) | DCFG_DAD(AAddr); }
 //    inline void IStartReception(uint8_t EpID) { Ep[EpID].StartOutTransaction(); }
-//    uint16_t IGetSetupAddr() { return SetupReq.wValue; }
     friend class Ep_t;
 };
 
@@ -143,12 +141,17 @@ extern Usb_t Usb;
 #define USB_FEATURE_DEVICE_REMOTE_WAKEUP    1
 #define USB_FEATURE_TEST_MODE               2
 
-#define USB_RTYPE_DIR_DEV2HOST              0x80
-#define USB_RTYPE_RECIPIENT_MASK            0x1F
-#define USB_RTYPE_RECIPIENT_DEVICE          0x00
-#define USB_RTYPE_RECIPIENT_INTERFACE       0x01
-#define USB_RTYPE_RECIPIENT_ENDPOINT        0x02
-#define USB_RTYPE_RECIPIENT_OTHER           0x03
+// Setup request type (bmRequestType)
+#define USB_REQTYPE_DEV2HOST                (1<<7)
+#define USB_REQTYPE_HOST2DEV                (0<<7)
+#define USB_REQTYPE_STANDARD                (0<<5)
+#define USB_REQTYPE_CLASS                   (1<<5)
+#define USB_REQTYPE_VENDOR                  (2<<5)
+#define USB_REQTYPE_RECIPIENT_MASK          0x1F
+#define USB_REQTYPE_RECIPIENT_DEVICE        0x00
+#define USB_REQTYPE_RECIPIENT_INTERFACE     0x01
+#define USB_REQTYPE_RECIPIENT_ENDPOINT      0x02
+#define USB_REQTYPE_RECIPIENT_OTHER         0x03
 #endif
 
 #if 1 // ============================ stm32f2 related ==========================
