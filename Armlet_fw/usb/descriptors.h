@@ -20,6 +20,22 @@ extern "C" {
 #define EP_INTERRUPT_SZ     8   // Max size is 64 bytes
 #define EP_BULK_SZ          64  // Max size is 64 bytes
 
+#if 1 // ==== Constants (not to change) ====
+#define EP_DIR_IN           0x80
+#define EP_DIR_OUT          0x00
+// Descriptor-type endpoint codes
+#define EP_TYPE_CONTROL     0x00
+#define EP_TYPE_ISOCHRONOUS 0x01
+#define EP_TYPE_BULK        0x02
+#define EP_TYPE_INTERRUPT   0x03
+
+// Endpoint attributes
+#define EP_ATTR_NO_SYNC     (0 << 2)
+#define EP_ATTR_ASYNC       (1 << 2)
+#define EP_USAGE_DATA       (0 << 4)
+#define EP_USAGE_FEEDBACK   (1 << 4)
+#endif
+
 // Device' Endpoints Configuration type
 typedef struct {
     uint8_t Indx;

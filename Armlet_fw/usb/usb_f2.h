@@ -29,7 +29,7 @@ public:
     uint8_t *PtrIn;
     uint32_t LengthIn;
     bool TransmitFinalZeroPkt;
-//    InputQueue *POutQueue;
+    InputQueue *POutQueue;
     void Init(const EpCfg_t *PCfg);
     void StallIn()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_STALL; }
     void StallOut() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_STALL; }
@@ -52,7 +52,7 @@ public:
     void TransmitZeroPkt();
     void ReceivePkt();
     void ReadToBuf(uint8_t *PDstBuf, uint16_t Len);
-//    void ReadToQueue(uint16_t Len);
+    void ReadToQueue(uint16_t Len);
 //    uint16_t GetRxDataLength();
 //    void FlushRx(uint16_t Len);
     void ResumeWaitingThd(msg_t ReadyMsg);
@@ -74,9 +74,7 @@ struct UsbSetupReq_t {
 } __attribute__ ((__packed__));
 
 #if 1 // ============================ Usb_t ====================================
-#define USB_RX_SZ_WORDS     128//256 // => Sz_in_bytes = 256*4 = 1024; 256 is maximum
-//#define USB_TX_SZ
-
+#define USB_RX_SZ_WORDS     256 // => Sz_in_bytes = 256*4 = 1024; 256 is maximum
 
 enum UsbState_t {usDisconnected, usConnected, usConfigured};
 
@@ -103,6 +101,7 @@ private:
     void ISetAddress(uint8_t AAddr) { OTG_FS->DCFG = (OTG_FS->DCFG & ~DCFG_DAD_MASK) | DCFG_DAD(AAddr); }
     EpState_t DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen);
     void PrepareInTransaction(uint8_t *Ptr, uint32_t ALen);
+    void IEndpointsInit();
 public:
     UsbState_t State;
     void Init();
@@ -114,7 +113,7 @@ public:
 //    void StartTransmitBuf(uint8_t EpID, uint8_t *Ptr, uint32_t ALen) { StartTransmitTwoBufs(EpID, Ptr, ALen, NULL, 0); }
 //    void StartTransmitTwoBufs(uint8_t EpID, uint8_t *Ptr1, uint32_t ALen1, uint8_t *Ptr2, uint32_t ALen2);
 //    uint8_t WaitTransactionEnd(uint8_t EpID);
-//    inline void AssignEpOutQueue(uint8_t EpID, InputQueue *PQueue) { Ep[EpID].POutQueue = PQueue; }
+    inline void AssignEpOutQueue(uint8_t EpID, InputQueue *PQueue) { Ep[EpID].POutQueue = PQueue; }
     // Inner use
     void IIrqHandler();
 //    inline void IStartReception(uint8_t EpID) { Ep[EpID].StartOutTransaction(); }
@@ -152,13 +151,6 @@ extern Usb_t Usb;
 #define USB_REQTYPE_RECIPIENT_INTERFACE     0x01
 #define USB_REQTYPE_RECIPIENT_ENDPOINT      0x02
 #define USB_REQTYPE_RECIPIENT_OTHER         0x03
-#endif
-
-#if 1 // ============================ stm32f2 related ==========================
-#define EP_TYPE_CONTROL
-
-
-
 #endif
 
 #endif /* KL_USB_F2_H_ */

@@ -98,9 +98,9 @@ void Usb_t::IDeviceReset() {
     ISetAddress(0); // Reset device address to zero
 
     // Enable EP irqs
-    OTG_FS->GINTMSK  |= GINTMSK_RXFLVLM | GINTMSK_OEPM  | GINTMSK_IEPM;
-    OTG_FS->DIEPMSK   = DIEPMSK_TOCM    | DIEPMSK_XFRCM;
-    OTG_FS->DOEPMSK   = DOEPMSK_STUPM   | DOEPMSK_XFRCM;
+    OTG_FS->GINTMSK |= GINTMSK_RXFLVLM | GINTMSK_OEPM  | GINTMSK_IEPM;
+    OTG_FS->DIEPMSK  = DIEPMSK_TOCM    | DIEPMSK_XFRCM;
+    OTG_FS->DOEPMSK  = DOEPMSK_STUPM   | DOEPMSK_XFRCM;
 
     // Init EP0
     Ep[0].State = esSetup;
@@ -117,20 +117,20 @@ void Usb_t::IRamInit() {
     tmp |= USB_RX_SZ_WORDS;
     OTG_FS->GRXFSIZ = tmp;
     // ==== TX FIFO ====
-    uint32_t TxAddr = USB_RX_SZ_WORDS;  // FIXME: Really words, not bytes?
+    uint32_t TxAddr = USB_RX_SZ_WORDS;
     uint32_t RamSz;
     // Ep0 TX
     RamSz = (((2*EP0_SZ) / 4) < 16)? 16 : ((2*EP0_SZ) / 4); // Min size is 16 words
     OTG_FS->DIEPTXF0 = (uint32_t)((RamSz << 16) | TxAddr);
-//    TxAddr += RamSz;
+    TxAddr += RamSz;
     // Other endpoints
-//    for(uint8_t i=1; i<EP_CNT; i++) {
-//        if(EpCfg[i].InMaxsize != 0) {   // Configure RAM for only IN eps
-//            RamSz = (((2*EpCfg[i].InMaxsize) / 4) < 16)? 16 : ((2*EpCfg[i].InMaxsize) / 4); // Min size is 16 words
-//            OTG_FS->DIEPTXF[i-1] = (uint32_t)((RamSz << 16) | TxAddr);
-//            TxAddr += RamSz;
-//        } // if !0
-//    } // for
+    for(uint8_t i=1; i<EP_CNT; i++) {
+        if(EpCfg[i].InMaxsize != 0) {   // Configure RAM for only IN eps
+            RamSz = (((2*EpCfg[i].InMaxsize) / 4) < 16)? 16 : ((2*EpCfg[i].InMaxsize) / 4); // Min size is 16 words
+            OTG_FS->DIEPTXF[i-1] = (uint32_t)((RamSz << 16) | TxAddr);
+            TxAddr += RamSz;
+        } // if !0
+    } // for
     // ==== Flush RAM ====
     TxFifoFlush();
     RxFifoFlush();
@@ -173,6 +173,38 @@ void Usb_t::IEndpointsDisable() {
     OTG_FS->DAINTMSK = DAINTMSK_OEPM(0) | DAINTMSK_IEPM(0);
 }
 
+void Usb_t::IEndpointsInit() {
+    uint32_t ctl=0;
+    for(uint8_t i=1; i<EP_CNT; i++) {
+        switch(EpCfg[i].Type) {
+            case EP_TYPE_ISOCHRONOUS: ctl = DIEPCTL_SD0PID | DIEPCTL_USBAEP | DIEPCTL_EPTYP_ISO;  break;
+            case EP_TYPE_BULK:        ctl = DIEPCTL_SD0PID | DIEPCTL_USBAEP | DIEPCTL_EPTYP_BULK; break;
+            case EP_TYPE_INTERRUPT:   ctl = DIEPCTL_SD0PID | DIEPCTL_USBAEP | DIEPCTL_EPTYP_INTR; break;
+            default: break;
+        }
+        // OUT endpoint activation
+        OTG_FS->oe[i].DOEPTSIZ = DOEPTSIZ_PKTCNT(1) | DOEPTSIZ_XFRSIZ(EpCfg[i].OutMaxsize); // FIXME
+        if(EpCfg[i].OutMaxsize != 0) {  // really out endpoint
+            OTG_FS->oe[i].DOEPCTL = ctl | DOEPCTL_CNAK | DOEPCTL_MPSIZ(EpCfg[i].OutMaxsize);
+            OTG_FS->DAINTMSK |= DAINTMSK_OEPM(i);       // Enable out IRQ
+        }
+        else {
+            OTG_FS->oe[i].DOEPCTL &= ~DOEPCTL_USBAEP;   // Disable endpoint
+            OTG_FS->DAINTMSK &= ~DAINTMSK_OEPM(i);      // Disable out IRQ
+        }
+
+        // IN endpoint activation
+        OTG_FS->ie[i].DIEPTSIZ = 0;
+        if(EpCfg[i].InMaxsize != 0) {
+            OTG_FS->ie[i].DIEPCTL = ctl | DIEPCTL_TXFNUM(i) | DIEPCTL_MPSIZ(EpCfg[i].InMaxsize);
+            OTG_FS->DAINTMSK |= DAINTMSK_IEPM(i);
+        }
+        else {
+            OTG_FS->ie[i].DIEPCTL &= ~DIEPCTL_USBAEP;
+            OTG_FS->DAINTMSK &= ~DAINTMSK_IEPM(i);
+        }
+    } // for i
+}
 #endif
 
 #if 1 // =========================== High level ================================
@@ -240,6 +272,7 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
                 EP0_PRINT_V1("SetCnf %u\r", SetupReq.wValue);
                 *PLen = 0;
                 Uart.Printf("*******UsbConfigured\r");
+                IEndpointsInit();
                 Usb.State = usConfigured;
                 return esOutStatus;
                 break;
@@ -336,6 +369,10 @@ void Usb_t::IEpOutHandler(uint8_t EpID) {
                 Ep[0].ReceivePkt();
             }
         }
+        else {// Restart reception
+            OTG_FS->oe[EpID].DOEPTSIZ = DOEPTSIZ_PKTCNT(1) | DOEPTSIZ_XFRSIZ(EpCfg[EpID].OutMaxsize);
+            Ep[EpID].StartOutTransaction();
+        }
     } // if XFRC
 }
 
@@ -382,8 +419,7 @@ void Usb_t::IEpInHandler(uint8_t EpID) {
 
 // Only receives data, does not process it
 void Usb_t::IRxHandler() {
-    uint32_t sts, cnt, EpID;
-//    Ep_t *PEp;
+    uint32_t sts, Len, EpID;
     sts = OTG_FS->GRXSTSP;
 //    Uart.Printf("Rx sts=%X\r", sts);
 //    Uart.Printf("Rx%u Pkt sts: %X; Len: %u\r", sts&0xF, (sts>>17)&0xF, (sts>>4)&0x7FF);
@@ -395,23 +431,25 @@ void Usb_t::IRxHandler() {
             Ep[0].PktState = psDataPkt;
             break;
         case GRXSTSP_OUT_DATA:
-          cnt = (sts & GRXSTSP_BCNT_MASK) >> GRXSTSP_BCNT_OFF;
-          EpID = sts & GRXSTSP_EPNUM_MASK;
-          if(cnt == 0) {
-              Ep[EpID].PktState = psZeroPkt;
-          }
-          else {
-              Ep[EpID].PktState = psDataPkt;
-              // TODO: read data
-          }
-          // TODO: read to queue
-          break;
+            Len = (sts & GRXSTSP_BCNT_MASK) >> GRXSTSP_BCNT_OFF;
+            EpID = sts & GRXSTSP_EPNUM_MASK;
+            if(Len == 0) {
+                Ep[EpID].PktState = psZeroPkt;
+            }
+            else {
+                Ep[EpID].PktState = psDataPkt;
+                Uart.Printf("DataRcvd\r");
+                if(Ep[EpID].POutQueue != NULL) Ep[EpID].ReadToQueue(Len);
+                else RxFifoFlush();
+            }
+            break;
         case GRXSTSP_SETUP_COMP:    // Setup transaction completed
         case GRXSTSP_OUT_GLOBAL_NAK:
         case GRXSTSP_OUT_COMP:
         default: break;
     } // switch
 }
+
 #endif
 
 #if 1 // ============================ Endpoints ================================
@@ -452,6 +490,26 @@ void Ep_t::ReadToBuf(uint8_t *PDstBuf, uint16_t Len) {
     }
 }
 
+
+void Ep_t::ReadToQueue(uint16_t Len) {
+//    Uart.Printf("R2Q %u\r", Len);
+    // Get pointer to Fifo
+    volatile uint32_t *PFifo = OTG_FS->FIFO[Indx]; // FIXME: Indx, not 0?
+    Len = (Len + 3) / 4;    // Convert bytes count to words count
+    chSysLockFromIsr();
+    while(Len--) {
+        uint32_t w = *PFifo;
+        chIQPutI(POutQueue, (uint8_t)((w >>  0) & 0xFF));
+        chIQPutI(POutQueue, (uint8_t)((w >>  8) & 0xFF));
+        chIQPutI(POutQueue, (uint8_t)((w >> 16) & 0xFF));
+        chIQPutI(POutQueue, (uint8_t)((w >> 24) & 0xFF));
+    }
+    chSysUnlockFromIsr();
+    // Last byte for odd lengths
+//    if(OddLength) chIQPutI(POutQueue, (uint8_t)(*PSrc & 0xFF));
+  //  chSysUnlockFromIsr();
+}
+
 // Fill USB memory with BufIn's data
 void Ep_t::FillInBuf() {
 //    Uart.Printf("In%u: %A\r", Indx, PtrIn, LengthIn, ' ');
@@ -484,6 +542,7 @@ void Ep_t::ReceivePkt() {
     OTG_FS->oe[Indx].DOEPTSIZ = DOEPTSIZ_STUPCNT(3) | DOEPTSIZ_PKTCNT(1) | (3*8);//EpCfg[Indx].OutMaxsize;
     StartOutTransaction();
 }
+
 
 #endif
 

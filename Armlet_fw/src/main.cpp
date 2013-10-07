@@ -20,19 +20,11 @@
 #include "cmd_uart.h"
 #include "power.h"
 #include "pill.h"
-#include "usb_f2.h"
+#include "MassStorage.h"
 #include "ff.h"
 
 #include "application.h"
 
-//#include "usbd_cdc_core.h"
-//#include "usbd_core.h"
-//#include "usbd_usr.h"
-//#include "usb_conf.h"
-//#include "usbd_desc.h"
-
-
-//USB_OTG_CORE_HANDLE     USB_OTG_dev;
 
 static inline void Init();
 
@@ -92,7 +84,9 @@ void Init() {
 
 //    Lcd.Init();
     //Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
-//
+
+    MassStorage.Init();
+
     Usb.Init();
     chThdSleepMilliseconds(450);
     Usb.Connect();
