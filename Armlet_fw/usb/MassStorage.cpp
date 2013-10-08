@@ -56,7 +56,9 @@ void MassStorage_t::Init() {
 void MassStorage_t::UsbOutTask() {
     // Receive header
     if(chIQReadTimeout(&IOutQueue, (uint8_t*)&Cmd, MS_CMD_SZ, TIME_INFINITE) != MS_CMD_SZ) return;
-    Uart.Printf("Signature: %X\r", Cmd.Signature);
+    Uart.Printf("Sgn=%X; Tag=%X; Len=%u; Flags=%X; LUN=%u; SLen=%u; SCmd=%A\r",
+            Cmd.Signature, Cmd.Tag, Cmd.DataTransferLength, Cmd.Flags, Cmd.LUN, Cmd.SCSICommandLength,
+            Cmd.SCSICommandData, Cmd.SCSICommandLength, ' ');
 }
 
 #endif /* MASSSTORAGE_CPP_ */

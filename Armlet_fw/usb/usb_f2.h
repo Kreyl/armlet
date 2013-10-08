@@ -30,7 +30,6 @@ public:
     uint32_t LengthIn;
     bool TransmitFinalZeroPkt;
     InputQueue *POutQueue;
-    void Init(const EpCfg_t *PCfg);
     void StallIn()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_STALL; }
     void StallOut() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_STALL; }
     inline bool FifoEmtyIRQEnabled()    { return (OTG_FS->DIEPEMPMSK & (1 << Indx)); }

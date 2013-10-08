@@ -210,7 +210,7 @@ void Usb_t::IEndpointsInit() {
 #if 1 // =========================== High level ================================
 void Usb_t::SetupPktHandler() {
 //    EP0_PRINT("Setup\r");
-    Uart.Printf("%A\r", Ep0OutBuf, 8, ' ');
+//    Uart.Printf("%A\r", Ep0OutBuf, 8, ' ');
     // Try to handle request
     uint8_t *FPtr;
     uint32_t FLength;
@@ -255,7 +255,7 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
                 return esOutStatus;
                 break;
             case USB_REQ_GET_DESCRIPTOR:
-                EP0_PRINT_V1V2("GetDesc t=%u i=%u\r", SetupReq.Type, SetupReq.Indx);
+//                EP0_PRINT_V1V2("GetDesc t=%u i=%u\r", SetupReq.Type, SetupReq.Indx);
                 GetDescriptor(SetupReq.Type, SetupReq.Indx, PPtr, PLen);
                 // Trim descriptor if needed, as host can request part of descriptor.
                 TRIM_VALUE(*PLen, SetupReq.wLength);
@@ -269,7 +269,7 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
 //                return OK;
                 break;
             case USB_REQ_SET_CONFIGURATION:
-                EP0_PRINT_V1("SetCnf %u\r", SetupReq.wValue);
+//                EP0_PRINT_V1("SetCnf %u\r", SetupReq.wValue);
                 *PLen = 0;
                 Uart.Printf("*******UsbConfigured\r");
                 IEndpointsInit();
@@ -453,20 +453,6 @@ void Usb_t::IRxHandler() {
 #endif
 
 #if 1 // ============================ Endpoints ================================
-void Ep_t::Init(const EpCfg_t *PCfg) {
-//    Disable();
-//    Indx = PCfg->Indx;
-//    // Process waiting thread if any
-//    ResumeWaitingThd(RDY_RESET);
-//    // Set EP type, NAK both directions
-//    SetType(PCfg->Type);
-//    NakOutSet();
-//    NakInSet();
-//    // Size and address initialization
-//
-//    Enable();
-}
-
 void Ep_t::ResumeWaitingThd(msg_t ReadyMsg) {
     if(PThread != NULL) {
         chSysLockFromIsr();
@@ -492,17 +478,20 @@ void Ep_t::ReadToBuf(uint8_t *PDstBuf, uint16_t Len) {
 
 
 void Ep_t::ReadToQueue(uint16_t Len) {
-//    Uart.Printf("R2Q %u\r", Len);
+    Uart.Printf("R2Q %u\r", Len);
     // Get pointer to Fifo
-    volatile uint32_t *PFifo = OTG_FS->FIFO[Indx]; // FIXME: Indx, not 0?
-    Len = (Len + 3) / 4;    // Convert bytes count to words count
+    volatile uint32_t *PFifo = OTG_FS->FIFO[0]; // FIXME: Indx, not 0?
+    //Len = (Len + 3) / 4;    // Convert bytes count to words count
     chSysLockFromIsr();
-    while(Len--) {
+    while(Len != 0) {
+        // Read up to 4 bytes from FIFO
         uint32_t w = *PFifo;
-        chIQPutI(POutQueue, (uint8_t)((w >>  0) & 0xFF));
-        chIQPutI(POutQueue, (uint8_t)((w >>  8) & 0xFF));
-        chIQPutI(POutQueue, (uint8_t)((w >> 16) & 0xFF));
-        chIQPutI(POutQueue, (uint8_t)((w >> 24) & 0xFF));
+        // Put to queue byte by byte
+        for(uint8_t i=0; (i<4) and (Len>0); i++) {
+            chIQPutI(POutQueue, (uint8_t)(w & 0xFF));
+            Len--;
+            w >>= 8;
+        }
     }
     chSysUnlockFromIsr();
     // Last byte for odd lengths
