@@ -30,6 +30,7 @@
 #define FALSE 0
 #endif
 
+// Functional type
 typedef void (*ftVoidVoid)(void);
 
 // Return values
@@ -51,6 +52,7 @@ enum LowHigh_t  {Low, High};
 enum RiseFall_t {Rising, Falling, RisingFalling};
 
 // Simple pseudofunctions
+#define MIN(a, b)   (((a)<(b))? (a) : (b))
 #define TRIM_VALUE(v, Max)  { if(v > Max) v = Max; }
 #define IS_LIKE(v, precise, deviation)  (((precise - deviation) < v) and (v < (precise + deviation)))
 
@@ -58,6 +60,13 @@ enum RiseFall_t {Rising, Falling, RisingFalling};
 #define ANY_OF_3(a, b1, b2, b3)         (((a)==(b1)) or ((a)==(b2)) or ((a)==(b3)))
 #define ANY_OF_4(a, b1, b2, b3, b4)     (((a)==(b1)) or ((a)==(b2)) or ((a)==(b3)) or ((a)==(b4)))
 #define ANY_OF_5(a, b1, b2, b3, b4, b5) (((a)==(b1)) or ((a)==(b2)) or ((a)==(b3)) or ((a)==(b4)) or ((a)==(b5)))
+
+static inline uint16_t BuildUint16(uint8_t Lo, uint8_t Hi) {
+    uint16_t r = Hi;
+    r <<= 8;
+    r |= Lo;
+    return r;
+}
 
 // IRQ priorities
 #define IRQ_PRIO_LOW            15  // Minimum

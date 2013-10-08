@@ -480,12 +480,10 @@ void Ep_t::ReadToBuf(uint8_t *PDstBuf, uint16_t Len) {
 void Ep_t::ReadToQueue(uint16_t Len) {
     Uart.Printf("R2Q %u\r", Len);
     // Get pointer to Fifo
-    volatile uint32_t *PFifo = OTG_FS->FIFO[0]; // FIXME: Indx, not 0?
-    //Len = (Len + 3) / 4;    // Convert bytes count to words count
+    volatile uint32_t *PFifo = OTG_FS->FIFO[0]; // FIXME: Indx or 0?
     chSysLockFromIsr();
     while(Len != 0) {
-        // Read up to 4 bytes from FIFO
-        uint32_t w = *PFifo;
+        uint32_t w = *PFifo;    // Read up to 4 bytes from FIFO
         // Put to queue byte by byte
         for(uint8_t i=0; (i<4) and (Len>0); i++) {
             chIQPutI(POutQueue, (uint8_t)(w & 0xFF));
@@ -494,9 +492,6 @@ void Ep_t::ReadToQueue(uint16_t Len) {
         }
     }
     chSysUnlockFromIsr();
-    // Last byte for odd lengths
-//    if(OddLength) chIQPutI(POutQueue, (uint8_t)(*PSrc & 0xFF));
-  //  chSysUnlockFromIsr();
 }
 
 // Fill USB memory with BufIn's data
