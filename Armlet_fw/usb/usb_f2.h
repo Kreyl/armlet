@@ -29,8 +29,6 @@ private:
     uint8_t *PtrIn;
     uint32_t LengthIn;
     bool TransmitFinalZeroPkt;
-    void StallIn()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_STALL; }
-    void StallOut() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_STALL; }
     void ClearInNAK() { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_CNAK; }
     inline bool FifoEmtyIRQEnabled()    { return (OTG_FS->DIEPEMPMSK & (1 << Indx)); }
     inline void EnableInFifoEmptyIRQ()  { OTG_FS->DIEPEMPMSK |=  (1 << Indx); }
@@ -56,6 +54,10 @@ private:
 public:
     inline void AssignOutQueue(InputQueue *PQueue) { POutQueue = PQueue; }
     void StartTransmitBuf(uint8_t *Ptr, uint32_t ALen);
+    uint8_t WaitInTransactionEnd();
+    void StallIn()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_STALL; }
+    void StallOut() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_STALL; }
+    // Inner use
     friend class Usb_t;
 };
 #endif
@@ -112,7 +114,6 @@ public:
     Ep_t *PEpBulkOut, *PEpBulkIn;
     // Data operations
     EpState_t NonStandardControlRequestHandler(uint8_t **PPtr, uint32_t *PLen);
-//    uint8_t WaitTransactionEnd(uint8_t EpID);
     // Inner use
     void IIrqHandler();
 //    inline void IStartReception(uint8_t EpID) { Ep[EpID].StartOutTransaction(); }

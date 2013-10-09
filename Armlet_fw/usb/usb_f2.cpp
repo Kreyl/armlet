@@ -385,11 +385,11 @@ void Usb_t::IEpOutHandler(uint8_t EpID) {
 void Usb_t::IEpInHandler(uint8_t EpID) {
     uint32_t epint = OTG_FS->ie[EpID].DIEPINT;
     OTG_FS->ie[EpID].DIEPINT = 0xFF;   // Reset IRQs
-    Uart.Printf("=== in %X i%X\r\n", EpID, epint);
+//    Uart.Printf("=== in %X i%X\r\n", EpID, epint);
     Ep_t *ep = &Ep[EpID];
     // Transmit transfer complete
     if((epint & DIEPINT_XFRC) and (OTG_FS->DIEPMSK & DIEPMSK_XFRCM)) {
-        Uart.Printf("In XFRC\r\n");
+//        Uart.Printf("In XFRC\r\n");
         if(EpID == 0) {
             switch(ep->State) {
                 case esInData:
@@ -416,12 +416,12 @@ void Usb_t::IEpInHandler(uint8_t EpID) {
             } // switch
         } // if(EpID == 0)
         else {
-
+            ep->ResumeWaitingThd(OK);
         }
     }
     // TX FIFO empty
     if((epint & DIEPINT_TXFE) and Ep[EpID].InFifoEmptyIRQEnabled()) {
-        Uart.Printf("In TXFE\r");
+//        Uart.Printf("In TXFE\r");
         Ep[EpID].FillInBuf();
     } // if txfe
 }
@@ -489,7 +489,7 @@ void Ep_t::ReadToBuf(uint8_t *PDstBuf, uint16_t Len) {
 }
 
 void Ep_t::ReadToQueue(uint16_t Len) {
-    Uart.Printf("R2Q %u\r", Len);
+//    Uart.Printf("R2Q %u\r", Len);
     // Get pointer to Fifo
     volatile uint32_t *PFifo = OTG_FS->FIFO[0]; // FIXME: Indx or 0?
     chSysLockFromIsr();
@@ -547,6 +547,16 @@ void Ep_t::StartTransmitBuf(uint8_t *Ptr, uint32_t ALen) {
     chSysUnlock();
 }
 
+uint8_t Ep_t::WaitInTransactionEnd() {
+    uint8_t rslt = OK;
+    chSysLock();
+    PThread = chThdSelf();
+    chSchGoSleepS(THD_STATE_SUSPENDED);
+    PThread = nullptr;
+    if(chThdSelf()->p_u.rdymsg != RDY_OK) rslt = FAILURE;
+    chSysUnlock();
+    return rslt;
+}
 
 #endif
 

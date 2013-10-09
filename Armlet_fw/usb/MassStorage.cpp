@@ -9,7 +9,6 @@
 #define MASSSTORAGE_CPP_
 
 #include "MassStorage.h"
-#include "scsi.h"
 
 MassStorage_t MassStorage;
 static uint8_t SByte;
@@ -56,13 +55,26 @@ void MassStorage_t::Init() {
     chThdCreateStatic(waUsbOutThd, sizeof(waUsbOutThd), NORMALPRIO, (tfunc_t)UsbOutThd, NULL);
 }
 
+#if 1 // ====================== OUT task =======================================
 void MassStorage_t::UsbOutTask() {
     // Receive header
     if(chIQReadTimeout(&IOutQueue, (uint8_t*)&CmdBlock, MS_CMD_SZ, TIME_INFINITE) != MS_CMD_SZ) return;
+    bool CmdRsltOk = DecodeSCSICommand();
+    CmdStatus.Status = CmdRsltOk? MS_SCSI_COMMAND_Pass : MS_SCSI_COMMAND_Fail;
+    CmdStatus.Signature = MS_CSW_SIGNATURE;
+    CmdStatus.Tag = CmdBlock.Tag;
+    CmdStatus.DataTransferResidue = CmdBlock.DataTransferLength;
+    // Stall if cmd failed and there is data to send
+    if(!CmdRsltOk and (CmdStatus.DataTransferResidue != 0)) Usb.PEpBulkIn->StallIn();
+    Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&CmdStatus, sizeof(MS_CommandStatusWrapper_t));
+}
+#endif
+
+#if 1 // =========================== SCSI ======================================
+bool MassStorage_t::DecodeSCSICommand() {
     Uart.Printf("Sgn=%X; Tag=%X; Len=%u; Flags=%X; LUN=%u; SLen=%u; SCmd=%A\r",
             CmdBlock.Signature, CmdBlock.Tag, CmdBlock.DataTransferLength, CmdBlock.Flags, CmdBlock.LUN, CmdBlock.SCSICommandLength,
             CmdBlock.SCSICommandData, CmdBlock.SCSICommandLength, ' ');
-    // ==== Decode SCSI cmd ====
     bool CommandSuccess = false;
     switch(CmdBlock.SCSICommandData[0]) {
         case SCSI_CMD_INQUIRY:          CommandSuccess = CmdInquiry(); break;
@@ -93,13 +105,13 @@ void MassStorage_t::UsbOutTask() {
         SenceData.AdditionalSenseCode = SCSI_ASENSE_NO_ADDITIONAL_INFORMATION;
         SenceData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
     }
+    return CommandSuccess;
 }
 
 bool MassStorage_t::CmdInquiry() {
     Uart.Printf("CmdInquiry\r");
     uint16_t RequestedLength = BuildUint16(CmdBlock.SCSICommandData[4], CmdBlock.SCSICommandData[3]);
     uint16_t BytesToTransfer = MIN(RequestedLength, sizeof(InquiryData));
-    Uart.Printf("L=%X, b=%u\r", RequestedLength, BytesToTransfer);
     // Only the standard INQUIRY data is supported, check if any optional INQUIRY bits set
     if((CmdBlock.SCSICommandData[1] & ((1 << 0) | (1 << 1))) or CmdBlock.SCSICommandData[2]) {
         // Optional but unsupported bits set - update the SENSE key and fail the request
@@ -110,6 +122,7 @@ bool MassStorage_t::CmdInquiry() {
     }
     // Transmit InquiryData
     Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&InquiryData, BytesToTransfer);
+    Usb.PEpBulkIn->WaitInTransactionEnd();
     // Succeed the command and update the bytes transferred counter
     CmdBlock.DataTransferLength -= BytesToTransfer;
     return true;
@@ -134,5 +147,7 @@ bool MassStorage_t::CmdModeSense6() {
     Uart.Printf("CmdModeSense6\r");
     return true;
 }
+
+#endif
 
 #endif /* MASSSTORAGE_CPP_ */
