@@ -10,23 +10,20 @@
 
 #if 1 // ==== Endpoints config ====
 const EpCfg_t EpCfg[EP_CNT] = {
-        // Control endpoint
+        // Control endpoint, Indx = 0
         {
-            Indx:       0,
             Type:       EP_TYPE_CONTROL,
             InMaxsize:  EP0_SZ,
             OutMaxsize: EP0_SZ,
         },
-        // Bulk Out endpoint
+        // Bulk Out endpoint, Indx = 1
         {
-            Indx:       EP_BULK_OUT_INDX,
             Type:       EP_TYPE_BULK,
             InMaxsize:  0,
             OutMaxsize: EP_BULK_SZ,
         },
-        // Bulk In endpoint
+        // Bulk In endpoint, Indx = 2
         {
-            Indx:       EP_BULK_IN_INDX,
             Type:       EP_TYPE_BULK,
             InMaxsize:  EP_BULK_SZ,
             OutMaxsize: 0,
@@ -88,7 +85,7 @@ static const ConfigDescriptor_t ConfigDescriptor = {
         MS_DataOutEndpoint: {
             bLength:            sizeof(EndpointDescriptor_t),
             bDescriptorType:    dtEndpoint,
-            bEndpointAddress:   (EP_DIR_OUT | EP_BULK_OUT_INDX),
+            bEndpointAddress:   (EP_DIR_OUT | EP_BULK_OUT_ADDR),
             bmAttributes:       (EP_TYPE_BULK | EP_ATTR_NO_SYNC | EP_USAGE_DATA),
             wMaxPacketSize:     EP_BULK_SZ,
             bInterval:          0x05
@@ -97,7 +94,7 @@ static const ConfigDescriptor_t ConfigDescriptor = {
         MS_DataInEndpoint: {
             bLength:            sizeof(EndpointDescriptor_t),
             bDescriptorType:    dtEndpoint,
-            bEndpointAddress:   (EP_DIR_IN | EP_BULK_IN_INDX),
+            bEndpointAddress:   (EP_DIR_IN | EP_BULK_IN_ADDR),
             bmAttributes:       (EP_TYPE_BULK | EP_ATTR_NO_SYNC | EP_USAGE_DATA),
             wMaxPacketSize:     EP_BULK_SZ,
             bInterval:          0x05

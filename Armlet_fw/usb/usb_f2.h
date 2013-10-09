@@ -22,16 +22,16 @@ enum EpPktState_t {psNoPkt, psDataPkt, psZeroPkt};
 class Ep_t {
 private:
     uint8_t Indx;
-public:
+    InputQueue *POutQueue;
     EpState_t State;
     EpPktState_t PktState;
     Thread *PThread;
     uint8_t *PtrIn;
     uint32_t LengthIn;
     bool TransmitFinalZeroPkt;
-    InputQueue *POutQueue;
     void StallIn()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_STALL; }
     void StallOut() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_STALL; }
+    void ClearInNAK() { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_CNAK; }
     inline bool FifoEmtyIRQEnabled()    { return (OTG_FS->DIEPEMPMSK & (1 << Indx)); }
     inline void EnableInFifoEmptyIRQ()  { OTG_FS->DIEPEMPMSK |=  (1 << Indx); }
     inline void DisableInFifoEmptyIRQ() { OTG_FS->DIEPEMPMSK &= ~(1 << Indx); }
@@ -47,14 +47,16 @@ public:
         EnableInFifoEmptyIRQ();
     }
     inline void StartOutTransaction() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_CNAK; }
-    //void TransmitDataChunk() { FillInBuf(); StartInTransaction(); }
     void TransmitZeroPkt();
     void ReceivePkt();
     void ReadToBuf(uint8_t *PDstBuf, uint16_t Len);
     void ReadToQueue(uint16_t Len);
 //    uint16_t GetRxDataLength();
-//    void FlushRx(uint16_t Len);
     void ResumeWaitingThd(msg_t ReadyMsg);
+public:
+    inline void AssignOutQueue(InputQueue *PQueue) { POutQueue = PQueue; }
+    void StartTransmitBuf(uint8_t *Ptr, uint32_t ALen);
+    friend class Usb_t;
 };
 #endif
 
@@ -107,13 +109,10 @@ public:
     void Connect()    { OTG_FS->GCCFG |=  GCCFG_VBUSBSEN | GCCFG_NOVBUSSENS; }
     void Disconnect() { OTG_FS->GCCFG &= ~GCCFG_VBUSBSEN; }
     void Shutdown();
+    Ep_t *PEpBulkOut, *PEpBulkIn;
     // Data operations
     EpState_t NonStandardControlRequestHandler(uint8_t **PPtr, uint32_t *PLen);
-    void StartTransmitBuf(uint8_t EpID, uint8_t *Ptr, uint32_t ALen);
-//    void StartTransmitBuf(uint8_t EpID, uint8_t *Ptr, uint32_t ALen) { StartTransmitTwoBufs(EpID, Ptr, ALen, NULL, 0); }
-//    void StartTransmitTwoBufs(uint8_t EpID, uint8_t *Ptr1, uint32_t ALen1, uint8_t *Ptr2, uint32_t ALen2);
 //    uint8_t WaitTransactionEnd(uint8_t EpID);
-    inline void AssignEpOutQueue(uint8_t EpID, InputQueue *PQueue) { Ep[EpID].POutQueue = PQueue; }
     // Inner use
     void IIrqHandler();
 //    inline void IStartReception(uint8_t EpID) { Ep[EpID].StartOutTransaction(); }

@@ -49,7 +49,7 @@ static void UsbOutThd(void *arg) {
 
 void MassStorage_t::Init() {
     chIQInit(&IOutQueue, QueueBuf, MS_OUTBUF_SZ, NULL, NULL);
-    Usb.AssignEpOutQueue(EP_BULK_OUT_INDX, &IOutQueue);
+    Usb.PEpBulkOut->AssignOutQueue(&IOutQueue);
     SenceData.ResponseCode = 0x70;
     SenceData.AdditionalLength = 0x0A;
     // Thread
@@ -109,7 +109,7 @@ bool MassStorage_t::CmdInquiry() {
         return false;
     }
     // Transmit InquiryData
-    Usb.StartTransmitBuf(EP_BULK_IN_INDX, (uint8_t*)&InquiryData, BytesToTransfer);
+    Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&InquiryData, BytesToTransfer);
     // Succeed the command and update the bytes transferred counter
     CmdBlock.DataTransferLength -= BytesToTransfer;
     return true;

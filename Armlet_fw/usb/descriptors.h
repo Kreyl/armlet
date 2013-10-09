@@ -38,7 +38,6 @@ extern "C" {
 
 // Device' Endpoints Configuration type
 typedef struct {
-    uint8_t Indx;
     uint16_t Type;
     uint16_t InMaxsize;
     uint16_t OutMaxsize;
@@ -46,9 +45,9 @@ typedef struct {
 
 #define EP_CNT                  3   // Control, In & Out
 extern const EpCfg_t EpCfg[EP_CNT];
-// Endpoint addresses
-#define EP_BULK_OUT_INDX        1
-#define EP_BULK_IN_INDX         2
+// Endpoint addresses. Nothing to do with inner Indx value.
+#define EP_BULK_OUT_ADDR        1
+#define EP_BULK_IN_ADDR         2
 
 void GetDescriptor(uint8_t Type, uint8_t Indx, uint8_t **PPtr, uint32_t *PLen);
 

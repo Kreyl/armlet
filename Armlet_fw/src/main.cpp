@@ -85,9 +85,8 @@ void Init() {
 //    Lcd.Init();
     //Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
 
-    MassStorage.Init();
-
     Usb.Init();
+    MassStorage.Init();
     chThdSleepMilliseconds(450);
     Usb.Connect();
 
