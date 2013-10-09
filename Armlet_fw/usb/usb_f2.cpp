@@ -176,6 +176,7 @@ void Usb_t::IEndpointsDisable() {
 void Usb_t::IEndpointsInit() {
     uint32_t ctl=0;
     for(uint8_t i=1; i<EP_CNT; i++) {
+        Ep[i].Indx = EpCfg[i].Indx;
         switch(EpCfg[i].Type) {
             case EP_TYPE_ISOCHRONOUS: ctl = DIEPCTL_SD0PID | DIEPCTL_USBAEP | DIEPCTL_EPTYP_ISO;  break;
             case EP_TYPE_BULK:        ctl = DIEPCTL_SD0PID | DIEPCTL_USBAEP | DIEPCTL_EPTYP_BULK; break;
@@ -183,12 +184,13 @@ void Usb_t::IEndpointsInit() {
             default: break;
         }
         // OUT endpoint activation
-        OTG_FS->oe[i].DOEPTSIZ = DOEPTSIZ_PKTCNT(1) | DOEPTSIZ_XFRSIZ(EpCfg[i].OutMaxsize); // FIXME
         if(EpCfg[i].OutMaxsize != 0) {  // really out endpoint
+            OTG_FS->oe[i].DOEPTSIZ = DOEPTSIZ_PKTCNT(1) | DOEPTSIZ_XFRSIZ(EpCfg[i].OutMaxsize); // FIXME
             OTG_FS->oe[i].DOEPCTL = ctl | DOEPCTL_CNAK | DOEPCTL_MPSIZ(EpCfg[i].OutMaxsize);
             OTG_FS->DAINTMSK |= DAINTMSK_OEPM(i);       // Enable out IRQ
         }
         else {
+            OTG_FS->oe[i].DOEPTSIZ = 0;
             OTG_FS->oe[i].DOEPCTL &= ~DOEPCTL_USBAEP;   // Disable endpoint
             OTG_FS->DAINTMSK &= ~DAINTMSK_OEPM(i);      // Disable out IRQ
         }
@@ -302,6 +304,19 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
     return esError;
 }
 
+void Usb_t::StartTransmitBuf(uint8_t EpID, uint8_t *Ptr, uint32_t ALen) {
+    Uart.Printf("TxBuf Ep%u; %A\r", EpID, Ptr, ALen, ' ');
+    chSysLock();
+    Ep[EpID].PtrIn = Ptr;
+    Ep[EpID].LengthIn = ALen;
+//    Ep[EpID].PrepareInTransaction();   // Just prepare; may not fill fifo here
+    uint32_t pcnt = (ALen + 64 - 1) / 64;
+    OTG_FS->ie[EpID].DIEPTSIZ = DIEPTSIZ_PKTCNT(pcnt) | ALen;
+    Uart.Printf("DIEPTSIZ=%X\r", OTG_FS->ie[EpID].DIEPTSIZ);
+    Ep[EpID].StartInTransaction();
+    chSysUnlock();
+}
+
 __attribute__((weak))
 EpState_t Usb_t::NonStandardControlRequestHandler(uint8_t **PPtr, uint32_t *PLen) {
     return esError;
@@ -335,6 +350,7 @@ void Usb_t::IIrqHandler() {
     // OUT & IN event handling
     if(irqs & GINTSTS_IEPINT) {
         uint32_t src = OTG_FS->DAINT;
+        Uart.Printf("src: %X\r", src);
         if(src & (1 << 0)) IEpInHandler(0);
         if(src & (1 << 1)) IEpInHandler(1);
         if(src & (1 << 2)) IEpInHandler(2);
@@ -379,7 +395,7 @@ void Usb_t::IEpOutHandler(uint8_t EpID) {
 void Usb_t::IEpInHandler(uint8_t EpID) {
     uint32_t epint = OTG_FS->ie[EpID].DIEPINT;
     OTG_FS->ie[EpID].DIEPINT = 0xFF;   // Reset IRQs
-//    Uart.Printf("=== in %X i%X\r\n", EpID, epint);
+    Uart.Printf("=== in %X i%X\r\n", EpID, epint);
     Ep_t *ep = &Ep[EpID];
     // Transmit transfer complete
     if((epint & DIEPINT_XFRC) and (OTG_FS->DIEPMSK & DIEPMSK_XFRCM)) {

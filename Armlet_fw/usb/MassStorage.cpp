@@ -9,31 +9,10 @@
 #define MASSSTORAGE_CPP_
 
 #include "MassStorage.h"
+#include "scsi.h"
 
 MassStorage_t MassStorage;
 static uint8_t SByte;
-
-static const SCSI_Inquiry_Response_t InquiryData {
-        .DeviceType = 0,     // Block Media device
-        .PeripheralQualifier = 0,
-        .Removable = true,
-//        InquiryData.Version = 0;
-//        InquiryData.ResponseDataFormat = 2;
-//        InquiryData.NormACA = false;
-//        InquiryData.TrmTsk = false;
-//        InquiryData.AERC = false;
-//        InquiryData.AdditionalLength = 0x1F;
-//        InquiryData.SoftReset = false;
-//        InquiryData.CmdQue = false;
-//        InquiryData.Linked = false;
-//        InquiryData.Sync = false;
-//        InquiryData.WideBus16Bit = false;
-//        InquiryData.WideBus32Bit = false;
-//        InquiryData.RelAddr = false;
-//        InquiryData.VendorID = "Ostranna";
-//        InquiryData.ProductID = "MassStorage";
-//        InquiryData.RevisionID = {'1', '.', '0', '0'};
-};
 
 // Handler of non-standard control pkt
 EpState_t Usb_t::NonStandardControlRequestHandler(uint8_t **PPtr, uint32_t *PLen) {
@@ -73,27 +52,6 @@ void MassStorage_t::Init() {
     Usb.AssignEpOutQueue(EP_BULK_OUT_INDX, &IOutQueue);
     SenceData.ResponseCode = 0x70;
     SenceData.AdditionalLength = 0x0A;
-
-//    InquiryData.DeviceType = 0;     // Block Media device
-//    InquiryData.PeripheralQualifier = 0;
-//    InquiryData.Removable = true;
-//    InquiryData.Version = 0;
-//    InquiryData.ResponseDataFormat = 2;
-//    InquiryData.NormACA = false;
-//    InquiryData.TrmTsk = false;
-//    InquiryData.AERC = false;
-//    InquiryData.AdditionalLength = 0x1F;
-//    InquiryData.SoftReset = false;
-//    InquiryData.CmdQue = false;
-//    InquiryData.Linked = false;
-//    InquiryData.Sync = false;
-//    InquiryData.WideBus16Bit = false;
-//    InquiryData.WideBus32Bit = false;
-//    InquiryData.RelAddr = false;
-//    InquiryData.VendorID = "Ostranna";
-//    InquiryData.ProductID = "MassStorage";
-//    InquiryData.RevisionID = {'1', '.', '0', '0'};
-
     // Thread
     chThdCreateStatic(waUsbOutThd, sizeof(waUsbOutThd), NORMALPRIO, (tfunc_t)UsbOutThd, NULL);
 }
@@ -139,9 +97,9 @@ void MassStorage_t::UsbOutTask() {
 
 bool MassStorage_t::CmdInquiry() {
     Uart.Printf("CmdInquiry\r");
-    uint16_t AllocationLength = BuildUint16(CmdBlock.SCSICommandData[3], CmdBlock.SCSICommandData[4]);
-    uint16_t BytesTransferred  = MIN(AllocationLength, sizeof(InquiryData));
-    Uart.Printf("L=%X, b=%u\r", AllocationLength, BytesTransferred);
+    uint16_t RequestedLength = BuildUint16(CmdBlock.SCSICommandData[4], CmdBlock.SCSICommandData[3]);
+    uint16_t BytesToTransfer = MIN(RequestedLength, sizeof(InquiryData));
+    Uart.Printf("L=%X, b=%u\r", RequestedLength, BytesToTransfer);
     // Only the standard INQUIRY data is supported, check if any optional INQUIRY bits set
     if((CmdBlock.SCSICommandData[1] & ((1 << 0) | (1 << 1))) or CmdBlock.SCSICommandData[2]) {
         // Optional but unsupported bits set - update the SENSE key and fail the request
@@ -151,9 +109,9 @@ bool MassStorage_t::CmdInquiry() {
         return false;
     }
     // Transmit InquiryData
-    //Usb.
+    Usb.StartTransmitBuf(EP_BULK_IN_INDX, (uint8_t*)&InquiryData, BytesToTransfer);
     // Succeed the command and update the bytes transferred counter
-    CmdBlock.DataTransferLength -= BytesTransferred;
+    CmdBlock.DataTransferLength -= BytesToTransfer;
     return true;
 }
 bool MassStorage_t::CmdRequestSense() {

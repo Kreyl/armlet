@@ -109,6 +109,7 @@ public:
     void Shutdown();
     // Data operations
     EpState_t NonStandardControlRequestHandler(uint8_t **PPtr, uint32_t *PLen);
+    void StartTransmitBuf(uint8_t EpID, uint8_t *Ptr, uint32_t ALen);
 //    void StartTransmitBuf(uint8_t EpID, uint8_t *Ptr, uint32_t ALen) { StartTransmitTwoBufs(EpID, Ptr, ALen, NULL, 0); }
 //    void StartTransmitTwoBufs(uint8_t EpID, uint8_t *Ptr1, uint32_t ALen1, uint8_t *Ptr2, uint32_t ALen2);
 //    uint8_t WaitTransactionEnd(uint8_t EpID);
