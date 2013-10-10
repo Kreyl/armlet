@@ -7,16 +7,21 @@
 
 #include "scsi.h"
 
-const SCSI_Inquiry_Response_t InquiryData = {
+const SCSI_InquiryResponse_t InquiryData = {
         DeviceType: 0,     // Block Media device
         PeripheralQualifier: 0,
+
         Removable: true,
+
         Version: 0,
+
         ResponseDataFormat: 2,
         NormACA: false,
         TrmTsk: false,
         AERC: false,
+
         AdditionalLength: 0x1F,
+
         SoftReset: false,
         CmdQue: false,
         Linked: false,
@@ -24,6 +29,7 @@ const SCSI_Inquiry_Response_t InquiryData = {
         WideBus16Bit: false,
         WideBus32Bit: false,
         RelAddr: false,
+
         VendorID: "Ostranna",
         ProductID: "MassStorage",
         RevisionID: {'1', '.', '0', '0'}

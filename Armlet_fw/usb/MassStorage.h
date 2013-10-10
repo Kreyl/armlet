@@ -14,6 +14,7 @@
 
 // Config
 #define NUMBER_OF_LUNS  1   // Number of logical disks
+#define READ_ONLY       false
 
 #if 1 // ================= Mass Storage constants and types ====================
 // Enum for the Mass Storage class specific control requests that can be issued by the USB bus host
@@ -60,7 +61,8 @@ class MassStorage_t {
     InputQueue IOutQueue;   // Host to Device, USB convention
     MS_CommandBlockWrapper_t CmdBlock;
     MS_CommandStatusWrapper_t CmdStatus;
-    SCSI_Request_Sense_Response_t SenceData;
+    SCSI_RequestSenseResponse_t SenseData;
+    SCSI_ReadCapacity10Response_t ReadCapacity10Response;
     bool DecodeSCSICommand();
     // Scsi commands
     bool CmdInquiry();

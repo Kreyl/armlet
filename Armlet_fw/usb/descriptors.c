@@ -88,7 +88,7 @@ static const ConfigDescriptor_t ConfigDescriptor = {
             bEndpointAddress:   (EP_DIR_OUT | EP_BULK_OUT_ADDR),
             bmAttributes:       (EP_TYPE_BULK | EP_ATTR_NO_SYNC | EP_USAGE_DATA),
             wMaxPacketSize:     EP_BULK_SZ,
-            bInterval:          0x05
+            bInterval:          0
         },
 
         MS_DataInEndpoint: {
@@ -97,7 +97,7 @@ static const ConfigDescriptor_t ConfigDescriptor = {
             bEndpointAddress:   (EP_DIR_IN | EP_BULK_IN_ADDR),
             bmAttributes:       (EP_TYPE_BULK | EP_ATTR_NO_SYNC | EP_USAGE_DATA),
             wMaxPacketSize:     EP_BULK_SZ,
-            bInterval:          0x05
+            bInterval:          0
         }
 };
 #endif

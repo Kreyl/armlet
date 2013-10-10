@@ -76,7 +76,7 @@ void Init() {
     Uart.Init(115200);
     Uart.Printf("UsbDiscovery Sys=%u usb=%u\r", Clk.AHBFreqHz, Clk.UsbSdioFreqHz);
 
-//    SD.Init();
+    SD.Init();
     // Read config
 //    uint32_t ID=0;
 //    iniReadUint32("Radio", "ID", "settings.ini", &ID);

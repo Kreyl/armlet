@@ -9,6 +9,7 @@
 #define MASSSTORAGE_CPP_
 
 #include "MassStorage.h"
+#include "sdc_lld.h"
 
 MassStorage_t MassStorage;
 static uint8_t SByte;
@@ -49,8 +50,8 @@ static void UsbOutThd(void *arg) {
 void MassStorage_t::Init() {
     chIQInit(&IOutQueue, QueueBuf, MS_OUTBUF_SZ, NULL, NULL);
     Usb.PEpBulkOut->AssignOutQueue(&IOutQueue);
-    SenceData.ResponseCode = 0x70;
-    SenceData.AdditionalLength = 0x0A;
+    SenseData.ResponseCode = 0x70;
+    SenseData.AdditionalLength = 0x0A;
     // Thread
     chThdCreateStatic(waUsbOutThd, sizeof(waUsbOutThd), NORMALPRIO, (tfunc_t)UsbOutThd, NULL);
 }
@@ -99,17 +100,17 @@ bool MassStorage_t::DecodeSCSICommand() {
         default:
             Uart.Printf("Cmd %X not supported\r", CmdBlock.SCSICommandData[0]);
             // Update the SENSE key to reflect the invalid command
-            SenceData.SenseKey = SCSI_SENSE_KEY_ILLEGAL_REQUEST;
-            SenceData.AdditionalSenseCode = SCSI_ASENSE_INVALID_COMMAND;
-            SenceData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
+            SenseData.SenseKey = SCSI_SENSE_KEY_ILLEGAL_REQUEST;
+            SenseData.AdditionalSenseCode = SCSI_ASENSE_INVALID_COMMAND;
+            SenseData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
             break;
     } // switch
 
     // Check if command was successfully processed
     if(CommandSuccess) {
-        SenceData.SenseKey = SCSI_SENSE_KEY_GOOD;
-        SenceData.AdditionalSenseCode = SCSI_ASENSE_NO_ADDITIONAL_INFORMATION;
-        SenceData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
+        SenseData.SenseKey = SCSI_SENSE_KEY_GOOD;
+        SenseData.AdditionalSenseCode = SCSI_ASENSE_NO_ADDITIONAL_INFORMATION;
+        SenseData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
     }
     return CommandSuccess;
 }
@@ -121,9 +122,9 @@ bool MassStorage_t::CmdInquiry() {
     // Only the standard INQUIRY data is supported, check if any optional INQUIRY bits set
     if((CmdBlock.SCSICommandData[1] & ((1 << 0) | (1 << 1))) or CmdBlock.SCSICommandData[2]) {
         // Optional but unsupported bits set - update the SENSE key and fail the request
-        SenceData.SenseKey = SCSI_SENSE_KEY_ILLEGAL_REQUEST;
-        SenceData.AdditionalSenseCode = SCSI_ASENSE_INVALID_FIELD_IN_CDB;
-        SenceData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
+        SenseData.SenseKey = SCSI_SENSE_KEY_ILLEGAL_REQUEST;
+        SenseData.AdditionalSenseCode = SCSI_ASENSE_INVALID_FIELD_IN_CDB;
+        SenseData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
         return false;
     }
     // Transmit InquiryData
@@ -135,10 +136,24 @@ bool MassStorage_t::CmdInquiry() {
 }
 bool MassStorage_t::CmdRequestSense() {
     Uart.Printf("CmdRequestSense\r");
+    uint16_t RequestedLength = CmdBlock.SCSICommandData[4];
+    uint16_t BytesToTransfer = MIN(RequestedLength, sizeof(SenseData));
+    // Transmit SenceData
+    Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&SenseData, BytesToTransfer);
+    Usb.PEpBulkIn->WaitUntilReady();
+    // Succeed the command and update the bytes transferred counter
+    CmdBlock.DataTransferLength -= BytesToTransfer;
     return true;
 }
 bool MassStorage_t::CmdReadCapacity10() {
     Uart.Printf("CmdReadCapacity10\r");
+    ReadCapacity10Response.LastBlockAddr = __REV(SDCD1.capacity - 1);
+    ReadCapacity10Response.BlockSize = __REV(MMCSD_BLOCK_SIZE);
+    // Transmit SenceData
+    Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&ReadCapacity10Response, sizeof(ReadCapacity10Response));
+    Usb.PEpBulkIn->WaitUntilReady();
+    // Succeed the command and update the bytes transferred counter
+    CmdBlock.DataTransferLength -= sizeof(ReadCapacity10Response);
     return true;
 }
 bool MassStorage_t::CmdSendDiagnostic() {
@@ -147,6 +162,27 @@ bool MassStorage_t::CmdSendDiagnostic() {
 }
 bool MassStorage_t::CmdReadWrite10(ReadWrite_t ReadWrite) {
     Uart.Printf("CmdReadWrite10\r");
+    // Check if read-only
+    if((ReadWrite == rwWrite) and READ_ONLY) {
+        SenseData.SenseKey = SCSI_SENSE_KEY_DATA_PROTECT;
+        SenseData.AdditionalSenseCode = SCSI_ASENSE_WRITE_PROTECTED;
+        SenseData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
+        return false;
+    }
+    uint32_t BlockAddress = BuildUint32(CmdBlock.SCSICommandData[5], CmdBlock.SCSICommandData[4], CmdBlock.SCSICommandData[3], CmdBlock.SCSICommandData[2]);
+    uint16_t TotalBlocks  = BuildUint16(CmdBlock.SCSICommandData[8], CmdBlock.SCSICommandData[7]);
+    Uart.Printf("Addr=%u; Len=%u\r", BlockAddress, TotalBlocks);
+    // Check block addr
+    if(BlockAddress >= SDCD1.capacity) {
+        SenseData.SenseKey = SCSI_SENSE_KEY_ILLEGAL_REQUEST;
+        SenseData.AdditionalSenseCode = SCSI_ASENSE_LOGICAL_BLOCK_ADDRESS_OUT_OF_RANGE;
+        SenseData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
+        return false;
+    }
+
+
+
+
     return true;
 }
 bool MassStorage_t::CmdModeSense6() {

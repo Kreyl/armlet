@@ -17,7 +17,7 @@
  *  device (giving explicit error codes for the last issued command). For details of the
  *  structure contents, refer to the SCSI specifications.
  */
-struct SCSI_Request_Sense_Response_t {
+typedef struct {
     uint8_t  ResponseCode;
     uint8_t  SegmentNumber;
     unsigned SenseKey            : 4;
@@ -32,7 +32,7 @@ struct SCSI_Request_Sense_Response_t {
     uint8_t  AdditionalSenseQualifier;
     uint8_t  FieldReplaceableUnitCode;
     uint8_t  SenseKeySpecific[3];
-} __attribute__ ((__packed__));
+} __attribute__ ((__packed__)) SCSI_RequestSenseResponse_t;
 
 /** Mass Storage Class SCSI Inquiry Structure.
  *  Type define for a SCSI Inquiry structure. Structures of this type are filled out by the
@@ -70,9 +70,14 @@ typedef struct {
     uint8_t  VendorID[8];
     uint8_t  ProductID[16];
     uint8_t  RevisionID[4];
-} __attribute__ ((__packed__)) SCSI_Inquiry_Response_t;
+} __attribute__ ((__packed__)) SCSI_InquiryResponse_t;
 
-extern const SCSI_Inquiry_Response_t InquiryData;
+typedef struct {
+    uint32_t LastBlockAddr;
+    uint32_t BlockSize;
+} __attribute__ ((__packed__)) SCSI_ReadCapacity10Response_t;
+
+extern const SCSI_InquiryResponse_t InquiryData;
 
 /** Magic signature for a Command Status Wrapper used in the Mass Storage Bulk-Only transport protocol. */
 #define MS_CSW_SIGNATURE                               0x53425355UL

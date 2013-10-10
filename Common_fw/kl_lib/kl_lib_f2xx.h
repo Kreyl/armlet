@@ -68,6 +68,18 @@ static inline uint16_t BuildUint16(uint8_t Lo, uint8_t Hi) {
     return r;
 }
 
+static inline uint32_t BuildUint32(uint8_t Lo, uint8_t MidLo, uint8_t MidHi, uint8_t Hi) {
+    uint32_t r = Hi;
+    r <<= 8;
+    r |= MidHi;
+    r <<= 8;
+    r |= MidLo;
+    r <<= 8;
+    r |= Lo;
+    return r;
+}
+
+
 // IRQ priorities
 #define IRQ_PRIO_LOW            15  // Minimum
 #define IRQ_PRIO_MEDIUM         9
