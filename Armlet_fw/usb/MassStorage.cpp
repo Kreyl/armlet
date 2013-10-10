@@ -57,6 +57,8 @@ void MassStorage_t::Init() {
 
 #if 1 // ====================== OUT task =======================================
 void MassStorage_t::UsbOutTask() {
+    bool ShouldSendStatus;
+    ShouldSendStatus = true;
     // Receive header
     if(chIQReadTimeout(&IOutQueue, (uint8_t*)&CmdBlock, MS_CMD_SZ, TIME_INFINITE) != MS_CMD_SZ) return;
     bool CmdRsltOk = DecodeSCSICommand();
@@ -65,8 +67,11 @@ void MassStorage_t::UsbOutTask() {
     CmdStatus.Tag = CmdBlock.Tag;
     CmdStatus.DataTransferResidue = CmdBlock.DataTransferLength;
     // Stall if cmd failed and there is data to send
-    if(!CmdRsltOk and (CmdStatus.DataTransferResidue != 0)) Usb.PEpBulkIn->StallIn();
-    Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&CmdStatus, sizeof(MS_CommandStatusWrapper_t));
+    if(!CmdRsltOk and (CmdStatus.DataTransferResidue != 0)) {
+        Usb.PEpBulkIn->StallIn();
+        ShouldSendStatus = (Usb.PEpBulkIn->WaitUntilReady() == OK);
+    }
+    if(ShouldSendStatus) Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&CmdStatus, sizeof(MS_CommandStatusWrapper_t));
 }
 #endif
 
@@ -92,6 +97,7 @@ bool MassStorage_t::DecodeSCSICommand() {
             CmdBlock.DataTransferLength = 0;
             break;
         default:
+            Uart.Printf("Cmd %X not supported\r", CmdBlock.SCSICommandData[0]);
             // Update the SENSE key to reflect the invalid command
             SenceData.SenseKey = SCSI_SENSE_KEY_ILLEGAL_REQUEST;
             SenceData.AdditionalSenseCode = SCSI_ASENSE_INVALID_COMMAND;
@@ -122,7 +128,7 @@ bool MassStorage_t::CmdInquiry() {
     }
     // Transmit InquiryData
     Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&InquiryData, BytesToTransfer);
-    Usb.PEpBulkIn->WaitInTransactionEnd();
+    Usb.PEpBulkIn->WaitUntilReady();
     // Succeed the command and update the bytes transferred counter
     CmdBlock.DataTransferLength -= BytesToTransfer;
     return true;

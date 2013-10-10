@@ -94,6 +94,7 @@ void Usb_t::IDeviceReset() {
         OTG_FS->oe[i].DOEPINT = 0xFF;
         Ep[i].State = esIdle;
         Ep[i].PktState = psNoPkt;
+        Ep[i].ResumeWaitingThd(FAILURE);
     }
     // Disable and clear all EPs irqs
     OTG_FS->DAINT = 0xFFFFFFFF;
@@ -244,6 +245,7 @@ void Usb_t::SetupPktHandler() {
 EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
     uint8_t Recipient = SetupReq.bmRequestType & USB_REQTYPE_RECIPIENT_MASK;
     uint32_t Addr;
+    uint8_t EpID;
     if(Recipient == USB_REQTYPE_RECIPIENT_DEVICE) {
         //Uart.Printf("Dev\r\n");
         switch(SetupReq.bRequest) {
@@ -285,7 +287,7 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
             default: break;
         } // switch
     }
-//    else if(Recipient == USB_RTYPE_RECIPIENT_INTERFACE) {
+//    else if(Recipient == USB_REQTYPE_RECIPIENT_INTERFACE) {
 //        if(SetupReq.bRequest == USB_REQ_GET_STATUS) {
 //            EP0_PRINT("InterfGetSta\r");
 ////            *Ptr = (uint8_t*)ZeroStatus;
@@ -293,18 +295,30 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
 ////            return OK;
 //        }
 //    }
-//    else if(Recipient == USB_RTYPE_RECIPIENT_ENDPOINT) {
-//        EP0_PRINT("Ep\r");
-//        switch(SetupReq.bRequest) {
-//            case USB_REQ_SYNCH_FRAME:
-////                *Ptr = (uint8_t*)ZeroStatus;
-////                *PLen = 2;
-////                return OK;
-//                break;
-//            case USB_REQ_GET_STATUS:
-//                break;
-//        }
-//    }
+    else if(Recipient == USB_REQTYPE_RECIPIENT_ENDPOINT) {
+        EP0_PRINT("Ep\r");
+        switch(SetupReq.bRequest) {
+            case USB_REQ_SYNCH_FRAME:
+                *PPtr = ZeroArr;    // Remote wakeup = 0, selfpowered = 0
+                *PLen = 2;
+                return esInData;
+                break;
+            case USB_REQ_CLEAR_FEATURE:
+                // Only ENDPOINT_HALT is handled as feature
+                if(SetupReq.wValue != 0) return esError;
+                // Handle only non-control eps
+                EpID = SetupReq.wIndex & 0x0F;
+                if(EpID != 0) {
+                    if(SetupReq.wIndex & 0x80) Ep[EpID].ClearStallIn();
+                    else Ep[EpID].ClearStallOut();
+                    Ep[EpID].ResumeWaitingThd(OK);
+                }
+                return esOutStatus;
+                break;
+            case USB_REQ_GET_STATUS:
+                break;
+        } // switch bRequest
+    } // if Ep
     return esError;
 }
 
@@ -447,7 +461,7 @@ void Usb_t::IRxHandler() {
             }
             else {
                 Ep[EpID].PktState = psDataPkt;
-                Uart.Printf("DataRcvd for %u\r", EpID);
+//                Uart.Printf("DataRcvd for %u\r", EpID);
                 if(Ep[EpID].POutQueue != NULL) Ep[EpID].ReadToQueue(Len);
                 else {
                     Uart.Printf("flush\r");
@@ -547,7 +561,7 @@ void Ep_t::StartTransmitBuf(uint8_t *Ptr, uint32_t ALen) {
     chSysUnlock();
 }
 
-uint8_t Ep_t::WaitInTransactionEnd() {
+uint8_t Ep_t::WaitUntilReady() {
     uint8_t rslt = OK;
     chSysLock();
     PThread = chThdSelf();

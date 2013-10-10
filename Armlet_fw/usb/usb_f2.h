@@ -30,21 +30,22 @@ private:
     uint32_t LengthIn;
     bool TransmitFinalZeroPkt;
     void ClearInNAK() { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_CNAK; }
-    inline bool FifoEmtyIRQEnabled()    { return (OTG_FS->DIEPEMPMSK & (1 << Indx)); }
-    inline void EnableInFifoEmptyIRQ()  { OTG_FS->DIEPEMPMSK |=  (1 << Indx); }
-    inline void DisableInFifoEmptyIRQ() { OTG_FS->DIEPEMPMSK &= ~(1 << Indx); }
-    inline bool InFifoEmptyIRQEnabled() { return (OTG_FS->DIEPEMPMSK & DIEPEMPMSK_INEPTXFEM(Indx)); }
-
+    // IRQ
+    bool FifoEmtyIRQEnabled()    { return (OTG_FS->DIEPEMPMSK & (1 << Indx)); }
+    void EnableInFifoEmptyIRQ()  { OTG_FS->DIEPEMPMSK |=  (1 << Indx); }
+    void DisableInFifoEmptyIRQ() { OTG_FS->DIEPEMPMSK &= ~(1 << Indx); }
+    bool InFifoEmptyIRQEnabled() { return (OTG_FS->DIEPEMPMSK & DIEPEMPMSK_INEPTXFEM(Indx)); }
+    // Buffers and transactions
     void FillInBuf();
-    inline void PrepareInTransaction() {
+    void PrepareInTransaction() {
         uint32_t pcnt = (LengthIn + EpCfg[Indx].InMaxsize - 1) / EpCfg[Indx].InMaxsize;
         OTG_FS->ie[Indx].DIEPTSIZ = DIEPTSIZ_PKTCNT(pcnt) | LengthIn;
     }
-    inline void StartInTransaction()  {
+    void StartInTransaction()  {
         OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_EPENA | DIEPCTL_CNAK;   // Enable Ep and clear NAK
         EnableInFifoEmptyIRQ();
     }
-    inline void StartOutTransaction() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_CNAK; }
+    void StartOutTransaction() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_CNAK; }
     void TransmitZeroPkt();
     void ReceivePkt();
     void ReadToBuf(uint8_t *PDstBuf, uint16_t Len);
@@ -54,9 +55,11 @@ private:
 public:
     inline void AssignOutQueue(InputQueue *PQueue) { POutQueue = PQueue; }
     void StartTransmitBuf(uint8_t *Ptr, uint32_t ALen);
-    uint8_t WaitInTransactionEnd();
+    uint8_t WaitUntilReady();
     void StallIn()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_STALL; }
     void StallOut() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_STALL; }
+    void ClearStallIn()  { OTG_FS->ie[Indx].DIEPCTL &= ~DIEPCTL_STALL; }
+    void ClearStallOut() { OTG_FS->oe[Indx].DOEPCTL &= ~DOEPCTL_STALL; }
     // Inner use
     friend class Usb_t;
 };
