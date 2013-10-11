@@ -8,29 +8,26 @@
 #include "scsi.h"
 
 const SCSI_InquiryResponse_t InquiryData = {
-        DeviceType: 0,     // Block Media device
-        PeripheralQualifier: 0,
+        Peripheral:         0x00,   // direct access block device, connected
+        Removable:          0x80,   // device is removable
+        Version:            0x04,   // SPC-2 compliance
+        ResponseDataFormat: 0x02,
+        AdditionalLength:   0x1F,   // == 36-5
+        Sccstp:             0x00,
+        bqueetc:            0x00,
+        CmdQue:             0x00,
+        VendorID:           "Ostranna",
+        ProductID:          "MassStorage ",
+        ProductRev:         "0001"
+};
 
-        Removable: true,
-
-        Version: 0,
-
-        ResponseDataFormat: 2,
-        NormACA: false,
-        TrmTsk: false,
-        AERC: false,
-
-        AdditionalLength: 0x1F,
-
-        SoftReset: false,
-        CmdQue: false,
-        Linked: false,
-        Sync: false,
-        WideBus16Bit: false,
-        WideBus32Bit: false,
-        RelAddr: false,
-
-        VendorID: "Ostranna",
-        ProductID: "MassStorage",
-        RevisionID: {'1', '.', '0', '0'}
+// USB Mass storage Page 0 Inquiry Data
+const uint8_t Page00InquiryData[PAGE0_INQUIRY_DATA_SZ] = {
+    0x00,
+    0x00,
+    0x00,
+    (PAGE0_INQUIRY_DATA_SZ - 4),
+    0x00,
+    0x80,
+    0x83
 };

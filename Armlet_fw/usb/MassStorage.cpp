@@ -51,114 +51,151 @@ void MassStorage_t::Init() {
     chIQInit(&IOutQueue, QueueBuf, MS_OUTBUF_SZ, NULL, NULL);
     Usb.PEpBulkOut->AssignOutQueue(&IOutQueue);
     SenseData.ResponseCode = 0x70;
-    SenseData.AdditionalLength = 0x0A;
+    SenseData.AddSenseLen = 0x0A;
+
     // Thread
     chThdCreateStatic(waUsbOutThd, sizeof(waUsbOutThd), NORMALPRIO, (tfunc_t)UsbOutThd, NULL);
 }
 
 #if 1 // ====================== OUT task =======================================
 void MassStorage_t::UsbOutTask() {
-    bool ShouldSendStatus;
-    ShouldSendStatus = true;
     // Receive header
     if(chIQReadTimeout(&IOutQueue, (uint8_t*)&CmdBlock, MS_CMD_SZ, TIME_INFINITE) != MS_CMD_SZ) return;
-    bool CmdRsltOk = DecodeSCSICommand();
-    CmdStatus.Status = CmdRsltOk? MS_SCSI_COMMAND_Pass : MS_SCSI_COMMAND_Fail;
+    SCSICmdHandler();
+}
+#endif
+
+/*
+ *     CmdStatus.Status = CmdRsltOk? MS_SCSI_COMMAND_Pass : MS_SCSI_COMMAND_Fail;
     CmdStatus.Signature = MS_CSW_SIGNATURE;
     CmdStatus.Tag = CmdBlock.Tag;
     CmdStatus.DataTransferResidue = CmdBlock.DataTransferLength;
     // Stall if cmd failed and there is data to send
     if(!CmdRsltOk and (CmdStatus.DataTransferResidue != 0)) {
+        CmdStatus.DataTransferResidue = 0;
+        Usb.PEpBulkIn->StallIn();
+        ShouldSendStatus = (Usb.PEpBulkIn->WaitUntilReady() == OK);
+    }
+    if(ShouldSendStatus) Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&CmdStatus, sizeof(MS_CommandStatusWrapper_t));
+ *
+ */
+
+#if 1 // =========================== SCSI ======================================
+void MassStorage_t::SCSICmdHandler() {
+    Uart.Printf("Sgn=%X; Tag=%X; Len=%u; Flags=%X; LUN=%u; SLen=%u; SCmd=%A\r",
+            CmdBlock.Signature, CmdBlock.Tag, CmdBlock.DataTransferLen, CmdBlock.Flags, CmdBlock.LUN, CmdBlock.SCSICmdLen,
+            CmdBlock.SCSICmdData, CmdBlock.SCSICmdLen, ' ');
+    bool CmdOk = false;
+    switch(CmdBlock.SCSICmdData[0]) {
+        case SCSI_CMD_INQUIRY:            CmdOk = CmdInquiry(); break;
+        case SCSI_CMD_REQUEST_SENSE:      CmdOk = CmdRequestSense(); break;
+        case SCSI_CMD_READ_CAPACITY_10:   CmdOk = CmdReadCapacity10(); break;
+        case SCSI_CMD_SEND_DIAGNOSTIC:    CmdOk = CmdSendDiagnostic(); break;
+        case SCSI_READ_FORMAT_CAPACITIES: CmdOk = CmdReadFormatCapacities(); break;
+        case SCSI_CMD_WRITE_10:           CmdOk = CmdReadWrite10(rwWrite); break;
+        case SCSI_CMD_READ_10:            CmdOk = CmdReadWrite10(rwRead); break;
+        case SCSI_CMD_MODE_SENSE_6:       CmdOk = CmdModeSense6(); break;
+        // These commands should just succeed, no handling required
+        case SCSI_CMD_TEST_UNIT_READY:
+        case SCSI_CMD_PREVENT_ALLOW_MEDIUM_REMOVAL:
+        case SCSI_CMD_VERIFY_10:
+            CmdOk = true;
+            CmdBlock.DataTransferLen = 0;
+            break;
+        default:
+            Uart.Printf("Cmd %X not supported\r", CmdBlock.SCSICmdData[0]);
+            // Update the SENSE key to reflect the invalid command
+            SenseData.SenseKey = SCSI_SENSE_KEY_ILLEGAL_REQUEST;
+            SenseData.AdditionalSenseCode = SCSI_ASENSE_INVALID_COMMAND;
+            SenseData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
+            // Update status
+            //CmdStatus.DataTransferResidue = 0;    // 0 or requested length?
+            break;
+    } // switch
+    // Update Sense if command was successfully processed
+    if(CmdOk) {
+        SenseData.SenseKey = SCSI_SENSE_KEY_GOOD;
+        SenseData.AdditionalSenseCode = SCSI_ASENSE_NO_ADDITIONAL_INFORMATION;
+        SenseData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
+    }
+
+    // Send status
+    CmdStatus.Status = CmdOk? MS_SCSI_COMMAND_Pass : MS_SCSI_COMMAND_Fail;
+    CmdStatus.Signature = MS_CSW_SIGNATURE;
+    CmdStatus.Tag = CmdBlock.Tag;
+    CmdStatus.DataTransferResidue = CmdBlock.DataTransferLen;   // DataTransferLen decreased at cmd handlers
+    // Stall if cmd failed and there is data to send
+    bool ShouldSendStatus = true;
+    if(!CmdOk) {
         Usb.PEpBulkIn->StallIn();
         ShouldSendStatus = (Usb.PEpBulkIn->WaitUntilReady() == OK);
     }
     if(ShouldSendStatus) Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&CmdStatus, sizeof(MS_CommandStatusWrapper_t));
 }
-#endif
-
-#if 1 // =========================== SCSI ======================================
-bool MassStorage_t::DecodeSCSICommand() {
-    Uart.Printf("Sgn=%X; Tag=%X; Len=%u; Flags=%X; LUN=%u; SLen=%u; SCmd=%A\r",
-            CmdBlock.Signature, CmdBlock.Tag, CmdBlock.DataTransferLength, CmdBlock.Flags, CmdBlock.LUN, CmdBlock.SCSICommandLength,
-            CmdBlock.SCSICommandData, CmdBlock.SCSICommandLength, ' ');
-    bool CommandSuccess = false;
-    switch(CmdBlock.SCSICommandData[0]) {
-        case SCSI_CMD_INQUIRY:          CommandSuccess = CmdInquiry(); break;
-        case SCSI_CMD_REQUEST_SENSE:    CommandSuccess = CmdRequestSense(); break;
-        case SCSI_CMD_READ_CAPACITY_10: CommandSuccess = CmdReadCapacity10(); break;
-        case SCSI_CMD_SEND_DIAGNOSTIC:  CommandSuccess = CmdSendDiagnostic(); break;
-        case SCSI_CMD_WRITE_10:         CommandSuccess = CmdReadWrite10(rwWrite); break;
-        case SCSI_CMD_READ_10:          CommandSuccess = CmdReadWrite10(rwRead); break;
-        case SCSI_CMD_MODE_SENSE_6:     CommandSuccess = CmdModeSense6(); break;
-        // These commands should just succeed, no handling required
-        case SCSI_CMD_TEST_UNIT_READY:
-        case SCSI_CMD_PREVENT_ALLOW_MEDIUM_REMOVAL:
-        case SCSI_CMD_VERIFY_10:
-            CommandSuccess = true;
-            CmdBlock.DataTransferLength = 0;
-            break;
-        default:
-            Uart.Printf("Cmd %X not supported\r", CmdBlock.SCSICommandData[0]);
-            // Update the SENSE key to reflect the invalid command
-            SenseData.SenseKey = SCSI_SENSE_KEY_ILLEGAL_REQUEST;
-            SenseData.AdditionalSenseCode = SCSI_ASENSE_INVALID_COMMAND;
-            SenseData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
-            break;
-    } // switch
-
-    // Check if command was successfully processed
-    if(CommandSuccess) {
-        SenseData.SenseKey = SCSI_SENSE_KEY_GOOD;
-        SenseData.AdditionalSenseCode = SCSI_ASENSE_NO_ADDITIONAL_INFORMATION;
-        SenseData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
-    }
-    return CommandSuccess;
-}
 
 bool MassStorage_t::CmdInquiry() {
     Uart.Printf("CmdInquiry\r");
-    uint16_t RequestedLength = BuildUint16(CmdBlock.SCSICommandData[4], CmdBlock.SCSICommandData[3]);
-    uint16_t BytesToTransfer = MIN(RequestedLength, sizeof(InquiryData));
-    // Only the standard INQUIRY data is supported, check if any optional INQUIRY bits set
-    if((CmdBlock.SCSICommandData[1] & ((1 << 0) | (1 << 1))) or CmdBlock.SCSICommandData[2]) {
-        // Optional but unsupported bits set - update the SENSE key and fail the request
-        SenseData.SenseKey = SCSI_SENSE_KEY_ILLEGAL_REQUEST;
-        SenseData.AdditionalSenseCode = SCSI_ASENSE_INVALID_FIELD_IN_CDB;
-        SenseData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
-        return false;
+    uint16_t RequestedLength = BuildUint16(CmdBlock.SCSICmdData[4], CmdBlock.SCSICmdData[3]);
+    uint16_t BytesToTransfer;
+
+    if(CmdBlock.SCSICmdData[1] & 0x01) {
+        BytesToTransfer = MIN(RequestedLength, PAGE0_INQUIRY_DATA_SZ);
+        Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&Page00InquiryData, BytesToTransfer);
     }
-    // Transmit InquiryData
-    Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&InquiryData, BytesToTransfer);
+    else {
+        // Transmit InquiryData
+        BytesToTransfer = MIN(RequestedLength, sizeof(SCSI_InquiryResponse_t));
+        Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&InquiryData, BytesToTransfer);
+    }
     Usb.PEpBulkIn->WaitUntilReady();
     // Succeed the command and update the bytes transferred counter
-    CmdBlock.DataTransferLength -= BytesToTransfer;
+    CmdBlock.DataTransferLen -= BytesToTransfer;
     return true;
 }
 bool MassStorage_t::CmdRequestSense() {
     Uart.Printf("CmdRequestSense\r");
-    uint16_t RequestedLength = CmdBlock.SCSICommandData[4];
+    uint16_t RequestedLength = CmdBlock.SCSICmdData[4];
     uint16_t BytesToTransfer = MIN(RequestedLength, sizeof(SenseData));
     // Transmit SenceData
     Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&SenseData, BytesToTransfer);
     Usb.PEpBulkIn->WaitUntilReady();
     // Succeed the command and update the bytes transferred counter
-    CmdBlock.DataTransferLength -= BytesToTransfer;
+    CmdBlock.DataTransferLen -= BytesToTransfer;
     return true;
 }
 bool MassStorage_t::CmdReadCapacity10() {
     Uart.Printf("CmdReadCapacity10\r");
-    ReadCapacity10Response.LastBlockAddr = __REV(SDCD1.capacity - 1);
-    ReadCapacity10Response.BlockSize = __REV(MMCSD_BLOCK_SIZE);
+    ReadCapacity10Response.LastBlockAddr = __REV((uint32_t)((SDCD1.capacity / MMCSD_BLOCK_SIZE) - 1));
+    ReadCapacity10Response.BlockSize = __REV((uint32_t)MMCSD_BLOCK_SIZE);
     // Transmit SenceData
     Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&ReadCapacity10Response, sizeof(ReadCapacity10Response));
     Usb.PEpBulkIn->WaitUntilReady();
     // Succeed the command and update the bytes transferred counter
-    CmdBlock.DataTransferLength -= sizeof(ReadCapacity10Response);
+    CmdBlock.DataTransferLen -= sizeof(ReadCapacity10Response);
     return true;
 }
 bool MassStorage_t::CmdSendDiagnostic() {
     Uart.Printf("CmdSendDiagnostic\r");
+    return false;
+}
+bool MassStorage_t::CmdReadFormatCapacities() {
+    Uart.Printf("CmdReadFormatCapacities\r");
+    ReadFormatCapacitiesResponse.Length = 0x08;
+    ReadFormatCapacitiesResponse.NumberOfBlocks = __REV(SDCD1.capacity / MMCSD_BLOCK_SIZE);
+    // 01b Unformatted Media - Maximum formattable capacity for this cartridge
+    // 10b Formatted Media - Current media capacity
+    // 11b No Cartridge in Drive - Maximum formattable capacity
+    ReadFormatCapacitiesResponse.DescCode = 0x02;
+    ReadFormatCapacitiesResponse.BlockSize[0] = (uint8_t)(MMCSD_BLOCK_SIZE >> 16);
+    ReadFormatCapacitiesResponse.BlockSize[1] = (uint8_t)(MMCSD_BLOCK_SIZE >> 8);
+    ReadFormatCapacitiesResponse.BlockSize[2] = (uint8_t)(MMCSD_BLOCK_SIZE);
+    // Transmit Data
+    Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&ReadFormatCapacitiesResponse, sizeof(ReadFormatCapacitiesResponse));
+    Usb.PEpBulkIn->WaitUntilReady();
+    // Succeed the command and update the bytes transferred counter
+    CmdBlock.DataTransferLen -= sizeof(ReadFormatCapacitiesResponse);
     return true;
+
 }
 bool MassStorage_t::CmdReadWrite10(ReadWrite_t ReadWrite) {
     Uart.Printf("CmdReadWrite10\r");
@@ -169,8 +206,8 @@ bool MassStorage_t::CmdReadWrite10(ReadWrite_t ReadWrite) {
         SenseData.AdditionalSenseQualifier = SCSI_ASENSEQ_NO_QUALIFIER;
         return false;
     }
-    uint32_t BlockAddress = BuildUint32(CmdBlock.SCSICommandData[5], CmdBlock.SCSICommandData[4], CmdBlock.SCSICommandData[3], CmdBlock.SCSICommandData[2]);
-    uint16_t TotalBlocks  = BuildUint16(CmdBlock.SCSICommandData[8], CmdBlock.SCSICommandData[7]);
+    uint32_t BlockAddress = BuildUint32(CmdBlock.SCSICmdData[5], CmdBlock.SCSICmdData[4], CmdBlock.SCSICmdData[3], CmdBlock.SCSICmdData[2]);
+    uint16_t TotalBlocks  = BuildUint16(CmdBlock.SCSICmdData[8], CmdBlock.SCSICmdData[7]);
     Uart.Printf("Addr=%u; Len=%u\r", BlockAddress, TotalBlocks);
     // Check block addr
     if(BlockAddress >= SDCD1.capacity) {
@@ -183,11 +220,11 @@ bool MassStorage_t::CmdReadWrite10(ReadWrite_t ReadWrite) {
 
 
 
-    return true;
+    return false;
 }
 bool MassStorage_t::CmdModeSense6() {
     Uart.Printf("CmdModeSense6\r");
-    return true;
+    return false;
 }
 
 #endif

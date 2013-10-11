@@ -34,13 +34,13 @@ enum MS_CommandStatusCodes_t {
 
 // Mass Storage Class Command Block Wrapper
 struct MS_CommandBlockWrapper_t {
-    uint32_t Signature;          // Command block signature, must be MS_CBW_SIGNATURE to indicate a valid Command Block
-    uint32_t Tag;                // Unique command ID value, to associate a command block wrapper with its command status wrapper
-    uint32_t DataTransferLength; // Length of the optional data portion of the issued command, in bytes
-    uint8_t  Flags;              // Command block flags, indicating command data direction
-    uint8_t  LUN;                // Logical Unit number this command is issued to
-    uint8_t  SCSICommandLength;  // Length of the issued SCSI command within the SCSI command data array
-    uint8_t  SCSICommandData[16];// Issued SCSI command in the Command Block
+    uint32_t Signature;         // Command block signature, must be MS_CBW_SIGNATURE to indicate a valid Command Block
+    uint32_t Tag;               // Unique command ID value, to associate a command block wrapper with its command status wrapper
+    uint32_t DataTransferLen;   // Length of the optional data portion of the issued command, in bytes
+    uint8_t  Flags;             // Command block flags, indicating command data direction
+    uint8_t  LUN;               // Logical Unit number this command is issued to
+    uint8_t  SCSICmdLen;        // Length of the issued SCSI command within the SCSI command data array
+    uint8_t  SCSICmdData[16];   // Issued SCSI command in the Command Block
 } __attribute__ ((__packed__));
 #define MS_CMD_SZ   sizeof(MS_CommandBlockWrapper_t)
 
@@ -63,12 +63,14 @@ class MassStorage_t {
     MS_CommandStatusWrapper_t CmdStatus;
     SCSI_RequestSenseResponse_t SenseData;
     SCSI_ReadCapacity10Response_t ReadCapacity10Response;
-    bool DecodeSCSICommand();
+    SCSI_ReadFormatCapacitiesResponse_t ReadFormatCapacitiesResponse;
+    void SCSICmdHandler();
     // Scsi commands
     bool CmdInquiry();
     bool CmdRequestSense();
     bool CmdReadCapacity10();
     bool CmdSendDiagnostic();
+    bool CmdReadFormatCapacities();
     bool CmdReadWrite10(ReadWrite_t ReadWrite);
     bool CmdModeSense6();
 public:

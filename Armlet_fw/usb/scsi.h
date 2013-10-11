@@ -9,7 +9,7 @@
 #define SCSI_H_
 
 #include "inttypes.h"
-#include "stdbool.h"
+
 
 /*  Mass Storage Class SCSI Sense Structure
  *  Type define for a SCSI Sense structure. Structures of this type are filled out by the
@@ -18,16 +18,21 @@
  *  structure contents, refer to the SCSI specifications.
  */
 typedef struct {
-    uint8_t  ResponseCode;
-    uint8_t  SegmentNumber;
+    unsigned ResponseCode: 7;
+    unsigned VALID: 1;
+
+    uint8_t  Obsolete;
+
     unsigned SenseKey            : 4;
     unsigned Reserved            : 1;
     unsigned ILI                 : 1;
     unsigned EOM                 : 1;
     unsigned FileMark            : 1;
+
     uint8_t  Information[4];
-    uint8_t  AdditionalLength;
-    uint8_t  CmdSpecificInformation[4];
+
+    uint8_t  AddSenseLen;
+    uint8_t  CmdSpecificInfo[4];
     uint8_t  AdditionalSenseCode;
     uint8_t  AdditionalSenseQualifier;
     uint8_t  FieldReplaceableUnitCode;
@@ -41,35 +46,17 @@ typedef struct {
  *  For details of the structure contents, refer to the SCSI specifications.
  */
 typedef struct {
-    unsigned DeviceType          : 5;
-    unsigned PeripheralQualifier : 3;
-
-    unsigned Reserved            : 7;
-    unsigned Removable           : 1;
-
-    uint8_t  Version;
-
-    unsigned ResponseDataFormat  : 4;
-    unsigned Reserved2           : 1;
-    unsigned NormACA             : 1;
-    unsigned TrmTsk              : 1;
-    unsigned AERC                : 1;
-
-    uint8_t  AdditionalLength;
-    uint8_t  Reserved3[2];
-
-    unsigned SoftReset           : 1;
-    unsigned CmdQue              : 1;
-    unsigned Reserved4           : 1;
-    unsigned Linked              : 1;
-    unsigned Sync                : 1;
-    unsigned WideBus16Bit        : 1;
-    unsigned WideBus32Bit        : 1;
-    unsigned RelAddr             : 1;
-
-    uint8_t  VendorID[8];
-    uint8_t  ProductID[16];
-    uint8_t  RevisionID[4];
+    uint8_t Peripheral;
+    uint8_t Removable;
+    uint8_t Version;
+    uint8_t ResponseDataFormat;
+    uint8_t AdditionalLength;
+    uint8_t Sccstp;
+    uint8_t bqueetc;
+    uint8_t CmdQue;
+    uint8_t VendorID[8];
+    uint8_t ProductID[16];
+    uint8_t ProductRev[4];
 } __attribute__ ((__packed__)) SCSI_InquiryResponse_t;
 
 typedef struct {
@@ -77,26 +64,38 @@ typedef struct {
     uint32_t BlockSize;
 } __attribute__ ((__packed__)) SCSI_ReadCapacity10Response_t;
 
+typedef struct {
+    uint8_t Reserved[3];    // }
+    uint8_t Length;         // } Header
+    uint32_t NumberOfBlocks;
+    uint8_t DescCode;
+    uint8_t BlockSize[3];
+} __attribute__ ((__packed__)) SCSI_ReadFormatCapacitiesResponse_t;
+
+// Constants
 extern const SCSI_InquiryResponse_t InquiryData;
+#define PAGE0_INQUIRY_DATA_SZ   7
+extern const uint8_t Page00InquiryData[PAGE0_INQUIRY_DATA_SZ];
 
 /** Magic signature for a Command Status Wrapper used in the Mass Storage Bulk-Only transport protocol. */
 #define MS_CSW_SIGNATURE                               0x53425355UL
 
 
 #if 1 //==== SCSI Commands ====
-#define SCSI_CMD_TEST_UNIT_READY                       0x00
-#define SCSI_CMD_REQUEST_SENSE                         0x03
-#define SCSI_CMD_READ_6                                0x08
-#define SCSI_CMD_WRITE_6                               0x0A
-#define SCSI_CMD_INQUIRY                               0x12
-#define SCSI_CMD_MODE_SENSE_6                          0x1A
-#define SCSI_CMD_SEND_DIAGNOSTIC                       0x1D
-#define SCSI_CMD_PREVENT_ALLOW_MEDIUM_REMOVAL          0x1E
-#define SCSI_CMD_READ_CAPACITY_10                      0x25
-#define SCSI_CMD_READ_10                               0x28
-#define SCSI_CMD_WRITE_10                              0x2A
-#define SCSI_CMD_VERIFY_10                             0x2F
-#define SCSI_CMD_MODE_SENSE_10                         0x5A
+#define SCSI_CMD_TEST_UNIT_READY                0x00
+#define SCSI_CMD_REQUEST_SENSE                  0x03
+#define SCSI_CMD_READ_6                         0x08
+#define SCSI_CMD_WRITE_6                        0x0A
+#define SCSI_CMD_INQUIRY                        0x12
+#define SCSI_CMD_MODE_SENSE_6                   0x1A
+#define SCSI_CMD_SEND_DIAGNOSTIC                0x1D
+#define SCSI_CMD_PREVENT_ALLOW_MEDIUM_REMOVAL   0x1E
+#define SCSI_READ_FORMAT_CAPACITIES             0x23
+#define SCSI_CMD_READ_CAPACITY_10               0x25
+#define SCSI_CMD_READ_10                        0x28
+#define SCSI_CMD_WRITE_10                       0x2A
+#define SCSI_CMD_VERIFY_10                      0x2F
+#define SCSI_CMD_MODE_SENSE_10                  0x5A
 #endif
 
 #if 1 // ==== SCSI Sense Key Values ====
