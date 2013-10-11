@@ -14,7 +14,7 @@
 
 // Config
 #define NUMBER_OF_LUNS  1   // Number of logical disks
-#define READ_ONLY       false
+#define READ_ONLY       FALSE
 
 #if 1 // ================= Mass Storage constants and types ====================
 // Enum for the Mass Storage class specific control requests that can be issued by the USB bus host
@@ -54,8 +54,8 @@ struct MS_CommandStatusWrapper_t {
 
 #endif
 
-enum ReadWrite_t {rwRead, rwWrite};
-#define MS_OUTBUF_SZ     128
+#define MS_OUTBUF_SZ    128
+#define MS_DATABUF_SZ   2048
 class MassStorage_t {
     uint8_t QueueBuf[MS_OUTBUF_SZ];
     InputQueue IOutQueue;   // Host to Device, USB convention
@@ -71,8 +71,11 @@ class MassStorage_t {
     bool CmdReadCapacity10();
     bool CmdSendDiagnostic();
     bool CmdReadFormatCapacities();
-    bool CmdReadWrite10(ReadWrite_t ReadWrite);
+    bool CmdRead10();
+    bool CmdWrite10();
     bool CmdModeSense6();
+    // Buffers
+    uint8_t Buf1[MS_DATABUF_SZ], Buf2[MS_DATABUF_SZ];
 public:
     void Init();
     void UsbOutTask();

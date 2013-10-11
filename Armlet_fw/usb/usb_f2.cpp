@@ -521,7 +521,7 @@ void Ep_t::ReadToQueue(uint16_t Len) {
 
 // Fill USB memory with BufIn's data
 void Ep_t::FillInBuf() {
-    Uart.Printf("In%u: %A\r", Indx, PtrIn, LengthIn, ' ');
+//    Uart.Printf("In%u: %A\r", Indx, PtrIn, LengthIn, ' ');
     // Prepare variables
     volatile uint32_t *pDst = OTG_FS->FIFO[Indx];
     uint16_t WrittenBytesCnt = 0;
