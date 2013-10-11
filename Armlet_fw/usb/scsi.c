@@ -31,3 +31,15 @@ const uint8_t Page00InquiryData[PAGE0_INQUIRY_DATA_SZ] = {
     0x80,
     0x83
 };
+
+// USB Mass storage sense 6  Data
+const uint8_t Mode_Sense6_data[MODE_SENSE6_DATA_SZ] = {
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00
+};

@@ -76,7 +76,8 @@ typedef struct {
 extern const SCSI_InquiryResponse_t InquiryData;
 #define PAGE0_INQUIRY_DATA_SZ   7
 extern const uint8_t Page00InquiryData[PAGE0_INQUIRY_DATA_SZ];
-
+#define MODE_SENSE6_DATA_SZ     8
+extern const uint8_t Mode_Sense6_data[MODE_SENSE6_DATA_SZ];
 /** Magic signature for a Command Status Wrapper used in the Mass Storage Bulk-Only transport protocol. */
 #define MS_CSW_SIGNATURE                               0x53425355UL
 

@@ -123,7 +123,6 @@ bool MassStorage_t::CmdInquiry() {
     Uart.Printf("CmdInquiry\r");
     uint16_t RequestedLength = BuildUint16(CmdBlock.SCSICmdData[4], CmdBlock.SCSICmdData[3]);
     uint16_t BytesToTransfer;
-
     if(CmdBlock.SCSICmdData[1] & 0x01) {
         BytesToTransfer = MIN(RequestedLength, PAGE0_INQUIRY_DATA_SZ);
         Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&Page00InquiryData, BytesToTransfer);
@@ -239,7 +238,11 @@ bool MassStorage_t::CmdWrite10() {
 
 bool MassStorage_t::CmdModeSense6() {
     Uart.Printf("CmdModeSense6\r");
-    return false;
+    Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&Mode_Sense6_data, MODE_SENSE6_DATA_SZ);
+    Usb.PEpBulkIn->WaitUntilReady();
+    // Succeed the command and update the bytes transferred counter
+    CmdBlock.DataTransferLen -= MODE_SENSE6_DATA_SZ;
+    return true;
 }
 
 #endif
