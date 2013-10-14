@@ -13,7 +13,6 @@
 #include "scsi.h"
 
 // Config
-#define NUMBER_OF_LUNS  1   // Number of logical disks
 #define READ_ONLY       FALSE
 
 #if 1 // ================= Mass Storage constants and types ====================
@@ -54,11 +53,9 @@ struct MS_CommandStatusWrapper_t {
 
 #endif
 
-#define MS_OUTBUF_SZ    128
+#define MS_TIMEOUT_MS   2700
 #define MS_DATABUF_SZ   2048
 class MassStorage_t {
-    uint8_t QueueBuf[MS_OUTBUF_SZ];
-    InputQueue IOutQueue;   // Host to Device, USB convention
     MS_CommandBlockWrapper_t CmdBlock;
     MS_CommandStatusWrapper_t CmdStatus;
     SCSI_RequestSenseResponse_t SenseData;
@@ -74,8 +71,12 @@ class MassStorage_t {
     bool CmdRead10();
     bool CmdWrite10();
     bool CmdModeSense6();
-    // Buffers
-    uint8_t Buf1[MS_DATABUF_SZ], Buf2[MS_DATABUF_SZ];
+    // Buffers need to be aligned to 4-byte boundaries to allow advanced DMA to use aligned access.
+    struct {
+        uint8_t Buf1[MS_DATABUF_SZ];
+        uint8_t Buf2[MS_DATABUF_SZ];
+    } __attribute__((aligned(MS_DATABUF_SZ * 2)));
+    bool ReadWriteCommon(uint32_t *PAddr, uint16_t *PLen);
 public:
     void Init();
     void UsbOutTask();

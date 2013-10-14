@@ -72,11 +72,14 @@ int main() {
     }
 }
 
+static uint8_t Bufm[1024];
+
 void Init() {
-    Uart.Init(115200);
+    Uart.Init(256000);
     Uart.Printf("UsbDiscovery Sys=%u usb=%u\r", Clk.AHBFreqHz, Clk.UsbSdioFreqHz);
 
     SD.Init();
+
     // Read config
 //    uint32_t ID=0;
 //    iniReadUint32("Radio", "ID", "settings.ini", &ID);

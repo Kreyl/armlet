@@ -28,8 +28,10 @@
 #define EP0_PRINT_V1V2(S, a1, a2)
 #endif
 
-static uint8_t ZeroArr[2] = {0, 0};
 Usb_t Usb;
+// Constants
+const uint8_t cZero[2] = {0, 0};
+const uint8_t cOne[2]  = {1, 0};
 
 #if 1 // ========================== Low level ==================================
 void Usb_t::Init() {
@@ -188,10 +190,10 @@ void Usb_t::IEndpointsInit() {
             case EP_TYPE_INTERRUPT:   ctl = DIEPCTL_SD0PID | DIEPCTL_USBAEP | DIEPCTL_EPTYP_INTR; break;
             default: break;
         }
-        // OUT endpoint activation
+        // OUT endpoint setup
         if(EpCfg[i].OutMaxsize != 0) {  // really out endpoint
-            OTG_FS->oe[i].DOEPTSIZ = DOEPTSIZ_PKTCNT(1) | DOEPTSIZ_XFRSIZ(EpCfg[i].OutMaxsize); // FIXME
-            OTG_FS->oe[i].DOEPCTL = ctl | DOEPCTL_CNAK | DOEPCTL_MPSIZ(EpCfg[i].OutMaxsize);
+            //OTG_FS->oe[i].DOEPTSIZ = DOEPTSIZ_PKTCNT(1) | DOEPTSIZ_XFRSIZ(EpCfg[i].OutMaxsize); // FIXME
+            OTG_FS->oe[i].DOEPCTL = ctl | DOEPCTL_SNAK; // Do not receive
             OTG_FS->DAINTMSK |= DAINTMSK_OEPM(i);       // Enable out IRQ
         }
         else {
@@ -249,9 +251,9 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
     if(Recipient == USB_REQTYPE_RECIPIENT_DEVICE) {
         //Uart.Printf("Dev\r\n");
         switch(SetupReq.bRequest) {
-            case USB_REQ_GET_STATUS:    // Just return the current status word
+            case USB_REQ_GET_STATUS:        // Just return the current status word
                 EP0_PRINT("GetStatus\r");
-                *PPtr = ZeroArr;    // Remote wakeup = 0, selfpowered = 0
+                *PPtr = (uint8_t*)cZero;    // Remote wakeup = 0, selfpowered = 0
                 *PLen = 2;
                 return esInData;
                 break;
@@ -267,42 +269,55 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
                 GetDescriptor(SetupReq.Type, SetupReq.Indx, PPtr, PLen);
                 // Trim descriptor if needed, as host can request part of descriptor.
                 TRIM_VALUE(*PLen, SetupReq.wLength);
-//                Uart.Printf("DescLen=%u\r", PBuf->Len);
                 if(*PLen != 0) return esInData;
                 break;
             case USB_REQ_GET_CONFIGURATION:
                 EP0_PRINT("GetCnf\r");
-//                *Ptr = &Configuration;
-//                *PLen = 1;
-//                return OK;
+                *PPtr = &Configuration;
+                *PLen = 1;
+                return esInData;
                 break;
             case USB_REQ_SET_CONFIGURATION:
 //                EP0_PRINT_V1("SetCnf %u\r", SetupReq.wValue);
+                Configuration = (uint8_t)(SetupReq.wValue & 0xFF);
                 *PLen = 0;
-                Uart.Printf("*******UsbConfigured\r");
+//                Uart.Printf("*******UsbConfigured\r");
                 IEndpointsInit();
-                Usb.State = usConfigured;
+                if(PThread != nullptr) {
+                    chSysLockFromIsr();
+                    chEvtSignalI(PThread, (eventmask_t)1);
+                    chSysUnlockFromIsr();
+                }
                 return esOutStatus;
                 break;
             default: break;
         } // switch
     }
 //    else if(Recipient == USB_REQTYPE_RECIPIENT_INTERFACE) {
-//        if(SetupReq.bRequest == USB_REQ_GET_STATUS) {
-//            EP0_PRINT("InterfGetSta\r");
-////            *Ptr = (uint8_t*)ZeroStatus;
-////            *PLen = 2;
-////            return OK;
+//        if(SetupReq.bRequest == USB_REQ_SET_INTERFACE) {
+//            //EP0_PRINT("InterfaceSet\r");
+//            return esOutStatus;
 //        }
 //    }
     else if(Recipient == USB_REQTYPE_RECIPIENT_ENDPOINT) {
-        EP0_PRINT("Ep\r");
+//        EP0_PRINT("Ep\r");
         switch(SetupReq.bRequest) {
             case USB_REQ_SYNCH_FRAME:
-                *PPtr = ZeroArr;    // Remote wakeup = 0, selfpowered = 0
+                *PPtr = (uint8_t*)cZero;
                 *PLen = 2;
                 return esInData;
                 break;
+            case USB_REQ_SET_FEATURE:
+                // Only ENDPOINT_HALT is handled as feature
+                if(SetupReq.wValue != 0) return esError;
+                // Handle only non-control eps
+                EpID = SetupReq.wIndex & 0x0F;
+                if(EpID != 0) {
+                    if(SetupReq.wIndex & 0x80) Ep[EpID].StallIn();
+                    else Ep[EpID].StallOut();
+                    Ep[EpID].ResumeWaitingThd(OK);
+                }
+                return esOutStatus;
             case USB_REQ_CLEAR_FEATURE:
                 // Only ENDPOINT_HALT is handled as feature
                 if(SetupReq.wValue != 0) return esError;
@@ -316,6 +331,13 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
                 return esOutStatus;
                 break;
             case USB_REQ_GET_STATUS:
+                EpID = SetupReq.wIndex & 0x0F;
+                if(SetupReq.wIndex & 0x80)
+                    *PPtr = Ep[EpID].IsStalledIn()? (uint8_t*)cOne : (uint8_t*)cZero;
+                else
+                    *PPtr = Ep[EpID].IsStalledOut()? (uint8_t*)cOne : (uint8_t*)cZero;
+                *PLen = 2;
+                return esInData;
                 break;
         } // switch bRequest
     } // if Ep
@@ -386,12 +408,29 @@ void Usb_t::IEpOutHandler(uint8_t EpID) {
             if(Ep[0].PktState == psZeroPkt) {
                 Ep[0].PktState = psNoPkt;
                 Ep[0].State = esSetup;
-                Ep[0].ReceivePkt();
+                Ep[0].PrepareOutTransaction(1, 3*8);
+                Ep[0].StartOutTransaction();
             }
         }
-        else {// Restart reception
-            OTG_FS->oe[EpID].DOEPTSIZ = DOEPTSIZ_PKTCNT(1) | DOEPTSIZ_XFRSIZ(EpCfg[EpID].OutMaxsize);
-            Ep[EpID].StartOutTransaction();
+        else {// Restart reception if needed
+            // Queue
+            if(Ep[EpID].POutQueue != nullptr) {
+                if(chIQGetEmptyI(Ep[EpID].POutQueue) != 0) { // Restart reception if Queue is not full
+                    Ep[EpID].PrepareOutTransaction(1, 64);   // FIXME
+                    Ep[EpID].StartOutTransaction();
+                }
+            }
+            // Buffer
+            else if(Ep[EpID].PtrOut != nullptr) {
+                if(Ep[EpID].LengthOut != 0) {
+                    Ep[EpID].PrepareOutTransaction(1, 64);   // FIXME
+                    Ep[EpID].StartOutTransaction();
+                }
+                else {  // Transmission completed
+                    Ep[EpID].PtrOut = nullptr;
+                    Ep[EpID].ResumeWaitingThd(OK);
+                }
+            } // if buffer
         }
     } // if XFRC
 }
@@ -408,12 +447,13 @@ void Usb_t::IEpInHandler(uint8_t EpID) {
             switch(ep->State) {
                 case esInData:
                     if((ep->LengthIn != 0) or ep->TransmitFinalZeroPkt) {
-                        ep->FillInBuf(); // Transfer not completed
+                        ep->BufToFifo(); // Transfer not completed
                         ep->StartInTransaction();
                     }
                     else {  // Buf len == 0
                         ep->State = esInStatus; // Receive zero pkt
-                        ep->ReceivePkt();
+                        ep->PrepareOutTransaction(1, 3*8);
+                        ep->StartOutTransaction();
                     }
                     break;
 
@@ -436,7 +476,7 @@ void Usb_t::IEpInHandler(uint8_t EpID) {
     // TX FIFO empty
     if((epint & DIEPINT_TXFE) and Ep[EpID].InFifoEmptyIRQEnabled()) {
 //        Uart.Printf("In TXFE\r");
-        Ep[EpID].FillInBuf();
+        Ep[EpID].BufToFifo();
     } // if txfe
 }
 
@@ -448,9 +488,7 @@ void Usb_t::IRxHandler() {
 //    Uart.Printf("Rx%u Pkt sts: %X; Len: %u\r", sts&0xF, (sts>>17)&0xF, (sts>>4)&0x7FF);
     switch (sts & GRXSTSP_PKTSTS_MASK) {
         case GRXSTSP_SETUP_DATA:
-//            cnt = (sts & GRXSTSP_BCNT_MASK) >> GRXSTSP_BCNT_OFF;
-//            EpID = sts & GRXSTSP_EPNUM_MASK;
-            Ep[0].ReadToBuf(Ep0OutBuf, 8);
+            Ep[0].FifoToBuf(Ep0OutBuf, 8);
             Ep[0].PktState = psDataPkt;
             break;
         case GRXSTSP_OUT_DATA:
@@ -462,11 +500,21 @@ void Usb_t::IRxHandler() {
             else {
                 Ep[EpID].PktState = psDataPkt;
 //                Uart.Printf("DataRcvd for %u\r", EpID);
-                if(Ep[EpID].POutQueue != NULL) Ep[EpID].ReadToQueue(Len);
-                else {
-                    Uart.Printf("flush\r");
-                    RxFifoFlush();
+                // Read to queue
+                if(Ep[EpID].POutQueue != nullptr) {
+                    Ep[EpID].FifoToQueue(Len);
+                    return;
                 }
+                // Read to buffer
+                else if((Ep[EpID].PtrOut != nullptr) and (Ep[EpID].LengthOut != 0)) {
+                    Len = MIN(Len, Ep[EpID].LengthOut);
+                    Ep[EpID].FifoToBuf(Ep[EpID].PtrOut, Len);
+                    Ep[EpID].LengthOut -= Len;
+                    Ep[EpID].PtrOut += Len;
+                    return;
+                }
+                Uart.Printf("flush\r");
+                RxFifoFlush();
             }
             break;
         case GRXSTSP_SETUP_COMP:    // Setup transaction completed
@@ -480,20 +528,34 @@ void Usb_t::IRxHandler() {
 
 #if 1 // ============================ Endpoints ================================
 void Ep_t::ResumeWaitingThd(msg_t ReadyMsg) {
-    if(PThread != NULL) {
+    Buzy = false;
+    if(PThread != nullptr) {
         chSysLockFromIsr();
         if(PThread->p_state == THD_STATE_SUSPENDED) {
             PThread->p_u.rdymsg = ReadyMsg;
             chSchReadyI(PThread);
         }
+        PThread = nullptr;
         chSysUnlockFromIsr();
-        PThread = NULL;
     }
 }
 
-void Ep_t::ReadToBuf(uint8_t *PDstBuf, uint16_t Len) {
+uint8_t Ep_t::WaitUntilReady() {
+    if(!Buzy) return OK;
+    uint8_t rslt = OK;
+    chSysLock();
+    PThread = chThdSelf();
+    chSchGoSleepS(THD_STATE_SUSPENDED);
+    PThread = nullptr;
+    if(chThdSelf()->p_u.rdymsg != RDY_OK) rslt = FAILURE;
+    chSysUnlock();
+    return rslt;
+}
+
+// ==== Buffers ====
+void Ep_t::FifoToBuf(uint8_t *PDstBuf, uint32_t Len) {
     // Get pointer to Fifo
-    volatile uint32_t *PFifo = OTG_FS->FIFO[Indx]; // FIXME: Indx, not 0?
+    volatile uint32_t *PFifo = OTG_FS->FIFO[Indx];
     Len = (Len + 3) / 4;    // Convert bytes count to words count
     while(Len--) {
         uint32_t w = *PFifo;
@@ -502,10 +564,10 @@ void Ep_t::ReadToBuf(uint8_t *PDstBuf, uint16_t Len) {
     }
 }
 
-void Ep_t::ReadToQueue(uint16_t Len) {
-//    Uart.Printf("R2Q %u\r", Len);
+void Ep_t::FifoToQueue(uint32_t Len) {
+//    Uart.Printf("F2Q %u\r", Len);
     // Get pointer to Fifo
-    volatile uint32_t *PFifo = OTG_FS->FIFO[0]; // FIXME: Indx or 0?
+    volatile uint32_t *PFifo = OTG_FS->FIFO[0]; // It is really 0
     chSysLockFromIsr();
     while(Len != 0) {
         uint32_t w = *PFifo;    // Read up to 4 bytes from FIFO
@@ -520,7 +582,7 @@ void Ep_t::ReadToQueue(uint16_t Len) {
 }
 
 // Fill USB memory with BufIn's data
-void Ep_t::FillInBuf() {
+void Ep_t::BufToFifo() {
 //    Uart.Printf("In%u: %A\r", Indx, PtrIn, LengthIn, ' ');
     // Prepare variables
     volatile uint32_t *pDst = OTG_FS->FIFO[Indx];
@@ -540,38 +602,40 @@ void Ep_t::FillInBuf() {
     if(LengthIn == 0) DisableInFifoEmptyIRQ();
 }
 
+// ==== Transactions ====
 void Ep_t::TransmitZeroPkt() {
 //    Uart.Printf("Tx0\r");
     OTG_FS->ie[Indx].DIEPTSIZ = DIEPTSIZ_PKTCNT(1) | DIEPTSIZ_XFRSIZ(0);
     OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_EPENA | DIEPCTL_CNAK;   // Enable Ep and clear NAK
-}
-void Ep_t::ReceivePkt() {
-//    Uart.Printf("Rx\r");
-    OTG_FS->oe[Indx].DOEPTSIZ = DOEPTSIZ_STUPCNT(3) | DOEPTSIZ_PKTCNT(1) | (3*8);//EpCfg[Indx].OutMaxsize;
-    StartOutTransaction();
 }
 
 void Ep_t::StartTransmitBuf(uint8_t *Ptr, uint32_t ALen) {
  //    Uart.Printf("TxBuf Ep%u; %A\r", Indx, Ptr, ALen, ' ');
     chSysLock();
     PtrIn = Ptr;
+    Buzy = true;
     LengthIn = ALen;
     PrepareInTransaction();   // Just prepare; may not fill fifo here
     StartInTransaction();
     chSysUnlock();
 }
 
-uint8_t Ep_t::WaitUntilReady() {
-    uint8_t rslt = OK;
+uint32_t Ep_t::ReceiveToBuf(uint8_t *PDst, uint32_t Len, systime_t Timeout) {
     chSysLock();
+    PtrOut = PDst;
+    LengthOut = Len;
+    Buzy = true;
+    if(Timeout != TIME_INFINITE) {
+        // TODO: Start timer
+    }
+    PrepareOutTransaction(1, 64);   // FIXME
+    StartOutTransaction();
+    // Wait until ready
     PThread = chThdSelf();
     chSchGoSleepS(THD_STATE_SUSPENDED);
-    PThread = nullptr;
-    if(chThdSelf()->p_u.rdymsg != RDY_OK) rslt = FAILURE;
     chSysUnlock();
-    return rslt;
+    // Return number of received bytes
+    return (Len - LengthOut);
 }
 
 #endif
-
-

@@ -26,8 +26,9 @@ private:
     EpState_t State;
     EpPktState_t PktState;
     Thread *PThread;
-    uint8_t *PtrIn;
-    uint32_t LengthIn;
+    bool Buzy;
+    uint8_t *PtrIn, *PtrOut;
+    uint32_t LengthIn, LengthOut;
     bool TransmitFinalZeroPkt;
     void ClearInNAK() { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_CNAK; }
     // IRQ
@@ -35,8 +36,8 @@ private:
     void EnableInFifoEmptyIRQ()  { OTG_FS->DIEPEMPMSK |=  (1 << Indx); }
     void DisableInFifoEmptyIRQ() { OTG_FS->DIEPEMPMSK &= ~(1 << Indx); }
     bool InFifoEmptyIRQEnabled() { return (OTG_FS->DIEPEMPMSK & DIEPEMPMSK_INEPTXFEM(Indx)); }
-    // Buffers and transactions
-    void FillInBuf();
+    // ==== IN ====
+    void BufToFifo();
     void PrepareInTransaction() {
         uint32_t pcnt = (LengthIn + EpCfg[Indx].InMaxsize - 1) / EpCfg[Indx].InMaxsize;
         OTG_FS->ie[Indx].DIEPTSIZ = DIEPTSIZ_PKTCNT(pcnt) | LengthIn;
@@ -45,21 +46,28 @@ private:
         OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_EPENA | DIEPCTL_CNAK;   // Enable Ep and clear NAK
         EnableInFifoEmptyIRQ();
     }
-    void StartOutTransaction() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_CNAK; }
     void TransmitZeroPkt();
-    void ReceivePkt();
-    void ReadToBuf(uint8_t *PDstBuf, uint16_t Len);
-    void ReadToQueue(uint16_t Len);
+    // ==== OUT ====
+    void PrepareOutTransaction(uint8_t PktCnt, uint8_t Len) { OTG_FS->oe[Indx].DOEPTSIZ = DOEPTSIZ_STUPCNT(3) | DOEPTSIZ_PKTCNT(PktCnt) | Len; }
+    void StartOutTransaction() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_CNAK; }
+    void FifoToBuf(uint8_t *PDstBuf, uint32_t Len);
+    void FifoToQueue(uint32_t Len);
 //    uint16_t GetRxDataLength();
     void ResumeWaitingThd(msg_t ReadyMsg);
 public:
-    inline void AssignOutQueue(InputQueue *PQueue) { POutQueue = PQueue; }
-    void StartTransmitBuf(uint8_t *Ptr, uint32_t ALen);
+    // OUT
+    uint32_t ReceiveToBuf(uint8_t *PDst, uint32_t Len, systime_t Timeout);
+    void AssignOutQueue(InputQueue *PQueue) { POutQueue = PQueue; }
+    // IN
+    void StartTransmitBuf(uint8_t *PSrc, uint32_t ALen);
     uint8_t WaitUntilReady();
+    // Ep operations
     void StallIn()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_STALL; }
     void StallOut() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_STALL; }
     void ClearStallIn()  { OTG_FS->ie[Indx].DIEPCTL &= ~DIEPCTL_STALL; }
     void ClearStallOut() { OTG_FS->oe[Indx].DOEPCTL &= ~DOEPCTL_STALL; }
+    bool IsStalledIn()   { return (OTG_FS->ie[Indx].DIEPCTL & DIEPCTL_STALL); }
+    bool IsStalledOut()  { return (OTG_FS->oe[Indx].DOEPCTL & DOEPCTL_STALL); }
     // Inner use
     friend class Usb_t;
 };
@@ -82,8 +90,6 @@ struct UsbSetupReq_t {
 #if 1 // ============================ Usb_t ====================================
 #define USB_RX_SZ_WORDS     256 // => Sz_in_bytes = 256*4 = 1024; 256 is maximum
 
-enum UsbState_t {usDisconnected, usConnected, usConfigured};
-
 class Usb_t {
 private:
     Ep_t Ep[EP_CNT];
@@ -93,6 +99,7 @@ private:
         UsbSetupReq_t SetupReq;
     };
     uint8_t Ep1OutBuf[EP0_SZ];
+    uint8_t Configuration;
     // Initialization
     void IDeviceReset();
     void IEndpointsDisable();
@@ -109,7 +116,7 @@ private:
     void PrepareInTransaction(uint8_t *Ptr, uint32_t ALen);
     void IEndpointsInit();
 public:
-    UsbState_t State;
+    Thread *PThread;
     void Init();
     void Connect()    { OTG_FS->GCCFG |=  GCCFG_VBUSBSEN | GCCFG_NOVBUSSENS; }
     void Disconnect() { OTG_FS->GCCFG &= ~GCCFG_VBUSBSEN; }

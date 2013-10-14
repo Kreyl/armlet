@@ -52,7 +52,7 @@ static const DeviceDescriptor_t DeviceDescriptor = {
         bcdDevice:          0x0001,          // bcdDevice
         iManufacturer:      1,               // iManufacturer
         iProduct:           2,               // iProduct
-        iSerialNumber:      0,               // iSerialNumber
+        iSerialNumber:      3,               // iSerialNumber
         bNumConfigurations: 1                // bNumConfigurations
 };
 #endif
@@ -105,9 +105,9 @@ static const ConfigDescriptor_t ConfigDescriptor = {
 #if 1 // ==== Strings ====
 // U.S. English language identifier
 static const StringDescriptor_t LanguageString = {
-        bLength: USB_STRING_LEN(1),
+        bLength: USB_STRING_LEN(2),
         bDescriptorType: dtString,
-        bString: {0x0409}
+        bString: {0x09, 0x04}   // == 0409
 };
 
 // Vendor string
@@ -122,6 +122,13 @@ static const StringDescriptor_t ProductString = {
         bLength: USB_STRING_LEN(12),
         bDescriptorType: dtString,
         bString: {'M','a','s','s',' ','S','t','o','r','a','g','e'}
+};
+
+// Device Description string
+static const StringDescriptor_t SerialNumber = {
+        bLength: USB_STRING_LEN(12),
+        bDescriptorType: dtString,
+        bString: {'0','1','2','3','4','5','6','7','8','9','A','B'}
 };
 #endif
 
@@ -149,6 +156,10 @@ void GetDescriptor(uint8_t Type, uint8_t Indx, uint8_t **PPtr, uint32_t *PLen) {
                 case 2:
                     *PPtr = (uint8_t*)&ProductString;
                     *PLen = ProductString.bLength;
+                    break;
+                case 3:
+                    *PPtr = (uint8_t*)&SerialNumber;
+                    *PLen = SerialNumber.bLength;
                     break;
                 default: break;
             }
