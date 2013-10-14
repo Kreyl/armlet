@@ -238,8 +238,8 @@ void Usb_t::SetupPktHandler() {
             Ep[0].TransmitZeroPkt();
             break;
         default:
-            Ep[0].StallIn();
-            Ep[0].StallOut();
+            Ep[0].SetStallIn();
+            Ep[0].SetStallOut();
             break;
     } // switch
 }
@@ -314,8 +314,8 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
                 // Handle only non-control eps
                 EpID = SetupReq.wIndex & 0x0F;
                 if(EpID != 0) {
-                    if(SetupReq.wIndex & 0x80) Ep[EpID].StallIn();
-                    else Ep[EpID].StallOut();
+                    if(SetupReq.wIndex & 0x80) Ep[EpID].SetStallIn();
+                    else Ep[EpID].SetStallOut();
                     Ep[EpID].ResumeWaitingThd(OK);
                 }
                 return esOutStatus;
@@ -428,6 +428,7 @@ void Usb_t::IEpOutHandler(uint8_t EpID) {
                 }
                 else {  // Transmission completed
                     Ep[EpID].PtrOut = nullptr;
+                    Ep[EpID].SetNakOut();
                     Ep[EpID].ResumeWaitingThd(OK);
                 }
             } // if buffer
@@ -464,8 +465,8 @@ void Usb_t::IEpInHandler(uint8_t EpID) {
                 default:
                     EP0_PRINT("e\r");
                     ep->State = esError;
-                    ep->StallIn();
-                    ep->StallOut();
+                    ep->SetStallIn();
+                    ep->SetStallOut();
                     break;
             } // switch
         } // if(EpID == 0)

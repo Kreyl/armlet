@@ -69,13 +69,15 @@ public:
     void StartTransmitBuf(uint8_t *PSrc, uint32_t ALen);
     // Common
     uint8_t WaitUntilReady();
-    // Ep operations
-    void StallIn()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_STALL; }
-    void StallOut() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_STALL; }
+    // Stall operations
+    void SetStallIn()    { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_STALL; }
+    void SetStallOut()   { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_STALL; }
     void ClearStallIn()  { OTG_FS->ie[Indx].DIEPCTL &= ~DIEPCTL_STALL; }
     void ClearStallOut() { OTG_FS->oe[Indx].DOEPCTL &= ~DOEPCTL_STALL; }
     bool IsStalledIn()   { return (OTG_FS->ie[Indx].DIEPCTL & DIEPCTL_STALL); }
     bool IsStalledOut()  { return (OTG_FS->oe[Indx].DOEPCTL & DOEPCTL_STALL); }
+    // NAK operations
+    void SetNakOut() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_SNAK; }
     // Inner use
     friend class Usb_t;
 };

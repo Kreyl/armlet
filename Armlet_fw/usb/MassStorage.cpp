@@ -114,7 +114,7 @@ void MassStorage_t::SCSICmdHandler() {
     // Stall if cmd failed and there is data to send
     bool ShouldSendStatus = true;
     if(!CmdOk) {
-        Usb.PEpBulkIn->StallIn();
+        Usb.PEpBulkIn->SetStallIn();
         ShouldSendStatus = (Usb.PEpBulkIn->WaitUntilReady() == OK);
     }
     if(ShouldSendStatus) Usb.PEpBulkIn->StartTransmitBuf((uint8_t*)&CmdStatus, sizeof(MS_CommandStatusWrapper_t));
@@ -257,7 +257,7 @@ bool MassStorage_t::CmdRead10() {
 }
 
 bool MassStorage_t::CmdWrite10() {
-    Uart.Printf("CmdWrite10\r");
+//    Uart.Printf("CmdWrite10\r");
 #if READ_ONLY
     SenseData.SenseKey = SCSI_SENSE_KEY_DATA_PROTECT;
     SenseData.AdditionalSenseCode = SCSI_ASENSE_WRITE_PROTECTED;
@@ -279,55 +279,28 @@ bool MassStorage_t::CmdWrite10() {
     uint32_t BlockAddress=0;
     uint16_t TotalBlocks=0;
     if(ReadWriteCommon(&BlockAddress, &TotalBlocks) == false) return false;
-    Uart.Printf("Addr=%u; Len=%u\r", BlockAddress, TotalBlocks);
-
-    uint32_t BlocksToWrite, BytesToReceive;//, Rcvd;
-    bool Rslt = CH_SUCCESS; // DEBUG
+//    Uart.Printf("Addr=%u; Len=%u\r", BlockAddress, TotalBlocks);
+    uint32_t BlocksToWrite, BytesToReceive;
+    bool Rslt = CH_SUCCESS; // FIXME
     while(TotalBlocks != 0) {
-        // First buffer
+        // Fill Buf1
         BytesToReceive = MIN(MS_DATABUF_SZ, TotalBlocks * MMCSD_BLOCK_SIZE);
         BlocksToWrite = BytesToReceive / MMCSD_BLOCK_SIZE;
         // Get data from USB
         Usb.PEpBulkOut->StartReceiveToBuf(Buf1, BytesToReceive);
-        Usb.PEpBulkOut->WaitUntilReady();
-//        Rcvd = Usb.PEpBulkOut->GetRcvdLen();
-//        Uart.Printf("Rcvd1: %u\r", Rcvd);
-//        Uart.Printf("%A\r", Buf1, Rcvd, ' ');
-//        chThdSleep(MS2ST(999));
-//        if(Rcvd != BytesToReceive) return false;
-        // Write data to card
-        //Rslt = sdcWrite(&SDCD1, BlockAddress, Buf1, BlocksToWrite);
-        if(Rslt == CH_SUCCESS) {
-            CmdBlock.DataTransferLen -= BytesToReceive;
-            TotalBlocks  -= BlocksToWrite;
-            BlockAddress += BlocksToWrite;
+        if(Usb.PEpBulkOut->WaitUntilReady() != OK) {
+            Uart.Printf("Rcv1 fail\r");
+            return false;
         }
-        else {
+
+        Rslt = sdcWrite(&SDCD1, BlockAddress, Buf1, BlocksToWrite);
+        if(Rslt != CH_SUCCESS) {
             Uart.Printf("Wr1 fail\r");
             return false;
         }
-        // Second buffer
-        if(TotalBlocks != 0) {
-            BytesToReceive = MIN(MS_DATABUF_SZ, TotalBlocks * MMCSD_BLOCK_SIZE);
-            BlocksToWrite = BytesToReceive / MMCSD_BLOCK_SIZE;
-            // Get data from USB
-//            Usb.PEpBulkOut->ReceiveToBuf(Buf2, BytesToReceive, MS2ST(MS_TIMEOUT_MS));
-//            Uart.Printf("Rcvd2: %u\r", Rcvd);
-//            Uart.Printf("%A\r", Buf2, Rcvd, ' ');
-            chThdSleep(MS2ST(999));
-//            if(Rcvd != BytesToReceive) return false;
-            // Write data to card
-            //Rslt = sdcWrite(&SDCD1, BlockAddress, Buf2, BlocksToWrite);
-            if(Rslt == CH_SUCCESS) {
-                CmdBlock.DataTransferLen -= BytesToReceive;
-                TotalBlocks  -= BlocksToWrite;
-                BlockAddress += BlocksToWrite;
-            }
-            else {
-                Uart.Printf("Wr2 fail\r");
-                return false;
-            }
-        } // if second buf makes sense
+        TotalBlocks  -= BlocksToWrite;
+        BlockAddress += BlocksToWrite;
+        CmdBlock.DataTransferLen -= BytesToReceive;
     } // while
     return true;
 #endif
