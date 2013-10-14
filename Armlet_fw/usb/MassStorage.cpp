@@ -22,7 +22,7 @@ EpState_t Usb_t::NonStandardControlRequestHandler(uint8_t **PPtr, uint32_t *PLen
     if((SetupReq.wIndex != 0) or (SetupReq.wValue != 0)) return esError;
     switch(SetupReq.bRequest) {
             case MS_REQ_MassStorageReset:
-                Uart.Printf("MS_REQ_MassStorageReset\r");
+//                Uart.Printf("MS_REQ_MassStorageReset\r");
                 if((SetupReq.bmRequestType == (USB_REQTYPE_RECIPIENT_DEVICE | USB_REQTYPE_CLASS | USB_REQTYPE_RECIPIENT_INTERFACE))
                         and (SetupReq.wLength == 0)) {
                     // TODO: remove Stall condition
@@ -30,7 +30,7 @@ EpState_t Usb_t::NonStandardControlRequestHandler(uint8_t **PPtr, uint32_t *PLen
                 }
                 break;
             case MS_REQ_GetMaxLUN:
-                Uart.Printf("MS_REQ_GetMaxLUN\r");
+//                Uart.Printf("MS_REQ_GetMaxLUN\r");
                 if((SetupReq.bmRequestType == (USB_REQTYPE_DEV2HOST | USB_REQTYPE_CLASS | USB_REQTYPE_RECIPIENT_INTERFACE))
                         and (SetupReq.wLength == 1)) {
                     SByte = 0;  // Maximum LUN ID

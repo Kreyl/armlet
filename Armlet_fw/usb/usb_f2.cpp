@@ -252,14 +252,14 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
         //Uart.Printf("Dev\r\n");
         switch(SetupReq.bRequest) {
             case USB_REQ_GET_STATUS:        // Just return the current status word
-                EP0_PRINT("GetStatus\r");
+//                EP0_PRINT("GetStatus\r");
                 *PPtr = (uint8_t*)cZero;    // Remote wakeup = 0, selfpowered = 0
                 *PLen = 2;
                 return esInData;
                 break;
             case USB_REQ_SET_ADDRESS:
                 Addr = IGetSetupAddr();
-                EP0_PRINT_V1("SetAddr %u\r", Addr);
+//                EP0_PRINT_V1("SetAddr %u\r", Addr);
                 *PLen = 0;
                 ISetAddress(Addr);
                 return esOutStatus;
@@ -272,7 +272,7 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
                 if(*PLen != 0) return esInData;
                 break;
             case USB_REQ_GET_CONFIGURATION:
-                EP0_PRINT("GetCnf\r");
+//                EP0_PRINT("GetCnf\r");
                 *PPtr = &Configuration;
                 *PLen = 1;
                 return esInData;
@@ -333,10 +333,8 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
                 break;
             case USB_REQ_GET_STATUS:
                 EpID = SetupReq.wIndex & 0x0F;
-                if(SetupReq.wIndex & 0x80)
-                    *PPtr = Ep[EpID].IsStalledIn()? (uint8_t*)cOne : (uint8_t*)cZero;
-                else
-                    *PPtr = Ep[EpID].IsStalledOut()? (uint8_t*)cOne : (uint8_t*)cZero;
+                if(SetupReq.wIndex & 0x80) *PPtr = Ep[EpID].IsStalledIn()?  (uint8_t*)cOne : (uint8_t*)cZero;
+                else                       *PPtr = Ep[EpID].IsStalledOut()? (uint8_t*)cOne : (uint8_t*)cZero;
                 *PLen = 2;
                 return esInData;
                 break;
@@ -370,7 +368,7 @@ void Usb_t::IIrqHandler() {
     // Reset
     if(irqs & GINTSTS_USBRST) IDeviceReset();
     // Enumeration done
-    if(irqs & GINTSTS_ENUMDNE) { (void)OTG_FS->DSTS; }    // FIXME: really needed?
+    if(irqs & GINTSTS_ENUMDNE) { (void)OTG_FS->DSTS; }
     // RX FIFO not empty
     if(irqs & GINTSTS_RXFLVL) {
         IRxHandler();
@@ -418,7 +416,7 @@ void Usb_t::IEpOutHandler(uint8_t EpID) {
             // Queue
             if(Ep[EpID].POutQueue != nullptr) {
                 if(chIQGetEmptyI(Ep[EpID].POutQueue) != 0) { // Restart reception if Queue is not full
-                    Ep[EpID].PrepareOutTransaction(1, 64);   // FIXME
+                    Ep[EpID].PrepareOutTransaction(1, EpCfg[EpID].OutMaxsize);
                     Ep[EpID].StartOutTransaction();
                 }
             }
