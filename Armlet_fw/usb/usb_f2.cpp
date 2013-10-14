@@ -86,7 +86,7 @@ void Usb_t::Shutdown() {
 
 void Usb_t::IDeviceReset() {
 //    Uart.Printf("Rst\r");
-    State = usConnected;
+    IsReady = false;
     TxFifoFlush(); // TX FIFO flush
     // Force all EPs in NAK mode and clear irqs
     for(uint8_t i = 0; i < EP_CNT; i++) {
@@ -192,8 +192,8 @@ void Usb_t::IEndpointsInit() {
         }
         // OUT endpoint setup
         if(EpCfg[i].OutMaxsize != 0) {  // really out endpoint
-            //OTG_FS->oe[i].DOEPTSIZ = DOEPTSIZ_PKTCNT(1) | DOEPTSIZ_XFRSIZ(EpCfg[i].OutMaxsize); // FIXME
-            OTG_FS->oe[i].DOEPCTL = ctl | DOEPCTL_SNAK; // Do not receive
+            OTG_FS->oe[i].DOEPTSIZ = DOEPTSIZ_PKTCNT(1) | DOEPTSIZ_XFRSIZ(EpCfg[i].OutMaxsize); // FIXME
+            OTG_FS->oe[i].DOEPCTL = ctl | DOEPCTL_CNAK; // Do not receive
             OTG_FS->DAINTMSK |= DAINTMSK_OEPM(i);       // Enable out IRQ
         }
         else {
@@ -283,6 +283,7 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
                 *PLen = 0;
 //                Uart.Printf("*******UsbConfigured\r");
                 IEndpointsInit();
+                IsReady = true;
                 if(PThread != nullptr) {
                     chSysLockFromIsr();
                     chEvtSignalI(PThread, (eventmask_t)1);
@@ -413,6 +414,7 @@ void Usb_t::IEpOutHandler(uint8_t EpID) {
             }
         }
         else {// Restart reception if needed
+            Uart.Printf("OutXFRC #%u\r", EpID);
             // Queue
             if(Ep[EpID].POutQueue != nullptr) {
                 if(chIQGetEmptyI(Ep[EpID].POutQueue) != 0) { // Restart reception if Queue is not full
@@ -499,7 +501,7 @@ void Usb_t::IRxHandler() {
             }
             else {
                 Ep[EpID].PktState = psDataPkt;
-//                Uart.Printf("DataRcvd for %u\r", EpID);
+                Uart.Printf("DataRcvd for %u\r", EpID);
                 // Read to queue
                 if(Ep[EpID].POutQueue != nullptr) {
                     Ep[EpID].FifoToQueue(Len);
@@ -527,7 +529,7 @@ void Usb_t::IRxHandler() {
 #endif
 
 #if 1 // ============================ Endpoints ================================
-void Ep_t::ResumeWaitingThd(msg_t ReadyMsg) {
+void Ep_t::ResumeWaitingThd(uint8_t ReadyMsg) {
     Buzy = false;
     if(PThread != nullptr) {
         chSysLockFromIsr();
@@ -542,8 +544,8 @@ void Ep_t::ResumeWaitingThd(msg_t ReadyMsg) {
 
 uint8_t Ep_t::WaitUntilReady() {
     if(!Buzy) return OK;
-    uint8_t rslt = OK;
     chSysLock();
+    uint8_t rslt = OK;
     PThread = chThdSelf();
     chSchGoSleepS(THD_STATE_SUSPENDED);
     PThread = nullptr;
@@ -620,22 +622,15 @@ void Ep_t::StartTransmitBuf(uint8_t *Ptr, uint32_t ALen) {
     chSysUnlock();
 }
 
-uint32_t Ep_t::ReceiveToBuf(uint8_t *PDst, uint32_t Len, systime_t Timeout) {
+void Ep_t::StartReceiveToBuf(uint8_t *PDst, uint32_t Len) {
     chSysLock();
     PtrOut = PDst;
     LengthOut = Len;
     Buzy = true;
-    if(Timeout != TIME_INFINITE) {
-        // TODO: Start timer
-    }
-    PrepareOutTransaction(1, 64);   // FIXME
-    StartOutTransaction();
-    // Wait until ready
-    PThread = chThdSelf();
-    chSchGoSleepS(THD_STATE_SUSPENDED);
+//    PrepareOutTransaction(1, Len);   // FIXME
+//    StartOutTransaction();
+    Uart.Printf("#%u; %X; %X\r", Indx, OTG_FS->oe[Indx].DOEPCTL, OTG_FS->oe[Indx].DOEPTSIZ);
     chSysUnlock();
-    // Return number of received bytes
-    return (Len - LengthOut);
 }
 
 #endif

@@ -48,18 +48,22 @@ private:
     }
     void TransmitZeroPkt();
     // ==== OUT ====
-    void PrepareOutTransaction(uint8_t PktCnt, uint8_t Len) { OTG_FS->oe[Indx].DOEPTSIZ = DOEPTSIZ_STUPCNT(3) | DOEPTSIZ_PKTCNT(PktCnt) | Len; }
+    void PrepareOutTransaction(uint8_t PktCnt, uint8_t Len) {
+        OTG_FS->oe[Indx].DOEPTSIZ = DOEPTSIZ_STUPCNT(3) | DOEPTSIZ_PKTCNT(PktCnt) | Len;
+    }
     void StartOutTransaction() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_CNAK; }
     void FifoToBuf(uint8_t *PDstBuf, uint32_t Len);
     void FifoToQueue(uint32_t Len);
 //    uint16_t GetRxDataLength();
-    void ResumeWaitingThd(msg_t ReadyMsg);
+    void ResumeWaitingThd(uint8_t ReadyMsg);
 public:
     // OUT
-    uint32_t ReceiveToBuf(uint8_t *PDst, uint32_t Len, systime_t Timeout);
+    uint32_t GetRcvResidueLen() { return LengthOut; }
+    void StartReceiveToBuf(uint8_t *PDst, uint32_t Len);
     void AssignOutQueue(InputQueue *PQueue) { POutQueue = PQueue; }
     // IN
     void StartTransmitBuf(uint8_t *PSrc, uint32_t ALen);
+    // Common
     uint8_t WaitUntilReady();
     // Ep operations
     void StallIn()  { OTG_FS->ie[Indx].DIEPCTL |= DIEPCTL_STALL; }
@@ -116,6 +120,7 @@ private:
     void PrepareInTransaction(uint8_t *Ptr, uint32_t ALen);
     void IEndpointsInit();
 public:
+    bool IsReady;
     Thread *PThread;
     void Init();
     void Connect()    { OTG_FS->GCCFG |=  GCCFG_VBUSBSEN | GCCFG_NOVBUSSENS; }

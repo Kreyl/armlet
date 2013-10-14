@@ -72,8 +72,6 @@ int main() {
     }
 }
 
-static uint8_t Bufm[1024];
-
 void Init() {
     Uart.Init(256000);
     Uart.Printf("UsbDiscovery Sys=%u usb=%u\r", Clk.AHBFreqHz, Clk.UsbSdioFreqHz);
