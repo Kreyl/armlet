@@ -84,7 +84,7 @@
 		<link>
 			<name>3KShellLib</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/3KShellLib</locationURI>
+			<location>D:/Nute/Armlet/OpenSpace/ArmletShell/3KShellLib</location>
 		</link>
 		<link>
 			<name>Common_fw</name>
@@ -94,32 +94,17 @@
 		<link>
 			<name>MiddleWareLib</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/MiddleWareLib</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/Armlet/OpenSpace/ArmletShell/MiddleWareLib</locationURI>
 		</link>
 		<link>
-			<name>PriceOfHonor2</name>
+			<name>OpenSpaceApp</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/PriceOfHonor2</locationURI>
-		</link>
-		<link>
-			<name>ShellApi</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/ShellApi</locationURI>
-		</link>
-		<link>
-			<name>MiddleWareLib</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/MiddleWareLib</locationURI>
-		</link>
-		<link>
-			<name>PriceOfHonor2</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/PriceOfHonor2</locationURI>
+			<location>D:/Nute/Armlet/OpenSpace/ArmletShell/OpenSpaceApp</location>
 		</link>
 		<link>
 			<name>ShellApi</name>
 			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/ShellApi</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/Armlet/OpenSpace/ArmletShell/ShellApi</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>

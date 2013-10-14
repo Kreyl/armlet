@@ -369,9 +369,9 @@ void ArmletApi::OnRadioPacket(unsigned char* packet, int len) { }
 void ArmletApi::OnPillConnect(int cure_id, int charges) { }
 #endif
 
-void ThreeKShell::ApiPrintf(const char *S, unsigned int N1, unsigned int N2) {
-    Uart.Printf("%S;%u;%u\r\n", S, N1, N2);
-}
+//void ThreeKShell::ApiPrintf(const char *S, unsigned int N1, unsigned int N2) {
+//    Uart.Printf("%S;%u;%u\r\n", S, N1, N2);
+//}
 
 unsigned char ArmletApi::GetLustraId() {
     uint8_t b = Lustra.IDForApp;
