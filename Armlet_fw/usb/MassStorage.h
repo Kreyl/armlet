@@ -53,9 +53,11 @@ struct MS_CommandStatusWrapper_t {
 
 #endif
 
-#define MS_TIMEOUT_MS   2700
+#define MS_OUTBUF_SZ    128
 #define MS_DATABUF_SZ   2048
 class MassStorage_t {
+    uint8_t QueueBuf[MS_DATABUF_SZ];
+    InputQueue IOutQueue;   // Host to Device, USB convention
     MS_CommandBlockWrapper_t CmdBlock;
     MS_CommandStatusWrapper_t CmdStatus;
     SCSI_RequestSenseResponse_t SenseData;
