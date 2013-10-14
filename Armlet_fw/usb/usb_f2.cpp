@@ -192,8 +192,8 @@ void Usb_t::IEndpointsInit() {
         }
         // OUT endpoint setup
         if(EpCfg[i].OutMaxsize != 0) {  // really out endpoint
-            OTG_FS->oe[i].DOEPTSIZ = DOEPTSIZ_PKTCNT(1) | DOEPTSIZ_XFRSIZ(EpCfg[i].OutMaxsize); // FIXME
-            OTG_FS->oe[i].DOEPCTL = ctl | DOEPCTL_CNAK; // Do not receive
+//            OTG_FS->oe[i].DOEPTSIZ = DOEPTSIZ_PKTCNT(1) | DOEPTSIZ_XFRSIZ(EpCfg[i].OutMaxsize); // FIXME
+            OTG_FS->oe[i].DOEPCTL = ctl | DOEPCTL_SNAK | EpCfg[i].OutMaxsize; // Do not receive
             OTG_FS->DAINTMSK |= DAINTMSK_OEPM(i);       // Enable out IRQ
         }
         else {
@@ -627,8 +627,8 @@ void Ep_t::StartReceiveToBuf(uint8_t *PDst, uint32_t Len) {
     PtrOut = PDst;
     LengthOut = Len;
     Buzy = true;
-//    PrepareOutTransaction(1, Len);   // FIXME
-//    StartOutTransaction();
+    PrepareOutTransaction(1, Len);   // FIXME
+    StartOutTransaction();
     Uart.Printf("#%u; %X; %X\r", Indx, OTG_FS->oe[Indx].DOEPCTL, OTG_FS->oe[Indx].DOEPTSIZ);
     chSysUnlock();
 }

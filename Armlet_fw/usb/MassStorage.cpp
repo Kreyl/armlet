@@ -61,12 +61,8 @@ void MassStorage_t::Init() {
 void MassStorage_t::UsbOutTask() {
     if(!Usb.IsReady) chEvtWaitAny((eventmask_t)1);
     // Receive header
-    Uart.Printf("1\r");
     Usb.PEpBulkOut->StartReceiveToBuf((uint8_t*)&CmdBlock, MS_CMD_SZ);
     uint8_t rslt = Usb.PEpBulkOut->WaitUntilReady();
-    uint32_t Rcvd = Usb.PEpBulkOut->GetRcvResidueLen();
-    Uart.Printf("Residue: %u\r", Rcvd);
-//    Uart.Printf("rslt: %u\r", rslt);
     if(rslt == OK) SCSICmdHandler();
 }
 #endif
