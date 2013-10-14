@@ -48,7 +48,11 @@ private:
     }
     void TransmitZeroPkt();
     // ==== OUT ====
-    void PrepareOutTransaction(uint8_t PktCnt, uint8_t Len) {
+    void PrepareOutTransaction(uint32_t PktCnt, uint32_t Len) {
+        OTG_FS->oe[Indx].DOEPTSIZ = DOEPTSIZ_STUPCNT(3) | DOEPTSIZ_PKTCNT(PktCnt) | Len;
+    }
+    void PrepareOutTransaction(uint32_t Len) {
+        uint32_t PktCnt = (Len + EpCfg[Indx].OutMaxsize - 1) / EpCfg[Indx].OutMaxsize;
         OTG_FS->oe[Indx].DOEPTSIZ = DOEPTSIZ_STUPCNT(3) | DOEPTSIZ_PKTCNT(PktCnt) | Len;
     }
     void StartOutTransaction() { OTG_FS->oe[Indx].DOEPCTL |= DOEPCTL_CNAK; }

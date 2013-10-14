@@ -6,6 +6,7 @@
  */
 
 #include "usb_f2.h"
+#include "evt_mask.h"
 
 #define TRDT        0xF  // AHB clock = 24, => TRDT = 4 * (24/48) +1
 
@@ -192,7 +193,6 @@ void Usb_t::IEndpointsInit() {
         }
         // OUT endpoint setup
         if(EpCfg[i].OutMaxsize != 0) {  // really out endpoint
-//            OTG_FS->oe[i].DOEPTSIZ = DOEPTSIZ_PKTCNT(1) | DOEPTSIZ_XFRSIZ(EpCfg[i].OutMaxsize); // FIXME
             OTG_FS->oe[i].DOEPCTL = ctl | DOEPCTL_SNAK | EpCfg[i].OutMaxsize; // Do not receive
             OTG_FS->DAINTMSK |= DAINTMSK_OEPM(i);       // Enable out IRQ
         }
@@ -286,7 +286,7 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
                 IsReady = true;
                 if(PThread != nullptr) {
                     chSysLockFromIsr();
-                    chEvtSignalI(PThread, (eventmask_t)1);
+                    chEvtSignalI(PThread, EVTMASK_USB_READY);
                     chSysUnlockFromIsr();
                 }
                 return esOutStatus;
@@ -414,7 +414,7 @@ void Usb_t::IEpOutHandler(uint8_t EpID) {
             }
         }
         else {// Restart reception if needed
-            Uart.Printf("OutXFRC #%u\r", EpID);
+//            Uart.Printf("OutXFRC #%u\r", EpID);
             // Queue
             if(Ep[EpID].POutQueue != nullptr) {
                 if(chIQGetEmptyI(Ep[EpID].POutQueue) != 0) { // Restart reception if Queue is not full
@@ -425,7 +425,7 @@ void Usb_t::IEpOutHandler(uint8_t EpID) {
             // Buffer
             else if(Ep[EpID].PtrOut != nullptr) {
                 if(Ep[EpID].LengthOut != 0) {
-                    Ep[EpID].PrepareOutTransaction(1, 64);   // FIXME
+                    Ep[EpID].PrepareOutTransaction(Ep[EpID].LengthOut);
                     Ep[EpID].StartOutTransaction();
                 }
                 else {  // Transmission completed
@@ -501,7 +501,7 @@ void Usb_t::IRxHandler() {
             }
             else {
                 Ep[EpID].PktState = psDataPkt;
-                Uart.Printf("DataRcvd for %u\r", EpID);
+//                Uart.Printf("DataRcvd for %u\r", EpID);
                 // Read to queue
                 if(Ep[EpID].POutQueue != nullptr) {
                     Ep[EpID].FifoToQueue(Len);
@@ -627,9 +627,9 @@ void Ep_t::StartReceiveToBuf(uint8_t *PDst, uint32_t Len) {
     PtrOut = PDst;
     LengthOut = Len;
     Buzy = true;
-    PrepareOutTransaction(1, Len);   // FIXME
+    PrepareOutTransaction(Len);
     StartOutTransaction();
-    Uart.Printf("#%u; %X; %X\r", Indx, OTG_FS->oe[Indx].DOEPCTL, OTG_FS->oe[Indx].DOEPTSIZ);
+//    Uart.Printf("#%u; %X; %X\r", Indx, OTG_FS->oe[Indx].DOEPCTL, OTG_FS->oe[Indx].DOEPTSIZ);
     chSysUnlock();
 }
 

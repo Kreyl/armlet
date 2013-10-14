@@ -10,6 +10,7 @@
 
 #include "MassStorage.h"
 #include "sdc_lld.h"
+#include "evt_mask.h"
 
 MassStorage_t MassStorage;
 static uint8_t SByte;
@@ -59,7 +60,7 @@ void MassStorage_t::Init() {
 
 #if 1 // ====================== OUT task =======================================
 void MassStorage_t::UsbOutTask() {
-    if(!Usb.IsReady) chEvtWaitAny((eventmask_t)1);
+    if(!Usb.IsReady) chEvtWaitAny(EVTMASK_USB_READY);
     // Receive header
     Usb.PEpBulkOut->StartReceiveToBuf((uint8_t*)&CmdBlock, MS_CMD_SZ);
     uint8_t rslt = Usb.PEpBulkOut->WaitUntilReady();
