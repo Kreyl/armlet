@@ -86,19 +86,20 @@ void Init() {
 //    Lcd.Init();
     //Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
 
-    Usb.Init();
-    MassStorage.Init();
-    chThdSleepMilliseconds(450);
-    Usb.Connect();
+//    Usb.Init();
+//    MassStorage.Init();
+//    chThdSleepMilliseconds(450);
+//    Usb.Connect();
 
-//    Keys.Init();
+    Keys.Init();
 //    Beeper.Init();
 //    Vibro.Init();
 //    IR.TxInit();
 //    IR.RxInit();
 //    Power.Init();
 //    PillInit();
-//    Sound.Init();
+    Sound.Init();
+    Sound.Play("angel.mp3");
 //    Sound.Play("alive.wav");
 //    rLevel1.Init(ID);
 //    AppInit();

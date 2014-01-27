@@ -8,10 +8,6 @@
 #ifndef MEDIA_H
 #define	MEDIA_H
 
-#define SOUND_ENABLED   FALSE
-
-#if SOUND_ENABLED
-
 #include "kl_sd.h"
 #include <stdint.h>
 #include "kl_lib_f2xx.h"
@@ -115,7 +111,7 @@ private:
     void AddCmd(uint8_t AAddr, uint16_t AData);
     inline void StartTransmissionIfNotBusy() {
         if(IDmaIdle and IDreq.IsHi()) {
-//            Uart.Printf("T");
+            Uart.Printf("T");
             IDreq.Enable(IRQ_PRIO_MEDIUM);
             IDreq.GenerateIrq();    // Do not call SendNexData directly because of its interrupt context
         }
@@ -128,7 +124,9 @@ public:
     void Init();
     void Play(const char* AFilename) {
         IFilename = AFilename;
-        chEvtSignal(PThread, VS_EVT_STOP);
+        chSysLock();
+        chEvtSignalI(PThread, VS_EVT_STOP);
+        chSysUnlock();
     }
     void Stop() {
         IFilename = NULL;
@@ -160,8 +158,6 @@ public:
 };
 
 extern Sound_t Sound;
-
-#endif  // Sound Enabled
 
 #endif	/* MEDIA_H */
 

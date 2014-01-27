@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include "core_cmInstr.h"
-#include "tiny_sprintf.h"
 
 #include "lcdFont8x8.h"
 
@@ -178,15 +177,15 @@ uint16_t Lcd_t::PutChar(uint8_t x, uint8_t y, char c, Color_t ForeClr, Color_t B
 
 void Lcd_t::Printf(uint8_t x, uint8_t y, const Color_t ForeClr, const Color_t BckClr, const char *S, ...) {
     // Printf to buffer
-    va_list args;
-    va_start(args, S);
-    uint32_t Cnt = tiny_vsprintf(CharBuf, LCD_CHARBUF_SZ, S, args);
-    va_end(args);
-    // Draw what printed
-    for(uint32_t i=0; i<Cnt; i++) {
-        x = PutChar(x, y, CharBuf[i], ForeClr, BckClr);
-        if(x>160) break;
-    }
+//    va_list args;
+//    va_start(args, S);
+//    uint32_t Cnt = tiny_vsprintf(CharBuf, LCD_CHARBUF_SZ, S, args);
+//    va_end(args);
+//    // Draw what printed
+//    for(uint32_t i=0; i<Cnt; i++) {
+//        x = PutChar(x, y, CharBuf[i], ForeClr, BckClr);
+//        if(x>160) break;
+//    }
 }
 #endif
 

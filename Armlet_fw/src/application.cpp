@@ -17,7 +17,6 @@
 #include "pill.h"
 #include "infrared.h"
 #include "power.h"
-#include "tiny_sprintf.h"
 
 #include "lvl1_assym.h"
 #include "evt_mask.h"

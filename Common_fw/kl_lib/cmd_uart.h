@@ -12,26 +12,27 @@
 #include "ch.h"
 #include "hal.h"
 #include "kl_lib_f2xx.h"
+#include "kl_sprintf.h"
 
 #include "main.h"
 
 
 // Set to true if RX needed
 //#ifdef GATE
-#define UART_RX_ENABLED     TRUE
+#define UART_RX_ENABLED     FALSE
 //#endif
 
 // UART
-#define UART_TXBUF_SIZE     2700
+#define UART_TXBUF_SIZE     504
 #define UART                USART2
 #define UART_GPIO           GPIOD
 #define UART_TX_PIN         5
-#define UART_AF             AF7
-#define UART_DMA            STM32_DMA1_STREAM6
+#define UART_AF             AF7  // for all uarts
 #define UART_DMA_CHNL       4
 #define UART_RCC_ENABLE()   rccEnableUSART2(FALSE)
 
-#define UART_DMA_MODE       STM32_DMA_CR_CHSEL(UART_DMA_CHNL) | \
+#define UART_DMA_TX         STM32_DMA1_STREAM6
+#define UART_DMA_TX_MODE    STM32_DMA_CR_CHSEL(UART_DMA_CHNL) | \
                             DMA_PRIORITY_LOW | \
                             STM32_DMA_CR_MSIZE_BYTE | \
                             STM32_DMA_CR_PSIZE_BYTE | \
@@ -53,9 +54,8 @@ enum RcvState_t {rsStart, rsCmdCode1, rsCmdCode2, rsData1, rsData2};
 
 class CmdUart_t {
 private:
-    uint8_t TXBuf[UART_TXBUF_SIZE];
-    char SprintfBuf[UART_TXBUF_SIZE];
-    uint8_t *PWrite, *PRead;
+    char TXBuf[UART_TXBUF_SIZE];
+    char *PWrite, *PRead;
     bool IDmaIsIdle;
     uint32_t IFullSlotsCount, ITransSize;
 #if UART_RX_ENABLED
@@ -75,8 +75,9 @@ public:
     }
     void Init(uint32_t ABaudrate);
     void Cmd(uint8_t CmdCode, uint8_t *PData, uint32_t Length) { Printf("#%X,%A\r\n", CmdCode, PData, Length, 0); }
-
+    // Inner use
     void IRQDmaTxHandler();
+    void IPutChar(char c);
 #if UART_RX_ENABLED
     // Inner use
     InputQueue iqueue;

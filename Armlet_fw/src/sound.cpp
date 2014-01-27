@@ -1,8 +1,6 @@
 #include "sound.h"
 #include <string.h>
 
-#if SOUND_ENABLED
-
 Sound_t Sound;
 
 // Mode register
@@ -55,12 +53,12 @@ void Sound_t::ITask() {
     }
     // Stop request
     else if(EvtMsk & VS_EVT_STOP) {
-//        Uart.Printf("Stop\r");
+        Uart.Printf("Stop\r");
         PrepareToStop();
     }
     // Data read request
     else if(EvtMsk & VS_EVT_READ_NEXT) {
-        FRESULT rslt;
+        FRESULT rslt = FR_OK;
         bool EofAtStart = f_eof(&IFile);
         // Read next if not EOF
         if(!EofAtStart) {
@@ -174,7 +172,7 @@ void Sound_t::AddCmd(uint8_t AAddr, uint16_t AData) {
 }
 
 void Sound_t::ISendNextData() {
-//    Uart.Printf("sn\r");
+    Uart.Printf("sn\r");
     IDreq.Disable();
     dmaStreamDisable(VS_DMA);
     IDmaIdle = false;
@@ -219,7 +217,7 @@ void Sound_t::ISendNextData() {
         }
     }
     else if(State == sndWritingZeroes) {
-//        Uart.Printf("Z");
+        Uart.Printf("Z");
         if(ZeroesCount == 0) { // Was writing zeroes, now all over
             State = sndStopped;
             IDmaIdle = true;
@@ -245,7 +243,7 @@ void Sound_t::PrepareToStop() {
 }
 
 void Sound_t::SendZeroes() {
-//    Uart.Printf("sz\r");
+    Uart.Printf("sz\r");
     XDCS_Lo();  // Start data transmission
     uint32_t FLength = (ZeroesCount > 32)? 32 : ZeroesCount;
     dmaStreamSetMemory0(VS_DMA, &SZero);
@@ -263,10 +261,9 @@ uint8_t ReadWriteByte(uint8_t AByte) {
 
 // ==== Commands ====
 uint8_t Sound_t::CmdRead(uint8_t AAddr, uint16_t* AData) {
-    uint8_t IReply;
     uint16_t IData;
     // Wait until ready
-    //if ((IReply = BusyWait()) != OK) return IReply; // Get out in case of timeout
+    //if ((uint8_t IReply = BusyWait()) != OK) return IReply; // Get out in case of timeout
     XCS_Lo();   // Start transmission
     ReadWriteByte(VS_READ_OPCODE);  // Send operation code
     ReadWriteByte(AAddr);           // Send addr
@@ -278,9 +275,8 @@ uint8_t Sound_t::CmdRead(uint8_t AAddr, uint16_t* AData) {
     return OK;
 }
 uint8_t Sound_t::CmdWrite(uint8_t AAddr, uint16_t AData) {
-    uint8_t IReply;
     // Wait until ready
-//    if ((IReply = BusyWait()) != OK) return IReply; // Get out in case of timeout
+//    if ((uint8_t IReply = BusyWait()) != OK) return IReply; // Get out in case of timeout
     XCS_Lo();                       // Start transmission
     ReadWriteByte(VS_WRITE_OPCODE); // Send operation code
     ReadWriteByte(AAddr);           // Send addr
@@ -289,5 +285,3 @@ uint8_t Sound_t::CmdWrite(uint8_t AAddr, uint16_t AData) {
     XCS_Hi();                       // End transmission
     return OK;
 }
-
-#endif // #if SOUND_ENABLED

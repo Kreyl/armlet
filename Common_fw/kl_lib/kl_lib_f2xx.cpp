@@ -8,7 +8,6 @@
 #include "kl_lib_f2xx.h"
 #include <stdarg.h>
 #include <string.h>
-#include "tiny_sprintf.h"
 
 // ================================ Timer ======================================
 void Timer_t::Init() {
