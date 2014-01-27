@@ -41,7 +41,6 @@ private:
     bool GDO2IsHi() { return PinIsSet(CC_GPIO, CC_GDO2); }
     void BusyWait() { while(PinIsSet(CC_GPIO, CC_MISO)); }
     // General
-    uint8_t ReadWriteByte(uint8_t AByte);
     void RfConfig();
     int8_t RSSI_dBm(uint8_t ARawRSSI);
     // Registers and buffers

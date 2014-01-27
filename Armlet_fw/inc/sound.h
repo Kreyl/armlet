@@ -68,8 +68,8 @@ union VsCmd_t {
 
 #define VS_VOLUME_STEP          4
 #define VS_INITIAL_ATTENUATION  0x33
-#define VS_CMD_BUF_SZ   4
-#define VS_DATA_BUF_SZ  512    // bytes. Must be multiply of 512.
+#define VS_CMD_BUF_SZ           9
+#define VS_DATA_BUF_SZ          512    // bytes. Must be multiply of 512.
 
 struct VsBuf_t {
     uint8_t Data[VS_DATA_BUF_SZ], *PData;
@@ -93,11 +93,10 @@ private:
     VsBuf_t Buf1, Buf2, *PBuf;
     uint32_t ZeroesCount;
     Thread *PThread;
-    EventSource IEvtSrcPlayEnd;
     FIL IFile;
+    const char* IFilename;
     bool IDmaIdle;
     int16_t IAttenuation;
-    const char* IFilename;
     // Pin operations
     inline void Rst_Lo()   { PinClear(VS_GPIO, VS_RST); }
     inline void Rst_Hi()   { PinSet(VS_GPIO, VS_RST); }
@@ -111,7 +110,7 @@ private:
     void AddCmd(uint8_t AAddr, uint16_t AData);
     inline void StartTransmissionIfNotBusy() {
         if(IDmaIdle and IDreq.IsHi()) {
-            Uart.Printf("T");
+//            Uart.Printf("T");
             IDreq.Enable(IRQ_PRIO_MEDIUM);
             IDreq.GenerateIrq();    // Do not call SendNexData directly because of its interrupt context
         }
@@ -125,7 +124,8 @@ public:
     void Play(const char* AFilename) {
         IFilename = AFilename;
         chSysLock();
-        chEvtSignalI(PThread, VS_EVT_STOP);
+        if(State == sndStopped) chEvtSignalI(PThread, VS_EVT_COMPLETED);
+        else chEvtSignalI(PThread, VS_EVT_STOP);
         chSysUnlock();
     }
     void Stop() {
@@ -148,7 +148,6 @@ public:
         if(IAttenuation > 0x8F) IAttenuation = 0x8F;
         AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
     }
-    void RegisterEvtPlayEnd(EventListener *PEvtLstnr, uint8_t EvtMask) { chEvtRegisterMask(&IEvtSrcPlayEnd, PEvtLstnr, EvtMask); }
     // Inner use
     IrqPin_t IDreq;
     void IrqDreqHandler();

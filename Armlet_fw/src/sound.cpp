@@ -10,7 +10,7 @@ Sound_t Sound;
 #define ZERO_SEQ_LEN        128
 static const uint8_t SZero = 0;
 
-static uint8_t ReadWriteByte(uint8_t AByte);
+static Spi_t ISpi;
 
 // ================================= IRQ =======================================
 extern "C" {
@@ -27,7 +27,7 @@ void SIrqDmaHandler(void *p, uint32_t flags) { Sound.IrqDmaHandler(); }
 
 void Sound_t::IrqDmaHandler() {
 //    Uart.Printf("Dma\r");
-    Spi_t::WaitBsyHi2Lo(VS_SPI);    // Wait SPI transaction end
+    ISpi.WaitBsyLo();               // Wait SPI transaction end
     XCS_Hi();                       // }
     XDCS_Hi();                      // } Stop SPI
     if(IDreq.IsHi()) ISendNextData();   // More data allowed, send it now
@@ -35,7 +35,7 @@ void Sound_t::IrqDmaHandler() {
 }
 
 // =========================== Implementation ==================================
-static WORKING_AREA(waSoundThread, 272);
+static WORKING_AREA(waSoundThread, 280);
 __attribute__((noreturn))
 static void SoundThread(void *arg) {
     chRegSetThreadName("Sound");
@@ -46,10 +46,9 @@ void Sound_t::ITask() {
     eventmask_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
     // Play new request
     if(EvtMsk & VS_EVT_COMPLETED) {
-//        Uart.Printf("cmp\r");
         AddCmd(VS_REG_MODE, 0x0004);
         if(IFilename != NULL) IPlayNew();
-        else chEvtBroadcast(&IEvtSrcPlayEnd);   // Raise event if nothing to play
+        // else chEvtBroadcast(&IEvtSrcPlayEnd);   // TODO: Raise event if nothing to play
     }
     // Stop request
     else if(EvtMsk & VS_EVT_STOP) {
@@ -88,12 +87,11 @@ void Sound_t::Init() {
     PinSetupAlterFunc(VS_GPIO, VS_SI,   omPushPull, pudNone, VS_AF);
 
     // ==== SPI init ====
-    Spi_t::Setup(VS_SPI, boMSB, cpolIdleLow, cphaFirstEdge, sbFdiv4);
-    Spi_t::Enable(VS_SPI);
-    Spi_t::EnableTxDma(VS_SPI);
+    ISpi.Setup(VS_SPI, boMSB, cpolIdleLow, cphaFirstEdge, sbFdiv8);
+    ISpi.EnableTxDma();
+    ISpi.Enable();
 
     // ==== DMA ====
-    // Here only unchanged parameters of the DMA are configured.
     dmaStreamAllocate     (VS_DMA, IRQ_PRIO_MEDIUM, SIrqDmaHandler, NULL);
     dmaStreamSetPeripheral(VS_DMA, &VS_SPI->DR);
     dmaStreamSetMode      (VS_DMA, VS_DMA_MODE);
@@ -104,7 +102,6 @@ void Sound_t::Init() {
     PBuf = &Buf1;
     IAttenuation = VS_INITIAL_ATTENUATION;
     chMBInit(&CmdBox, CmdBuf, VS_CMD_BUF_SZ);
-    chEvtInit(&IEvtSrcPlayEnd); // Event src
 
     // ==== Init VS ====
     Rst_Hi();
@@ -115,16 +112,16 @@ void Sound_t::Init() {
     IDreq.Init(VS_GPIO, VS_DREQ, Rising);
 
 //   CmdWrite(VS_REG_MODE, (VS_SM_SDInew | VS_SM_RESET));    // Perform software reset
-//    AddCmd(VS_REG_MODE, VS_MODE_REG_VALUE);
-//    AddCmd(VS_REG_CLOCKF, 0x8000 + (12000000/2000));
-//    AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
+    AddCmd(VS_REG_MODE, VS_MODE_REG_VALUE);
+    AddCmd(VS_REG_CLOCKF, 0x8000 + (12000000/2000));
+    AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
 //    CmdWrite(VS_REG_MIXERVOL, (VS_SMV_ACTIVE | VS_SMV_GAIN2));
 //    CmdWrite(VS_REG_RECCTRL, VS_SARC_DREQ512);    // VS1103 only
-    //chThdSleepMilliseconds(45);
+    chThdSleepMilliseconds(45);
 
     // ==== Thread ====
     PThread = chThdCreateStatic(waSoundThread, sizeof(waSoundThread), NORMALPRIO, (tfunc_t)SoundThread, NULL);
-    //StartTransmissionIfNotBusy();   // Send init commands
+    StartTransmissionIfNotBusy();   // Send init commands
 }
 
 void Sound_t::IPlayNew() {
@@ -172,7 +169,7 @@ void Sound_t::AddCmd(uint8_t AAddr, uint16_t AData) {
 }
 
 void Sound_t::ISendNextData() {
-    Uart.Printf("sn\r");
+//    Uart.Printf("sn\r");
     IDreq.Disable();
     dmaStreamDisable(VS_DMA);
     IDmaIdle = false;
@@ -217,7 +214,7 @@ void Sound_t::ISendNextData() {
         }
     }
     else if(State == sndWritingZeroes) {
-        Uart.Printf("Z");
+//        Uart.Printf("Z");
         if(ZeroesCount == 0) { // Was writing zeroes, now all over
             State = sndStopped;
             IDmaIdle = true;
@@ -243,7 +240,7 @@ void Sound_t::PrepareToStop() {
 }
 
 void Sound_t::SendZeroes() {
-    Uart.Printf("sz\r");
+//    Uart.Printf("sz\r");
     XDCS_Lo();  // Start data transmission
     uint32_t FLength = (ZeroesCount > 32)? 32 : ZeroesCount;
     dmaStreamSetMemory0(VS_DMA, &SZero);
@@ -253,23 +250,17 @@ void Sound_t::SendZeroes() {
     ZeroesCount -= FLength;
 }
 
-uint8_t ReadWriteByte(uint8_t AByte) {
-    VS_SPI->DR = AByte;
-    while(!(VS_SPI->SR & SPI_SR_RXNE));
-    return (uint8_t)(VS_SPI->DR);
-}
-
 // ==== Commands ====
 uint8_t Sound_t::CmdRead(uint8_t AAddr, uint16_t* AData) {
     uint16_t IData;
     // Wait until ready
     //if ((uint8_t IReply = BusyWait()) != OK) return IReply; // Get out in case of timeout
     XCS_Lo();   // Start transmission
-    ReadWriteByte(VS_READ_OPCODE);  // Send operation code
-    ReadWriteByte(AAddr);           // Send addr
-    *AData = ReadWriteByte(0);      // Read upper byte
+    ISpi.ReadWriteByte(VS_READ_OPCODE);  // Send operation code
+    ISpi.ReadWriteByte(AAddr);           // Send addr
+    *AData = ISpi.ReadWriteByte(0);      // Read upper byte
     *AData <<= 8;
-    IData = ReadWriteByte(0);       // Read lower byte
+    IData = ISpi.ReadWriteByte(0);       // Read lower byte
     *AData += IData;
     XCS_Hi();   // End transmission
     return OK;
@@ -277,11 +268,11 @@ uint8_t Sound_t::CmdRead(uint8_t AAddr, uint16_t* AData) {
 uint8_t Sound_t::CmdWrite(uint8_t AAddr, uint16_t AData) {
     // Wait until ready
 //    if ((uint8_t IReply = BusyWait()) != OK) return IReply; // Get out in case of timeout
-    XCS_Lo();                       // Start transmission
-    ReadWriteByte(VS_WRITE_OPCODE); // Send operation code
-    ReadWriteByte(AAddr);           // Send addr
-    ReadWriteByte(AData >> 8);      // Send upper byte
-    ReadWriteByte(0x00FF & AData);  // Send lower byte
-    XCS_Hi();                       // End transmission
+    XCS_Lo();                            // Start transmission
+    ISpi.ReadWriteByte(VS_WRITE_OPCODE); // Send operation code
+    ISpi.ReadWriteByte(AAddr);           // Send addr
+    ISpi.ReadWriteByte(AData >> 8);      // Send upper byte
+    ISpi.ReadWriteByte(0x00FF & AData);  // Send lower byte
+    XCS_Hi();                            // End transmission
     return OK;
 }

@@ -16,11 +16,8 @@
 
 #include "main.h"
 
-
 // Set to true if RX needed
-//#ifdef GATE
 #define UART_RX_ENABLED     FALSE
-//#endif
 
 // UART
 #define UART_TXBUF_SIZE     504

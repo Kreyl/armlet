@@ -49,17 +49,6 @@ int main() {
     // Report problem with clock if any
     if(ClkResult) Uart.Printf("Clock failure\r");
 
-//    PinSetupAlterFunc(GPIOA, 11, omOpenDrain, pudNone, AF10);
-//    PinSetupAlterFunc(GPIOA, 12, omOpenDrain, pudNone, AF10);
-//    PinSetupIn(GPIOA, 9, pudPullDown);
-//    // OTG FS clock enable and reset
-//    rccEnableOTG_FS(FALSE);
-//    rccResetOTG_FS();
-//
-//
-//    USBD_Init(&USB_OTG_dev, USB_OTG_FS_CORE_ID, &USR_desc, &USBD_CDC_cb, &USR_cb);
-
-
     while(TRUE) {
         chThdSleepMilliseconds(999);
 //        chSysLock();
@@ -77,7 +66,6 @@ void Init() {
     Uart.Printf("UsbDiscovery Sys=%u usb=%u\r", Clk.AHBFreqHz, Clk.UsbSdioFreqHz);
 
     SD.Init();
-
     // Read config
 //    uint32_t ID=0;
 //    iniReadUint32("Radio", "ID", "settings.ini", &ID);
