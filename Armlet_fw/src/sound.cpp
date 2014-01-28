@@ -1,7 +1,7 @@
 #include "sound.h"
 #include <string.h>
 
-#if SOUND_ENABLED
+//#if SOUND_ENABLED
 
 Sound_t Sound;
 
@@ -60,7 +60,7 @@ void Sound_t::ITask() {
     }
     // Data read request
     else if(EvtMsk & VS_EVT_READ_NEXT) {
-        FRESULT rslt;
+        FRESULT rslt = FR_NO_FILE;
         bool EofAtStart = f_eof(&IFile);
         // Read next if not EOF
         if(!EofAtStart) {
@@ -263,7 +263,7 @@ uint8_t ReadWriteByte(uint8_t AByte) {
 
 // ==== Commands ====
 uint8_t Sound_t::CmdRead(uint8_t AAddr, uint16_t* AData) {
-    uint8_t IReply;
+//    uint8_t IReply;
     uint16_t IData;
     // Wait until ready
     //if ((IReply = BusyWait()) != OK) return IReply; // Get out in case of timeout
@@ -278,7 +278,7 @@ uint8_t Sound_t::CmdRead(uint8_t AAddr, uint16_t* AData) {
     return OK;
 }
 uint8_t Sound_t::CmdWrite(uint8_t AAddr, uint16_t AData) {
-    uint8_t IReply;
+//    uint8_t IReply;
     // Wait until ready
 //    if ((IReply = BusyWait()) != OK) return IReply; // Get out in case of timeout
     XCS_Lo();                       // Start transmission
@@ -290,4 +290,4 @@ uint8_t Sound_t::CmdWrite(uint8_t AAddr, uint16_t AData) {
     return OK;
 }
 
-#endif // #if SOUND_ENABLED
+//#endif // #if SOUND_ENABLED

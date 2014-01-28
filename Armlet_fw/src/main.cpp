@@ -24,6 +24,7 @@
 #include "ff.h"
 
 #include "application.h"
+#include "atlantis_music_tree.h"
 
 static inline void Init();
 
@@ -53,9 +54,9 @@ int main() {
 //        chSchGoSleepS(THD_STATE_SUSPENDED); // Forever
 //        chSysUnlock();
         // Ctrl-Alt-Del
-        if(!PinIsSet(KEY_GPIO, 3) and !PinIsSet(KEY_GPIO, 4) and !PinIsSet(KEY_GPIO, 9)) {
-            REBOOT();
-        }
+//        if(!PinIsSet(KEY_GPIO, 3) and !PinIsSet(KEY_GPIO, 4) and !PinIsSet(KEY_GPIO, 9)) {
+//            REBOOT();
+//        }
     }
 }
 
@@ -68,18 +69,51 @@ void Init() {
     iniReadUint32("Radio", "ID", "settings.ini", &ID);
     Uart.Printf("ID=%u\r", ID);
 
-    Lcd.Init();
-    //Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
+ //   Lcd.Init();
+ //   Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
+
+ //   FIL *fp;
+ //   TCHAR filename[]="msettings.ini";
+
+ //   int open_code= f_open (
+ //   	fp,
+ //   	filename,
+ //   	FA_READ
+ //   );
+ //  Uart.Printf("f_open_code %d filename %s \r",open_code,filename);
+
+ //   Init_emotionTreeMusicNodeFiles_FromFile(filename);
+ //   Print_emotionTreeMusicNodeFiles_ToUART();
 
     Keys.Init();
     Beeper.Init();
     Vibro.Init();
 //    IR.TxInit();
-    IR.RxInit();
-    Power.Init();
-    PillInit();
-//    Sound.Init();
-//    Sound.Play("alive.wav");
-    rLevel1.Init(ID);
-    AppInit();
+//    IR.RxInit();
+//    Power.Init();
+//    PillInit();
+    Init_emotionTreeMusicNodeFiles_FromFile("mt_settings.txt");
+    Print_emotionTreeMusicNodeFiles_ToUART();
+
+  //   Sound.Init();
+  //  Sound.Play("alive.wav");
+
+    //TCHAR filename2[]="msettings.ini";
+
+   // char teststring1[]="write test string 1";
+    //strcpy
+    //CreateFileWithString(filename2,teststring1,strlen(teststring1),FA_CREATE_NEW);
+
+//    rLevel1.Init(ID);
+    //AppInit();
+
+    //
+//church_bells playgame.wav techview.wav titleview.wav
+   // filedatalimited filedata;//={{"fon_1_music1.mp3"},{"fon_2_music2.mp3"},{"ravnodushie_1_music_3.mp3"},{"zlost_1_music_4.mp3"}};
+    //char ** data_p=filedata;
+  //  CreateFileWithStringArray("m6_settings.ini",4,FA_CREATE_ALWAYS | FA_WRITE);
+ //  PrintFileToUART("settings.ini");//mt_settings.txt");
+  //  PrintFileToUART("mt_settings.txt");
+
+
 }

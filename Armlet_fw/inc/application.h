@@ -7,7 +7,10 @@
 
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
-
+/*
 void AppInit();
+*/
+#include "intention.h"
+
 
 #endif /* APPLICATION_H_ */

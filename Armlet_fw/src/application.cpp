@@ -23,12 +23,17 @@
 #include "evt_mask.h"
 #include "kl_sd.h"
 #include "sound.h"
-#include "ArmletApi.h"
-#include "Common.h"
 
-#include "kl_allocator.h"
-#include "ThreeKShell.h"
 
+
+
+
+//#include "ArmletApi.h"
+//#include "Common.h"
+
+//#include "kl_allocator.h"
+//#include "ThreeKShell.h"
+/*
 void LcdRedraw();
 
 static EventListener EvtLstnrRadioRx, EvtListenerKeys, EvtListenerIR, EvtListenerTmr;
@@ -487,5 +492,36 @@ int ArmletApi::AppendFile(FILE* file, char* buf, int len) {
     UINT FLen=0;
     f_write((FIL*)file, buf, len, &FLen);
     return FLen;
+}
+#endif
+*/
+#if 1 // ======================= Command processing ============================
+void UartCmdCallback(uint8_t CmdCode, uint8_t *PData, uint32_t Length) {
+    uint8_t b;
+    FRESULT res;
+    switch(CmdCode) {
+        case 0x01:
+            b = OK;
+            Uart.Cmd(0x90, &b, 1);
+            break;
+
+        case 0x51:  // GetID
+            Uart.Printf("ID=%u\r", rLevel1.GetID());
+            break;
+
+        case 0x52:  // SetID
+            b = PData[0];
+            res = f_open(&SD.File, "settings.ini", FA_CREATE_ALWAYS | FA_WRITE);
+            if(res == FR_OK) {
+                f_printf(&SD.File, "[Radio]\r\nID=%u\r\n", b);
+                f_close(&SD.File);
+                Uart.Printf("Written\r");
+            }
+            rLevel1.SetID(b);
+            Uart.Printf("New ID=%u\r", rLevel1.GetID());
+            break;
+
+        default: break;
+    } // switch
 }
 #endif

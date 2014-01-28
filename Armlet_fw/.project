@@ -106,21 +106,6 @@
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/ShellApi</locationURI>
 		</link>
-		<link>
-			<name>MiddleWareLib</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/MiddleWareLib</locationURI>
-		</link>
-		<link>
-			<name>PriceOfHonor2</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/PriceOfHonor2</locationURI>
-		</link>
-		<link>
-			<name>ShellApi</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/ShellApi</locationURI>
-		</link>
 	</linkedResources>
 	<variableList>
 		<variable>

@@ -7,10 +7,10 @@
 
 #ifndef MEDIA_H
 #define	MEDIA_H
-
-#define SOUND_ENABLED   FALSE
-
-#if SOUND_ENABLED
+//
+//#define SOUND_ENABLED   TRUE
+//
+//#if SOUND_ENABLED
 
 #include "kl_sd.h"
 #include <stdint.h>
@@ -161,7 +161,7 @@ public:
 
 extern Sound_t Sound;
 
-#endif  // Sound Enabled
+//#endif  // Sound Enabled
 
 #endif	/* MEDIA_H */
 
