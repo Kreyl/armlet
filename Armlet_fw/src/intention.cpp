@@ -7,7 +7,7 @@ Intention intentionArray[INTENTIONS_ARRAY_SIZE]={
 	{1000,"wasteland",0},		//3
 	{1000,"reaper",4}		//4 positiv
 };
-struct Intention ArrayOfIncomingIntentions[2]={
+struct IncomingIntentions ArrayOfIncomingIntentions[2]={
 		{0,2,},{1,3}
 };
 struct IntentionCalculationData SingletonIntentionCalculationData=
@@ -18,4 +18,5 @@ struct IntentionCalculationData SingletonIntentionCalculationData=
 		0,//	int last_intention_power_winner;
 		1,//	int new_intention_power_winner;
 		0,//	int winning_integral;
-		}
+		10//int winning_integral_top_limit_normalizer;
+		};

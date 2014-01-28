@@ -18,7 +18,7 @@ typedef struct IncomingIntentions {
 	int intention_indx;	//индекс из стандартного массива
 	int power256; //сила сигнала
 } IncomingIntentions;
-extern struct Intention ArrayOfIncomingIntentions[2];
+extern struct IncomingIntentions ArrayOfIncomingIntentions[2];
 
 typedef struct IntentionCalculationData
 //структура для рассчета изменений по входящим намерениям,
@@ -31,7 +31,7 @@ typedef struct IntentionCalculationData
 	int last_intention_power_winner;
 	int new_intention_power_winner;
 	int winning_integral;
-	int winning_integral_top_limit_normalizer
+	int winning_integral_top_limit_normalizer;
 }IntentionCalculationData;
 void CalculateIntentionsRadioChange();
 
