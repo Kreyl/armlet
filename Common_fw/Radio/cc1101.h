@@ -17,7 +17,6 @@
 #include "kl_lib_f2xx.h"
 #include "cc1101defins.h"
 #include "cc1101_rf_settings.h"
-#include "lvl1_assym.h"
 
 // Pins
 #define CC_GPIO     GPIOA

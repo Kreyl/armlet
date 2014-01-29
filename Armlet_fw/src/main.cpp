@@ -16,7 +16,7 @@
 #include "sound.h"
 #include "keys.h"
 #include "infrared.h"
-#include "lvl1_assym.h"
+#include "radio_lvl1.h"
 #include "cmd_uart.h"
 #include "power.h"
 #include "pill.h"
