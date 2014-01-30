@@ -229,69 +229,64 @@ public:
     void Off() { *PCCR = 0; }
 };
 
-// ==== Irq pin ====
+#if 1 // ==== External IRQ ====
+enum ExtiTrigType_t {ttRising, ttFalling, ttRisingFalling};
 class IrqPin_t {
 private:
-    uint32_t IrqVect;
-    uint16_t IPin;
+    uint32_t IIrqChnl;
     GPIO_TypeDef *IGPIO;
+    uint8_t IPinNumber;
 public:
-    inline void SetupFront(RiseFall_t Front) {
-        uint32_t msk = 1 << IPin;
-        switch(Front) {
+    void SetTriggerType(ExtiTrigType_t ATriggerType) {
+        uint32_t IrqMsk = 1 << IPinNumber;
+        switch(ATriggerType) {
             case Rising:
-                EXTI->FTSR &= ~msk; // Falling trigger disabled
-                EXTI->RTSR |=  msk; // Rising trigger enabled
+                EXTI->FTSR &= ~IrqMsk; // Falling trigger disabled
+                EXTI->RTSR |=  IrqMsk; // Rising trigger enabled
                 break;
             case Falling:
-                EXTI->FTSR |=  msk; // Falling trigger enabled
-                EXTI->RTSR &= ~msk; // Rising trigger disabled
+                EXTI->FTSR |=  IrqMsk; // Falling trigger enabled
+                EXTI->RTSR &= ~IrqMsk; // Rising trigger disabled
                 break;
             case RisingFalling:
-                EXTI->FTSR |=  msk; // Falling trigger enabled
-                EXTI->RTSR |=  msk; // Rising trigger enabled
+                EXTI->FTSR |=  IrqMsk; // Falling trigger enabled
+                EXTI->RTSR |=  IrqMsk; // Rising trigger enabled
                 break;
-        }
+        } // switch
     }
-    inline void Init(GPIO_TypeDef *PGPIO, uint16_t N, RiseFall_t Front) {
-        // Setup inner variables
-        IGPIO = PGPIO;
-        IPin = N;
-        IrqVect = EXTI0_IRQn + IPin;
-        if((N >= 5) and (N <=9)) IrqVect = EXTI9_5_IRQn;
-        else if(N >= 10) IrqVect = EXTI15_10_IRQn;
-        // Enable sys cfg controller
-        rccEnableAPB2(RCC_APB2ENR_SYSCFGEN, FALSE);
-        uint8_t Shift = N * 4;
-        __IO uint32_t  *PExtiCr = &SYSCFG->EXTICR[0];
-        if     (N > 3 ) { PExtiCr = &SYSCFG->EXTICR[1]; Shift = (N - 4) * 4; }
-        else if(N > 7 ) { PExtiCr = &SYSCFG->EXTICR[2]; Shift = (N - 8) * 4; }
-        else if(N > 11) { PExtiCr = &SYSCFG->EXTICR[3]; Shift = (N - 12) * 4; }
-
-        // Clear EXTIx-related bits
-        uint32_t msk = 0x000F << Shift;
-        *PExtiCr &= ~msk;
-        // Write GPIO-related bits
-        if     (IGPIO == GPIOA) msk = 0x0 << Shift;
-        else if(IGPIO == GPIOB) msk = 0x1 << Shift;
-        else if(IGPIO == GPIOC) msk = 0x2 << Shift;
-        else if(IGPIO == GPIOD) msk = 0x3 << Shift;
-        else if(IGPIO == GPIOE) msk = 0x4 << Shift;
-        *PExtiCr |= msk;
-
+    void Setup(GPIO_TypeDef *GPIO, const uint8_t APinNumber, ExtiTrigType_t ATriggerType) {
+        IGPIO = GPIO;
+        IPinNumber = APinNumber;
+        rccEnableAPB2(RCC_APB2ENR_SYSCFGEN, FALSE); // Enable sys cfg controller
+        // Connect EXTI line to the pin of the port
+        uint8_t Indx   = APinNumber / 4;            // Indx of EXTICR register
+        uint8_t Offset = (APinNumber & 0x03) * 4;   // Offset in EXTICR register
+        SYSCFG->EXTICR[Indx] &= ~((uint32_t)0b1111 << Offset);  // Clear port-related bits
+        // GPIOA requires all zeroes => nothing to do in this case
+        if     (GPIO == GPIOB) SYSCFG->EXTICR[Indx] |= (uint32_t)0b0001 << Offset;
+        else if(GPIO == GPIOC) SYSCFG->EXTICR[Indx] |= (uint32_t)0b0010 << Offset;
+        else if(GPIO == GPIOD) SYSCFG->EXTICR[Indx] |= (uint32_t)0b0011 << Offset;
+        else if(GPIO == GPIOE) SYSCFG->EXTICR[Indx] |= (uint32_t)0b0100 << Offset;
         // Configure EXTI line
-        msk = 1 << N;
-        EXTI->IMR  |=  msk;      // Interrupt mode enabled
-        EXTI->EMR  &= ~msk;      // Event mode disabled
-        SetupFront(Front);
+        uint32_t IrqMsk = 1 << APinNumber;
+        EXTI->IMR  |=  IrqMsk;      // Interrupt mode enabled
+        EXTI->EMR  &= ~IrqMsk;      // Event mode disabled
+        SetTriggerType(ATriggerType);
+        EXTI->PR    =  IrqMsk;      // Clean irq flag
+        // Get IRQ channel
+        if     ((APinNumber >= 0)  and (APinNumber <= 4))  IIrqChnl = EXTI0_IRQn + APinNumber;
+        else if((APinNumber >= 5)  and (APinNumber <= 9))  IIrqChnl = EXTI9_5_IRQn;
+        else if((APinNumber >= 10) and (APinNumber <= 15)) IIrqChnl = EXTI15_10_IRQn;
     }
     // Enable/disable NVIC vector
-    inline void Enable(uint8_t Priority) { nvicEnableVector(IrqVect, CORTEX_PRIORITY_MASK(Priority)); }
-    inline void Disable() { nvicDisableVector(IrqVect); }
-    inline void GenerateIrq() { EXTI->SWIER |= 1 << IPin; }
+    void EnableIrq(const uint32_t Priority) { nvicEnableVector(IIrqChnl, CORTEX_PRIORITY_MASK(Priority)); }
+    void DisableIrq() { nvicDisableVector(IIrqChnl); }
+    void GenerateIrq() { EXTI->SWIER |= 1 << IPinNumber; }
+    void CleanIrqFlag() { EXTI->PR = (1 << IPinNumber); }
     // Standard pin functions
-    inline bool IsHi() { return PinIsSet(IGPIO, IPin); }
+    bool IsHi() { return PinIsSet(IGPIO, IPinNumber); }
 };
+#endif
 
 // ================================= Random ====================================
 uint32_t Random(uint32_t TopValue);

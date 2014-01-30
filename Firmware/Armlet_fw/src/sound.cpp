@@ -31,7 +31,7 @@ void Sound_t::IrqDmaHandler() {
     XCS_Hi();                       // }
     XDCS_Hi();                      // } Stop SPI
     if(IDreq.IsHi()) ISendNextData();   // More data allowed, send it now
-    else IDreq.Enable(IRQ_PRIO_MEDIUM); // Enable dreq irq
+    else IDreq.EnableIrq(IRQ_PRIO_MEDIUM); // Enable dreq irq
 }
 
 // =========================== Implementation ==================================
@@ -109,7 +109,7 @@ void Sound_t::Init() {
     chThdSleepMicroseconds(45);
 
     // ==== DREQ IRQ ====
-    IDreq.Init(VS_GPIO, VS_DREQ, Rising);
+    IDreq.Setup(VS_GPIO, VS_DREQ, ttRising);
 
 //   CmdWrite(VS_REG_MODE, (VS_SM_SDInew | VS_SM_RESET));    // Perform software reset
     AddCmd(VS_REG_MODE, VS_MODE_REG_VALUE);
@@ -170,7 +170,7 @@ void Sound_t::AddCmd(uint8_t AAddr, uint16_t AData) {
 
 void Sound_t::ISendNextData() {
 //    Uart.Printf("sn\r");
-    IDreq.Disable();
+    IDreq.DisableIrq();
     dmaStreamDisable(VS_DMA);
     IDmaIdle = false;
     // If command queue is not empty, send command
@@ -227,7 +227,7 @@ void Sound_t::ISendNextData() {
     }
     else {
 //        Uart.Printf("I\r");
-        if(!IDreq.IsHi()) IDreq.Enable(IRQ_PRIO_MEDIUM);
+        if(!IDreq.IsHi()) IDreq.EnableIrq(IRQ_PRIO_MEDIUM);
         else IDmaIdle = true;
     }
 }

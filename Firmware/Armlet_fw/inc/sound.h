@@ -111,7 +111,7 @@ private:
     inline void StartTransmissionIfNotBusy() {
         if(IDmaIdle and IDreq.IsHi()) {
 //            Uart.Printf("T");
-            IDreq.Enable(IRQ_PRIO_MEDIUM);
+            IDreq.EnableIrq(IRQ_PRIO_MEDIUM);
             IDreq.GenerateIrq();    // Do not call SendNexData directly because of its interrupt context
         }
     }

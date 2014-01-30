@@ -317,7 +317,7 @@ static void LcdThread(void *arg) {
 #if 1 // ======================= Command processing ============================
 void UartCmdCallback(uint8_t CmdCode, uint8_t *PData, uint32_t Length) {
     uint8_t b;
-    FRESULT res;
+//    FRESULT res;
     switch(CmdCode) {
         case 0x01:
             b = OK;

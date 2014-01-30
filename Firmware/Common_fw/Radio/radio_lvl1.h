@@ -59,7 +59,7 @@ public:
     void Shutdown();
     void RegisterAppThd(Thread *PThd) { PAppThd = PThd; }
     // Inner use
-    void ITask() __attribute__((always_inline));
+    void ITask();
 };
 
 extern rLevel1_t rLevel1;
