@@ -1,0 +1,12 @@
+#
+# Reasons.csv
+#
+# RID->EID table for generic character.
+#
+# Is processed by EP.py and integrated into ArmLet firmware.
+#
+uliza1,1,fon
+uliza2,1,fon
+uliza3,1,fon
+church,5,umirotvorenie
+kabak,2,radost'
