@@ -3,7 +3,7 @@
  *
  * Part of "Ticket to Atlantis" LARP music engine.
  *
- * Generated automatically by EP.py from Emotions.csv and Reasons.csv
+ * Generated automatically by EmotionProcessor.py from Emotions.csv and Reasons.csv
  *
  * !!! DO NOT EDIT !!!
  */

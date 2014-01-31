@@ -18,7 +18,7 @@
 # - If source directory is not specified, current directory is used.
 # - If target directory is not specified, source/processed subdirectory is used.
 #
-from os import makedirs, walk
+from os import chdir, makedirs, walk
 from os.path import getsize, isdir, isfile, join
 from re import compile as reCompile
 from sys import argv
@@ -28,7 +28,9 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pydub v0.8.3 or later: https://pypi.python.org/pypi/pydub\n" % (ex.__class__.__name__, ex))
 
-from EP import convert, convertEmotion, convertTitle, processEmotions
+from EmotionProcessor import convert, convertEmotion, convertTitle, processEmotions, processReasons
+
+CHARACTER_CSV = 'Character.csv'
 
 EXTENSIONS = ('mp3', 'wav', 'wma', 'm4a')
 
@@ -65,14 +67,19 @@ def processFile(fullName, newFullName):
     except EOFError:
         return False
 
-def main(sourceDir = '.', targetDir = None):
-    targetDir = targetDir or join(sourceDir, DEFAULT_TARGET_DIR)
-    (emotionsIndexes, _) = processEmotions()
+def main(sourceDir = None, targetDir = None):
+    if sourceDir:
+        chdir(sourceDir)
+    (emotionsIndexes, _emotionsTree) = processEmotions()
+    if isfile(CHARACTER_CSV):
+        print "%s found, verifying" % CHARACTER_CSV
+        processReasons(emotionsIndexes, CHARACTER_CSV)
+    targetDir = targetDir or join('.', DEFAULT_TARGET_DIR)
     if not isdir(targetDir):
         makedirs(targetDir)
     error = False
     newFileNameSet = set()
-    for (dirName, fileName) in findFiles(sourceDir, FILE_PATTERN, (targetDir,)):
+    for (dirName, fileName) in findFiles('.', FILE_PATTERN, (targetDir,)):
         fullName = join(dirName, fileName)
         match = CHECK_PATTERN.match(fileName)
         if not match:

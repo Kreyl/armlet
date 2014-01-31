@@ -3,7 +3,7 @@
 #
 # RID->EID table for generic character.
 #
-# Is processed by EP.py and integrated into ArmLet firmware.
+# Is processed by EmotionProcessor.py and integrated into ArmLet firmware.
 #
 uliza1,1,fon
 uliza2,1,fon

@@ -9,7 +9,7 @@
 # - In Choose XSL File, locate mm2csv.xsl template in FreeMind/accessories directory.
 # - In Choose ExportFile, specify Emotions.csv located in the same directory as this script.
 # - Perform Export.
-# - Run this script: python EP.py
+# - Run this script: python EmotionProcessor.py
 # - The script would process Emotions.csv and produce emotions.c and emotions.h
 # - Compile and link those two files with whatever code that needs emotions data.
 #
@@ -32,7 +32,7 @@ C_CONTENT = '''\
  *
  * Part of "Ticket to Atlantis" LARP music engine.
  *
- * Generated automatically by EP.py from Emotions.csv and Reasons.csv
+ * Generated automatically by EmotionProcessor.py from Emotions.csv and Reasons.csv
  *
  * !!! DO NOT EDIT !!!
  */
@@ -85,11 +85,11 @@ def readCSV(csv):
             if not row[0].startswith('#'):
                 yield row
 
-def processEmotions():
+def processEmotions(fileName = EMOTIONS_CSV):
     parents = []
     emotionsIndexes = {}
     emotionsTree = []
-    for (eid, row) in enumerate(readCSV(getFileName(EMOTIONS_CSV))):
+    for (eid, row) in enumerate(readCSV(getFileName(fileName))):
         emotion = convertEmotion(row[-1])
         level = len(row) - 1
         if level > len(parents):
@@ -101,9 +101,9 @@ def processEmotions():
     assert len(emotionsIndexes) == len(emotionsTree), "Duplicate emotions detected"
     return (emotionsIndexes, tuple(emotionsTree))
 
-def processReasons(emotions):
+def processReasons(emotions, fileName = REASONS_CSV):
     reasons = []
-    for (rid, row) in enumerate(readCSV(getFileName(REASONS_CSV))):
+    for (rid, row) in enumerate(readCSV(getFileName(fileName))):
         assert len(row) == 3, "bad reasons file format"
         (reason, weight, emotion) = row
         eid = emotions.get(emotion)
