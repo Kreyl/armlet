@@ -31,12 +31,13 @@ static inline void Init();
 int main() {
     // ==== Setup clock ====
     uint8_t ClkResult = 1;
-    Clk.SetupFlashLatency(48);  // Setup Flash Latency for clock in MHz
     // 12 MHz/6 = 2; 2*192 = 384; 384/8 = 48 (preAHB divider); 384/8 = 48 (USB clock)
     Clk.SetupPLLDividers(6, 192, pllSysDiv8, 8);
     // 48/2 = 24 MHz core clock. APB1 & APB2 clock derive on AHB clock
-    Clk.SetupBusDividers(ahbDiv1, apbDiv2, apbDiv2);
-    //Clk.SetupBusDividers(ahbDiv2, apbDiv1, apbDiv1);
+//    Clk.SetupFlashLatency(48);  // Setup Flash Latency for clock in MHz
+//    Clk.SetupBusDividers(ahbDiv1, apbDiv2, apbDiv2);
+    Clk.SetupFlashLatency(12);  // Setup Flash Latency for clock in MHz
+    Clk.SetupBusDividers(ahbDiv4, apbDiv1, apbDiv1);
     if((ClkResult = Clk.SwitchToPLL()) == 0) Clk.HSIDisable();
     Clk.UpdateFreqValues();
 //    Clk.LSIEnable();        // To allow RTC to run
@@ -63,11 +64,11 @@ int main() {
 
 void Init() {
     Uart.Init(256000);
-    Uart.Printf("UsbDiscovery Sys=%u usb=%u\r", Clk.AHBFreqHz, Clk.UsbSdioFreqHz);
+    Uart.Printf("Atlantis Sys=%u usb=%u\r", Clk.AHBFreqHz, Clk.UsbSdioFreqHz);
 
     SD.Init();
     // Read config
-//    uint32_t ID=0;
+    uint8_t ID=9;
 //    iniReadUint32("Radio", "ID", "settings.ini", &ID);
 //    Uart.Printf("ID=%u\r", ID);
 
@@ -79,16 +80,16 @@ void Init() {
 //    chThdSleepMilliseconds(450);
 //    Usb.Connect();
 
-    Keys.Init();
+//    Keys.Init();
 //    Beeper.Init();
 //    Vibro.Init();
 //    IR.TxInit();
 //    IR.RxInit();
 //    Power.Init();
 //    PillInit();
-    Sound.Init();
-    Sound.Play("angel.mp3");
+//    Sound.Init();
+//    Sound.Play("angel.mp3");
 //    Sound.Play("alive.wav");
-//    rLevel1.Init(ID);
+    rLevel1.Init(ID);
 //    AppInit();
 }

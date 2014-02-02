@@ -19,13 +19,47 @@
 
 rLevel1_t rLevel1;
 
-
 // Radiotask
 void rLevel1_t::ITask() {
-    chSysLock();
-    chSchGoSleepS(THD_STATE_SUSPENDED); // Will wake up by rTmr
-    chSysUnlock();
-    // ==== Sleep ended, transmit 0; // new pkt ====
+    while(true) {
+        // New cycle begins
+        CC.Recalibrate();   // Recalibrate manually every cycle, as auto recalibration disabled
+        int8_t RSSI=0;
+        uint8_t RxRslt = CC.ReceiveSync(306, &PktRx, &RSSI);
+        if(RxRslt == OK) {
+            Uart.Printf("%u %d\r", PktRx.ID, RSSI);
+        }
+//        chThdSleepMilliseconds(45);
+
+#ifdef TX
+        // Transmit
+        DBG1_SET();
+        CC.TransmitSync(&PktTx);
+        DBG1_CLR();
+        chThdSleepMilliseconds(99);
+#elif defined LED_RX
+        Color_t Clr;
+        uint8_t RxRslt = CC.ReceiveSync(306, &PktRx);
+        if(RxRslt == OK) {
+            Uart.Printf("%d\r", PktRx.RSSI);
+            Clr = clWhite;
+            if     (PktRx.RSSI < -100) Clr = clRed;
+            else if(PktRx.RSSI < -90) Clr = clYellow;
+            else if(PktRx.RSSI < -80) Clr = clGreen;
+            else if(PktRx.RSSI < -70) Clr = clCyan;
+            else if(PktRx.RSSI < -60) Clr = clBlue;
+            else if(PktRx.RSSI < -50) Clr = clMagenta;
+        }
+        else Clr = clBlack;
+        Led.SetColor(Clr);
+#else
+        //IterateEmanators();
+//        Uart.Printf("%d\r", Damage);
+
+#endif
+    } // while true
+
+
 //    if(++SlotN >= RSLOT_CNT) SlotN = 0;
 //    PktTx.SlotN = SlotN;
 //    // If not transmitting long pkt already, try to get 0; // new data pkt
@@ -57,7 +91,7 @@ void rLevel1_t::ITask() {
 }
 
 // ================================= Thread ====================================
-static WORKING_AREA(warLvl1Thread, 1024);
+static WORKING_AREA(warLvl1Thread, 256);
 __attribute__ ((__noreturn__))
 static void rLvl1Thread(void *arg) {
     chRegSetThreadName("rLvl1");
@@ -65,16 +99,15 @@ static void rLvl1Thread(void *arg) {
 }
 
 // ================================= Common ====================================
-void rLevel1_t::Init(uint16_t ASelfID) {
+void rLevel1_t::Init(uint8_t ASelfID) {
 #ifdef DBG_PINS
     PinSetupOut(DBG_GPIO1, DBG_PIN1, omPushPull, pudNone);
 #endif
-    // Init Rx & Tx buffers
     // Init radioIC
     CC.Init();
-    CC.SetTxPower(PwrPlus12dBm);
+    CC.SetTxPower(Pwr0dBm);
     //CC.SetTxPower(PwrMinus6dBm);
-    // Variables
+    CC.SetPktSize(RPKT_SZ);
     CC.SetChannel(1);
     // Init thread. High priority is required to satisfy timings.
     chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);

@@ -19,16 +19,18 @@
 
 // ============================== Pkt_t ========================================
 struct rPkt_t {
-    uint8_t rID;        // Device ID
-    int8_t RSSI;        // Received signal level, RX use only
+    uint8_t ID;
+    uint32_t CycleN;
+    uint8_t TimeOwnerID;
+    uint8_t TimeAge;
 } __attribute__ ((__packed__));
-#define RPKT_LEN    (sizeof(rPkt_t)-1)  // Exclude RSSI
+#define RPKT_SZ     sizeof(rPkt_t)
 
 // =========================== Address space ===================================
-#define R_NO_ID         -1
+#define R_NO_ID                 0xFF
 // Emanators
-#define R_EMANATOR_BOTTOM_ID    100
-#define R_EMANATOR_TOP_ID       102
+#define R_EMANATOR_BOTTOM_ID    120
+#define R_EMANATOR_TOP_ID       122
 #define R_EMANATOR_CNT          ((1+R_EMANATOR_TOP_ID)-R_EMANATOR_BOTTOM_ID)
 
 // ============================== Timings ======================================
@@ -55,7 +57,7 @@ private:
     rPkt_t PktTx;       // Local rPkt to transmit
 public:
     Table_t *PCurrentTable;
-    void Init(uint16_t ASelfID);
+    void Init(uint8_t ASelfID);
     void Shutdown();
     void RegisterAppThd(Thread *PThd) { PAppThd = PThd; }
     // Inner use

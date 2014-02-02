@@ -157,7 +157,7 @@ uint8_t cc1101_t::ReadFIFO(void *Ptr, int8_t *PRssi) {
 }
 
 // =========================== Registers & Strobes =============================
-uint8_t cc1101_t::ReadRegister (uint8_t ARegAddr){
+uint8_t cc1101_t::ReadRegister (uint8_t ARegAddr) {
     CsLo();                                 // Start transmission
     BusyWait();                             // Wait for chip to become ready
     ISpi.ReadWriteByte(ARegAddr | CC_READ_FLAG); // Transmit header byte
@@ -165,14 +165,14 @@ uint8_t cc1101_t::ReadRegister (uint8_t ARegAddr){
     CsHi();                                 // End transmission
     return FReply;
 }
-void cc1101_t::WriteRegister (uint8_t ARegAddr, uint8_t AData){
+void cc1101_t::WriteRegister (uint8_t ARegAddr, uint8_t AData) {
     CsLo();                     // Start transmission
     BusyWait();                 // Wait for chip to become ready
     ISpi.ReadWriteByte(ARegAddr);    // Transmit header byte
     ISpi.ReadWriteByte(AData);       // Write data
     CsHi();                     // End transmission
 }
-void cc1101_t::WriteStrobe (uint8_t AStrobe){
+void cc1101_t::WriteStrobe (uint8_t AStrobe) {
     CsLo();                             // Start transmission
     BusyWait();                         // Wait for chip to become ready
     IState = ISpi.ReadWriteByte(AStrobe);    // Write strobe
