@@ -7,6 +7,7 @@
 
 #include "radio_lvl1.h"
 #include "cc1101.h"
+#include "SensorTable.h"
 
 //#define DBG_PINS
 
@@ -27,9 +28,10 @@ void rLevel1_t::ITask() {
         int8_t RSSI=0;
         uint8_t RxRslt = CC.ReceiveSync(306, &PktRx, &RSSI);
         if(RxRslt == OK) {
-            Uart.Printf("%u %d\r", PktRx.ID, RSSI);
+//            Uart.Printf("%u %d\r", PktRx.ID, RSSI);
+            uint8_t Lvl = (uint8_t)(RSSI + 120);
+            SnsTable.PutSnsInfo(PktRx.ID, Lvl);
         }
-//        chThdSleepMilliseconds(45);
 
 #ifdef TX
         // Transmit

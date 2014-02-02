@@ -36,27 +36,13 @@ struct rPkt_t {
 // ============================== Timings ======================================
 
 #if 1 //============================ Level1 ====================================
-struct Row_t {
-    uint8_t ID;
-    uint8_t Level;
-};
-
-#define MAX_ROW_CNT     99
-struct Table_t {
-    uint32_t Size;
-    Row_t Rows[MAX_ROW_CNT];
-};
 
 class rLevel1_t {
 private:
     Thread *PAppThd;
-    // ==== Rx ====
-    Table_t ITable[2];
     rPkt_t PktRx;       // Local rPkt to receive
-    // ==== Tx ====
     rPkt_t PktTx;       // Local rPkt to transmit
 public:
-    Table_t *PCurrentTable;
     void Init(uint8_t ASelfID);
     void Shutdown();
     void RegisterAppThd(Thread *PThd) { PAppThd = PThd; }

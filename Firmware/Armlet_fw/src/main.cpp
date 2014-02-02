@@ -91,5 +91,5 @@ void Init() {
 //    Sound.Play("angel.mp3");
 //    Sound.Play("alive.wav");
     rLevel1.Init(ID);
-//    AppInit();
+    App.Init();
 }
