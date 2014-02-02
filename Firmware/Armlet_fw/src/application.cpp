@@ -26,13 +26,13 @@
 
 App_t App;
 
-static VirtualTimer ITmr;
-void MeasureTmrCallback(void *p) {
-    chSysLockFromIsr();
-    chEvtSignalI(App.PThd, EVTMASK_TIMER);
-    chVTSetI(&ITmr, MS2ST(999), MeasureTmrCallback, nullptr);
-    chSysUnlockFromIsr();
-}
+//static VirtualTimer ITmr;
+//void MeasureTmrCallback(void *p) {
+//    chSysLockFromIsr();
+//    chEvtSignalI(App.PThd, EVTMASK_TIMER);
+//    chVTSetI(&ITmr, MS2ST(999), MeasureTmrCallback, nullptr);
+//    chSysUnlockFromIsr();
+//}
 
 #if 1 // ============================= Threads =================================
 static WORKING_AREA(waAppThread, 256);
@@ -51,9 +51,9 @@ static void AppThread(void *arg) {
             else Uart.Printf("Nobody there\r");
         } // if EVTMSK_TABLE_READY
 
-        if(EvtMsk & EVTMASK_TIMER) {
-            SnsTable.SendEvtReady();
-        }
+//        if(EvtMsk & EVTMASK_TIMER) {
+//            SnsTable.SendEvtReady();
+//        }
     } // while 1
 }
 
@@ -92,7 +92,7 @@ void UartCmdCallback(uint8_t CmdCode, uint8_t *PData, uint32_t Length) {
 
 #if 1 // ============================ App class ================================
 void App_t::Init() {
-    chVTSet(&ITmr, MS2ST(999), MeasureTmrCallback, nullptr);
+//    chVTSet(&ITmr, MS2ST(999), MeasureTmrCallback, nullptr);
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
     SnsTable.RegisterAppThd(PThd);
 }
