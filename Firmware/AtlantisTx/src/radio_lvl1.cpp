@@ -54,7 +54,7 @@ void rLevel1_t::Init(uint8_t ASelfID) {
     CC.Init();
     CC.SetTxPower(Pwr0dBm);
     CC.SetPktSize(RPKT_SZ);
-    CC.SetChannel(1);
+    CC.SetChannel(ASelfID);
     // Variables
     // Thread
     chThdCreateStatic(warLvl1Thread, sizeof(warLvl1Thread), HIGHPRIO, (tfunc_t)rLvl1Thread, NULL);

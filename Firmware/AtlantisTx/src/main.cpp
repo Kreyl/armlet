@@ -32,7 +32,7 @@ int main(void) {
     Init();
 //    if(ClkResult) Uart.Printf("Clock failure\r");
 
-    while(1) {
+    while(true) {
         //chThdSleepMilliseconds(999);
         chSysLock();
         chThdSleepS(TIME_INFINITE); // Forever
@@ -46,5 +46,5 @@ void Init() {
     PinSetupOut(GPIOB, 0, omPushPull);
     LED_ON();
 
-    rLevel1.Init(120);  // FIXME: read ID somehow
+    rLevel1.Init(121);  // FIXME: read ID somehow
 }
