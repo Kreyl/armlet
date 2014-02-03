@@ -66,7 +66,7 @@ enum Color_t {
 #define LCD_W               160 // } Pixels count
 #define LCD_TOP_BRIGHTNESS  100 // i.e. 100%
 
-#define BUF_SZ  36
+#define BUF_SZ  72
 class Lcd_t {
 private:
     uint16_t IX, IY;

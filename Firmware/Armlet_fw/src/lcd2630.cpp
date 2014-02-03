@@ -346,20 +346,18 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
         }
 
         SetBounds(x0, x0+Info.Width, y0, y0+Info.Height);
-        uint16_t Clr=0;
         // Write RAM
         WriteByte(0x2C);    // Memory write
         DC_Hi();
-        for(uint32_t i=0; i<Info.SzImage; i+=2) {
-            if((rslt = f_read(&IFile, (uint8_t*)&Clr, 2, &RCnt)) != 0) break;
-            uint8_t b1 = (Clr >> 8) & 0x00FF;
-            uint8_t b2 =  Clr       & 0x00FF;
-            WriteByte(b1);
-            WriteByte(b2);
+        while(Info.SzImage) {
+            if((rslt = f_read(&IFile, IBuf, BUF_SZ, &RCnt)) != 0) break;
+            for(uint32_t i=0; i<RCnt; i+=2) {
+                WriteByte(IBuf[i+1]);
+                WriteByte(IBuf[i]);
+            }
+            Info.SzImage -= RCnt;
         }
         DC_Lo();
-
-
     }
 
     else {
