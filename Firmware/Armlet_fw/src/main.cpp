@@ -74,7 +74,7 @@ void Init() {
 
     Lcd.Init();
     //Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
-    Lcd.DrawPngFile(0, 0, "BootAtlantis-kl.png");
+    Lcd.DrawBmpFile(0, 0, "BootAtlantis1.bmp");
 
 
     Usb.Init();

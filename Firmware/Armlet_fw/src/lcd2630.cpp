@@ -279,26 +279,29 @@ void Lcd_t::PutBitmap(uint8_t x0, uint8_t y0, uint8_t Width, uint8_t Height, uin
 }
 #endif
 
-#if 1 // ============================= Png =====================================
-struct ChunkHdr_t {
-    uint32_t Length;
-    char Type[4];
-} __attribute__((__packed__));
+#if 1 // ============================= BMP =====================================
+struct BmpHeader_t {
+    uint16_t bfType;
+    uint32_t bfSize;
+    uint16_t Reserved[2];
+    uint32_t bfOffBits;
+} __packed;
 
-struct ImgProp_t {
+struct BmpInfo_t {  // Length is absent as read first
     uint32_t Width;
     uint32_t Height;
-    uint8_t BitDepth;
-    uint8_t ColorType;
-    uint8_t Compression;
-    uint8_t Filter;
-    uint8_t Interlace;
-} __attribute__((__packed__));;
+    uint16_t Planes;
+    uint16_t BitCnt;
+    uint32_t Compression;
+    uint32_t SzImage;
+    uint32_t XPelsPerMeter, YPelsPerMeter;
+    uint32_t ClrUsed, ClrImportant;
+    // v4 begins. Only Adobe version here
+    uint32_t RedMsk, GreenMsk, BlueMsk, AlphaMsk;
+} __packed;
 
-const char PngSignature[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
-const char Ihdr[8]         = { 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52 };
 
-void Lcd_t::DrawPngFile(uint8_t x0, uint8_t y0, const char *Filename) {
+void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
     Uart.Printf("Draw %S\r", Filename);
     // Open file
     FRESULT rslt = f_open(&IFile, Filename, FA_READ+FA_OPEN_EXISTING);
@@ -314,121 +317,63 @@ void Lcd_t::DrawPngFile(uint8_t x0, uint8_t y0, const char *Filename) {
     }
 
     unsigned int RCnt=0;
-    // ==== Check signature ====
-    if((rslt = f_read(&IFile, IBuf, 8, &RCnt)) != 0) {
+    // Read BITMAPFILEHEADER
+    if((rslt = f_read(&IFile, IBuf, sizeof(BmpHeader_t), &RCnt)) != 0) {
         f_close(&IFile); return;
     }
-    if(strncmp(IBuf, PngSignature, 8) != 0) {
-        Uart.Printf("SigErr\r");
-        f_close(&IFile); return;
-    }
+    BmpHeader_t *PHdr = (BmpHeader_t*)IBuf;
+    Uart.Printf("T=%X; Sz=%u; Off=%u\r", PHdr->bfType, PHdr->bfSize, PHdr->bfOffBits);
+    uint32_t FOff = PHdr->bfOffBits;
 
-    // ==== Read IHDR ====
-    if((rslt = f_read(&IFile, IBuf, 8, &RCnt)) != 0) {
+    // ==== Read BITMAPINFO ====
+    // Get struct size => version
+    uint32_t Sz=0;
+    if((rslt = f_read(&IFile, (uint8_t*)&Sz, 4, &RCnt)) != 0) {
         f_close(&IFile); return;
     }
-    if(strncmp(IBuf, Ihdr, 8) != 0) {
-        Uart.Printf("BadFile\r");
-        f_close(&IFile); return;
-    }
-    ImgProp_t ImgProp;
-    if((rslt = f_read(&IFile, &ImgProp, sizeof(ImgProp_t), &RCnt)) != 0) {
-        f_close(&IFile); return;
-    }
-    // Reverse byte order in uint32_t values
-    ImgProp.Height = __REV(ImgProp.Height);
-    ImgProp.Width  = __REV(ImgProp.Width);
-    Uart.Printf("H=%u; W=%u; BD=%u; CT=%u; IL=%X\r", ImgProp.Height, ImgProp.Width, ImgProp.BitDepth, ImgProp.ColorType, ImgProp.Interlace);
-    // Skip CRC32
-    if((rslt = f_lseek(&IFile, IFile.fptr+4)) != 0) {
-        f_close(&IFile); return;
-    }
-
-    ChunkHdr_t *PHdr;
-    // ==== Find a IDAT chunk ====
-    while(true) {
-        // Read header
-        if((rslt = f_read(&IFile, IBuf, 8, &RCnt)) != 0) {
-            Uart.Printf("RdErr %u\r", rslt);
+    if((Sz == 40) or (Sz == 52) or (Sz == 56)) {  // V3 or V4 adobe
+        BmpInfo_t Info;
+        if((rslt = f_read(&IFile, (uint8_t*)&Info, Sz-4, &RCnt)) != 0) {
             f_close(&IFile); return;
         }
-        PHdr = (ChunkHdr_t*)IBuf;
-        PHdr->Length = __REV(PHdr->Length);
-        if(strncmp(PHdr->Type, "IDAT", 4) == 0) break;
-        // Skip Length bytes and CRC32
-        if((rslt = f_lseek(&IFile, (IFile.fptr + PHdr->Length + 4))) != 0) {
-            Uart.Printf("RdErr %u\r", rslt);
-            f_close(&IFile); return;
-        }
-    } // while
+        Uart.Printf("W=%u; H=%u; BitCnt=%u; Cmp=%u; Sz=%u;  MskR=%X; MskG=%X; MskB=%X; MskA=%X\r",
+                Info.Width, Info.Height, Info.BitCnt, Info.Compression,
+                Info.SzImage, Info.RedMsk, Info.GreenMsk, Info.BlueMsk, Info.AlphaMsk);
 
-    if(ImgProp.ColorType == 2) {    // Each pixel is an R,G,B triple.
-        bool LastBlock = false;
-        // Read start of IDAT section
-        if((rslt = f_read(&IFile, IBuf, 2, &RCnt)) != 0) {
-            Uart.Printf("RdErr %u\r", rslt);
-            f_close(&IFile); return;
-        }
-        //          Uart.Printf("Hdr: %A\r", IBuf, 7, ' ');
-        if((IBuf[0] != 0x78) or (IBuf[1] & 0b00100000)) {   // Wrong compression method, or dictionary presents
-            Uart.Printf("BadFile\r");
+        // Move to pixel data
+        if((rslt = f_lseek(&IFile, FOff)) != 0) {
             f_close(&IFile); return;
         }
 
-        // Read data blocks
-        do {
-            if((rslt = f_read(&IFile, IBuf, 5, &RCnt)) != 0) {
-                Uart.Printf("RdErr %u\r", rslt);
-                f_close(&IFile); return;
-            }
-            Uart.Printf("Hdr: %A\r", IBuf, 5, ' ');
+        SetBounds(x0, x0+Info.Width, y0, y0+Info.Height);
+        uint16_t Clr=0;
+        // Write RAM
+        WriteByte(0x2C);    // Memory write
+        DC_Hi();
+        for(uint32_t i=0; i<Info.SzImage; i+=2) {
+            if((rslt = f_read(&IFile, (uint8_t*)&Clr, 2, &RCnt)) != 0) break;
+            uint8_t b1 = (Clr >> 8) & 0x00FF;
+            uint8_t b2 =  Clr       & 0x00FF;
+            WriteByte(b1);
+            WriteByte(b2);
+        }
+        DC_Lo();
 
-            // Get compression method
-            LastBlock = IBuf[0] & 0x01;
-            uint8_t CompressionMethod = IBuf[0] & 0x06;
-            if(CompressionMethod == 0x00) {    // Uncompressed
-                Uart.Printf("Uncompr\r");
-                // Read LEN
-                uint32_t BlockLen = IBuf[1] | (IBuf[2] << 8);
-                Uart.Printf("Len=%u\r", BlockLen);
-                // IBuf[3] and [4] already read
 
-//                if((rslt = f_lseek(&IFile, (IFile.fptr + BlockLen))) != 0) {
-//                    Uart.Printf("RdErr %u\r", rslt);
-//                    f_close(&IFile); return;
-//                }
-                SetBounds(0, 160, 0, 127);
-                // Write RAM
-                WriteByte(0x2C);    // Memory write
-                DC_Hi();
+    }
 
-                while(BlockLen > 2) {
-                    if((rslt = f_read(&IFile, IBuf, 3, &RCnt)) != 0) {
-                        Uart.Printf("RdErr %u\r", rslt);
-                        f_close(&IFile); return;
-                    }
-                    uint16_t Clr = ((IBuf[0] & 0xF8) << 8) | ((IBuf[1] & 0xE0) << 3) | ((IBuf[1] & 0x1C) << 3) | (IBuf[2] >> 3);
-//                    Uart.Printf("%X %X %X   %04X\r", IBuf[0], IBuf[1], IBuf[2], Clr);
-                    WriteByte(Clr >> 8);    // RRRRR-GGG
-                    WriteByte(Clr & 0xFF);  // GGG-BBBBB
-                    BlockLen -= 3;
-                }
-                DC_Lo();
+    else {
+        Uart.Printf("Core, V4 or V5");
+    }
 
-            }
-            else {
-                Uart.Printf("Compr %X\r", CompressionMethod);
-                if(CompressionMethod == 0x04) { // compressed with dynamic Huffman codes
-                    //
-                }
-                f_close(&IFile); return; // FIXME
-            }
-        //        if(
-        } while(!LastBlock);
 
-        //Uart.Printf("%A\r", IBuf, 8, ' ');
+//    if(strncmp(IBuf, PngSignature, 8) != 0) {
+//        Uart.Printf("SigErr\r");
+//        f_close(&IFile); return;
+//    }
 
-    } // if color type == 2
+
+
     f_close(&IFile);
     Uart.Printf("Done\r");
 }
