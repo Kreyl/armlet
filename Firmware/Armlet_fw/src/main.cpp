@@ -34,10 +34,10 @@ int main() {
     // 12 MHz/6 = 2; 2*192 = 384; 384/8 = 48 (preAHB divider); 384/8 = 48 (USB clock)
     Clk.SetupPLLDividers(6, 192, pllSysDiv8, 8);
     // 48/2 = 24 MHz core clock. APB1 & APB2 clock derive on AHB clock
-//    Clk.SetupFlashLatency(48);  // Setup Flash Latency for clock in MHz
-//    Clk.SetupBusDividers(ahbDiv1, apbDiv2, apbDiv2);
-    Clk.SetupFlashLatency(12);  // Setup Flash Latency for clock in MHz
-    Clk.SetupBusDividers(ahbDiv4, apbDiv1, apbDiv1);
+    Clk.SetupFlashLatency(48);  // Setup Flash Latency for clock in MHz
+    Clk.SetupBusDividers(ahbDiv1, apbDiv2, apbDiv2);
+//    Clk.SetupFlashLatency(12);  // Setup Flash Latency for clock in MHz
+//    Clk.SetupBusDividers(ahbDiv4, apbDiv1, apbDiv1);
     if((ClkResult = Clk.SwitchToPLL()) == 0) Clk.HSIDisable();
     Clk.UpdateFreqValues();
 //    Clk.LSIEnable();        // To allow RTC to run
@@ -68,17 +68,19 @@ void Init() {
 
     SD.Init();
     // Read config
-    uint8_t ID=9;
+//    uint8_t ID=9;
 //    iniReadUint32("Radio", "ID", "settings.ini", &ID);
 //    Uart.Printf("ID=%u\r", ID);
 
-//    Lcd.Init();
+    Lcd.Init();
     //Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
+    Lcd.DrawPngFile(0, 0, "BootAtlantis-kl.png");
 
-//    Usb.Init();
-//    MassStorage.Init();
-//    chThdSleepMilliseconds(450);
-//    Usb.Connect();
+
+    Usb.Init();
+    MassStorage.Init();
+    chThdSleepMilliseconds(450);
+    Usb.Connect();
 
 //    Keys.Init();
 //    Beeper.Init();
@@ -90,6 +92,6 @@ void Init() {
 //    Sound.Init();
 //    Sound.Play("angel.mp3");
 //    Sound.Play("alive.wav");
-    rLevel1.Init(ID);
-    App.Init();
+//    rLevel1.Init(ID);
+//    App.Init();
 }

@@ -153,17 +153,8 @@ uint8_t iniReadUint32(const char *ASection, const char *AKey, const char *AFileN
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-bool_t sdc_lld_is_card_inserted(SDCDriver *sdcp) {
-    (void)sdcp;
-    return TRUE;
-}
-
-bool_t sdc_lld_is_write_protected(SDCDriver *sdcp) {
-    (void)sdcp;
-    return FALSE;
-}
-
+bool_t sdc_lld_is_card_inserted(SDCDriver *sdcp)   { return TRUE; }
+bool_t sdc_lld_is_write_protected(SDCDriver *sdcp) { return FALSE; }
 #ifdef __cplusplus
 }
 #endif

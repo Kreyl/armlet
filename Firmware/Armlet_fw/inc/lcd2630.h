@@ -11,8 +11,7 @@
 #include "stm32f2xx.h"
 #include "kl_lib_f2xx.h"
 #include <string.h>
-
-#define LCD_PRINTF      TRUE
+#include "ff.h"
 
 // ================================ Defines ====================================
 #define LCD_GPIO        GPIOE
@@ -30,6 +29,12 @@
 #define LCD_BCKLT_TMR   11
 #define LCD_BCKLT_CHNL  1
 
+//#define LCD_12BIT
+#ifndef LCD_12BIT
+#define LCD_16BIT
+#endif
+
+#ifdef LCD_12BIT
 // Color palette: 4R-4G-4B, 3 bytes per two pixels
 enum Color_t {
     clBlack     = 0x000,
@@ -41,6 +46,19 @@ enum Color_t {
     clCyan      = 0x0FF,
     clWhite     = 0xFFF,
 };
+#else
+// Color palette: 5R-6G-5B, 2 bytes per pixel
+enum Color_t {
+    clBlack     = 0x0000,
+    clRed       = 0xF800,
+    clGreen     = 0x07E0,
+    clBlue      = 0x001F,
+    clYellow    = 0xFFE0,
+    clMagenta   = 0xF81F,
+    clCyan      = 0x07FF,
+    clWhite     = 0xFFFF,
+};
+#endif
 
 #define LCD_X_0             1   // }
 #define LCD_Y_0             2   // } Zero pixels are shifted
@@ -48,18 +66,16 @@ enum Color_t {
 #define LCD_W               160 // } Pixels count
 #define LCD_TOP_BRIGHTNESS  100 // i.e. 100%
 
-#if LCD_PRINTF
-#define LCD_CHARBUF_SZ  198
-#endif
-
+#define BUF_SZ  36
 class Lcd_t {
 private:
+    uint16_t IX, IY;
+    Color_t IForeClr, IBckClr;
     PwmPin_t BckLt;
     void WriteCmd(uint8_t ACmd);
     void WriteCmd(uint8_t ACmd, uint8_t AData);
-#if LCD_PRINTF
-    char CharBuf[LCD_CHARBUF_SZ];
-#endif
+    FIL IFile;
+    char IBuf[BUF_SZ];
 public:
     // General use
     uint16_t Brightness;
@@ -68,19 +84,17 @@ public:
     void SetBrightness(uint16_t ABrightness)  { BckLt.On(Brightness = ABrightness); }
 
     // High-level
-#if LCD_PRINTF
-    uint16_t PutChar(uint8_t x, uint8_t y, char c, Color_t ForeClr, Color_t BckClr);
+    void PutChar(char c);
     void Printf(uint8_t x, uint8_t y, Color_t ForeClr, Color_t BckClr, const char *S, ...);
-#endif
     void Cls(Color_t Color);
     void GetBitmap(uint8_t x0, uint8_t y0, uint8_t Width, uint8_t Height, uint16_t *PBuf);
     void PutBitmap(uint8_t x0, uint8_t y0, uint8_t Width, uint8_t Height, uint16_t *PBuf);
-    void PutPixel (uint8_t x0, uint8_t y0, uint16_t Clr);
 //    void DrawImage(const uint8_t x, const uint8_t y, const uint8_t *Img);
 //    void DrawSymbol(const uint8_t x, const uint8_t y, const uint8_t ACode);
+    void DrawPngFile(uint8_t x0, uint8_t y0, const char *Filename);
 };
 
 extern Lcd_t Lcd;
 
-#endif	/* LCD6101_H */
+#endif
 
