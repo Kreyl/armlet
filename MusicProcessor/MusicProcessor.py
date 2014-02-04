@@ -49,6 +49,8 @@ CHECK_PATTERN = reCompile('^(?P<%s>[^%s]+)%s(?P<%s>[^%s]+)%s(?P<%s>[^%s]+)(?P<%s
 
 NEW_FORMAT = 'wav'
 
+MAX_FILE_NAME = 64
+
 NEW_EXTENSION = '.' + NEW_FORMAT
 
 DEFAULT_TARGET_DIR = 'processed'
@@ -95,7 +97,7 @@ def main(sourceDir = None, targetDir = None):
             print "ERROR: Unknown emotion: " + fullName
             error = True
             continue
-        newFileName = SEPARATOR.join((emotion, artist, title)) + tail + NEW_EXTENSION
+        newFileName = (SEPARATOR.join((emotion, artist, title)) + tail)[:MAX_FILE_NAME] + NEW_EXTENSION
         if newFileName in newFileNameSet:
             print "ERROR: Duplicate processed file name: " + newFileName
             error = True
