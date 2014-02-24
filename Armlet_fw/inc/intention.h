@@ -1,6 +1,7 @@
 #ifndef intention_h__
 #define intention_h__
 
+#define MAX_INCOMING_INTENRIONS_ARRAY_SIZE 2
 #define INTENTIONS_ARRAY_SIZE 5
 typedef struct Intention {
 	int weight1000;	//константа, определяющая степень и время роста
@@ -18,7 +19,7 @@ typedef struct IncomingIntentions {
 	int intention_indx;	//индекс из стандартного массива
 	int power256; //сила сигнала
 } IncomingIntentions;
-extern struct IncomingIntentions ArrayOfIncomingIntentions[2];
+extern struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENRIONS_ARRAY_SIZE];
 
 typedef struct IntentionCalculationData
 //структура для рассчета изменений по входящим намерениям,
@@ -28,14 +29,14 @@ typedef struct IntentionCalculationData
 	int Intention_weight_cost;
 	int Signal_power_weight_cost;
 	int Normalizer;
-	int last_intention_power_winner;
-	int new_intention_power_winner;
-	int winning_integral;
+	int last_intention_power_winner;//NOT NORMALIZED
+	int last_intention_index_winner;
+	int winning_integral;//NORMALIZED
 	int winning_integral_top_limit_normalizer;
 }IntentionCalculationData;
 void CalculateIntentionsRadioChange();
 
-extern struct IntentionCalculationData SingletonIntentionCalculationData;
+extern struct IntentionCalculationData SICD;//SingletonIntentionCalculationData;
 
 //в структуре рассчета будет индекс текущего победителя мощности,
 //индекс предыдущего победителя мощности,
