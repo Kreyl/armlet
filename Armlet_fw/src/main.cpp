@@ -24,7 +24,7 @@
 #include "ff.h"
 
 #include "application.h"
-#include "atlantis_music_tree.h"
+#include "../MusicProcessor/atlantis_music_tree.h"
 
 static inline void Init();
 
@@ -88,16 +88,20 @@ void Init() {
     Keys.Init();
     Beeper.Init();
     Vibro.Init();
+
+    //TODO  Lcd.Init(); - get last code version for this
+
 //    IR.TxInit();
 //    IR.RxInit();
 //    Power.Init();
 //    PillInit();
     Init_emotionTreeMusicNodeFiles_FromFile("mt_settings.txt");
-    Print_emotionTreeMusicNodeFiles_ToUART();
+   // Print_emotionTreeMusicNodeFiles_ToUART();
 
-  //   Sound.Init();
-  //  Sound.Play("alive.wav");
-
+     Sound.Init();
+    //Sound.Play("alive.wav");
+    Uart.Printf("AFTER ALIVE ID=%u\r", ID);
+    App.Init();
     //TCHAR filename2[]="msettings.ini";
 
    // char teststring1[]="write test string 1";
@@ -116,4 +120,6 @@ void Init() {
   //  PrintFileToUART("mt_settings.txt");
 
 
+    //goto sleep, now application thread is main run
+    while(true) { chThdSleep(TIME_INFINITE); }
 }

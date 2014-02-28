@@ -9,12 +9,19 @@
 #define ATLANTIS_MUSIC_TREE_H_
 #include "emotions.h"
 #include "integer.h"
-//#define EMOTIONTREE_ARRAY_SIZE 5
+//#define emotion_number_fix 5
 #define ROOT_ELEMENT_INDX -1
-#define MAX_MUSIC_FILENAME_CHAR_SIZE 100
+#define MAX_MUSIC_FILENAME_CHAR_SIZE 40
 #define MAX_NUMBER_MUSIC_FILES_ON_NODE 30
 //структура определяющая всю музыку под один нод, если таковой имеется
 //float1000 - используется инк как флоат, с точностью 1/1000
+//music_array_size = music_array_size
+//emotion_number_fix = emotion_number_fix
+//intentions = reason
+const int non_tree_array_size = 0;
+const int emotion_number_fix=67;
+const int music_array_size=emotion_number_fix+non_tree_array_size;
+const int reasons_number_fix=5;
 
 typedef struct string_limited512
 {
@@ -24,7 +31,6 @@ typedef struct filedatalimited
 {
 	string_limited512 data[4];
 	}filedatalimited;
-
 typedef struct emotionMusicFile
 {
 	char full_filename[MAX_MUSIC_FILENAME_CHAR_SIZE];
@@ -40,12 +46,14 @@ typedef struct emotionMusicNodeFiles {
 
 //в +1 будут храниться файлы, для которых не нашлось соответствия.
 //в последствии надо будет завести место под служебные файлы музыки
-
-extern struct emotionMusicNodeFiles emotionTreeMusicNodeFiles[MUSIC_ARRAY_SIZE];
+extern struct emotionMusicNodeFiles emotionTreeMusicNodeFiles[music_array_size];
 
 void Print_emotionTreeMusicNodeFiles_ToUART();
 int Init_emotionTreeMusicNodeFiles_FromFile(char * filename);
 void CreateFileWithString(char* filename, char * filestring,int string_size, BYTE open_mode);
 void CreateFileWithStringArray(char* filename, int string_size, BYTE open_mode );
 int PrintFileToUART(char* filename);
+int GetRandomEmoToPlay();
+char * GetFileNameToPlayFromEmoId(int emo_id);
+
 #endif /* ATLANTIS_MUSIC_TREE_H_ */

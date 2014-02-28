@@ -23,10 +23,259 @@
 #include "evt_mask.h"
 #include "kl_sd.h"
 #include "sound.h"
+#include "ff.h"
+App_t App;
+// transfer comments:
+//PAppThd from old code = App.PThd
+static EventListener EvtListenerKeys,EvtListenerSound;//EvtLstnrRadioRx, EvtListenerKeys, EvtListenerIR, EvtListenerTmr;
 
 
 
 
+#if 1 // ================================ Time =================================
+
+
+
+static void TimeTmrCallback(void *p);
+
+
+class Time_t {
+public:
+    uint8_t H, M, S;
+    VirtualTimer ITimer;
+    void Reset() {
+        chVTReset(&ITimer);
+        chVTSet(&ITimer, MS2ST(1000), TimeTmrCallback, NULL);
+    }
+};
+static Time_t Time;
+
+void TimeTmrCallback(void *p) {
+	//Uart.Printf("!!call  TimeTmrCallback()\r");
+    chSysLockFromIsr();
+    chVTSetI(&Time.ITimer, MS2ST(1000), TimeTmrCallback, NULL);
+    if(++Time.S == 60) {
+        Time.S = 0;
+        if(++Time.M == 60) {
+            Time.M = 0;
+            if(++Time.H == 24) Time.H = 0;
+        }
+    }
+    chEvtSignalI(App.PThd, EVTMASK_NEWSECOND);
+    chSysUnlockFromIsr();
+}
+#endif
+
+#if 1 // ========================== Keys lock / unlock =========================
+#define KEYLOCKER1              KEY_X   // }
+#define KEYLOCKER2              KEY_Z   // } Keys locking
+
+static void KeylockTmrCallback(void *p);
+#define AUTOLOCK_TIMEOUT_MS     18000
+class Keylock_t {
+private:
+    VirtualTimer VTimer;
+public:
+    bool Locked;
+    void TimerSet() { chVTSet(&VTimer, MS2ST(AUTOLOCK_TIMEOUT_MS), KeylockTmrCallback, NULL); }
+    void TimerReset() { chVTReset(&VTimer); }
+    void Lock();
+    void Unlock();
+};
+static Keylock_t Keylock;
+
+
+// Timer callback
+void KeylockTmrCallback(void *p) {
+    chSysLockFromIsr();
+    chEvtSignalI(App.PThd, EVTMASK_KEYLOCK);
+    chSysUnlockFromIsr();
+}
+
+void Keylock_t::Lock() {
+    Locked = true;
+    Uart.Printf("Lock\r");
+    Lcd.Shutdown();
+}
+
+void Keylock_t::Unlock() {
+    Locked = false;
+    Uart.Printf("Unlock\r");
+    Lcd.Init();
+    // Redraw display
+   // LcdHasChanged = true;
+}
+#endif
+#if 1 // =========================== Key handler ===============================
+static inline void KeysHandler() {
+    Keylock.TimerReset();   // Reset timer as Any key pressed or released
+    if(Keylock.Locked) {
+        // Just unlock, do not handle pressed keys
+        //if(Keys.AnyPressed()) Keylock.Unlock();   // Check if any key pressed, not released, not holded
+        if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
+            Keylock.Unlock();
+            Keylock.TimerSet();     // Start autolock timer
+            Vibro.Vibrate(ShortBrr);
+        }
+    }
+    // Check if lock
+    else if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
+        Keylock.Lock();
+    }
+    // Not locked, not lock pressed
+   /*
+#define KEY_A   Keys.Status[0]
+#define KEY_B   Keys.Status[1]
+#define KEY_C   Keys.Status[2]
+#define KEY_X   Keys.Status[3]
+#define KEY_Y   Keys.Status[4]
+#define KEY_Z   Keys.Status[5]
+#define KEY_L   Keys.Status[6]
+#define KEY_E   Keys.Status[7]
+#define KEY_R   Keys.Status[8]
+    */
+
+    else {
+        for(uint8_t i=0; i<KEYS_CNT; i++) {
+            if(Keys.Status[i].HasChanged) {
+                if(Keys.Status[i].State == ksReleased) {
+                   // ArmletApi::OnButtonRelease(i);
+                	Beeper.Beep(ShortBeep);
+                }
+                else {
+//                    Beeper.Beep(ShortBeep);
+                	if(i==0)
+                	{
+                		Sound.Stop();
+                		Uart.Printf("sound stop");
+                	}
+                	if(i==1)
+                	{
+                		Sound.Play("church_bells.wav");
+                		Uart.Printf("church_bells.wav");
+                	}
+                	if(i==2)
+                	{
+                		Sound.Play("techview.wav");
+                		Uart.Printf("techview.wav");
+                	}
+                    Vibro.Vibrate(ShortBrr);
+                    //ArmletApi::OnButtonPress(i);
+                }
+            }
+        } // for
+        Keylock.TimerSet(); // Start autolock timer
+    } // if not locked
+    Keys.Reset();
+}
+#endif
+
+
+// ===========================app thread ===============================
+static char appbufftmp[MAX_MUSIC_FILENAME_CHAR_SIZE];
+static WORKING_AREA(waAppThread, 256);
+__attribute__((noreturn))
+static void AppThread(void *arg) {
+    chRegSetThreadName("App");
+    uint32_t EvtMsk;
+    int onrun=0;
+    Uart.Printf("!!call  App_t::AppThread()\r");
+    Keys.RegisterEvt(&EvtListenerKeys, EVTMASK_KEYS);
+    Sound.RegisterEvtPlayEnd(&EvtListenerSound,EVTMASK_PLAY_ENDS);
+    while(true) {
+        EvtMsk = chEvtWaitAny(ALL_EVENTS);
+        if(EvtMsk & EVTMASK_KEYS)
+        	{
+        	 Uart.Printf("!!KeysHandler called  App_t::AppThread()\r");
+        	KeysHandler();
+        	}
+        if(EvtMsk & EVTMASK_PLAY_ENDS) {
+        	//int rval=GetRandomEmoToPlay();
+        	//strcpy(appbufftmp,GetFileNameToPlayFromEmoId(rval));
+        	// Sound.Play(appbufftmp);
+        	// Uart.Printf(appbufftmp);
+        	//Uart.Printf("sound track ended");
+        	Uart.Printf("music ends!!!\r");
+        }
+        if(EvtMsk & EVTMASK_NEWSECOND) {
+        	// Uart.Printf("New_second!");
+
+        	 if(onrun==0)
+        	 {
+        		 onrun=1;
+        		 Sound.Play("church_bells.wav");
+        		 Uart.Printf("church_bells.wav");
+        	 }
+        	// int rval=GetRandomEmoToPlay();
+        	// GetFileNameToPlayFromEmoId(rval);
+        	// Uart.Printf("!!App_t::AppThread() random id=%d, name = %s \r",
+        	//		 rval,emotions[rval].name );//,GetFileNameToPlayFromEmoId(rval));
+            /// Time.DecreaseSecond();
+            // if(Time.IsZero()) App.StopEverything();
+            // else Interface.ShowTimeNow();
+       	}
+
+    }//while 1
+}
+        // Keys
+  /*      if(EvtMsk & EVTMSK_KEY_START)            KeyStart();
+        if(App.State == asIdle) {
+           if(EvtMsk & EVTMSK_KEY_TIME_UP)      KeyTimeUp();
+            if(EvtMsk & EVTMSK_KEY_TIME_DOWN)    KeyTimeDown();
+            if(EvtMsk & EVTMSK_KEY_CURRENT_UP)   KeyCurrentUp();
+            if(EvtMsk & EVTMSK_KEY_CURRENT_DOWN) KeyCurrentDown();
+        }
+
+        // Time
+        if(EvtMsk & EVTMSK_NEWSECOND) {
+            Time.DecreaseSecond();
+            if(Time.IsZero()) App.StopEverything();
+            else Interface.ShowTimeNow();
+        }
+
+        // Measurement
+        if(EvtMsk & EVTMSK_MEASURE_TIME) Measure.StartMeasurement();
+        if(EvtMsk & EVTMSK_MEASUREMENT_DONE) {
+            Interface.DisplayBattery();
+            if(App.State == asCurrent) {
+                Interface.DisplayCurrentMeasured();
+                // Check if overcurrent (current regulation loop failure)
+                int32_t tmp = Measure.GetResult(CURRENT_CHNL);
+                tmp = Current.Adc2uA(tmp);
+                if((tmp - Current.uA) > 504) {
+                    App.StopEverything();
+                    Interface.ShowFailure();
+                }
+            }*/
+
+       // }
+    //} // while 1
+
+
+
+void App_t::Init()
+{
+	State = asIdle;
+	    PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
+	    Time.Reset();
+	    Uart.Printf("!!call  App_t::Init() ends!\r");
+}
+
+
+
+
+//NEW FROM BRAINENCH
+/*#include "application.h"
+#include "cmd_uart.h"
+#include "peripheral.h"
+#include "sequences.h"
+#include "eestore.h"
+#include "lcd1200.h"
+#include "evt_mask.h"
+#include "power.h"
+#include "battery_consts.h"
+#include "lcd_images.h"
+*/
 
 //#include "ArmletApi.h"
 //#include "Common.h"

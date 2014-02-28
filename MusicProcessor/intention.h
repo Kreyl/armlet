@@ -1,9 +1,10 @@
 #ifndef intention_h__
 #define intention_h__
-
-#define MAX_INCOMING_INTENRIONS_ARRAY_SIZE 2
+//#include "emotions.h"
+#include "atlantis_music_tree.h"
+#define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 2
 #define INTENTIONS_ARRAY_SIZE 5
-typedef struct Intention {
+/*typedef struct Intention {
 	int weight1000;	//константа, определяющая степень и время роста
 	//int last_measure_weight;//
 	//int cast_time_sec;//
@@ -12,14 +13,14 @@ typedef struct Intention {
 	char* name;		//имя намерения
 	int emotion_tree_indx;//индекс из массива эмоций, соответствующей музыки намерения.
 } Intention;
-
-extern struct Intention intentionArray[INTENTIONS_ARRAY_SIZE];
+*/
+//REASON extern struct Intention intentionArray[INTENTIONS_ARRAY_SIZE]; - change to reasons[]
 
 typedef struct IncomingIntentions {
 	int intention_indx;	//индекс из стандартного массива
 	int power256; //сила сигнала
 } IncomingIntentions;
-extern struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENRIONS_ARRAY_SIZE];
+extern struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRAY_SIZE];
 
 typedef struct IntentionCalculationData
 //структура для рассчета изменений по входящим намерениям,

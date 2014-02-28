@@ -14,7 +14,7 @@
 #define MAX_EMO_NAME_CHAR 20
 //#define MAX_MUSIC_FILE_NAME_CHAR 50
 
-emotionMusicNodeFiles emotionTreeMusicNodeFiles[MUSIC_ARRAY_SIZE];
+emotionMusicNodeFiles emotionTreeMusicNodeFiles[music_array_size];
 //#define INI_BUF_SIZE    512
 //static char IBuf2[512];
 static char PrintFileToUARTbuffer[512];
@@ -24,16 +24,16 @@ static char MusicFileNamebuffer[MAX_MUSIC_FILENAME_CHAR_SIZE];
 //полное дерево музыки
 Emotion * EmotionTreeGetParent(Emotion tree_node)
 {
-	if(tree_node.parent_indx==ROOT_ELEMENT_INDX)
+	if(tree_node.parent==ROOT_ELEMENT_INDX)
 		return NULL;
-	Emotion * return_pointer=&(emotionTree[tree_node.parent_indx]);
+	Emotion * return_pointer=&(emotions[tree_node.parent]);
 	return return_pointer;
 }
 Emotion * EmotionTreeGetParent2(int tree_node_indx)
 {
-	if(emotionTree[tree_node_indx].parent_indx==ROOT_ELEMENT_INDX)
+	if(emotions[tree_node_indx].parent==ROOT_ELEMENT_INDX)
 		return NULL;
-	Emotion * return_pointer=&(emotionTree[emotionTree[tree_node_indx].parent_indx]);
+	Emotion * return_pointer=&(emotions[emotions[tree_node_indx].parent]);
 	return return_pointer;
 }
 
@@ -55,12 +55,12 @@ int GetEmoIndxFromFileString(char * string)
 	//stremobuff=
 	//str
 
-	for(int i=0;i<EMOTIONTREE_ARRAY_SIZE;i++)
+	for(int i=0;i<emotion_number_fix;i++)
 	{
-		if(strncmp(EmoNamebuffer,emotionTree[i].name,sep_id)==0)
-		//if(strcmp(strpbrk(string,"_"),emotionTree[i].name))
+		if(strncmp(EmoNamebuffer,emotions[i].name,sep_id)==0)
+		//if(strcmp(strpbrk(string,"_"),emotions[i].name))
 		{
-			//Uart.Printf("GetEmoIndx string %s , EmoNamebuffer  %s, name %s  \r",string,EmoNamebuffer,emotionTree[i].name);
+			//Uart.Printf("GetEmoIndx string %s , EmoNamebuffer  %s, name %s  \r",string,EmoNamebuffer,emotions[i].name);
 			return i;
 		}
 	}
@@ -73,12 +73,12 @@ int GetRandomEmoToPlay()
 {
 	int max_sum_weight=0;
 	int min_sum_weight=0;
-	for(int i=0;i<EMOTIONTREE_ARRAY_SIZE;i++)
-		max_sum_weight+=emotionTree[i].weight;
+	for(int i=0;i<emotion_number_fix;i++)
+		max_sum_weight+=emotions[i].weight;
 	int rand_val=Random(max_sum_weight);
-	for(int i=0;i<EMOTIONTREE_ARRAY_SIZE;i++)
+	for(int i=0;i<emotion_number_fix;i++)
 	{
-		min_sum_weight+=emotionTree[i].weight;
+		min_sum_weight+=emotions[i].weight;
 		if(min_sum_weight>=rand_val)
 			return i;
 	}
@@ -87,14 +87,27 @@ int GetRandomEmoToPlay()
 char * GetFileNameToPlayFromEmoId(int emo_id)
 {
 	//TODO error to log here!
-	if(emo_id<0 || emo_id>EMOTIONTREE_ARRAY_SIZE)
+	if(emo_id<0 || emo_id>emotion_number_fix)
+	{
+		Uart.Printf("GetFileNameToPlayFromEmoId emo_id out of range");
 		return NULL;
-
+	}
 	//if no file available for this emo, play from top emo
 	if(emotionTreeMusicNodeFiles[emo_id].num_files_at_node==0)
-		return GetFileNameToPlayFromEmoId(emotionTreeMusicNodeFiles[emo_id].node_indx);
-
+	{
+		Uart.Printf("no files for emo %s \r", emotions[emo_id]);
+		return GetFileNameToPlayFromEmoId(emotions[emotionTreeMusicNodeFiles[emo_id].node_indx].parent);
+	}
 	//Random item from weights
+	//if 1 file, always use it.
+	if(emotionTreeMusicNodeFiles[emo_id].num_files_at_node ==1)
+	{
+		Uart.Printf("only one file for emo %s \r", emotions[emo_id]);
+		return emotionTreeMusicNodeFiles[emo_id].music_files[0].full_filename;
+	}
+	else
+		Uart.Printf("found %d files for for emo %s \r",emotionTreeMusicNodeFiles[emo_id].num_files_at_node, emotions[emo_id]);
+
 	int max_sum_weight=0;
 	int min_sum_weight=0;
 	for(int i=0;i<emotionTreeMusicNodeFiles[emo_id].num_files_at_node;i++)
@@ -104,8 +117,12 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 	{
 		min_sum_weight+=emotionTreeMusicNodeFiles[emo_id].float1000_file_weight[i];
 		if(min_sum_weight>=rand_val)
+		{
+			Uart.Printf("play %d file for for emo %s \r",i, emotions[emo_id]);
 			return emotionTreeMusicNodeFiles[emo_id].music_files[i].full_filename;
+		}
 	}
+	Uart.Printf("GetFileNameToPlayFromEmoId smth wrong");
 	//else if smth wrong return first!
 	//TODO log error here
 	return emotionTreeMusicNodeFiles[emo_id].music_files[0].full_filename;
@@ -114,12 +131,12 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 int Init_emotionTreeMusicNodeFiles_FromFile(char * filename)
 {
 	//init zero state
-	for(int i=0;i<MUSIC_ARRAY_SIZE;i++)
+	for(int i=0;i<music_array_size;i++)
 	{
 		emotionTreeMusicNodeFiles[i].num_files_at_node=0;
 		emotionTreeMusicNodeFiles[i].node_weight=1000;
 		//node indx есть только у музыки в узлах дерева, если узла нет, индекс -1
-		if(i<EMOTIONTREE_ARRAY_SIZE)
+		if(i<emotion_number_fix)
 			emotionTreeMusicNodeFiles[i].node_indx=i;
 		else
 			emotionTreeMusicNodeFiles[i].node_indx=-1;
@@ -146,6 +163,7 @@ int Init_emotionTreeMusicNodeFiles_FromFile(char * filename)
 	 {
 		 f_gets(MusicFileNamebuffer, MAX_MUSIC_FILENAME_CHAR_SIZE, &file);
 		 int emo_id=GetEmoIndxFromFileString(MusicFileNamebuffer);
+		 Uart.Printf("emo id found: %d \r",emo_id);
 		 if(emo_id>=0)
 		 {	//собственно инициализация
 			// Uart.Printf("Init_emotionTreeMusicNodeFiles_FromFile write file  %s ,on emo_id  %d  \r",PrintFileToUARTbuffer,emo_id);
@@ -160,12 +178,13 @@ int Init_emotionTreeMusicNodeFiles_FromFile(char * filename)
 		 else
 			 Uart.Printf("cannot find emotion for file %s",MusicFileNamebuffer);
 	 }
+	// Uart.Printf("Init_emotionTreeMusicNodeFiles_FromFile end \r");
 	 f_close(&file);
 	 return 0;
 }
 void Print_emotionTreeMusicNodeFiles_ToUART()
 {
-	 for (int i = 0; i < MUSIC_ARRAY_SIZE; i++)
+	 for (int i = 0; i < music_array_size; i++)
 		 for(int j=0;j<emotionTreeMusicNodeFiles[i].num_files_at_node;j++)
 		 {
 			 Uart.Printf("emotion tree, emo_indx = %d,fileindx= %d,filename= %s   \r",

@@ -2,15 +2,15 @@
 #include <stddef.h>
 //TODO move it right
 int CurrentIntentionArraySize=2;
-Intention intentionArray[INTENTIONS_ARRAY_SIZE]={
+/*Intention intentionArray[INTENTIONS_ARRAY_SIZE]={
 	{1000,"creation",0},			//0
 	{1000,"destruction",1},		//1 negativ
 	{1000,"horror_house",1},	//2 negativ
 	{1000,"wasteland",0},		//3
 	{1000,"reaper",4}		//4 positiv
-};
+};*/
 struct IncomingIntentions ArrayOfIncomingIntentions[2]={
-		{0,2,},{1,3}
+		{0,2},{1,3}
 };
 struct IntentionCalculationData SICD=
 {
@@ -52,7 +52,7 @@ void CalculateIntentionsRadioChange()
 	int current_winner_indx=-1;
 	for(int i=0;i<CurrentIntentionArraySize;i++)
 	{
-		currnotnormval=SICD.Intention_weight_cost*intentionArray[ArrayOfIncomingIntentions[i].intention_indx].weight1000+
+		currnotnormval=SICD.Intention_weight_cost*reasons[ArrayOfIncomingIntentions[i].intention_indx].weight+
 				SICD.Signal_power_weight_cost*ArrayOfIncomingIntentions[i].power256;
 		if(currnotnormval>maxnotnormval)
 		{
@@ -71,7 +71,7 @@ void CalculateIntentionsRadioChange()
 		for(int i=0;i<CurrentIntentionArraySize;i++)
 		if(i!=current_winner_indx)
 		{
-			secod_norm_val=SICD.Intention_weight_cost*intentionArray[ArrayOfIncomingIntentions[i].intention_indx].weight1000+
+			secod_norm_val=SICD.Intention_weight_cost*reasons[ArrayOfIncomingIntentions[i].intention_indx].weight+
 					SICD.Signal_power_weight_cost*ArrayOfIncomingIntentions[i].power256;
 			if(secod_norm_val>maxnotnormval)
 			{

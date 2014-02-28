@@ -97,6 +97,11 @@
 			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/MiddleWareLib</locationURI>
 		</link>
 		<link>
+			<name>MusicProcessor</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/MusicProcessor</locationURI>
+		</link>
+		<link>
 			<name>PriceOfHonor2</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/PriceOfHonor2</locationURI>
@@ -107,6 +112,17 @@
 			<locationURI>PARENT-2-PROJECT_LOC/Armlet/PriceOfHonor2/ArmletShell/ShellApi</locationURI>
 		</link>
 	</linkedResources>
+	<filteredResources>
+		<filter>
+			<id>1393598943385</id>
+			<name></name>
+			<type>6</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-location-matches-false-false-MusicProcessor</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
 	<variableList>
 		<variable>
 			<name>copy_PARENT</name>
