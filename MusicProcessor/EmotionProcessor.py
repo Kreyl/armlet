@@ -55,7 +55,7 @@ const int reasons_number = countof(reasons);
 // End of emotions.c
 '''
 
-C_NODE = ' /* %s */ %s{ %s, 1, %s, 0 },'
+C_NODE = ' /* %s */ %s{ %s, 1, %s, -1, -1 },'
 
 REASON_NODE = ' /* %s */ { %s, %d, %d }, \t/* %s */'
 
