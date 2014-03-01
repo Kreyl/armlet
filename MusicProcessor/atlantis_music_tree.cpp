@@ -3,10 +3,12 @@
 #include <stddef.h>
 #include "ff.h"
 #include "cmd_uart.h"
+#include "kl_sd.h"
 
 #include "kl_lib_f2xx.h" //random
 
 #define MUSIC_FILE_EMO_INFO_SEPARATOR -
+#define MUSIC_FILE_EMO_INFO_SEPARATOR_STRING "-"
 #define SEPARATOR_NOT_FOUND -3
 #define EMO_INFO_NOT_FOUND -2
 #define NOEMOFILEREASONWEIGHT (-1)
@@ -18,6 +20,8 @@
 //#define INI_BUF_SIZE    512
 //static char IBuf2[512];
 static char PrintFileToUARTbuffer[512];
+static char GMFNFLbuffer[512];
+static char emonamebuffer[129];
 static char EmoNamebuffer[MAX_EMO_NAME_CHAR];
 static char MusicFileNamebuffer[MAX_MUSIC_FILENAME_CHAR_SIZE];
 
@@ -39,7 +43,13 @@ Emotion * EmotionTreeGetParent2(int tree_node_indx)
 
 char * GetMusicFileNameFromList(int emo_id, int file_num)
 {
-    return "TODO";
+    strcpy(emonamebuffer,strcat((char*)emotions[emo_id].name,"-"));
+   // Uart.Printf("emonamebuffer %s , emotions[emo_id].name  %s \r",emonamebuffer,emotions[emo_id].name);
+    if(SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer)==FR_OK)
+    {
+        Uart.Printf("GetNthFileByPrefix prefix: %s,fnum %d result: %s \r",emonamebuffer,GMFNFLbuffer);
+        return emonamebuffer;
+    }
 }
 
 //на входе - название файла, выход - индекс эмоции из массива эмоций, соответствующей данному файлу
@@ -63,7 +73,7 @@ int GetEmoIndxFromFileString(char * string)
 		if(strncmp(EmoNamebuffer,emotions[i].name,sep_id)==0)
 		//if(strcmp(strpbrk(string,"_"),emotions[i].name))
 		{
-			//Uart.Printf("GetEmoIndx string %s , EmoNamebuffer  %s, name %s  \r",string,EmoNamebuffer,emotions[i].name);
+		//	Uart.Printf("GetEmoIndx string %s , EmoNamebuffer  %s, name %s  \r",string,EmoNamebuffer,emotions[i].name);
 			return i;
 		}
 	}
@@ -175,12 +185,65 @@ int Init_emotionTreeMusicNodeFiles_FromFile(const char * filename)
 	 f_close(&file);
 	 return 0;
 }
+
+int Init_emotionTreeMusicNodeFiles_FromFileIterrator()
+{
+    //init zero state
+    for(int i=0;i<music_array_size;i++)
+    {
+        emotions[i].numTracks=0;
+    }
+    if(SD.GetFirst("/")==FR_OK)
+    {
+        int emo_id=GetEmoIndxFromFileString(SD.FileInfo.lfname);
+      //
+        if(emo_id>=0)
+                 {  //собственно инициализация
+                     //увеличиваем счетчик файлов
+                    Uart.Printf("emo id found: %d \r",emo_id);
+                     emotions[emo_id].numTracks++;
+                 }
+                 else
+                     Uart.Printf("cannot find emotion for file %s \r",MusicFileNamebuffer);
+    }
+
+    while(SD.GetNext()==FR_OK)
+    {
+        int emo_id=GetEmoIndxFromFileString(SD.FileInfo.lfname);
+
+        if(emo_id>=0)
+                 {  //собственно инициализация
+                     //увеличиваем счетчик файлов
+                Uart.Printf("emo id found: %d \r",emo_id);
+                     emotions[emo_id].numTracks++;
+                 }
+                 else
+                     Uart.Printf("cannot find emotion for file %s \r",MusicFileNamebuffer);
+    }
+    //TODO critical error, stop working
+
+    // while(f_eof(&file)==0)
+    // {
+    //     f_gets(MusicFileNamebuffer, MAX_MUSIC_FILENAME_CHAR_SIZE, &file);
+   //      int emo_id=GetEmoIndxFromFileString(MusicFileNamebuffer);
+    //     Uart.Printf("emo id found: %d \r",emo_id);
+    //     if(emo_id>=0)
+   //      {  //собственно инициализация
+    //         //увеличиваем счетчик файлов
+    //         emotions[emo_id].numTracks++;
+    //     }
+    //     else
+    //         Uart.Printf("cannot find emotion for file %s",MusicFileNamebuffer);
+    // }
+    // Uart.Printf("Init_emotionTreeMusicNodeFiles_FromFile end \r");
+     return 0;
+}
 void Print_emotionTreeMusicNodeFiles_ToUART()
 {
 	 for (int i = 0; i < music_array_size; i++)
 		 for(int j=0;j<emotions[i].numTracks;j++)
 		 {
-			 Uart.Printf("emotion tree, emo_indx = %d,fileindx= %d,filename= %s   \r",
+			 Uart.Printf(" emo_indx = %d,fileindx= %d,filename= %s   \r",
 					 i,j, GetMusicFileNameFromList(i,j)); //emotionTreeMusicNodeFiles[i].music_files[j].full_filename);
 		 }
 

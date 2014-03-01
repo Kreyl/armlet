@@ -50,6 +50,7 @@ extern struct emotionMusicNodeFiles emotionTreeMusicNodeFiles[music_array_size];
 
 void Print_emotionTreeMusicNodeFiles_ToUART();
 int Init_emotionTreeMusicNodeFiles_FromFile(const char * filename);
+int Init_emotionTreeMusicNodeFiles_FromFileIterrator();
 void CreateFileWithString(char* filename, char * filestring,int string_size, BYTE open_mode);
 void CreateFileWithStringArray(char* filename, int string_size, BYTE open_mode );
 int PrintFileToUART(char* filename);

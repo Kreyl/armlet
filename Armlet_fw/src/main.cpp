@@ -106,8 +106,9 @@ void Init() {
 //    IR.RxInit();
 //    Power.Init();
 //    PillInit();
-    Init_emotionTreeMusicNodeFiles_FromFile("mt_settings.txt");
-    Print_emotionTreeMusicNodeFiles_ToUART();
+    //Init_emotionTreeMusicNodeFiles_FromFile("mt_settings.txt");
+    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
+  //  Print_emotionTreeMusicNodeFiles_ToUART();
 
      Sound.Init();
     //Sound.Play("alive.wav");
