@@ -96,7 +96,7 @@ void Init() {
 //    Power.Init();
 //    PillInit();
     Init_emotionTreeMusicNodeFiles_FromFile("mt_settings.txt");
-   // Print_emotionTreeMusicNodeFiles_ToUART();
+    Print_emotionTreeMusicNodeFiles_ToUART();
 
      Sound.Init();
     //Sound.Play("alive.wav");

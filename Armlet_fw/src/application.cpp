@@ -175,7 +175,7 @@ static inline void KeysHandler() {
 
 
 // ===========================app thread ===============================
-//static char appbufftmp[MAX_MUSIC_FILENAME_CHAR_SIZE];
+static char appbufftmp[MAX_MUSIC_FILENAME_CHAR_SIZE];
 static WORKING_AREA(waAppThread, 256);
 __attribute__((noreturn))
 static void AppThread(void *arg) {

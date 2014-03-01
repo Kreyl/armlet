@@ -55,5 +55,6 @@ void CreateFileWithStringArray(char* filename, int string_size, BYTE open_mode )
 int PrintFileToUART(char* filename);
 int GetRandomEmoToPlay();
 char * GetFileNameToPlayFromEmoId(int emo_id);
+void RebuildReasons();
 
 #endif /* ATLANTIS_MUSIC_TREE_H_ */

@@ -17,7 +17,7 @@
 //REASON extern struct Intention intentionArray[INTENTIONS_ARRAY_SIZE]; - change to reasons[]
 
 typedef struct IncomingIntentions {
-	int intention_indx;	//индекс из стандартного массива
+	int reason_indx;	//индекс из стандартного массива
 	int power256; //сила сигнала
 } IncomingIntentions;
 extern struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRAY_SIZE];

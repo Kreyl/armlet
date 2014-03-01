@@ -22,7 +22,16 @@ struct IntentionCalculationData SICD=
 		1,//	int new_intention_power_winner;
 		0,//	int winning_integral;
 		10//int winning_integral_top_limit_normalizer;
-		};
+};
+/*
+int Intention_weight_cost;
+int Signal_power_weight_cost;
+int Normalizer;
+int last_intention_power_winner;//NOT NORMALIZED
+int last_intention_index_winner;
+int winning_integral;//NORMALIZED
+int winning_integral_top_limit_normalizer;*/
+
 void PrintSCIDToUart()
 {
 	Uart.Printf("IWC %d,SPWC %d, Norm %d \r",SICD.Intention_weight_cost,SICD.Signal_power_weight_cost,SICD.Normalizer);
@@ -30,23 +39,73 @@ void PrintSCIDToUart()
 	}
 
 //TODO
-int CalcWinIntegral(int first_winner_power, int second_winner_power)
+int GetNotNormalizedIntegral(int power, int reason_id)
 {
-	int summ=first_winner_power-second_winner_power;
+    return SICD.Intention_weight_cost*reasons[reason_id].weight+power*SICD.Signal_power_weight_cost;
+}
+
+int CalcWinIntegral(int first_winner_power,int winner_id, int second_winner_power, int second_id)
+{
+    int int1=GetNotNormalizedIntegral(first_winner_power,winner_id);
+    int int2=GetNotNormalizedIntegral(second_winner_power,second_id);
+	int summ=(int1-int2)/SICD.Normalizer;
 	if(summ>=0)
-	return summ;
+	{
+	    Uart.Printf("win_int %d/%d \r",int1-int2,SICD.Normalizer);
+	    return summ;
+	}
 	else
+	{
+	    Uart.Printf("CalcWinIntegral winner lower than 2nd place");
 		return 0;//ERROR
 	}
+}
 
 void CalculateIntentionsRadioChange()
 {
 	//formula: (IWC*Intention.weight1000+power256*SPWC)/Normalizer
-	//int winner_power_tmp=SICD.last_intention_power_winner;
 
+    //если никого не слышим, сбросить суммы - TODO учесть интегрирование!
+        if(CurrentIntentionArraySize==0)
+        {
+            Uart.Printf("CalculateIntentionsRadioChange array 0\r");
+            SICD.winning_integral=0;
+            SICD.last_intention_power_winner=0;
+            return;
+        }
+
+        if(CurrentIntentionArraySize==1)
+        {
+            Uart.Printf("CalculateIntentionsRadioChange array 1\r");
+            SICD.winning_integral+=GetNotNormalizedIntegral(ArrayOfIncomingIntentions[0].power256,ArrayOfIncomingIntentions[0].reason_indx)/SICD.Normalizer;//CalcWinIntegral(ArrayOfIncomingIntentions[0].power256,ArrayOfIncomingIntentions[0].reason_indx,0,0);
+            SICD.last_intention_power_winner=ArrayOfIncomingIntentions[0].power256;//get current power!
+        }
+
+        int maxnotnormval=-1;// временная переменная!
+        int currnotnormval=0;
+        int current_winner_indx=-1;
+        for(int i=0;i<CurrentIntentionArraySize;i++)
+        {
+            currnotnormval=GetNotNormalizedIntegral(ArrayOfIncomingIntentions[i].power256,ArrayOfIncomingIntentions[i].reason_indx);
+            if(currnotnormval>maxnotnormval)
+                    {
+                        maxnotnormval=currnotnormval;
+                        current_winner_indx=ArrayOfIncomingIntentions[i].reason_indx;
+                    }
+        }
+        if(current_winner_indx==SICD.last_intention_index_winner)
+        {
+
+
+        }
+
+
+	//int winner_power_tmp=SICD.last_intention_power_winner;
+/*
 	//если никого не слышим, сбросить суммы - учесть интегрирование!
 	if(CurrentIntentionArraySize==0)
 	{
+	    Uart.Printf("CalculateIntentionsRadioChange array 0\r");
 		SICD.winning_integral=0;
 		SICD.last_intention_power_winner=0;
 		return;
@@ -54,6 +113,7 @@ void CalculateIntentionsRadioChange()
 	//если массив из 1 элемента, забить на всю эту хрень - учесть интегрирование!
 	if(CurrentIntentionArraySize==1)
 	{
+	    Uart.Printf("CalculateIntentionsRadioChange array 1\r");
 		SICD.winning_integral+=CalcWinIntegral(ArrayOfIncomingIntentions[0].power256,0);
 		SICD.last_intention_power_winner=ArrayOfIncomingIntentions[0].power256;//get current power!
 	}
@@ -76,6 +136,7 @@ void CalculateIntentionsRadioChange()
 	//если тот же победитель, смотрим значение второго?
 	if(current_winner_indx==SICD.last_intention_index_winner)
 	{
+	    Uart.Printf("same winner\r");
 		int secod_norm_val=-1;
 		maxnotnormval=-1;
 		int current_second_winner_indx=-1;
@@ -110,5 +171,5 @@ void CalculateIntentionsRadioChange()
 
 	//move last winner
 	//write new winner
-
+*/
 }
