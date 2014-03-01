@@ -37,7 +37,10 @@ Emotion * EmotionTreeGetParent2(int tree_node_indx)
 	return return_pointer;
 }
 
-
+char * GetMusicFileNameFromList(int emo_id, int file_num)
+{
+    return "TODO";
+    }
 
 //на входе - название файла, выход - индекс эмоции из массива эмоций, соответствующей данному файлу
 int GetEmoIndxFromFileString(char * string)
@@ -93,27 +96,28 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 		return NULL;
 	}
 	//if no file available for this emo, play from top emo
-	if(emotionTreeMusicNodeFiles[emo_id].num_files_at_node==0)
+	if(emotions[emo_id].numTracks==0)
 	{
 		Uart.Printf("no files for emo %s \r", emotions[emo_id]);
-		return GetFileNameToPlayFromEmoId(emotions[emotionTreeMusicNodeFiles[emo_id].node_indx].parent);
+		return GetFileNameToPlayFromEmoId(emotions[emo_id].parent);
 	}
 	//Random item from weights
 	//if 1 file, always use it.
 	if(emotionTreeMusicNodeFiles[emo_id].num_files_at_node ==1)
 	{
 		Uart.Printf("only one file for emo %s \r", emotions[emo_id]);
-		return emotionTreeMusicNodeFiles[emo_id].music_files[0].full_filename;
+		return "TODO get full filename";// emotionTreeMusicNodeFiles[emo_id].music_files[0].full_filename;
 	}
 	else
-		Uart.Printf("found %d files for for emo %s \r",emotionTreeMusicNodeFiles[emo_id].num_files_at_node, emotions[emo_id]);
+		Uart.Printf("found %d files for for emo %s \r",emotions[emo_id].numTracks, emotions[emo_id]);
 
 	int max_sum_weight=0;
 	int min_sum_weight=0;
-	for(int i=0;i<emotionTreeMusicNodeFiles[emo_id].num_files_at_node;i++)
-		max_sum_weight+=emotionTreeMusicNodeFiles[emo_id].float1000_file_weight[i];
-	int rand_val=Random(max_sum_weight);
-	for(int i=0;i<emotionTreeMusicNodeFiles[emo_id].num_files_at_node;i++)
+	for(int i=0;i<emotions[emo_id].numTracks;i++)
+		max_sum_weight+=emotions[emo_id].weight[i];
+	int rand_val=Random(emotions[emo_id].numTracks);
+	//веса у файлов убрали
+	/*for(int i=0;i<emotionTreeMusicNodeFiles[emo_id].num_files_at_node;i++)
 	{
 		min_sum_weight+=emotionTreeMusicNodeFiles[emo_id].float1000_file_weight[i];
 		if(min_sum_weight>=rand_val)
@@ -121,7 +125,7 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 			Uart.Printf("play %d file for for emo %s \r",i, emotions[emo_id]);
 			return emotionTreeMusicNodeFiles[emo_id].music_files[i].full_filename;
 		}
-	}
+	}*/
 	Uart.Printf("GetFileNameToPlayFromEmoId smth wrong");
 	//else if smth wrong return first!
 	//TODO log error here
@@ -133,13 +137,8 @@ int Init_emotionTreeMusicNodeFiles_FromFile(char * filename)
 	//init zero state
 	for(int i=0;i<music_array_size;i++)
 	{
-		emotionTreeMusicNodeFiles[i].num_files_at_node=0;
-		emotionTreeMusicNodeFiles[i].node_weight=1000;
-		//node indx есть только у музыки в узлах дерева, если узла нет, индекс -1
-		if(i<emotions_number)
-			emotionTreeMusicNodeFiles[i].node_indx=i;
-		else
-			emotionTreeMusicNodeFiles[i].node_indx=-1;
+		emotions[i].numTracks=0;
+		emotions[i].weight=1000;
 	}
 	//fopen routine
 	 FIL file;
@@ -167,13 +166,15 @@ int Init_emotionTreeMusicNodeFiles_FromFile(char * filename)
 		 if(emo_id>=0)
 		 {	//собственно инициализация
 			// Uart.Printf("Init_emotionTreeMusicNodeFiles_FromFile write file  %s ,on emo_id  %d  \r",PrintFileToUARTbuffer,emo_id);
-			 	//записываем имя файла
-			 strcpy(emotionTreeMusicNodeFiles[emo_id].music_files[ emotionTreeMusicNodeFiles[emo_id].num_files_at_node].full_filename,
-					 MusicFileNamebuffer);
 
-			 emotionTreeMusicNodeFiles[emo_id].float1000_file_weight[emotionTreeMusicNodeFiles[emo_id].num_files_at_node]=1000;
+			//записываем имя файла
+		    //не записываем - будет геттер по номеру эмоции
+			// strcpy(emotionTreeMusicNodeFiles[emo_id].music_files[ emotionTreeMusicNodeFiles[emo_id].num_files_at_node].full_filename,
+			//		 MusicFileNamebuffer);
+
+			//REMOVED emotionTreeMusicNodeFiles[emo_id].float1000_file_weight[emotionTreeMusicNodeFiles[emo_id].num_files_at_node]=1000;
 			 //увеличиваем счетчик файлов
-			 emotionTreeMusicNodeFiles[emo_id].num_files_at_node++;
+			 emotions[emo_id].numTracks++;
 		 }
 		 else
 			 Uart.Printf("cannot find emotion for file %s",MusicFileNamebuffer);
@@ -185,10 +186,11 @@ int Init_emotionTreeMusicNodeFiles_FromFile(char * filename)
 void Print_emotionTreeMusicNodeFiles_ToUART()
 {
 	 for (int i = 0; i < music_array_size; i++)
-		 for(int j=0;j<emotionTreeMusicNodeFiles[i].num_files_at_node;j++)
+		 for(int j=0;j<emotions[i].numTracks;j++)
 		 {
-			 Uart.Printf("emotion tree, emo_indx = %d,fileindx= %d,filename= %s   \r",
-					 i,j,emotionTreeMusicNodeFiles[i].music_files[j].full_filename);
+		     //TODO - тут нужно вызывать геттер
+			// Uart.Printf("emotion tree, emo_indx = %d,fileindx= %d,filename= %s   \r",
+			//		 i,j,emotionTreeMusicNodeFiles[i].music_files[j].full_filename);
 		 }
 
 }
