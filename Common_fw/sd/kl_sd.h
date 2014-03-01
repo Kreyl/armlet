@@ -12,12 +12,20 @@
 #include "ch.h"
 #include "hal.h"
 
+#define MAX_NAME_LEN    128
+
 // See SDIO clock divider in halconf.h
 
 class sd_t {
 private:
     FATFS SDC_FS;
+    char LongFileName[MAX_NAME_LEN];
 public:
+    DIR Directory;
+    FILINFO FileInfo;
+    FRESULT GetFirst(const char* DirPath);  // Put first file info into FileInfo field
+    FRESULT GetNext();
+    uint8_t GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName);
     bool IsReady;
     FIL File;
     void Init();

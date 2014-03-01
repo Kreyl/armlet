@@ -69,6 +69,17 @@ void Init() {
     iniReadUint32("Radio", "ID", "settings.ini", &ID);
     Uart.Printf("ID=%u\r", ID);
 
+    FRESULT r = SD.GetFirst("/");
+    if(r == FR_OK) {
+        Uart.Printf("%S\r", SD.FileInfo.lfname);
+        r = SD.GetNext();
+        if(r == FR_OK) Uart.Printf("%S\r", SD.FileInfo.lfname);
+    }
+
+    char Name[128];
+    uint8_t ur = SD.GetNthFileByPrefix("aga", 2, Name);
+    if(ur == OK) Uart.Printf("%S\r", Name);
+
  //   Lcd.Init();
  //   Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
 
