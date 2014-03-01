@@ -16,15 +16,15 @@
 #include "sound.h"
 #include "keys.h"
 #include "infrared.h"
-#include "lvl1_assym.h"
 #include "cmd_uart.h"
 #include "power.h"
 #include "pill.h"
+#include "rlvl2.h"
 
 #include "ff.h"
 
 #include "application.h"
-#include "../MusicProcessor/atlantis_music_tree.h"
+#include "atlantis_music_tree.h"
 
 static inline void Init();
 
@@ -79,6 +79,8 @@ void Init() {
     char Name[128];
     uint8_t ur = SD.GetNthFileByPrefix("aga", 2, Name);
     if(ur == OK) Uart.Printf("%S\r", Name);
+
+    RLvl2.Init();
 
  //   Lcd.Init();
  //   Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
