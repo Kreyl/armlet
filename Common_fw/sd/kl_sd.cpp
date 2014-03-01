@@ -47,6 +47,40 @@ void sd_t::Init() {
     IsReady = TRUE;
 }
 
+FRESULT sd_t::GetFirst(const char* DirPath) {
+    FRESULT r = f_opendir(&Directory, DirPath);
+    if(r != FR_OK) return r;
+    FileInfo.lfname = LongFileName;
+    FileInfo.lfsize = MAX_NAME_LEN;
+    while(true) {
+        r = f_readdir(&Directory, &FileInfo);
+        if(r != FR_OK) return r;
+        if(FileInfo.fname[0] == 0) return FR_NO_FILE;
+        if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
+    }
+    return FR_INT_ERR;
+}
+
+FRESULT sd_t::GetNext() {
+    while(true) {
+        FRESULT r = f_readdir(&Directory, &FileInfo);
+        if(r != FR_OK) return r;
+        if(FileInfo.fname[0] == 0) return FR_NO_FILE;
+        if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
+    }
+    return FR_INT_ERR;
+}
+
+uint8_t sd_t::GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName) {
+    FRESULT r = GetFirst("/");
+    if(r != FR_OK) return FAILURE;
+    while(N--) {
+        r = GetNext();
+        if(r != FR_OK) return FAILURE;
+    }
+    strcpy(PName, FileInfo.lfname);
+    return OK;
+}
 
 // ========================== ini files operations =============================
 #ifdef USE_INI_FILES
