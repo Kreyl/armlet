@@ -194,7 +194,7 @@ static void AppThread(void *arg) {
         	}
         if(EvtMsk & EVTMASK_RADIO) {
         }
-        }
+
         if(EvtMsk & EVTMASK_PLAY_ENDS) {
         	//int rval=GetRandomEmoToPlay();
         	//strcpy(appbufftmp,GetFileNameToPlayFromEmoId(rval));
