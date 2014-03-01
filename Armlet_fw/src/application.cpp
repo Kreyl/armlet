@@ -25,6 +25,17 @@
 #include "sound.h"
 #include "ff.h"
 #include "../MusicProcessor/intention.h"
+#include "rlvl2.h"
+
+ #define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+ #define min(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+
 App_t App;
 
 // transfer comments:
@@ -193,6 +204,17 @@ static void AppThread(void *arg) {
         	KeysHandler();
         	}
         if(EvtMsk & EVTMASK_RADIO) {
+            Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
+            int val1= min(reasons_number,RLvl2.PTable->RowCnt);
+            int chmaxval=-1;
+            int chmax_indx=-1;
+            for(int i=0;i<val1;i++)
+            {
+              //  if(chmaxval<
+
+
+            }
+
         }
 
         if(EvtMsk & EVTMASK_PLAY_ENDS) {
