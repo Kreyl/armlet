@@ -24,7 +24,9 @@
 #include "kl_sd.h"
 #include "sound.h"
 #include "ff.h"
+#include "../MusicProcessor/intention.h"
 App_t App;
+
 // transfer comments:
 //PAppThd from old code = App.PThd
 static EventListener EvtListenerKeys,EvtListenerSound;//EvtLstnrRadioRx, EvtListenerKeys, EvtListenerIR, EvtListenerTmr;
@@ -41,7 +43,7 @@ static void TimeTmrCallback(void *p);
 
 class Time_t {
 public:
-    uint8_t H, M, S;
+    uint8_t H, M, S,S_total;
     VirtualTimer ITimer;
     void Reset() {
         chVTReset(&ITimer);
@@ -61,6 +63,7 @@ void TimeTmrCallback(void *p) {
             if(++Time.H == 24) Time.H = 0;
         }
     }
+    Time.S_total++;
     chEvtSignalI(App.PThd, EVTMASK_NEWSECOND);
     chSysUnlockFromIsr();
 }
@@ -115,7 +118,7 @@ static inline void KeysHandler() {
         if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
             Keylock.Unlock();
             Keylock.TimerSet();     // Start autolock timer
-            Vibro.Vibrate(ShortBrr);
+            Vibro.Vibrate(ShortBrr);	//doesnt work?!
         }
     }
     // Check if lock
@@ -140,7 +143,7 @@ static inline void KeysHandler() {
             if(Keys.Status[i].HasChanged) {
                 if(Keys.Status[i].State == ksReleased) {
                    // ArmletApi::OnButtonRelease(i);
-                	Beeper.Beep(ShortBeep);
+                	Beeper.Beep(ShortBeep);	//doesnt work?!
                 }
                 else {
 //                    Beeper.Beep(ShortBeep);
@@ -172,7 +175,7 @@ static inline void KeysHandler() {
 
 
 // ===========================app thread ===============================
-static char appbufftmp[MAX_MUSIC_FILENAME_CHAR_SIZE];
+//static char appbufftmp[MAX_MUSIC_FILENAME_CHAR_SIZE];
 static WORKING_AREA(waAppThread, 256);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
@@ -195,11 +198,17 @@ static void AppThread(void *arg) {
         	// Sound.Play(appbufftmp);
         	// Uart.Printf(appbufftmp);
         	//Uart.Printf("sound track ended");
-        	Uart.Printf("music ends!!!\r");
+        	//Uart.Printf("music ends!!!\r");
         }
         if(EvtMsk & EVTMASK_NEWSECOND) {
         	// Uart.Printf("New_second!");
 
+        	if(Time.S_total % 4 ==0)
+        	{
+        		CalculateIntentionsRadioChange();
+        		PrintSCIDToUart();
+        		Uart.Printf("every 4 sec\r");
+        	}
         	 if(onrun==0)
         	 {
         		 onrun=1;
@@ -257,6 +266,11 @@ void App_t::Init()
 {
 	State = asIdle;
 	    PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
+	    // Time
+	    Time.H = 0;
+	    Time.M = 0;
+	    Time.S = 0;
+	    Time.S_total = 0;
 	    Time.Reset();
 	    Uart.Printf("!!call  App_t::Init() ends!\r");
 }

@@ -1,5 +1,6 @@
 #include "intention.h"
 #include <stddef.h>
+#include "cmd_uart.h"
 //TODO move it right
 int CurrentIntentionArraySize=2;
 /*Intention intentionArray[INTENTIONS_ARRAY_SIZE]={
@@ -10,40 +11,51 @@ int CurrentIntentionArraySize=2;
 	{1000,"reaper",4}		//4 positiv
 };*/
 struct IncomingIntentions ArrayOfIncomingIntentions[2]={
-		{0,2},{1,3}
+		{2,2},{6,3}
 };
 struct IntentionCalculationData SICD=
 {
 		10,//int Intention_weight_cost;
 		4,//	int Signal_power_weight_cost;
-		10,//	int Normalizer;
+		1,//	int Normalizer;
 		0,//	int last_intention_power_winner;
 		1,//	int new_intention_power_winner;
 		0,//	int winning_integral;
 		10//int winning_integral_top_limit_normalizer;
 		};
+void PrintSCIDToUart()
+{
+	Uart.Printf("IWC %d,SPWC %d, Norm %d \r",SICD.Intention_weight_cost,SICD.Signal_power_weight_cost,SICD.Normalizer);
+	Uart.Printf("last_id %d, last_pw %d,Win_int %d \r",SICD.last_intention_index_winner,SICD.last_intention_power_winner,SICD.winning_integral);
+	}
 
 //TODO
-int CalcWinIntegral()
+int CalcWinIntegral(int first_winner_power, int second_winner_power)
 {
-	return -1;
+	int summ=first_winner_power-second_winner_power;
+	if(summ>=0)
+	return summ;
+	else
+		return 0;//ERROR
 	}
 
 void CalculateIntentionsRadioChange()
 {
 	//formula: (IWC*Intention.weight1000+power256*SPWC)/Normalizer
 	//int winner_power_tmp=SICD.last_intention_power_winner;
-	//TODO если массив из 1 элемента, забить на всю эту хрень
+
+	//если никого не слышим, сбросить суммы - учесть интегрирование!
 	if(CurrentIntentionArraySize==0)
 	{
 		SICD.winning_integral=0;
 		SICD.last_intention_power_winner=0;
 		return;
 	}
+	//если массив из 1 элемента, забить на всю эту хрень - учесть интегрирование!
 	if(CurrentIntentionArraySize==1)
 	{
-		SICD.winning_integral+=CalcWinIntegral();
-		SICD.last_intention_power_winner;//get current power!
+		SICD.winning_integral+=CalcWinIntegral(ArrayOfIncomingIntentions[0].power256,0);
+		SICD.last_intention_power_winner=ArrayOfIncomingIntentions[0].power256;//get current power!
 	}
 
 
@@ -80,11 +92,12 @@ void CalculateIntentionsRadioChange()
 			}
 		}
 		//добавляем интеграл из значений обоих
-		SICD.winning_integral+=CalcWinIntegral();//f(currnotnormval-secod_norm_val)
+		SICD.winning_integral+=CalcWinIntegral(ArrayOfIncomingIntentions[current_winner_indx].power256,ArrayOfIncomingIntentions[current_second_winner_indx].power256);//f(currnotnormval-secod_norm_val)
 		SICD.last_intention_power_winner=currnotnormval;
 		return;
 	}
 	else
+		//если новый - начинаем считать заново
 	{
 		SICD.winning_integral=0;
 		SICD.last_intention_power_winner=currnotnormval;

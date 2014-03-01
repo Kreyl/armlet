@@ -38,7 +38,7 @@ typedef struct IntentionCalculationData
 void CalculateIntentionsRadioChange();
 
 extern struct IntentionCalculationData SICD;//SingletonIntentionCalculationData;
-
+void PrintSCIDToUart();
 //в структуре рассчета будет индекс текущего победителя мощности,
 //индекс предыдущего победителя мощности,
 //набранная дельта ( по определению принадлежит предыдущему победителю)
