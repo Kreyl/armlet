@@ -132,7 +132,7 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 	return emotionTreeMusicNodeFiles[emo_id].music_files[0].full_filename;
 }
 
-int Init_emotionTreeMusicNodeFiles_FromFile(char * filename)
+int Init_emotionTreeMusicNodeFiles_FromFile(const char * filename)
 {
 	//init zero state
 	for(int i=0;i<music_array_size;i++)

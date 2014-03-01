@@ -146,7 +146,7 @@ uint16_t Lcd_t::PutChar(uint8_t x, uint8_t y, char c, Color_t ForeClr, Color_t B
     uint16_t nBytes = PFont[2];
     SetBounds(x, nCols, y, nRows);
     // Get pointer to the first byte of the desired character
-    const char *PChar = Font8x8 + (nBytes * (c - 0x1F));
+    const uint8_t *PChar = Font8x8 + (nBytes * (c - 0x1F));
     // Write RAM
     WriteByte(0x2C);    // Memory write
     DC_Hi();
