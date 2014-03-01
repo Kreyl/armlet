@@ -19,6 +19,7 @@ typedef struct Emotion {
     const int weight;
     const int parent;
     int numTracks;
+    int lastPlayedTrack;
 } Emotion_t;
 
 extern Emotion_t emotions[];
