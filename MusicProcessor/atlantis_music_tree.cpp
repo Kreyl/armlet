@@ -55,7 +55,7 @@ int GetEmoIndxFromFileString(char * string)
 	//stremobuff=
 	//str
 
-	for(int i=0;i<emotion_number_fix;i++)
+	for(int i=0;i<emotions_number;i++)
 	{
 		if(strncmp(EmoNamebuffer,emotions[i].name,sep_id)==0)
 		//if(strcmp(strpbrk(string,"_"),emotions[i].name))
@@ -73,10 +73,10 @@ int GetRandomEmoToPlay()
 {
 	int max_sum_weight=0;
 	int min_sum_weight=0;
-	for(int i=0;i<emotion_number_fix;i++)
+	for(int i=0;i<emotions_number;i++)
 		max_sum_weight+=emotions[i].weight;
 	int rand_val=Random(max_sum_weight);
-	for(int i=0;i<emotion_number_fix;i++)
+	for(int i=0;i<emotions_number;i++)
 	{
 		min_sum_weight+=emotions[i].weight;
 		if(min_sum_weight>=rand_val)
@@ -87,7 +87,7 @@ int GetRandomEmoToPlay()
 char * GetFileNameToPlayFromEmoId(int emo_id)
 {
 	//TODO error to log here!
-	if(emo_id<0 || emo_id>emotion_number_fix)
+	if(emo_id<0 || emo_id>emotions_number)
 	{
 		Uart.Printf("GetFileNameToPlayFromEmoId emo_id out of range");
 		return NULL;
@@ -136,7 +136,7 @@ int Init_emotionTreeMusicNodeFiles_FromFile(char * filename)
 		emotionTreeMusicNodeFiles[i].num_files_at_node=0;
 		emotionTreeMusicNodeFiles[i].node_weight=1000;
 		//node indx есть только у музыки в узлах дерева, если узла нет, индекс -1
-		if(i<emotion_number_fix)
+		if(i<emotions_number)
 			emotionTreeMusicNodeFiles[i].node_indx=i;
 		else
 			emotionTreeMusicNodeFiles[i].node_indx=-1;
