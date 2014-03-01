@@ -72,14 +72,20 @@ FRESULT sd_t::GetNext() {
 }
 
 uint8_t sd_t::GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName) {
+    uint32_t Len = strlen(Prefix);
     FRESULT r = GetFirst("/");
-    if(r != FR_OK) return FAILURE;
-    while(N--) {
-        r = GetNext();
-        if(r != FR_OK) return FAILURE;
+    while(r == FR_OK) {
+        // Check if name begins with prefix
+        if(strncmp(FileInfo.lfname, Prefix, Len) == 0) {    // Prefix found
+            if(N == 0) {                                    // Required number of files found
+                strcpy(PName, FileInfo.lfname);             // Copy name
+                return OK;
+            }
+            else N--;
+        }
+        r = GetNext();  // Find next file
     }
-    strcpy(PName, FileInfo.lfname);
-    return OK;
+    return FAILURE;
 }
 
 // ========================== ini files operations =============================
