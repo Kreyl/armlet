@@ -192,6 +192,9 @@ static void AppThread(void *arg) {
         	 Uart.Printf("!!KeysHandler called  App_t::AppThread()\r");
         	KeysHandler();
         	}
+        if(EvtMsk & EVTMASK_RADIO) {
+        }
+        }
         if(EvtMsk & EVTMASK_PLAY_ENDS) {
         	//int rval=GetRandomEmoToPlay();
         	//strcpy(appbufftmp,GetFileNameToPlayFromEmoId(rval));
