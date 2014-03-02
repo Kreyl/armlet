@@ -204,7 +204,7 @@ static void AppThread(void *arg) {
         	KeysHandler();
         	}
         if(EvtMsk & EVTMASK_RADIO) {
-            Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
+         //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
             int val1= min(reasons_number,RLvl2.PTable->RowCnt);
             int chmaxval=-1;
             int chmax_indx=-1;
@@ -231,8 +231,8 @@ static void AppThread(void *arg) {
         	if(Time.S_total % 4 ==0)
         	{
         		CalculateIntentionsRadioChange();
-        		PrintSCIDToUart();
-        		Uart.Printf("every 4 sec\r");
+        		//PrintSCIDToUart();
+        		//Uart.Printf("every 4 sec\r");
         	}
         	 if(onrun==0)
         	 {
