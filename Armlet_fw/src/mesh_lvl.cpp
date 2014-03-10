@@ -36,23 +36,7 @@ void Mesh_t::ITask() {
     uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
     if(EvtMsk & EVTMSK_NEW_CYCLE) {
 //        Uart.Printf("i,%u, t=%u\r", AbsCycle, chTimeNow());
-        Beeper.Beep(ShortBeep);
-        IncCurrCycle();
-        // RX
-        if(CurrCycle == RxCycleN) {
-            chEvtSignal(rLevel1.PrThd, EVTMSK_MESH_RX);
-            mshMsg_t MeshPkt;
-            uint32_t Timeout = CYCLE_TIME; /* Wait Answer for Cycle Time */
-            do {
-                if(MsgBox.TryFetchMsg(&MeshPkt) == OK) PktBuf.WritePkt(MeshPkt); // Put Msg to CircBuffer
-                Timeout--;
-            } while(Timeout != 0);
-        }
-        // TX
-        else {
-            chThdSleepMilliseconds(SleepTime);
-            chEvtSignal(rLevel1.PrThd, EVTMSK_MESH_TX);
-        }
+        NewCycle();
     }
     if(EvtMsk & EVTMSK_UPDATE_CYCLE) {
         uint8_t PriorityID = SelfID;
@@ -88,16 +72,38 @@ void Mesh_t::ITask() {
 
         if(NeedUpdateTime) {
             Uart.Printf("MESH CycUpdat=%u\r", NewAbsTime);
-            SetCurrCycleN(NewAbsTime); // FIXME: aligh NewAbsTime
             uint32_t timeNow = chTimeNow();
-            do NextCycleStart += CYCLE_TIME;
+            do {
+                NextCycleStart += CYCLE_TIME;
+                NewAbsTime++;
+            }
             while (NextCycleStart < timeNow);
+            SetCurrCycleN(NewAbsTime);
+            CycleTmr.SetCounter(0);
+            NeedUpdateTime = false;
             Uart.Printf("MESH Sl %u to %u\r", chTimeNow(), NextCycleStart);
             chThdSleepUntil(NextCycleStart);
             CycleTmr.Enable();
-            CycleTmr.SetCounter(0);
-            NeedUpdateTime = false;
         }
+    }
+}
+
+void Mesh_t::NewCycle() {
+    IncCurrCycle();
+    // RX
+    if(CurrCycle == RxCycleN) {
+        chEvtSignal(rLevel1.PrThd, EVTMSK_MESH_RX);
+        mshMsg_t MeshPkt;
+        uint32_t Timeout = CYCLE_TIME; /* Wait Answer for Cycle Time */
+        do {
+            if(MsgBox.TryFetchMsg(&MeshPkt) == OK) PktBuf.WritePkt(MeshPkt); // Put Msg to CircBuffer
+            Timeout--;
+        } while(Timeout != 0);
+    }
+    // TX
+    else {
+        chThdSleepMilliseconds(SleepTime);
+        chEvtSignal(rLevel1.PrThd, EVTMSK_MESH_TX);
     }
 }
 

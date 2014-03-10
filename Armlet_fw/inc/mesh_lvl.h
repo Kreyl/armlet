@@ -78,6 +78,7 @@ private:
     void NewRxCycle()       { RxCycleN = *PRndTable; PRndTable++; if(PRndTable > RndTableBuf + RND_TBL_BUFFER_SZ) PRndTable = RndTableBuf;   }
     void IncCurrCycle()     { AbsCycle++; CurrCycle++; if(CurrCycle >= COUNT_OF_CYCLES) { CurrCycle = 0; NewRxCycle(); } }
 
+    void NewCycle();
 public:
     Mesh_t() :  PRndTable(RndTableBuf),
                 AbsCycle(0),

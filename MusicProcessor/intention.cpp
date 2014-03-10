@@ -101,7 +101,7 @@ void CalculateIntentionsRadioChange()
             SICD.winning_integral+=GetNotNormalizedIntegral(ArrayOfIncomingIntentions[0].power256,ArrayOfIncomingIntentions[0].reason_indx)/SICD.Normalizer;
             SICD.last_intention_power_winner=ArrayOfIncomingIntentions[0].power256;//get current power!
             SICD.last_intention_index_winner=ArrayOfIncomingIntentions[0].reason_indx;
-            Uart.Printf("CalculateIntentionsRadioChange win_int1 %d, win_id %d \r",SICD.winning_integral, SICD.last_intention_index_winner);
+            Uart.Printf("CalculateIntentionsRadioChange win_int1 %d, win_id %d, pw %d \r",SICD.winning_integral, SICD.last_intention_index_winner,SICD.last_intention_power_winner);
             return;
         }
 

@@ -139,8 +139,4 @@ void Init() {
   //  CreateFileWithStringArray("m6_settings.ini",4,FA_CREATE_ALWAYS | FA_WRITE);
  //  PrintFileToUART("settings.ini");//mt_settings.txt");
   //  PrintFileToUART("mt_settings.txt");
-
-
-    //goto sleep, now application thread is main run
-    while(true) { chThdSleep(TIME_INFINITE); }
 }
