@@ -67,6 +67,7 @@ void rLevel1_t::ITask() {
             } while ((chTimeNow() - RxStartTime) < CYCLE_TIME);
 //            Uart.Printf("RxEnd, t=%u\r", chTimeNow());
             chEvtSignal(Mesh.IPThread, EVTMSK_UPDATE_CYCLE);
+
         }
 #endif
     } // while true
