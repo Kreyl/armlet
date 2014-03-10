@@ -240,15 +240,15 @@ public:
     void SetTriggerType(ExtiTrigType_t ATriggerType) {
         uint32_t IrqMsk = 1 << IPinNumber;
         switch(ATriggerType) {
-            case Rising:
+            case ttRising:
                 EXTI->FTSR &= ~IrqMsk; // Falling trigger disabled
                 EXTI->RTSR |=  IrqMsk; // Rising trigger enabled
                 break;
-            case Falling:
+            case ttFalling:
                 EXTI->FTSR |=  IrqMsk; // Falling trigger enabled
                 EXTI->RTSR &= ~IrqMsk; // Rising trigger disabled
                 break;
-            case RisingFalling:
+            case ttRisingFalling:
                 EXTI->FTSR |=  IrqMsk; // Falling trigger enabled
                 EXTI->RTSR |=  IrqMsk; // Rising trigger enabled
                 break;
