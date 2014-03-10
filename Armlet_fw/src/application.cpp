@@ -19,22 +19,12 @@
 #include "power.h"
 #include "tiny_sprintf.h"
 
-#include "lvl1_assym.h"
 #include "evt_mask.h"
 #include "kl_sd.h"
 #include "sound.h"
 #include "ff.h"
 #include "../MusicProcessor/intention.h"
 #include "rlvl2.h"
-
- #define max(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a > _b ? _a : _b; })
- #define min(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a < _b ? _a : _b; })
 
 App_t App;
 
@@ -206,7 +196,7 @@ static void AppThread(void *arg) {
         if(EvtMsk & EVTMASK_RADIO) {
         //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
            // continue;
-            int val1= min(reasons_number,RLvl2.PTable->RowCnt);
+            int val1= MIN(reasons_number,RLvl2.PTable->RowCnt);
 
             //copy to ArrayOfIncomingIntentions
             CurrentIntentionArraySize=val1;
@@ -846,21 +836,21 @@ void UartCmdCallback(uint8_t CmdCode, uint8_t *PData, uint32_t Length) {
             Uart.Cmd(0x90, &b, 1);
             break;
 
-        case 0x51:  // GetID
-            Uart.Printf("ID=%u\r", rLevel1.GetID());
-            break;
-
-        case 0x52:  // SetID
-            b = PData[0];
-            res = f_open(&SD.File, "settings.ini", FA_CREATE_ALWAYS | FA_WRITE);
-            if(res == FR_OK) {
-                f_printf(&SD.File, "[Radio]\r\nID=%u\r\n", b);
-                f_close(&SD.File);
-                Uart.Printf("Written\r");
-            }
-            rLevel1.SetID(b);
-            Uart.Printf("New ID=%u\r", rLevel1.GetID());
-            break;
+//        case 0x51:  // GetID
+//            Uart.Printf("ID=%u\r", rLevel1.GetID());
+//            break;
+//
+//        case 0x52:  // SetID
+//            b = PData[0];
+//            res = f_open(&SD.File, "settings.ini", FA_CREATE_ALWAYS | FA_WRITE);
+//            if(res == FR_OK) {
+//                f_printf(&SD.File, "[Radio]\r\nID=%u\r\n", b);
+//                f_close(&SD.File);
+//                Uart.Printf("Written\r");
+//            }
+//            rLevel1.SetID(b);
+//            Uart.Printf("New ID=%u\r", rLevel1.GetID());
+//            break;
 
         default: break;
     } // switch

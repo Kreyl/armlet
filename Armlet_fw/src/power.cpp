@@ -8,7 +8,6 @@
 #include "power.h"
 #include "keys.h"
 #include "peripheral.h"
-#include "lvl1_assym.h"
 #include "infrared.h"
 
 Pwr_t Power;
@@ -119,6 +118,5 @@ void ShutdownPeriphery() {
     Beeper.Shutdown();
     Vibro.Shutdown();
     IR.Shutdown();
-    rLevel1.Shutdown();
 }
 
