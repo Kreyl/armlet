@@ -118,7 +118,7 @@ void Sound_t::Init() {
     chThdSleepMicroseconds(45);
 
     // ==== DREQ IRQ ====
-    IDreq.Init(VS_GPIO, VS_DREQ, Rising);
+    IDreq.Setup(VS_GPIO, VS_DREQ, Rising);
 
 //   CmdWrite(VS_REG_MODE, (VS_SM_SDInew | VS_SM_RESET));    // Perform software reset
 //    AddCmd(VS_REG_MODE, VS_MODE_REG_VALUE);
@@ -179,7 +179,7 @@ void Sound_t::AddCmd(uint8_t AAddr, uint16_t AData) {
 
 void Sound_t::ISendNextData() {
 //    Uart.Printf("sn\r");
-    IDreq.Disable();
+    IDreq.DisableIrq();
     dmaStreamDisable(VS_DMA);
     IDmaIdle = false;
     // If command queue is not empty, send command
