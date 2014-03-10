@@ -24,6 +24,7 @@ void SnsTable_t::ISwitchTableI() {
 }
 
 void SnsTable_t::PutSnsInfo(uint8_t ID, uint32_t Level) {
+//    Uart.Printf("ID=%u,RSSI=%u\r", ID, Level);
     if(PCurrTbl->Size >= MAX_ROW_CNT) return;
     for(uint32_t i=0; i<PCurrTbl->Size; i++) {
         if(PCurrTbl->Row[i].ID == ID) {

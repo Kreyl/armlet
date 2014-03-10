@@ -9,7 +9,7 @@
 #include "mesh_lvl.h"
 #include "radio_lvl1.h"
 #include "SensorTable.h"
-int tablesentcntr =0;
+
 Mesh_t Mesh;
 
 // ================================= Thread ====================================
@@ -36,7 +36,7 @@ void Mesh_t::ITask() {
     uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
     if(EvtMsk & EVTMSK_NEW_CYCLE) {
 //        Uart.Printf("i,%u, t=%u\r", AbsCycle, chTimeNow());
-//        Beeper.Beep(ShortBeep);
+        Beeper.Beep(ShortBeep);
         IncCurrCycle();
         // RX
         if(CurrCycle == RxCycleN) {
@@ -62,7 +62,7 @@ void Mesh_t::ITask() {
         if(PktBuf.GetFilledSlots() != 0) {
             do {
                 PktBuf.ReadPkt(&MeshMsg);
-    //            Uart.Printf("ID=%u %d\r", MeshMsg.PktRx.ID, MeshMsg.RSSI);
+//                Uart.Printf("ID=%u %d\r", MeshMsg.PktRx.ID, MeshMsg.RSSI);
                 if(PriorityID > MeshMsg.PktRx.ID) {                /* Priority time checking */
                     CycleTmr.Disable();
                     NeedUpdateTime = true;
@@ -81,21 +81,18 @@ void Mesh_t::ITask() {
 
         NeedToSendTable++;
         if(NeedToSendTable == TABLE_SEND_N) {
-            tablesentcntr++;
-            Uart.Printf("TableSend,t=%u, num_sent= %d\r", chTimeNow(),tablesentcntr);
-
-
+            Uart.Printf("MESH TS,t=%u\r", chTimeNow());
             SnsTable.SendEvtReady();
             NeedToSendTable = 0;
         }
 
         if(NeedUpdateTime) {
-            Uart.Printf("NewCycleUpdate=%u\r", NewAbsTime);
+            Uart.Printf("MESH CycUpdat=%u\r", NewAbsTime);
             SetCurrCycleN(NewAbsTime); // FIXME: aligh NewAbsTime
             uint32_t timeNow = chTimeNow();
             do NextCycleStart += CYCLE_TIME;
             while (NextCycleStart < timeNow);
-            Uart.Printf("Sleep from %u to %u\r", chTimeNow(), NextCycleStart);
+            Uart.Printf("MESH Sl %u to %u\r", chTimeNow(), NextCycleStart);
             chThdSleepUntil(NextCycleStart);
             CycleTmr.Enable();
             CycleTmr.SetCounter(0);
