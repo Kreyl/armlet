@@ -82,12 +82,12 @@ static void rLvl1Thread(void *arg) {
 }
 
 // ================================= Common ====================================
-void rLevel1_t::Init(uint8_t ASelfID) {
+void rLevel1_t::Init(uint32_t ASelfID) {
 #ifdef DBG_PINS
     PinSetupOut(DBG_GPIO1, DBG_PIN1, omPushPull, pudNone);
 #endif
 
-    PktTx.ID = ASelfID;
+    PktTx.ID = (uint8_t)ASelfID;
     PktTx.CycleN = 0;
     PktTx.TimeOwnerID = PktTx.ID;
 

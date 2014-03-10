@@ -56,7 +56,7 @@ void Mesh_t::ITask() {
     if(EvtMsk & EVTMSK_UPDATE_CYCLE) {
 
 //        uint8_t NumPkts = PktBuf.GetFilledSlots();
-        uint8_t PriorityID = (uint8_t)SELF_ID;
+        uint8_t PriorityID = SelfID;
         uint32_t NewAbsTime=0;
         uint32_t NextCycleStart=0;
         mshMsg_t MeshMsg;
@@ -92,11 +92,13 @@ void Mesh_t::ITask() {
     }
 }
 
-void Mesh_t::Init() {
+void Mesh_t::Init(uint32_t ID) {
     // Init Thread
     IPThread = chThdCreateStatic(waMeshLvlThread, sizeof(waMeshLvlThread), NORMALPRIO, (tfunc_t)MeshLvlThread, NULL);
     // Create RandomTable
     MsgBox.Init();
+    SelfID = (uint8_t)ID;
+    SleepTime= ((SelfID-1)*SLOT_TIME);
     for(uint8_t i=0; i<RND_TBL_BUFFER_SZ; i++) {
         RndTableBuf[i] = GET_RND_VALUE(COUNT_OF_CYCLES);
     }

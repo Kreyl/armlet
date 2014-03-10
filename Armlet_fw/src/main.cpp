@@ -21,6 +21,9 @@
 #include "pill.h"
 #include "rlvl2.h"
 
+#include "radio_lvl1.h"
+#include "mesh_lvl.h"
+
 #include "ff.h"
 
 #include "application.h"
@@ -123,7 +126,8 @@ void Init() {
     //strcpy
     //CreateFileWithString(filename2,teststring1,strlen(teststring1),FA_CREATE_NEW);
 
-//    rLevel1.Init(ID);
+    rLevel1.Init(ID);
+    Mesh.Init(ID);
     //AppInit();
 
     //

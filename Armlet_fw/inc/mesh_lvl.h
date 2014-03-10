@@ -13,7 +13,7 @@
 #include "radio_lvl1.h"
 #include "msg_box.h"
 
-#define SELF_ID             15
+//#define SELF_ID             15
 #define MAX_ABONENTS        100   // max ID, started from 1
 
 #define MESH_CHANNEL        1
@@ -69,6 +69,7 @@ private:
     uint32_t RxCycleN;
     uint32_t SleepTime;
     bool NeedUpdateTime;
+    uint32_t SelfID;
 
     Timer_t CycleTmr;
     void NewRxCycle()       { RxCycleN = *PRndTable; PRndTable++; if(PRndTable > RndTableBuf + RND_TBL_BUFFER_SZ) PRndTable = RndTableBuf;   }
@@ -79,8 +80,9 @@ public:
                 AbsCycle(0),
                 CurrCycle(COUNT_OF_CYCLES),
                 RxCycleN(*PRndTable),
-                SleepTime((SELF_ID-1)*SLOT_TIME),
+                SleepTime(0),
                 NeedUpdateTime(false),
+                SelfID(0),
                 CycleTmr(MESH_TIM),
                 IPThread(NULL) {}
 
@@ -90,7 +92,7 @@ public:
     uint32_t GetAbsTimeMS()     { return (AbsCycle*CYCLE_TIME);  }
     void SetCurrCycleN(uint32_t ANew)   { AbsCycle = ANew; CurrCycle = 0; NewRxCycle(); }
     MsgBox_t<mshMsg_t, RPKT_SZ> MsgBox;
-    void Init();
+    void Init(uint32_t ID);
     void ITask();
 
     void IIrqHandler();
