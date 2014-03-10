@@ -68,78 +68,59 @@ void Timer_t::PwmInit(GPIO_TypeDef *GPIO, uint16_t N, uint8_t Chnl, Inverted_t I
 }
 
 // ================================ PWM pin ====================================
-void PwmPin_t::Init(GPIO_TypeDef *GPIO, uint16_t N, uint8_t TimN, uint8_t Chnl, uint16_t TopValue, bool Inverted) {
-    switch(TimN) {
-        case 1:
-            Tim = TIM1;
-            PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF1);
-            rccEnableTIM1(FALSE);
-            break;
-        case 2:
-            Tim = TIM2;
-            PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF1);
-            rccEnableTIM2(FALSE);
-            break;
-
-        case 3:
-            Tim = TIM3;
-            PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF2);
-            rccEnableTIM3(FALSE);
-            break;
-        case 4:
-            Tim = TIM4;
+void PwmPin_t::Init(GPIO_TypeDef *GPIO, uint16_t N, TIM_TypeDef* PTim, uint8_t Chnl, uint16_t TopValue, bool Inverted) {
+    Tim = PTim;
+    if(Tim == TIM1) {
+        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF1);
+        rccEnableTIM1(FALSE);
+    }
+    else if(Tim == TIM2) {
+        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF1);
+        rccEnableTIM2(FALSE);
+    }
+    else if(Tim == TIM3) {
+        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF2);
+        rccEnableTIM3(FALSE);
+    }
+    else if(Tim == TIM4) {
             PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF2);
             rccEnableTIM4(FALSE);
-            break;
-        case 5:
-            Tim = TIM5;
-            PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF2);
-            rccEnableTIM5(FALSE);
-            break;
-
-        case 8:
-            Tim = TIM8;
-            PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF3);
-            rccEnableTIM8(FALSE);
-            break;
-        case 9:
-            Tim = TIM9;
-            PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF3);
-            rccEnableAPB2(RCC_APB2ENR_TIM9EN, FALSE);
-            break;
-        case 10:
-            Tim = TIM10;
-            PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF3);
-            rccEnableAPB2(RCC_APB2ENR_TIM10EN, FALSE);
-            break;
-        case 11:
-            Tim = TIM11;
-            PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF3);
-            rccEnableAPB2(RCC_APB2ENR_TIM11EN, FALSE);
-            break;
-
-        case 12:
-            Tim = TIM12;
-            PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF9);
-            rccEnableAPB1(RCC_APB1ENR_TIM12EN, FALSE);
-            break;
-        case 13:
-            Tim = TIM13;
-            PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF9);
-            rccEnableAPB1(RCC_APB1ENR_TIM13EN, FALSE);
-            break;
-        case 14:
-            Tim = TIM14;
-            PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF9);
-            rccEnableAPB1(RCC_APB1ENR_TIM14EN, FALSE);
-            break;
-
-        default: return; break;
+    }
+    else if(Tim == TIM5) {
+        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF2);
+        rccEnableTIM5(FALSE);
+    }
+    else if(Tim == TIM8) {
+        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF3);
+        rccEnableTIM8(FALSE);
+    }
+    else if(Tim == TIM9) {
+        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF3);
+        rccEnableAPB2(RCC_APB2ENR_TIM9EN, FALSE);
+    }
+    else if(Tim == TIM10) {
+        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF3);
+        rccEnableAPB2(RCC_APB2ENR_TIM10EN, FALSE);
+    }
+    else if(Tim == TIM11) {
+        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF3);
+        rccEnableAPB2(RCC_APB2ENR_TIM11EN, FALSE);
+    }
+    else if(Tim == TIM12) {
+        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF9);
+        rccEnableAPB1(RCC_APB1ENR_TIM12EN, FALSE);
+    }
+    else if(Tim == TIM13) {
+        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF9);
+        rccEnableAPB1(RCC_APB1ENR_TIM13EN, FALSE);
+    }
+    else if(Tim == TIM14) {
+        PinSetupAlterFunc(GPIO, N, omPushPull, pudNone, AF9);
+        rccEnableAPB1(RCC_APB1ENR_TIM14EN, FALSE);
     }
 
     // Clock src
-    if((TimN == 1) or (TimN == 8) or (TimN == 9) or (TimN == 10) or (TimN == 11))
-        PClk = &Clk.APB2FreqHz;
+    if(ANY_OF_5(Tim, TIM1, TIM8, TIM9, TIM10, TIM11)) PClk = &Clk.APB2FreqHz;
     else PClk = &Clk.APB1FreqHz;
 
     // Common
