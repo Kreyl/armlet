@@ -221,6 +221,7 @@ static void AppThread(void *arg) {
                 //играть музыку по резону, если у нас всё еще тот же победитель - не трогать музыку.
             if(reason_id!=-1 && reason_id!=-2)
             {
+                Uart.Printf("REASON to play %d\r",reason_id);
                 strcpy(appbufftmp,GetFileNameToPlayFromEmoId(reasons[reason_id].eID));
                 Sound.Play(appbufftmp);
                 Uart.Printf(appbufftmp);

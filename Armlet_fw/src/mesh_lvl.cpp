@@ -9,7 +9,7 @@
 #include "mesh_lvl.h"
 #include "radio_lvl1.h"
 #include "SensorTable.h"
-
+int tablesentcntr =0;
 Mesh_t Mesh;
 
 // ================================= Thread ====================================
@@ -81,7 +81,10 @@ void Mesh_t::ITask() {
 
         NeedToSendTable++;
         if(NeedToSendTable == TABLE_SEND_N) {
-            Uart.Printf("TableSend,t=%u\r", chTimeNow());
+            tablesentcntr++;
+            Uart.Printf("TableSend,t=%u, num_sent= %d\r", chTimeNow(),tablesentcntr);
+
+
             SnsTable.SendEvtReady();
             NeedToSendTable = 0;
         }

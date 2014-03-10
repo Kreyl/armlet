@@ -159,8 +159,9 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 	else
 	 track_num_calculated=(rand_val+emotions[emo_id].lastPlayedTrack) % emotions[emo_id].numTracks;
 
-	Uart.Printf("GetFileNameToPlayFromEmoId result: rand_val %d, track_num %d, last played %d", rand_val,track_num_calculated,emotions[emo_id].lastPlayedTrack);
+	Uart.Printf("GetFileNameToPlayFromEmoId result: rand_val %d, track_num %d, last played %d \r", rand_val,track_num_calculated,emotions[emo_id].lastPlayedTrack);
 	emotions[emo_id].lastPlayedTrack=track_num_calculated;
+	Uart.Printf("GetFileNameToPlayFromEmoId result: new last played %d\r",emotions[emo_id].lastPlayedTrack);
 	    return GetMusicFileNameFromList(emo_id,track_num_calculated);
 }
 
