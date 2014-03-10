@@ -118,6 +118,7 @@ void Init() {
     Print_emotionTreeMusicNodeFiles_ToUART();
 
     Sound.Init();
+    Sound.SetVolume(254);
     //Sound.Play("alive.wav");
     Uart.Printf("AFTER ALIVE ID=%u\r", ID);
     App.Init();
