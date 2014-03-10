@@ -91,6 +91,7 @@ struct VsBuf_t {
 
 class Sound_t {
 private:
+    Spi_t ISpi;
     msg_t CmdBuf[VS_CMD_BUF_SZ];
     Mailbox CmdBox;
     VsCmd_t ICmd;

@@ -32,11 +32,11 @@ void SIrqDmaHandler(void *p, uint32_t flags) { Sound.IrqDmaHandler(); }
 
 void Sound_t::IrqDmaHandler() {
    // Uart.PrintNow("D ");
-    Spi_t::WaitBsyHi2Lo(VS_SPI);    // Wait SPI transaction end
+    ISpi.WaitBsyLo();               // Wait SPI transaction end
     XCS_Hi();                       // }
     XDCS_Hi();                      // } Stop SPI
     if(IDreq.IsHi()) ISendNextData();   // More data allowed, send it now
-    else IDreq.Enable(IRQ_PRIO_MEDIUM); // Enable dreq irq
+    else IDreq.EnableIrq(IRQ_PRIO_MEDIUM); // Enable dreq irq
    // Uart.PrintNow("d ");
 }
 
@@ -94,9 +94,9 @@ void Sound_t::Init() {
     PinSetupAlterFunc(VS_GPIO, VS_SI,   omPushPull, pudNone, VS_AF);
 
     // ==== SPI init ====
-    Spi_t::Setup(VS_SPI, boMSB, cpolIdleLow, cphaFirstEdge, sbFdiv4);
-    Spi_t::Enable(VS_SPI);
-    Spi_t::EnableTxDma(VS_SPI);
+    ISpi.Setup(VS_SPI, boMSB, cpolIdleLow, cphaFirstEdge, sbFdiv4);
+    ISpi.Enable();
+    ISpi.EnableTxDma();
 
     // ==== DMA ====
     // Here only unchanged parameters of the DMA are configured.
@@ -118,7 +118,7 @@ void Sound_t::Init() {
     chThdSleepMicroseconds(45);
 
     // ==== DREQ IRQ ====
-    IDreq.Setup(VS_GPIO, VS_DREQ, Rising);
+    IDreq.Setup(VS_GPIO, VS_DREQ, ttRising);
 
 //   CmdWrite(VS_REG_MODE, (VS_SM_SDInew | VS_SM_RESET));    // Perform software reset
 //    AddCmd(VS_REG_MODE, VS_MODE_REG_VALUE);
@@ -236,7 +236,7 @@ void Sound_t::ISendNextData() {
     }
     else {
 //        Uart.Printf("I\r");
-        if(!IDreq.IsHi()) IDreq.Enable(IRQ_PRIO_MEDIUM);
+        if(!IDreq.IsHi()) IDreq.EnableIrq(IRQ_PRIO_MEDIUM);
         else IDmaIdle = true;
     }
 }
