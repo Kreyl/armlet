@@ -195,6 +195,7 @@ static void AppThread(void *arg) {
         	}
         if(EvtMsk & EVTMASK_RADIO) {
         //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
+            Uart.Printf("CatchTable, size=%u\r", SnsTable.PTable->Size);
            // continue;
             int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
 
