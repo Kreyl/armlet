@@ -10,6 +10,7 @@
 
 #include "stm32f2xx.h"
 #include "kl_lib_f2xx.h"
+#include "kl_sprintf.h"
 #include <string.h>
 
 #define LCD_PRINTF      TRUE
@@ -59,6 +60,7 @@ private:
     void WriteCmd(uint8_t ACmd, uint8_t AData);
 #if LCD_PRINTF
     char CharBuf[LCD_CHARBUF_SZ];
+    char *PCharBuf;
 #endif
 public:
     // General use
@@ -69,6 +71,7 @@ public:
 
     // High-level
 #if LCD_PRINTF
+    void PutToBuf(char c)     { *PCharBuf++ = c; if(PCharBuf >= CharBuf + LCD_CHARBUF_SZ) PCharBuf = CharBuf; }
     uint16_t PutChar(uint8_t x, uint8_t y, char c, Color_t ForeClr, Color_t BckClr);
     void Printf(uint8_t x, uint8_t y, Color_t ForeClr, Color_t BckClr, const char *S, ...);
 #endif

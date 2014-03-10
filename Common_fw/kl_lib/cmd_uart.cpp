@@ -6,39 +6,33 @@
  */
 
 #include "cmd_uart.h"
-#include "tiny_sprintf.h"
+#include <string.h>
 
 CmdUart_t Uart;
 
+static inline void FPutChar(char c) { Uart.IPutChar(c); }
+
+void CmdUart_t::IPutChar(char c) {
+    *PWrite++ = c;
+    if(PWrite >= &TXBuf[UART_TXBUF_SIZE]) PWrite = TXBuf;   // Circulate buffer
+}
+
 void CmdUart_t::Printf(const char *format, ...) {
+    uint32_t MaxLength = (PWrite < PRead)? (PRead - PWrite) : ((UART_TXBUF_SIZE + PRead) - PWrite);
     va_list args;
     va_start(args, format);
-    uint32_t Cnt = tiny_vsprintf(SprintfBuf, UART_TXBUF_SIZE, format, args);
+    IFullSlotsCount += kl_vsprintf(FPutChar, MaxLength, format, args);
     va_end(args);
-
-    // Put data to buffer
-    uint8_t *p = (uint8_t*)SprintfBuf;
-    IFullSlotsCount += Cnt;
-    uint32_t PartSz = (TXBuf + UART_TXBUF_SIZE) - PWrite;  // Data from PWrite to right bound
-    if(Cnt > PartSz) {
-        memcpy(PWrite, p, PartSz);
-        PWrite = TXBuf;     // Start from beginning
-        p += PartSz;
-        Cnt -= PartSz;
-    }
-    memcpy(PWrite, p, Cnt);
-    PWrite += Cnt;
-    if(PWrite >= (TXBuf + UART_TXBUF_SIZE)) PWrite = TXBuf; // Circulate pointer
 
     // Start transmission if Idle
     if(IDmaIsIdle) {
         IDmaIsIdle = false;
-        dmaStreamSetMemory0(UART_DMA, PRead);
-        PartSz = (TXBuf + UART_TXBUF_SIZE) - PRead;
-        ITransSize = (IFullSlotsCount > PartSz)? PartSz : IFullSlotsCount;
-        dmaStreamSetTransactionSize(UART_DMA, ITransSize);
-        dmaStreamSetMode(UART_DMA, UART_DMA_MODE);
-        dmaStreamEnable(UART_DMA);
+        dmaStreamSetMemory0(UART_DMA_TX, PRead);
+        uint32_t PartSz = (TXBuf + UART_TXBUF_SIZE) - PRead;    // Char count from PRead to buffer end
+        ITransSize = (IFullSlotsCount > PartSz)? PartSz : IFullSlotsCount;  // How many to transmit now
+        dmaStreamSetTransactionSize(UART_DMA_TX, ITransSize);
+        dmaStreamSetMode(UART_DMA_TX, UART_DMA_TX_MODE);
+        dmaStreamEnable(UART_DMA_TX);
     }
 }
 
@@ -135,11 +129,12 @@ void CmdUart_t::Init(uint32_t ABaudrate) {
     // ==== USART configuration ====
     UART_RCC_ENABLE();
     UART->CR1 = USART_CR1_UE;     // Enable USART
-    UART->BRR = Clk.APB2FreqHz / ABaudrate;
+    if(UART == USART1) UART->BRR = Clk.APB2FreqHz / ABaudrate;
+    else               UART->BRR = Clk.APB1FreqHz / ABaudrate;
     UART->CR2 = 0;
     UART->CR3 = USART_CR3_DMAT;   // Enable DMA at transmitter
 #if UART_RX_ENABLED
-    UART->CR1 =
+    UART->CR1 |=
             USART_CR1_TE            // Transmitter enable
             | USART_CR1_RE          // Receiver enable
             | USART_CR1_RXNEIE;     // RX Irq enable
@@ -149,10 +144,9 @@ void CmdUart_t::Init(uint32_t ABaudrate) {
 #endif
 
     // ==== DMA ====
-    // Here only unchanged parameters of the DMA are configured.
-    dmaStreamAllocate     (UART_DMA, IRQ_PRIO_MEDIUM, CmdUartTxIrq, NULL);
-    dmaStreamSetPeripheral(UART_DMA, &UART->DR);
-    dmaStreamSetMode      (UART_DMA, UART_DMA_MODE);
+    dmaStreamAllocate     (UART_DMA_TX, IRQ_PRIO_HIGH, CmdUartTxIrq, NULL);
+    dmaStreamSetPeripheral(UART_DMA_TX, &UART->DR);
+    dmaStreamSetMode      (UART_DMA_TX, UART_DMA_TX_MODE);
 
 #if UART_RX_ENABLED
     chIQInit(&iqueue, IRxBuf, UART_RXBUF_SZ, NULL, NULL);
@@ -165,21 +159,21 @@ void CmdUart_t::Init(uint32_t ABaudrate) {
     UART->CR1 |= USART_CR1_UE;       // Enable USART
 }
 
-// ==== IRQs ====
+// ==== TX DMA IRQ ====
 void CmdUart_t::IRQDmaTxHandler() {
-    dmaStreamDisable(UART_DMA);    // Registers may be changed only when stream is disabled
+    dmaStreamDisable(UART_DMA_TX);    // Registers may be changed only when stream is disabled
     IFullSlotsCount -= ITransSize;
     PRead += ITransSize;
     if(PRead >= (TXBuf + UART_TXBUF_SIZE)) PRead = TXBuf; // Circulate pointer
 
     if(IFullSlotsCount == 0) IDmaIsIdle = true; // Nothing left to send
     else {  // There is something to transmit more
-        dmaStreamSetMemory0(UART_DMA, PRead);
+        dmaStreamSetMemory0(UART_DMA_TX, PRead);
         uint32_t PartSz = (TXBuf + UART_TXBUF_SIZE) - PRead;
         ITransSize = (IFullSlotsCount > PartSz)? PartSz : IFullSlotsCount;
-        dmaStreamSetTransactionSize(UART_DMA, ITransSize);
-        dmaStreamSetMode(UART_DMA, UART_DMA_MODE);
-        dmaStreamEnable(UART_DMA);    // Restart DMA
+        dmaStreamSetTransactionSize(UART_DMA_TX, ITransSize);
+        dmaStreamSetMode(UART_DMA_TX, UART_DMA_TX_MODE);
+        dmaStreamEnable(UART_DMA_TX);    // Restart DMA
     }
 }
 

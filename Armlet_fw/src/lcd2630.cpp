@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include "core_cmInstr.h"
-#include "tiny_sprintf.h"
 
 #include "lcdFont8x8.h"
 
@@ -29,6 +28,7 @@ static inline void RD_Hi()   { PinSet  (LCD_GPIO, LCD_RD);   LCD_DELAY(); }
 
 void Lcd_t::Init() {
     // Init pins if not setup
+    PCharBuf = CharBuf;
     if(Brightness == 0) {
         BckLt.Init(LCD_BCKLT_GPIO, LCD_BCKLT_PIN, LCD_BCKLT_TMR, LCD_BCKLT_CHNL, LCD_TOP_BRIGHTNESS);
         PinSetupOut(LCD_GPIO, LCD_DC,   omPushPull, pudNone, ps100MHz);
@@ -176,11 +176,13 @@ uint16_t Lcd_t::PutChar(uint8_t x, uint8_t y, char c, Color_t ForeClr, Color_t B
     return x+nCols;
 }
 
+static inline void FLcdPutChar(char c) { Lcd.PutToBuf(c); }
+
 void Lcd_t::Printf(uint8_t x, uint8_t y, const Color_t ForeClr, const Color_t BckClr, const char *S, ...) {
     // Printf to buffer
     va_list args;
     va_start(args, S);
-    uint32_t Cnt = tiny_vsprintf(CharBuf, LCD_CHARBUF_SZ, S, args);
+    uint32_t Cnt = kl_vsprintf(FLcdPutChar, LCD_CHARBUF_SZ, S, args);
     va_end(args);
     // Draw what printed
     for(uint32_t i=0; i<Cnt; i++) {
