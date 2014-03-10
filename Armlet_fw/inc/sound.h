@@ -151,7 +151,7 @@ public:
         if(IAttenuation > 0x8F) IAttenuation = 0x8F;
         AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
     }
-    void RegisterEvtPlayEnd(EventListener *PEvtLstnr, uint8_t EvtMask) { chEvtRegisterMask(&IEvtSrcPlayEnd, PEvtLstnr, EvtMask); }
+    void RegisterEvtPlayEnd(EventListener *PEvtLstnr, uint32_t EvtMask) { chEvtRegisterMask(&IEvtSrcPlayEnd, PEvtLstnr, EvtMask); }
     // Inner use
     IrqPin_t IDreq;
     void IrqDreqHandler();
