@@ -50,7 +50,7 @@ private:
 public:
     Thread *PrThd;
 
-    void Init(uint8_t ASelfID);
+    void Init(uint32_t ASelfID);
     void Shutdown();
     void RegisterAppThd(Thread *PThd) { PAppThd = PThd; }
 
