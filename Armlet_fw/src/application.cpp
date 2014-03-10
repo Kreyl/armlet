@@ -24,7 +24,7 @@
 #include "sound.h"
 #include "ff.h"
 #include "../MusicProcessor/intention.h"
-#include "rlvl2.h"
+#include "SensorTable.h"
 
 App_t App;
 
@@ -196,14 +196,14 @@ static void AppThread(void *arg) {
         if(EvtMsk & EVTMASK_RADIO) {
         //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
            // continue;
-            int val1= MIN(reasons_number,RLvl2.PTable->RowCnt);
+            int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
 
             //copy to ArrayOfIncomingIntentions
             CurrentIntentionArraySize=val1;
             for(int i=0;i<val1;i++)
             {
-                ArrayOfIncomingIntentions[i].power256=RLvl2.PTable->Rows[i].Level;
-                ArrayOfIncomingIntentions[i].reason_indx=RLvl2.PTable->Rows[i].ID;
+                ArrayOfIncomingIntentions[i].power256=SnsTable.PTable->Row[i].Level;
+                ArrayOfIncomingIntentions[i].reason_indx=SnsTable.PTable->Row[i].ID;
                 Uart.Printf("radio_in int_id %d, int_pw %d, val1 %d\r",ArrayOfIncomingIntentions[i].reason_indx,ArrayOfIncomingIntentions[i].power256,val1);
             }
 
@@ -829,7 +829,7 @@ int ArmletApi::AppendFile(FILE* file, char* buf, int len) {
 #if 1 // ======================= Command processing ============================
 void UartCmdCallback(uint8_t CmdCode, uint8_t *PData, uint32_t Length) {
     uint8_t b;
-    FRESULT res;
+//    FRESULT res;
     switch(CmdCode) {
         case 0x01:
             b = OK;

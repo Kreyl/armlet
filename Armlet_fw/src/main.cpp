@@ -19,7 +19,6 @@
 #include "cmd_uart.h"
 #include "power.h"
 #include "pill.h"
-#include "rlvl2.h"
 
 #include "radio_lvl1.h"
 #include "mesh_lvl.h"
@@ -53,6 +52,7 @@ int main() {
 
     while(TRUE) {
         chThdSleepMilliseconds(999);
+//        Lcd.Printf(11, 21, clWhite, clBlack, "%u:%u", (Mesh.GetAbsTimeMS()/1000), (Mesh.GetAbsTimeMS()%1000));
 //        chSysLock();
 //        chSchGoSleepS(THD_STATE_SUSPENDED); // Forever
 //        chSysUnlock();
@@ -64,13 +64,15 @@ int main() {
 }
 
 void Init() {
-    Uart.Init(115200);
+    Uart.Init(256000);
     Uart.Printf("Armlet3\r");
+
     SD.Init();
     // Read config
     uint32_t ID=0;
     iniReadUint32("Radio", "ID", "settings.ini", &ID);
     Uart.Printf("ID=%u\r", ID);
+
 
     FRESULT r = SD.GetFirst("/");
     if(r == FR_OK) {
@@ -83,10 +85,10 @@ void Init() {
     uint8_t ur = SD.GetNthFileByPrefix("aga", 2, Name);
     if(ur == OK) Uart.Printf("%S\r", Name);
 
-    RLvl2.Init();
+//    RLvl2.Init();
 
- //   Lcd.Init();
- //   Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS");
+    Lcd.Init();
+    Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
 
  //   FIL *fp;
  //   TCHAR filename[]="msettings.ini";
@@ -115,8 +117,7 @@ void Init() {
     Init_emotionTreeMusicNodeFiles_FromFileIterrator();
     Print_emotionTreeMusicNodeFiles_ToUART();
 
-     Sound.Init();
-     Sound.SetVolume(254);
+    Sound.Init();
     //Sound.Play("alive.wav");
     Uart.Printf("AFTER ALIVE ID=%u\r", ID);
     App.Init();

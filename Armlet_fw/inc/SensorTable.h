@@ -8,9 +8,11 @@
 #ifndef SENSORTABLE_H_
 #define SENSORTABLE_H_
 
+#include "kl_lib_f2xx.h"
+
 struct Row_t {
     uint8_t ID;
-    uint8_t Level;
+    uint32_t Level;
 };
 
 #define MAX_ROW_CNT     99
@@ -28,7 +30,7 @@ public:
     void RegisterAppThd(Thread *PThd) { IPThd = PThd; }
     SnsTable_t() : PCurrTbl(&ITbl[0]), IPThd(nullptr), PTable(&ITbl[1]) {}
     Table_t *PTable;
-    void PutSnsInfo(uint8_t ID, uint8_t Level);
+    void PutSnsInfo(uint8_t ID, uint32_t Level);
     void SendEvtReady();
 };
 
