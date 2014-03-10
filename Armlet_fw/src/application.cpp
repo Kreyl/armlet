@@ -195,7 +195,7 @@ static void AppThread(void *arg) {
         	}
         if(EvtMsk & EVTMASK_RADIO) {
         //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
-            Uart.Printf("CatchTable, size=%u\r", SnsTable.PTable->Size);
+           Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", SnsTable.PTable->Size);
            // continue;
             int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
 
@@ -219,9 +219,10 @@ static void AppThread(void *arg) {
                 Uart.Printf("\r");
             }
             else*/
-                //играть музыку по резону
-            if(reason_id!=-1)
+                //играть музыку по резону, если у нас всё еще тот же победитель - не трогать музыку.
+            if(reason_id!=-1 && reason_id!=-2)
             {
+                Uart.Printf("REASON to play %d\r",reason_id);
                 strcpy(appbufftmp,GetFileNameToPlayFromEmoId(reasons[reason_id].eID));
                 Sound.Play(appbufftmp);
                 Uart.Printf(appbufftmp);
