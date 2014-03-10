@@ -334,6 +334,7 @@ void App_t::Init()
 {
 	State = asIdle;
 	    PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
+	    SnsTable.RegisterAppThd(PThd);
 	    // Time
 	    Time.H = 0;
 	    Time.M = 0;
