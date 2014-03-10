@@ -10,45 +10,34 @@
 #define GPIO0_IRQ_MASK  ((uint32_t)0x10)    // Line 4
 
 cc1101_t CC;
-static Thread *PWaitingThread = NULL;
 
 void cc1101_t::Init() {
     // ==== GPIO ====
-    PinSetupOut      (GPIOA, CC_CS,   omPushPull, pudNone);
-    PinSetupAlterFunc(GPIOA, CC_SCK,  omPushPull, pudNone, AF5);
-    PinSetupAlterFunc(GPIOA, CC_MISO, omPushPull, pudNone, AF5);
-    PinSetupAlterFunc(GPIOA, CC_MOSI, omPushPull, pudNone, AF5);
-    PinSetupIn       (GPIOA, CC_GDO0, pudNone);
-    PinSetupIn       (GPIOA, CC_GDO2, pudNone);
+    PinSetupOut      (CC_GPIO, CC_CS,   omPushPull, pudNone);
+    PinSetupAlterFunc(CC_GPIO, CC_SCK,  omPushPull, pudNone, AF5);
+    PinSetupAlterFunc(CC_GPIO, CC_MISO, omPushPull, pudNone, AF5);
+    PinSetupAlterFunc(CC_GPIO, CC_MOSI, omPushPull, pudNone, AF5);
+    PinSetupIn       (CC_GPIO, CC_GDO0, pudNone);
+    PinSetupIn       (CC_GPIO, CC_GDO2, pudNone);
     CsHi();
-
     // ==== SPI ====    MSB first, master, ClkLowIdle, FirstEdge, Baudrate=f/2
-    Spi_t::Setup(CC_SPI, boMSB, cpolIdleLow, cphaFirstEdge, sbFdiv2);
-    Spi_t::Enable(CC_SPI);
-
+    ISpi.Setup(CC_SPI, boMSB, cpolIdleLow, cphaFirstEdge, sbFdiv2);
+    ISpi.Enable();
     // ==== Init CC ====
     CReset();
     FlushRxFIFO();
     RfConfig();
-
+    PWaitingThread = nullptr;
+    State = ccIdle;
     // ==== IRQ ====
-    rccEnableAPB2(RCC_APB2ENR_SYSCFGEN, FALSE); // Enable sys cfg controller
-    SYSCFG->EXTICR[1] &= 0xFFFFFFF0;    // EXTI4 is connected to PortA
-    // Configure EXTI line
-    EXTI->IMR  |=  GPIO0_IRQ_MASK;      // Interrupt mode enabled
-    EXTI->EMR  &= ~GPIO0_IRQ_MASK;      // Event mode disabled
-    EXTI->RTSR &= ~GPIO0_IRQ_MASK;      // Rising trigger disabled
-    EXTI->FTSR |=  GPIO0_IRQ_MASK;      // Falling trigger enabled
-    EXTI->PR    =  GPIO0_IRQ_MASK;      // Clean irq flag
-    nvicEnableVector(EXTI4_IRQn, CORTEX_PRIORITY_MASK(IRQ_PRIO_HIGH));
+    IGdo0.Setup(CC_GPIO, CC_GDO0, ttFalling);
+    IGdo0.EnableIrq(IRQ_PRIO_HIGH);
 }
 
 // ========================== TX, RX, freq and power ===========================
 void cc1101_t::SetChannel(uint8_t AChannel) {
-    // CC must be in IDLE mode
-    while(IState != CC_STB_IDLE) EnterIdle();
-    // Now set channel
-    WriteRegister(CC_CHANNR, AChannel);
+    while(IState != CC_STB_IDLE) EnterIdle();   // CC must be in IDLE mode
+    WriteRegister(CC_CHANNR, AChannel);         // Now set channel
 }
 
 //void cc1101_t::WaitUntilChannelIsBusy() {
@@ -61,26 +50,33 @@ void cc1101_t::SetChannel(uint8_t AChannel) {
 //    //Uart.Printf("\r");
 //}
 
-void cc1101_t::Transmit(rPkt_t *pPkt) {
+void cc1101_t::TransmitSync(void *Ptr) {
     // WaitUntilChannelIsBusy();   // If this is not done, time after time FIFO is destroyed
     while(IState != CC_STB_IDLE) EnterIdle();
-    WriteTX((uint8_t*)pPkt, RPKT_LEN);
-    EnterTX();
-    // Waiting for the IRQ to happen
+    WriteTX((uint8_t*)Ptr, IPktSz);
+    // Enter TX and wait IRQ
     chSysLock();
     PWaitingThread = chThdSelf();
+    EnterTX();
     chSchGoSleepS(THD_STATE_SUSPENDED);
-    chSysUnlock();  // Will be here when IRQ will fire
+    chSysUnlock();  // Will be here when IRQ fires
 }
 
-/*
- * Enter RX mode and wait reception for Timeout_ms.
- */
-uint8_t cc1101_t::Receive(uint32_t Timeout_ms, rPkt_t *pPkt) {
+void cc1101_t::TransmitAsync(void *Ptr) {
+    // WaitUntilChannelIsBusy();   // If this is not done, time after time FIFO is destroyed
+    PWaitingThread = NULL;
+    State = ccTransmitting;
+    while(IState != CC_STB_IDLE) EnterIdle();
+    WriteTX((uint8_t*)Ptr, IPktSz);
+    EnterTX();
+}
+
+// Enter RX mode and wait reception for Timeout_ms.
+uint8_t cc1101_t::ReceiveSync(uint32_t Timeout_ms, void *Ptr, int8_t *PRssi) {
     FlushRxFIFO();
-    EnterRX();  // After that, some time will be wasted to recalibrate
     chSysLock();
     PWaitingThread = chThdSelf();
+    EnterRX();
     msg_t Rslt = chSchGoSleepTimeoutS(THD_STATE_SUSPENDED, MS2ST(Timeout_ms));
     chSysUnlock();  // Will be here when IRQ will fire, or timeout occur - with appropriate message
 
@@ -88,34 +84,44 @@ uint8_t cc1101_t::Receive(uint32_t Timeout_ms, rPkt_t *pPkt) {
         EnterIdle();            // Get out of RX mode
         return TIMEOUT;
     }
-    else {  // IRQ occured: something received, or CRC error
-        uint8_t b, *p = (uint8_t*)pPkt;
-        // Check if received successfully
-        b = ReadRegister(CC_PKTSTATUS);
-        //    Uart.Printf("St: %X  ", b);
-        if(b & 0x80) {  // CRC OK
-            // Read FIFO
-            CsLo();                                            // Start transmission
-            BusyWait();                                        // Wait for chip to become ready
-            ReadWriteByte(CC_FIFO|CC_READ_FLAG|CC_BURST_FLAG); // Address with read & burst flags
-            for(uint8_t i=0; i<RPKT_LEN; i++) {                // Read bytes
-                b = ReadWriteByte(0);
-                *p++ = b;
-          //      Uart.Printf(" %X", b);
-            }
-            // Receive two additional info bytes
-            b = ReadWriteByte(0);   // RSSI
-            ReadWriteByte(0);       // LQI
-            CsHi();                 // End transmission
-            pPkt->RSSI = RSSI_dBm(b);
-            return OK;
-        }
-        else {  // CRC Error
-
-            return FAILURE;
-        }
-    } // IRQ or Timeout
+    else return ReadFIFO(Ptr, PRssi);
 }
+
+void cc1101_t::ReceiveAsync() {
+    PWaitingThread = NULL;
+    State = ccReceiving;
+    FlushRxFIFO();
+    EnterRX();
+}
+
+//    {  // IRQ occured: something received, or CRC error
+//        uint8_t b, *p = (uint8_t*)pPkt;
+//        // Check if received successfully
+//        b = ReadRegister(CC_PKTSTATUS);
+//        //    Uart.Printf("St: %X  ", b);
+//        if(b & 0x80) {  // CRC OK
+//            // Read FIFO
+//            CsLo();                                            // Start transmission
+//            BusyWait();                                        // Wait for chip to become ready
+//            ISpi.ReadWriteByte(CC_FIFO|CC_READ_FLAG|CC_BURST_FLAG); // Address with read & burst flags
+//            for(uint8_t i=0; i<RPKT_LEN; i++) {                // Read bytes
+//                b = ISpi.ReadWriteByte(0);
+//                *p++ = b;
+//          //      Uart.Printf(" %X", b);
+//            }
+//            // Receive two additional info bytes
+//            b = ISpi.ReadWriteByte(0);   // RSSI
+//            ISpi.ReadWriteByte(0);       // LQI
+//            CsHi();                 // End transmission
+//            pPkt->RSSI = RSSI_dBm(b);
+//            return OK;
+//        }
+//        else {  // CRC Error
+//
+//            return FAILURE;
+//        }
+//    } // IRQ or Timeout
+//}
 
 // Return RSSI in dBm
 int8_t cc1101_t::RSSI_dBm(uint8_t ARawRSSI) {
@@ -125,46 +131,64 @@ int8_t cc1101_t::RSSI_dBm(uint8_t ARawRSSI) {
     return RSSI;
 }
 
-
-// =========================== Registers & Strobes =============================
-uint8_t cc1101_t::ReadWriteByte(uint8_t AByte) {
-    CC_SPI->DR = AByte;
-    while(!(CC_SPI->SR & SPI_SR_RXNE));  // Wait for SPI transmission to complete
-    return CC_SPI->DR;
+uint8_t cc1101_t::ReadFIFO(void *Ptr, int8_t *PRssi) {
+    uint8_t b, *p = (uint8_t*)Ptr;
+     // Check if received successfully
+     b = ReadRegister(CC_PKTSTATUS);
+     //    Uart.Printf("St: %X  ", b);
+     if(b & 0x80) {  // CRC OK
+         // Read FIFO
+         CsLo();                                            // Start transmission
+         BusyWait();                                        // Wait for chip to become ready
+         ISpi.ReadWriteByte(CC_FIFO|CC_READ_FLAG|CC_BURST_FLAG); // Address with read & burst flags
+         for(uint8_t i=0; i<IPktSz; i++) {                // Read bytes
+             b = ISpi.ReadWriteByte(0);
+             *p++ = b;
+             // Uart.Printf(" %X", b);
+         }
+         // Receive two additional info bytes
+         b = ISpi.ReadWriteByte(0); // RSSI
+         ISpi.ReadWriteByte(0);     // LQI
+         CsHi();                    // End transmission
+         if(PRssi != nullptr) *PRssi = RSSI_dBm(b);
+         return OK;
+     }
+     else return FAILURE;
 }
 
-uint8_t cc1101_t::ReadRegister (uint8_t ARegAddr){
+// =========================== Registers & Strobes =============================
+uint8_t cc1101_t::ReadRegister (uint8_t ARegAddr) {
     CsLo();                                 // Start transmission
     BusyWait();                             // Wait for chip to become ready
-    ReadWriteByte(ARegAddr | CC_READ_FLAG); // Transmit header byte
-    uint8_t FReply = ReadWriteByte(0);      // Read reply
+    ISpi.ReadWriteByte(ARegAddr | CC_READ_FLAG); // Transmit header byte
+    uint8_t FReply = ISpi.ReadWriteByte(0);      // Read reply
     CsHi();                                 // End transmission
     return FReply;
 }
-void cc1101_t::WriteRegister (uint8_t ARegAddr, uint8_t AData){
+void cc1101_t::WriteRegister (uint8_t ARegAddr, uint8_t AData) {
     CsLo();                     // Start transmission
     BusyWait();                 // Wait for chip to become ready
-    ReadWriteByte(ARegAddr);    // Transmit header byte
-    ReadWriteByte(AData);       // Write data
+    ISpi.ReadWriteByte(ARegAddr);    // Transmit header byte
+    ISpi.ReadWriteByte(AData);       // Write data
     CsHi();                     // End transmission
 }
-void cc1101_t::WriteStrobe (uint8_t AStrobe){
+void cc1101_t::WriteStrobe (uint8_t AStrobe) {
     CsLo();                             // Start transmission
     BusyWait();                         // Wait for chip to become ready
-    IState = ReadWriteByte(AStrobe);    // Write strobe
+    IState = ISpi.ReadWriteByte(AStrobe);    // Write strobe
     CsHi();                             // End transmission
     IState &= 0b01110000;               // Mask needed bits
 }
 
 void cc1101_t::WriteTX(uint8_t* Ptr, uint8_t Length) {
-    CsLo();                                                 // Start transmission
-    BusyWait();                                             // Wait for chip to become ready
-    ReadWriteByte(CC_FIFO|CC_WRITE_FLAG|CC_BURST_FLAG);     // Address with write & burst flags
+    CsLo();                                                     // Start transmission
+    BusyWait();                                                 // Wait for chip to become ready
+    ISpi.ReadWriteByte(CC_FIFO|CC_WRITE_FLAG|CC_BURST_FLAG);    // Address with write & burst flags
     uint8_t b;
     //Uart.Printf("TX: ");
-    for (uint8_t i=0; i<Length; i++) {
+    for(uint8_t i=0; i<Length; i++) {
         b = *Ptr++;
-        ReadWriteByte(b);  // Write bytes
+        ISpi.ReadWriteByte(b);  // Write bytes
       //  Uart.Printf("%X ", b);
     }
     CsHi();    // End transmission
@@ -205,7 +229,7 @@ void cc1101_t::RfConfig() {
     WriteRegister(CC_IOCFG0,   CC_IOCFG0_VALUE);     // GDO0 output pin configuration.
     WriteRegister(CC_PKTCTRL1, CC_PKTCTRL1_VALUE);   // Packet automation control.
     WriteRegister(CC_PKTCTRL0, CC_PKTCTRL0_VALUE);   // Packet automation control.
-    WriteRegister(CC_PKTLEN,   RPKT_LEN);            // Packet length, dummy
+    WriteRegister(CC_PKTLEN,   7);                   // Packet length, dummy
 
     WriteRegister(CC_PATABLE, CC_PATABLE_INITIAL);
 
@@ -214,12 +238,19 @@ void cc1101_t::RfConfig() {
 }
 
 // ============================= Interrupts ====================================
-extern "C" {
+void cc1101_t::IHandleAsync() {
+    if(State == ccTransmitting) {
+        State = ccIdle;
+//        chEvtBroadcastI(&IEvtSrcTx);  // FIXME
+    }
+    else if(State == ccReceiving) {
+        State = ccIdle;
+//        chEvtBroadcastI(&IEvtSrcRx);  // FIXME
+    }
+}
 
-CH_IRQ_HANDLER(EXTI4_IRQHandler) {
-    CH_IRQ_PROLOGUE();
-    EXTI->PR = (1 << 4);  // Clean irq flag
-
+void cc1101_t::IGdo0IrqHandler() {
+    IGdo0.CleanIrqFlag();
     // Resume thread if any
     chSysLockFromIsr();
     if(PWaitingThread != NULL) {
@@ -229,9 +260,14 @@ CH_IRQ_HANDLER(EXTI4_IRQHandler) {
         }
         PWaitingThread = NULL;
     }
+    else IHandleAsync(); // Async task completed
     chSysUnlockFromIsr();
-
-    CH_IRQ_EPILOGUE();
 }
 
+extern "C" {
+CH_IRQ_HANDLER(GDO0_IRQ_HANLER) {
+    CH_IRQ_PROLOGUE();
+    CC.IGdo0IrqHandler();
+    CH_IRQ_EPILOGUE();
+}
 } // extern c
