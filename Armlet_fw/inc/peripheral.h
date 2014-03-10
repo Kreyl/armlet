@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include "kl_lib_f2xx.h"
 
+enum ChunkKind_t {ckNormal=0, ckStop=1, ckRepeat=2};
+
 // ==================================== Vibro ==================================
 struct VibroChunk_t {
     int8_t Intencity;  // 0 means off, 1...100 means intencity, -1 means end
@@ -35,30 +37,39 @@ public:
 };
 extern Vibrator_t Vibro;
 
-// ==================================== Beep ===================================
+#if 1 // ================================= Beep ================================
 struct BeepChunk_t {
-    int8_t VolumePercent;   // 0 means silence, 1...100 means volume, -1 means end
-    uint16_t Time_ms;
+    uint8_t Volume;   // 0 means silence, 10 means top
     uint16_t Freq_Hz;
-} PACKED;
+    uint16_t Time_ms;
+    ChunkKind_t ChunkKind;
+};
 #define BEEP_CHUNK_SZ   sizeof(BeepChunk_t)
 class Beeper_t {
 private:
     VirtualTimer ITmr;
+    const BeepChunk_t *IPFirstChunk;
 public:
     void BeepI(const BeepChunk_t *PSequence);
     void Beep(const BeepChunk_t *PSequence) {   // Beep with this function
+        IPFirstChunk = PSequence;
         chSysLock();
         BeepI(PSequence);
         chSysUnlock();
     }
-    void Beep(uint32_t ms);
+    void Stop() {
+        chSysLock();
+        if(chVTIsArmedI(&ITmr)) chVTResetI(&ITmr);
+        chSysUnlock();
+        IPin.Set(0);
+    }
     void Init();
     void Shutdown();
     // Inner use
     PwmPin_t IPin;
 };
 extern Beeper_t Beeper;
+#endif
 
 // ================================= Pin control ===============================
 #define PIN_GPIO    GPIOD

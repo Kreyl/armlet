@@ -27,7 +27,7 @@
 
 #define LCD_BCKLT_GPIO  GPIOB
 #define LCD_BCKLT_PIN   9
-#define LCD_BCKLT_TMR   11
+#define LCD_BCKLT_TMR   TIM11
 #define LCD_BCKLT_CHNL  1
 
 // Color palette: 4R-4G-4B, 3 bytes per two pixels
@@ -65,7 +65,7 @@ public:
     uint16_t Brightness;
     void Init();
     void Shutdown();
-    void SetBrightness(uint16_t ABrightness)  { BckLt.On(Brightness = ABrightness); }
+    void SetBrightness(uint16_t ABrightness)  { BckLt.Set(Brightness = ABrightness); }
 
     // High-level
 #if LCD_PRINTF
