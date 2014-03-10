@@ -36,6 +36,7 @@ typedef struct IntentionCalculationData
 	int last_intention_index_winner;
 	int winning_integral;//NORMALIZED
 	int winning_integral_top_limit_normalizer;
+	bool is_empty_fon;
 }IntentionCalculationData;
 void CalculateIntentionsRadioChange();
 //returns -1 if winner does not over switch limit, else return reason id
