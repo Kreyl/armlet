@@ -9,6 +9,10 @@
 #include "mesh_lvl.h"
 #include "radio_lvl1.h"
 #include "SensorTable.h"
+//pyton translation for db
+//[22:19:36] Jolaf: str(tuple(1 + int(sqrt(float(i) / 65) * 99) for i in xrange(0, 65 + 1)))
+const int DbTranslate[66] ={1, 13, 18, 22, 25, 28, 31, 33, 35, 37, 39, 41, 43, 45, 46, 48, 50, 51, 53, 54, 55, 57, 58, 59, 61, 62, 63, 64, 65, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 86, 87, 88, 89, 90, 91, 92, 92, 93, 94, 95, 96, 96, 97, 98, 99, 100};
+
 
 Mesh_t Mesh;
 
@@ -58,7 +62,7 @@ void Mesh_t::ITask() {
                 if(MeshMsg.RSSI < -100) MeshMsg.RSSI = -100;
                 else if(MeshMsg.RSSI > -35) MeshMsg.RSSI = -35;
                 MeshMsg.RSSI += 100;    // 0...65
-                uint32_t Lvl = 1 + (uint32_t)(((int32_t)MeshMsg.RSSI * 99) / 65);
+                uint32_t Lvl =DbTranslate[MeshMsg.RSSI]; //1 + (uint32_t)(((int32_t)MeshMsg.RSSI * 99) / 65);
                 SnsTable.PutSnsInfo(MeshMsg.PktRx.ID, Lvl);   /* Put Information in SensTable */
             } while(PktBuf.GetFilledSlots() != 0);
         }

@@ -25,8 +25,8 @@ struct IntentionCalculationData SICD=
       -100,//  last_intention_power_winner;//NOT NORMALIZED
       0,//  last_intention_index_winner;
       0,//  winning_integral;//NORMALIZED
-      10000//  winning_integral_top_limit_normalizer;
-
+      10000,//  winning_integral_top_limit_normalizer;
+      false
         /*
 		10,//int Intention_weight_cost;
 		4,//	int Signal_power_weight_cost;
@@ -84,13 +84,21 @@ void CalculateIntentionsRadioChange()
     //если никого не слышим, сбросить суммы - TODO учесть интегрирование!
         if(CurrentIntentionArraySize==0)
         {
-            Uart.Printf("CalculateIntentionsRadioChange array 0\r");
-            SICD.winning_integral=0;
-            SICD.last_intention_power_winner=0;
-           // Uart.Printf("CalculateIntentionsRadioChange win_int %d, win_id %d \r",SICD.winning_integral,current_reason_arr_winner_indx);
+            if( SICD.is_empty_fon==false)
+            {
+                Uart.Printf("CalculateIntentionsRadioChange array 0\r");
+                SICD.winning_integral=0;
+                SICD.last_intention_power_winner=0;
+                SICD.is_empty_fon=true;
+               // Uart.Printf("CalculateIntentionsRadioChange win_int %d, win_id %d \r",SICD.winning_integral,current_reason_arr_winner_indx);
+            }
+            else
+            {
+                SICD.winning_integral+=FON_RELAX_SPEED;
+            }
             return;
         }
-
+        SICD.is_empty_fon=false;
         if(CurrentIntentionArraySize==1)
         {
             Uart.Printf("CalculateIntentionsRadioChange array 1\r");
@@ -186,5 +194,11 @@ int MainCalculateReasons()
 
     if(SICD.winning_integral<WINING_INTEGRAL_SWITCH_LIMIT)
         return -1;
-    else return SICD.last_intention_index_winner;
+    else
+    {
+        if(SICD.is_empty_fon==false)
+            return SICD.last_intention_index_winner;
+        else
+            return -3; // play fon now!
+    }
 }
