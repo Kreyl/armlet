@@ -173,7 +173,16 @@ void CalculateIntentionsRadioChange()
 
 int MainCalculateReasons()
 {
+    bool is_more_than_9000 = false;
+    int old_winner= SICD.last_intention_index_winner;
+    if(SICD.winning_integral>WINING_INTEGRAL_SWITCH_LIMIT)
+        is_more_than_9000=true;
     CalculateIntentionsRadioChange();
+    if(is_more_than_9000 && old_winner==SICD.last_intention_index_winner)
+    {
+        Uart.Printf("old winner stepped over 9000 again \r");
+        return -2;
+    }
 
     if(SICD.winning_integral<WINING_INTEGRAL_SWITCH_LIMIT)
         return -1;
