@@ -91,6 +91,7 @@ struct VsBuf_t {
 
 class Sound_t {
 private:
+    Spi_t ISpi;
     msg_t CmdBuf[VS_CMD_BUF_SZ];
     Mailbox CmdBox;
     VsCmd_t ICmd;
@@ -116,7 +117,7 @@ private:
     inline void StartTransmissionIfNotBusy() {
         if(IDmaIdle and IDreq.IsHi()) {
 //            Uart.Printf("T");
-            IDreq.Enable(IRQ_PRIO_MEDIUM);
+            IDreq.EnableIrq(IRQ_PRIO_MEDIUM);
             IDreq.GenerateIrq();    // Do not call SendNexData directly because of its interrupt context
         }
     }
@@ -150,7 +151,7 @@ public:
         if(IAttenuation > 0x8F) IAttenuation = 0x8F;
         AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
     }
-    void RegisterEvtPlayEnd(EventListener *PEvtLstnr, uint8_t EvtMask) { chEvtRegisterMask(&IEvtSrcPlayEnd, PEvtLstnr, EvtMask); }
+    void RegisterEvtPlayEnd(EventListener *PEvtLstnr, uint32_t EvtMask) { chEvtRegisterMask(&IEvtSrcPlayEnd, PEvtLstnr, EvtMask); }
     // Inner use
     IrqPin_t IDreq;
     void IrqDreqHandler();

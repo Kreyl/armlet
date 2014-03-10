@@ -78,7 +78,7 @@ int GetEmoIndxFromFileString(char * string)
 	for(int i=0;i<emotions_number;i++)
 	{
 		//if(strncmp(EmoNamebuffer,emotions[i].name,sep_id)==0)
-        if(sep_id== strlen(emotions[i].name))
+        if((uint32_t)sep_id== strlen(emotions[i].name))
         {
             if(strncmp(EmoNamebuffer,emotions[i].name,sep_id)==0)
             //if(strcmp(strpbrk(string,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING),emotions[i].name))
