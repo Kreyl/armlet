@@ -30,6 +30,9 @@
 #define FALSE 0
 #endif
 
+// Functional type
+typedef void (*ftVoidVoid)(void);
+
 // Return values
 #define OK              0
 #define FAILURE         1
@@ -49,6 +52,7 @@ enum LowHigh_t  {Low, High};
 enum RiseFall_t {Rising, Falling, RisingFalling};
 
 // Simple pseudofunctions
+#define MIN(a, b)   (((a)<(b))? (a) : (b))
 #define TRIM_VALUE(v, Max)  { if(v > Max) v = Max; }
 #define IS_LIKE(v, precise, deviation)  (((precise - deviation) < v) and (v < (precise + deviation)))
 
@@ -56,6 +60,25 @@ enum RiseFall_t {Rising, Falling, RisingFalling};
 #define ANY_OF_3(a, b1, b2, b3)         (((a)==(b1)) or ((a)==(b2)) or ((a)==(b3)))
 #define ANY_OF_4(a, b1, b2, b3, b4)     (((a)==(b1)) or ((a)==(b2)) or ((a)==(b3)) or ((a)==(b4)))
 #define ANY_OF_5(a, b1, b2, b3, b4, b5) (((a)==(b1)) or ((a)==(b2)) or ((a)==(b3)) or ((a)==(b4)) or ((a)==(b5)))
+
+static inline uint16_t BuildUint16(uint8_t Lo, uint8_t Hi) {
+    uint16_t r = Hi;
+    r <<= 8;
+    r |= Lo;
+    return r;
+}
+
+static inline uint32_t BuildUint32(uint8_t Lo, uint8_t MidLo, uint8_t MidHi, uint8_t Hi) {
+    uint32_t r = Hi;
+    r <<= 8;
+    r |= MidHi;
+    r <<= 8;
+    r |= MidLo;
+    r <<= 8;
+    r |= Lo;
+    return r;
+}
+
 
 // IRQ priorities
 #define IRQ_PRIO_LOW            15  // Minimum
@@ -206,69 +229,64 @@ public:
     void Off() { *PCCR = 0; }
 };
 
-// ==== Irq pin ====
+#if 1 // ==== External IRQ ====
+enum ExtiTrigType_t {ttRising, ttFalling, ttRisingFalling};
 class IrqPin_t {
 private:
-    uint32_t IrqVect;
-    uint16_t IPin;
+    uint32_t IIrqChnl;
     GPIO_TypeDef *IGPIO;
+    uint8_t IPinNumber;
 public:
-    inline void SetupFront(RiseFall_t Front) {
-        uint32_t msk = 1 << IPin;
-        switch(Front) {
+    void SetTriggerType(ExtiTrigType_t ATriggerType) {
+        uint32_t IrqMsk = 1 << IPinNumber;
+        switch(ATriggerType) {
             case Rising:
-                EXTI->FTSR &= ~msk; // Falling trigger disabled
-                EXTI->RTSR |=  msk; // Rising trigger enabled
+                EXTI->FTSR &= ~IrqMsk; // Falling trigger disabled
+                EXTI->RTSR |=  IrqMsk; // Rising trigger enabled
                 break;
             case Falling:
-                EXTI->FTSR |=  msk; // Falling trigger enabled
-                EXTI->RTSR &= ~msk; // Rising trigger disabled
+                EXTI->FTSR |=  IrqMsk; // Falling trigger enabled
+                EXTI->RTSR &= ~IrqMsk; // Rising trigger disabled
                 break;
             case RisingFalling:
-                EXTI->FTSR |=  msk; // Falling trigger enabled
-                EXTI->RTSR |=  msk; // Rising trigger enabled
+                EXTI->FTSR |=  IrqMsk; // Falling trigger enabled
+                EXTI->RTSR |=  IrqMsk; // Rising trigger enabled
                 break;
-        }
+        } // switch
     }
-    inline void Init(GPIO_TypeDef *PGPIO, uint16_t N, RiseFall_t Front) {
-        // Setup inner variables
-        IGPIO = PGPIO;
-        IPin = N;
-        IrqVect = EXTI0_IRQn + IPin;
-        if((N >= 5) and (N <=9)) IrqVect = EXTI9_5_IRQn;
-        else if(N >= 10) IrqVect = EXTI15_10_IRQn;
-        // Enable sys cfg controller
-        rccEnableAPB2(RCC_APB2ENR_SYSCFGEN, FALSE);
-        uint8_t Shift = N * 4;
-        __IO uint32_t  *PExtiCr = &SYSCFG->EXTICR[0];
-        if     (N > 3 ) { PExtiCr = &SYSCFG->EXTICR[1]; Shift = (N - 4) * 4; }
-        else if(N > 7 ) { PExtiCr = &SYSCFG->EXTICR[2]; Shift = (N - 8) * 4; }
-        else if(N > 11) { PExtiCr = &SYSCFG->EXTICR[3]; Shift = (N - 12) * 4; }
-
-        // Clear EXTIx-related bits
-        uint32_t msk = 0x000F << Shift;
-        *PExtiCr &= ~msk;
-        // Write GPIO-related bits
-        if     (IGPIO == GPIOA) msk = 0x0 << Shift;
-        else if(IGPIO == GPIOB) msk = 0x1 << Shift;
-        else if(IGPIO == GPIOC) msk = 0x2 << Shift;
-        else if(IGPIO == GPIOD) msk = 0x3 << Shift;
-        else if(IGPIO == GPIOE) msk = 0x4 << Shift;
-        *PExtiCr |= msk;
-
+    void Setup(GPIO_TypeDef *GPIO, const uint8_t APinNumber, ExtiTrigType_t ATriggerType) {
+        IGPIO = GPIO;
+        IPinNumber = APinNumber;
+        rccEnableAPB2(RCC_APB2ENR_SYSCFGEN, FALSE); // Enable sys cfg controller
+        // Connect EXTI line to the pin of the port
+        uint8_t Indx   = APinNumber / 4;            // Indx of EXTICR register
+        uint8_t Offset = (APinNumber & 0x03) * 4;   // Offset in EXTICR register
+        SYSCFG->EXTICR[Indx] &= ~((uint32_t)0b1111 << Offset);  // Clear port-related bits
+        // GPIOA requires all zeroes => nothing to do in this case
+        if     (GPIO == GPIOB) SYSCFG->EXTICR[Indx] |= (uint32_t)0b0001 << Offset;
+        else if(GPIO == GPIOC) SYSCFG->EXTICR[Indx] |= (uint32_t)0b0010 << Offset;
+        else if(GPIO == GPIOD) SYSCFG->EXTICR[Indx] |= (uint32_t)0b0011 << Offset;
+        else if(GPIO == GPIOE) SYSCFG->EXTICR[Indx] |= (uint32_t)0b0100 << Offset;
         // Configure EXTI line
-        msk = 1 << N;
-        EXTI->IMR  |=  msk;      // Interrupt mode enabled
-        EXTI->EMR  &= ~msk;      // Event mode disabled
-        SetupFront(Front);
+        uint32_t IrqMsk = 1 << APinNumber;
+        EXTI->IMR  |=  IrqMsk;      // Interrupt mode enabled
+        EXTI->EMR  &= ~IrqMsk;      // Event mode disabled
+        SetTriggerType(ATriggerType);
+        EXTI->PR    =  IrqMsk;      // Clean irq flag
+        // Get IRQ channel
+        if     ((APinNumber >= 0)  and (APinNumber <= 4))  IIrqChnl = EXTI0_IRQn + APinNumber;
+        else if((APinNumber >= 5)  and (APinNumber <= 9))  IIrqChnl = EXTI9_5_IRQn;
+        else if((APinNumber >= 10) and (APinNumber <= 15)) IIrqChnl = EXTI15_10_IRQn;
     }
     // Enable/disable NVIC vector
-    inline void Enable(uint8_t Priority) { nvicEnableVector(IrqVect, CORTEX_PRIORITY_MASK(Priority)); }
-    inline void Disable() { nvicDisableVector(IrqVect); }
-    inline void GenerateIrq() { EXTI->SWIER |= 1 << IPin; }
+    void EnableIrq(const uint32_t Priority) { nvicEnableVector(IIrqChnl, CORTEX_PRIORITY_MASK(Priority)); }
+    void DisableIrq() { nvicDisableVector(IIrqChnl); }
+    void GenerateIrq() { EXTI->SWIER |= 1 << IPinNumber; }
+    void CleanIrqFlag() { EXTI->PR = (1 << IPinNumber); }
     // Standard pin functions
-    inline bool IsHi() { return PinIsSet(IGPIO, IPin); }
+    bool IsHi() { return PinIsSet(IGPIO, IPinNumber); }
 };
+#endif
 
 // ================================= Random ====================================
 uint32_t Random(uint32_t TopValue);
@@ -292,11 +310,11 @@ public:
     inline void Enable()  { ITmr->CR1 |=  TIM_CR1_CEN; }
     inline void Disable() { ITmr->CR1 &= ~TIM_CR1_CEN; }
     inline void SetUpdateFrequency(uint32_t FreqHz) { SetTopValue(*PClk / FreqHz); }
-    inline void SetTopValue(uint16_t Value) { ITmr->ARR = Value; }
-    inline uint16_t GetTopValue() { return ITmr->ARR; }
+    inline void SetTopValue(uint32_t Value) { ITmr->ARR = Value; }
+    inline uint32_t GetTopValue() { return ITmr->ARR; }
     inline void SetupPrescaler(uint32_t PrescaledFreqHz) { ITmr->PSC = (*PClk / PrescaledFreqHz) - 1; }
-    inline void SetCounter(uint16_t Value) { ITmr->CNT = Value; }
-    inline uint16_t GetCounter() { return ITmr->CNT; }
+    inline void SetCounter(uint32_t Value) { ITmr->CNT = Value; }
+    inline uint32_t GetCounter() { return ITmr->CNT; }
     // Master/Slave
     inline void SetTriggerInput(TmrTrigInput_t TrgInput) {
         uint16_t tmp = ITmr->SMCR;
@@ -319,12 +337,14 @@ public:
     // DMA, Irq, Evt
     inline void DmaOnTriggerEnable() { ITmr->DIER |= TIM_DIER_TDE; }
     inline void GenerateUpdateEvt()  { ITmr->EGR = TIM_EGR_UG; }
+    inline void IrqOnTriggerEnable() { ITmr->DIER |= TIM_DIER_UIE; }
+    inline void ClearIrqPendingBit() { ITmr->SR &= ~TIM_SR_UIF;    }
     // PWM
     void PwmInit(GPIO_TypeDef *GPIO, uint16_t N, uint8_t Chnl, Inverted_t Inverted);
     void PwmSet(uint16_t Value) { *PCCR = Value; }
 };
 
-// ================================= SPI =======================================
+#if 1 // ============================== SPI ====================================
 enum CPHA_t {cphaFirstEdge, cphaSecondEdge};
 enum CPOL_t {cpolIdleLow, cpolIdleHigh};
 enum SpiBaudrate_t {
@@ -339,27 +359,51 @@ enum SpiBaudrate_t {
 };
 
 class Spi_t {
+private:
+    SPI_TypeDef *PSpi;
 public:
-    static inline void Setup(SPI_TypeDef *Spi, BitOrder_t BitOrder,
+    void Setup(SPI_TypeDef *Spi, BitOrder_t BitOrder,
             CPOL_t CPOL, CPHA_t CPHA, SpiBaudrate_t Baudrate) {
+        PSpi = Spi;
         // Clocking
-        if      (Spi == SPI1) { rccEnableSPI1(FALSE); }
-        else if (Spi == SPI2) { rccEnableSPI2(FALSE); }
-        else if (Spi == SPI3) { rccEnableSPI3(FALSE); }
+        if     (PSpi == SPI1) { rccEnableSPI1(FALSE); }
+        else if(PSpi == SPI2) { rccEnableSPI2(FALSE); }
         // Mode: Master, NSS software controlled and is 1, 8bit, NoCRC, FullDuplex
-        Spi->CR1 = SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_MSTR;
-        if(BitOrder == boLSB) Spi->CR1 |= SPI_CR1_LSBFIRST;     // MSB/LSB
-        if(CPOL == cpolIdleHigh) Spi->CR1 |= SPI_CR1_CPOL;      // CPOL
-        if(CPHA == cphaSecondEdge) Spi->CR1 |= SPI_CR1_CPHA;    // CPHA
-        Spi->CR1 |= ((uint16_t)Baudrate) << 3;                  // Baudrate
-        Spi->CR2 = 0;
-        Spi->I2SCFGR &= ~((uint16_t)SPI_I2SCFGR_I2SMOD);        // Disable I2S
+        uint16_t tmp = SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_MSTR;
+        if(BitOrder == boLSB) tmp |= SPI_CR1_LSBFIRST;    // MSB/LSB
+        if(CPOL == cpolIdleHigh) tmp |= SPI_CR1_CPOL;     // CPOL
+        if(CPHA == cphaSecondEdge) tmp |= SPI_CR1_CPHA;   // CPHA
+        tmp |= ((uint16_t)Baudrate) << 3;                 // Baudrate
+        PSpi->CR1 = tmp;
+        PSpi->CR2 = 0;
+        PSpi->I2SCFGR &= ~((uint16_t)SPI_I2SCFGR_I2SMOD);       // Disable I2S
     }
-    static inline void Enable (SPI_TypeDef *Spi) { Spi->CR1 |=  SPI_CR1_SPE; }
-    static inline void Disable(SPI_TypeDef *Spi) { Spi->CR1 &= ~SPI_CR1_SPE; }
-    static inline void EnableTxDma(SPI_TypeDef *Spi) { Spi->CR2 |= SPI_CR2_TXDMAEN; }
-    static inline void WaitBsyHi2Lo(SPI_TypeDef *Spi) { while(Spi->SR & SPI_SR_BSY); }
+    void Enable () { PSpi->CR1 |=  SPI_CR1_SPE; }
+    void Disable() { PSpi->CR1 &= ~SPI_CR1_SPE; }
+    uint8_t ReadWriteByte(uint8_t AByte) {
+        PSpi->DR = AByte;
+        while(!(PSpi->SR & SPI_SR_RXNE));  // Wait for SPI transmission to complete
+        return PSpi->DR;
+    }
+    // Flags
+    void WaitBsyLo() { while(PSpi->SR & SPI_SR_BSY); }
+    void WaitTxEHi() { while(!(PSpi->SR & SPI_SR_TXE)); }
+    void ClearOVR() { (void)PSpi->DR; (void)PSpi->SR; (void)PSpi->DR; }
+    // IRQ
+    void SetupIrq(uint32_t Priority) {
+        if     (PSpi == SPI1) nvicEnableVector(SPI1_IRQn, CORTEX_PRIORITY_MASK(Priority));
+        else if(PSpi == SPI2) nvicEnableVector(SPI2_IRQn, CORTEX_PRIORITY_MASK(Priority));
+    }
+    void EnableIrqRxNE()  { PSpi->CR2 |=  SPI_CR2_RXNEIE; }
+    void EnableIrqTxE()   { PSpi->CR2 |=  SPI_CR2_TXEIE;  }
+    void DisableIrqRxNE() { PSpi->CR2 &= ~SPI_CR2_RXNEIE; }
+    void DisableIrqTxE()  { PSpi->CR2 &= ~SPI_CR2_TXEIE;  }
+    // DMA
+    void EnableTxDma() { PSpi->CR2 |= SPI_CR2_TXDMAEN; }
+    void EnableRxDma() { PSpi->CR2 |= SPI_CR2_RXDMAEN; }
 };
+#endif
+
 
 // =============================== I2C =========================================
 #define I2C_DMATX_MODE  STM32_DMA_CR_CHSEL(DmaChnl) |   \
