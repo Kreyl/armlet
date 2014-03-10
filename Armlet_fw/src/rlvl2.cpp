@@ -24,23 +24,29 @@ void rLevel2_t::ITask() {
     // DEBUG
     PInTbl->RowCnt = rand() % 5;
     for(uint8_t i=0; i<PInTbl->RowCnt; i++) {
-        /*      int tmpval=rand() % 5;
-        int is_new=-1;
+         int tmpval=rand() % 5;
+        int is_new=1;
         //
         while(is_new<0)
         {
             for(int j=0;j<i;j++)
             {
-
+               if(PInTbl->Rows[i].ID==tmpval)
+                   is_new=-1;
             }
-
+            if(is_new==-1)
+            {
             tmpval++;
             tmpval = tmpval %5;
-        }*/
+            }
+            else
+                continue;
+        }
 
-        PInTbl->Rows[i].ID = rand() % 5;
+        PInTbl->Rows[i].ID=tmpval;
+      //  PInTbl->Rows[i].ID = rand() % 5;
 
-        PInTbl->Rows[i].Level = rand() % 100 + 1;
+        PInTbl->Rows[i].Level = rand() % 10 + 1;
     }
     chThdSleepMilliseconds(999);
     // Switch tables

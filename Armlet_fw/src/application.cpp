@@ -204,8 +204,8 @@ static void AppThread(void *arg) {
         	KeysHandler();
         	}
         if(EvtMsk & EVTMASK_RADIO) {
-         //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
-            continue;
+        //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
+           // continue;
             int val1= min(reasons_number,RLvl2.PTable->RowCnt);
 
             //copy to ArrayOfIncomingIntentions
@@ -216,7 +216,28 @@ static void AppThread(void *arg) {
                 ArrayOfIncomingIntentions[i].reason_indx=RLvl2.PTable->Rows[i].ID;
                 Uart.Printf("radio_in int_id %d, int_pw %d, val1 %d\r",ArrayOfIncomingIntentions[i].reason_indx,ArrayOfIncomingIntentions[i].power256,val1);
             }
-            CalculateIntentionsRadioChange();
+
+            Uart.Printf("radio incoming ends!!!\r");
+            int reason_id=MainCalculateReasons();
+           /* if(reason_id==-1)
+                //играть фон
+            {
+                strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
+                Sound.Play(appbufftmp);
+                Uart.Printf(appbufftmp);
+                Uart.Printf("\r");
+            }
+            else*/
+                //играть музыку по резону
+            if(reason_id!=-1)
+            {
+                strcpy(appbufftmp,GetFileNameToPlayFromEmoId(reasons[reason_id].eID));
+                Sound.Play(appbufftmp);
+                Uart.Printf(appbufftmp);
+                Uart.Printf("\r");
+            }
+
+         //   CalculateIntentionsRadioChange();
            // int chmaxval=-1;
            // int chmax_indx=-1;
            // for(int i=0;i<val1;i++)
