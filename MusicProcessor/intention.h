@@ -2,8 +2,9 @@
 #define intention_h__
 //#include "emotions.h"
 #include "atlantis_music_tree.h"
-#define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 2
+#define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 10
 #define INTENTIONS_ARRAY_SIZE 5
+#define WINING_INTEGRAL_SWITCH_LIMIT 100
 /*typedef struct Intention {
 	int weight1000;	//константа, определ€юща€ степень и врем€ роста
 	//int last_measure_weight;//
@@ -36,11 +37,13 @@ typedef struct IntentionCalculationData
 	int winning_integral_top_limit_normalizer;
 }IntentionCalculationData;
 void CalculateIntentionsRadioChange();
-
+//returns -1 if winner does not over switch limit, else return reason id
+int MainCalculateReasons();
 extern struct IntentionCalculationData SICD;//SingletonIntentionCalculationData;
 void PrintSCIDToUart();
 //в структуре рассчета будет индекс текущего победител€ мощности,
 //индекс предыдущего победител€ мощности,
 //набранна€ дельта ( по определению принадлежит предыдущему победителю)
-
+extern int CurrentIntentionArraySize;
+//extern IncomingIntentions ArrayOfIncomingIntentions[];
 #endif // intention_h__

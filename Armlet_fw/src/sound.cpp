@@ -19,8 +19,11 @@ extern "C" {
 // Dreq IRQ
 CH_IRQ_HANDLER(EXTI0_IRQHandler) {
     CH_IRQ_PROLOGUE();
+    Uart.PrintNow("I ");
     EXTI->PR = (1 << 0);  // Clean irq flag
+//    Uart.Printf("Irq ");
     Sound.ISendNextData();
+    Uart.PrintNow("i ");
     CH_IRQ_EPILOGUE();
 }
 // DMA irq
@@ -28,12 +31,13 @@ void SIrqDmaHandler(void *p, uint32_t flags) { Sound.IrqDmaHandler(); }
 } // extern c
 
 void Sound_t::IrqDmaHandler() {
-//    Uart.Printf("Dma\r");
+    Uart.PrintNow("D ");
     Spi_t::WaitBsyHi2Lo(VS_SPI);    // Wait SPI transaction end
     XCS_Hi();                       // }
     XDCS_Hi();                      // } Stop SPI
     if(IDreq.IsHi()) ISendNextData();   // More data allowed, send it now
     else IDreq.Enable(IRQ_PRIO_MEDIUM); // Enable dreq irq
+    Uart.PrintNow("d ");
 }
 
 // =========================== Implementation ==================================
@@ -136,7 +140,7 @@ void Sound_t::IPlayNew() {
 
     FRESULT rslt;
     // Open new file
-    Uart.Printf("Play %S\r", IFilename);
+    //Uart.Printf("Play %S\r", IFilename);
     rslt = f_open(&IFile, IFilename, FA_READ+FA_OPEN_EXISTING);
     IFilename = NULL;
     if (rslt != FR_OK) {

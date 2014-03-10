@@ -205,19 +205,51 @@ static void AppThread(void *arg) {
         	}
         if(EvtMsk & EVTMASK_RADIO) {
          //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
+            continue;
             int val1= min(reasons_number,RLvl2.PTable->RowCnt);
-            int chmaxval=-1;
-            int chmax_indx=-1;
+
+            //copy to ArrayOfIncomingIntentions
+            CurrentIntentionArraySize=val1;
             for(int i=0;i<val1;i++)
             {
+                ArrayOfIncomingIntentions[i].power256=RLvl2.PTable->Rows[i].Level;
+                ArrayOfIncomingIntentions[i].reason_indx=RLvl2.PTable->Rows[i].ID;
+                Uart.Printf("radio_in int_id %d, int_pw %d, val1 %d\r",ArrayOfIncomingIntentions[i].reason_indx,ArrayOfIncomingIntentions[i].power256,val1);
+            }
+            CalculateIntentionsRadioChange();
+           // int chmaxval=-1;
+           // int chmax_indx=-1;
+           // for(int i=0;i<val1;i++)
+           // {
               //  if(chmaxval<
 
 
-            }
+           // }
 
         }
 
         if(EvtMsk & EVTMASK_PLAY_ENDS) {
+            //пересчитываем суммарные резоны
+            // по резону победителю считаем  новую эмоцию и включаем рандомный трек из неё.
+            Uart.Printf("music ends!!!\r");
+            int reason_id=MainCalculateReasons();
+            if(reason_id==-1)
+                //играть фон
+            {
+                strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
+                Sound.Play(appbufftmp);
+                Uart.Printf(appbufftmp);
+                Uart.Printf("\r");
+            }
+            else
+                //играть музыку по резону
+            {
+                strcpy(appbufftmp,GetFileNameToPlayFromEmoId(reasons[reason_id].eID));
+                Sound.Play(appbufftmp);
+                Uart.Printf(appbufftmp);
+                Uart.Printf("\r");
+            }
+
         	//int rval=GetRandomEmoToPlay();
         	//strcpy(appbufftmp,GetFileNameToPlayFromEmoId(rval));
         	// Sound.Play(appbufftmp);
@@ -230,7 +262,7 @@ static void AppThread(void *arg) {
 
         	if(Time.S_total % 4 ==0)
         	{
-        		CalculateIntentionsRadioChange();
+        		//CalculateIntentionsRadioChange();
         		//PrintSCIDToUart();
         		//Uart.Printf("every 4 sec\r");
         	}

@@ -1,5 +1,6 @@
 #include "atlantis_music_tree.h"
 #include "emotions.h"
+#include "intention.h"
 #include <stddef.h>
 #include "ff.h"
 #include "cmd_uart.h"
@@ -43,7 +44,9 @@ Emotion * EmotionTreeGetParent2(int tree_node_indx)
 
 char * GetMusicFileNameFromList(int emo_id, int file_num)
 {
-    strcpy(emonamebuffer,strcat((char*)emotions[emo_id].name,"-"));
+    //strcpy(emonamebuffer,strcat((char*)emotions[emo_id].name,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING));
+    strcpy(emonamebuffer,(char*)emotions[emo_id].name);
+    strcat(emonamebuffer,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING);
    // Uart.Printf("emonamebuffer %s , emotions[emo_id].name  %s \r",emonamebuffer,emotions[emo_id].name);
     if(SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer)==FR_OK)
     {
@@ -51,6 +54,7 @@ char * GetMusicFileNameFromList(int emo_id, int file_num)
         return GMFNFLbuffer;
     }
     //TODO error!
+    return nullptr;
 }
 
 //на входе - название файла, выход - индекс эмоции из массива эмоций, соответствующей данному файлу
@@ -62,7 +66,9 @@ int GetEmoIndxFromFileString(char * string)
 	//int return_value=EMO_INFO_NOT_FOUND;
 	//getting emo from filename
 	int sep_id=-1;
-	sep_id=strcspn(string,"_");
+	sep_id=strcspn(string,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING);
+	Uart.Printf("sepid=%d\r", sep_id);
+	if(sep_id > 20) return -3;
 	if(sep_id<=0)
 		return SEPARATOR_NOT_FOUND;
 	strncpy(EmoNamebuffer,string,sep_id);
@@ -72,14 +78,16 @@ int GetEmoIndxFromFileString(char * string)
 	for(int i=0;i<emotions_number;i++)
 	{
 		//if(strncmp(EmoNamebuffer,emotions[i].name,sep_id)==0)
-	   if(sep_id== strlen(emotions[i].name))
-		    if(strncmp(EmoNamebuffer,emotions[i].name,sep_id)==0)
-		//if(strcmp(strpbrk(string,"_"),emotions[i].name))
-		{
-		//	Uart.Printf("GetEmoIndx string %s , EmoNamebuffer  %s, name %s  \r",string,EmoNamebuffer,emotions[i].name);
-		      //  Uart.Printf("String_size %d %d, ",sep_id,strlen(emotions[i].name));
-			return i;
-		}
+        if(sep_id== strlen(emotions[i].name))
+        {
+            if(strncmp(EmoNamebuffer,emotions[i].name,sep_id)==0)
+            //if(strcmp(strpbrk(string,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING),emotions[i].name))
+            {
+            //	Uart.Printf("GetEmoIndx string %s , EmoNamebuffer  %s, name %s  \r",string,EmoNamebuffer,emotions[i].name);
+                  //  Uart.Printf("String_size %d %d, ",sep_id,strlen(emotions[i].name));
+                return i;
+            }
+        }
 	}
 	return EMO_INFO_NOT_FOUND;
 
@@ -133,16 +141,25 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 	//if 1 file, always use it.
 	if(emotions[emo_id].numTracks ==1)
 	{
-		Uart.Printf("only one file for emo %s \r", emotions[emo_id]);
-		return "TODO get full filename";// emotionTreeMusicNodeFiles[emo_id].music_files[0].full_filename;
+		Uart.Printf("GetFileNameToPlayFromEmoId only one file for emo %s \r", emotions[emo_id]);
+		return GetMusicFileNameFromList(emo_id,0);//"TODO get full filename";// emotionTreeMusicNodeFiles[emo_id].music_files[0].full_filename;
 	}
 	else
-		Uart.Printf("found %d files for for emo %s \r",emotions[emo_id].numTracks, emotions[emo_id]);
-
-	int rand_val=Random(emotions[emo_id].numTracks-1)+1;
+		Uart.Printf("GetFileNameToPlayFromEmoId found %d files for for emo %s \r",emotions[emo_id].numTracks, emotions[emo_id]);
+	// если треков 2 и более
+	int rand_val=Random(emotions[emo_id].numTracks-2)+1; //рандомное число от максимум треков +1
 	if(emotions[emo_id].numTracks==0)
 	    Uart.Printf("GetFileNameToPlayFromEmoId smth wrong");
-	int track_num_calculated=rand_val+emotions[emo_id].lastPlayedTrack;
+
+	//Uart.Printf("emotions[emo_id].lastPlayedTrack %d",emotions[emo_id].lastPlayedTrack);
+	int track_num_calculated;
+	if(emotions[emo_id].lastPlayedTrack==-1)
+	    track_num_calculated=Random(emotions[emo_id].numTracks);
+	// к текущему номе ру ртека прибавляем рандомное число по модулю числа треков - получаем номер другого трека
+	else
+	 track_num_calculated=(rand_val+emotions[emo_id].lastPlayedTrack) % emotions[emo_id].numTracks;
+
+	Uart.Printf("GetFileNameToPlayFromEmoId result: rand_val %d, track_num %d, last played %d", rand_val,track_num_calculated,emotions[emo_id].lastPlayedTrack);
 	emotions[emo_id].lastPlayedTrack=track_num_calculated;
 	    return GetMusicFileNameFromList(emo_id,track_num_calculated);
 }
@@ -208,7 +225,7 @@ int Init_emotionTreeMusicNodeFiles_FromFileIterrator()
                      emotions[emo_id].numTracks++;
                  }
                  else
-                     Uart.Printf("cannot find emotion for file %s \r",MusicFileNamebuffer);
+                     Uart.Printf("cannot find emotion for file1 %s \r",SD.FileInfo.lfname);//MusicFileNamebuffer);
     }
 
     while(SD.GetNext()==FR_OK)
@@ -216,13 +233,13 @@ int Init_emotionTreeMusicNodeFiles_FromFileIterrator()
         int emo_id=GetEmoIndxFromFileString(SD.FileInfo.lfname);
 
         if(emo_id>=0)
-                 {  //собственно инициализация
-                     //увеличиваем счетчик файлов
-                Uart.Printf("emo id found3: %d, filename %s \r",emo_id,SD.FileInfo.lfname);
-                     emotions[emo_id].numTracks++;
-                 }
-                 else
-                     Uart.Printf("cannot find emotion for file %s \r",MusicFileNamebuffer);
+        {  //собственно инициализация
+            //увеличиваем счетчик файлов
+            Uart.Printf("emo id found3: %d, filename %s \r",emo_id,SD.FileInfo.lfname);
+            emotions[emo_id].numTracks++;
+        }
+        else
+            Uart.Printf("cannot find emotion for file2 %s \r",SD.FileInfo.lfname);//MusicFileNamebuffer);
     }
     //TODO critical error, stop working
 

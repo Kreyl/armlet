@@ -22,9 +22,24 @@ static void Rlvl2Thread(void *arg) {
 
 void rLevel2_t::ITask() {
     // DEBUG
-    PInTbl->RowCnt = rand() % 7;
+    PInTbl->RowCnt = rand() % 5;
     for(uint8_t i=0; i<PInTbl->RowCnt; i++) {
-        PInTbl->Rows[i].ID = rand() % 50;
+        /*      int tmpval=rand() % 5;
+        int is_new=-1;
+        //
+        while(is_new<0)
+        {
+            for(int j=0;j<i;j++)
+            {
+
+            }
+
+            tmpval++;
+            tmpval = tmpval %5;
+        }*/
+
+        PInTbl->Rows[i].ID = rand() % 5;
+
         PInTbl->Rows[i].Level = rand() % 100 + 1;
     }
     chThdSleepMilliseconds(999);
