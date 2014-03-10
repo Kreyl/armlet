@@ -23,11 +23,11 @@ void SnsTable_t::ISwitchTableI() {
     PCurrTbl->Size = 0; // Reset table
 }
 
-void SnsTable_t::PutSnsInfo(uint8_t ID, uint8_t Level) {
+void SnsTable_t::PutSnsInfo(uint8_t ID, uint32_t Level) {
     if(PCurrTbl->Size >= MAX_ROW_CNT) return;
     for(uint32_t i=0; i<PCurrTbl->Size; i++) {
         if(PCurrTbl->Row[i].ID == ID) {
-            PCurrTbl->Row[i].Level = Level;
+            PCurrTbl->Row[i].Level = MAX(PCurrTbl->Row[i].Level, Level);
             return;
         }
     }
@@ -39,6 +39,6 @@ void SnsTable_t::PutSnsInfo(uint8_t ID, uint8_t Level) {
 void SnsTable_t::SendEvtReady() {
     chSysLock();
     ISwitchTableI();
-    if(IPThd != nullptr) chEvtSignalI(IPThd, EVTMSK_TABLE_READY);
+    if(IPThd != nullptr) chEvtSignalI(IPThd, EVTMASK_RADIO);
     chSysUnlock();
 }

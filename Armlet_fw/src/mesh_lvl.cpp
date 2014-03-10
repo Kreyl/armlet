@@ -35,7 +35,8 @@ void Mesh_t::ITask() {
     // Catch Event
     uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
     if(EvtMsk & EVTMSK_NEW_CYCLE) {
-        Uart.Printf("i,%u, t=%u\r", AbsCycle, chTimeNow());
+//        Uart.Printf("i,%u, t=%u\r", AbsCycle, chTimeNow());
+        Beeper.Beep(ShortBeep);
         IncCurrCycle();
         // RX
         if(CurrCycle == RxCycleN) {
@@ -54,8 +55,6 @@ void Mesh_t::ITask() {
         }
     }
     if(EvtMsk & EVTMSK_UPDATE_CYCLE) {
-
-//        uint8_t NumPkts = PktBuf.GetFilledSlots();
         uint8_t PriorityID = SelfID;
         uint32_t NewAbsTime=0;
         uint32_t NextCycleStart=0;
@@ -71,20 +70,30 @@ void Mesh_t::ITask() {
                     PriorityID = MeshMsg.PktRx.TimeOwnerID;
                     NextCycleStart = MeshMsg.Timestamp + (uint32_t)CYCLE_TIME - (SLOT_TIME * PriorityID);
                 }
-                uint8_t Lvl = (uint8_t)(MeshMsg.RSSI + 120);
+
+                if(MeshMsg.RSSI < -100) MeshMsg.RSSI = -100;
+                else if(MeshMsg.RSSI > -35) MeshMsg.RSSI = -35;
+                MeshMsg.RSSI += 100;    // 0...65
+                uint32_t Lvl = 1 + (uint32_t)(((int32_t)MeshMsg.RSSI * 99) / 65);
                 SnsTable.PutSnsInfo(MeshMsg.PktRx.ID, Lvl);   /* Put Information in SensTable */
             } while(PktBuf.GetFilledSlots() != 0);
-            SnsTable.SendEvtReady();                        /* Send Evt to App Theread */
+        }
+
+        NeedToSendTable++;
+        if(NeedToSendTable == TABLE_SEND_N) {
+            Uart.Printf("TableSend,t=%u\r", chTimeNow());
+            SnsTable.SendEvtReady();
+            NeedToSendTable = 0;
         }
 
         if(NeedUpdateTime) {
-//            Uart.Printf("NewCycleUpdate=%u\r", NewAbsTime);
-//            SetCurrCycleN(NewAbsTime); // FIXME: aligh NewAbsTime
-//            uint32_t timeNow = chTimeNow();
-//            do NextCycleStart += CYCLE_TIME;
-//            while (NextCycleStart < timeNow);
-//            Uart.Printf("Sleep from %u to %u\r", chTimeNow(), NextCycleStart);
-//            chThdSleepUntil(NextCycleStart);
+            Uart.Printf("NewCycleUpdate=%u\r", NewAbsTime);
+            SetCurrCycleN(NewAbsTime); // FIXME: aligh NewAbsTime
+            uint32_t timeNow = chTimeNow();
+            do NextCycleStart += CYCLE_TIME;
+            while (NextCycleStart < timeNow);
+            Uart.Printf("Sleep from %u to %u\r", chTimeNow(), NextCycleStart);
+            chThdSleepUntil(NextCycleStart);
             CycleTmr.Enable();
             CycleTmr.SetCounter(0);
             NeedUpdateTime = false;
