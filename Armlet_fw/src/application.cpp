@@ -362,13 +362,11 @@ void App_t::Task() {
         CurrentIntentionArraySize=val1;
         for(int i=0;i<val1;i++)
         {
-            if(SnsTable.PTable->Row[i].ID>=reasons_number || SnsTable.PTable->Row[i].ID<0)
+            if(SnsTable.PTable->Row[i].ID>=reasons_number || SnsTable.PTable->Row[i].ID<0 || SnsTable.PTable->Row[i].Level<70)
             {
                 CurrentIntentionArraySize--;
                 continue;
             }
-            if(SnsTable.PTable->Row[i].Level<70)
-                continue;
             ArrayOfIncomingIntentions[i].power256=SnsTable.PTable->Row[i].Level-70;
             //if(ArrayOfIncomingIntentions[i].power256
             ArrayOfIncomingIntentions[i].reason_indx=SnsTable.PTable->Row[i].ID;
