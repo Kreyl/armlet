@@ -349,48 +349,11 @@ void App_t::Task() {
     }
     if(EvtMsk & EVTMASK_PLAY_ENDS) {
         Uart.Printf("App PlayEnd\r");
-
-        //пересчитываем суммарные резоны
-        // по резону победителю считаем  новую эмоцию и включаем рандомный трек из неё.
-
-       // int reason_id=MainCalculateReasons();
-        //if(reason_id==-1)
-        //if(reason_id<0)
-          //играть фон, если надо играть фон, или если что не так )
-        //{
-        //    strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
-        //    Sound.Play(appbufftmp);
-        //    Uart.Printf(appbufftmp);
-       //    Uart.Printf("\r");
-       // }
-       // else
-          //играть музыку по текущей эмоции
-
-        PlayNewEmo(SICD.last_played_emo,1);
-      //  {
-            //SICD.last_intention_index_winner;
-          /*  char * fname = GetFileNameToPlayFromEmoId();
-            if(fname != nullptr)
-            {
-               strcpy(appbufftmp,fname);
-               Sound.Play(appbufftmp);
-               Uart.Printf(appbufftmp);
-               Uart.Printf("\r");
-
-            }
-            else
-            {
-                Uart.Printf("ERROR EvtMsk & EVTMASK_PLAY_ENDS on next string:\rGetFileNameToPlayFromEmoId nullptr!!! smth wrong. emo_id %d, reason_id %d \r",reasons[reason_id].eID,reason_id);
-
-            }*/
-           // strcpy(appbufftmp,));
-           // if(app
-
-      //  }
-
+        //играть музыку по текущей эмоции
+      //  PlayNewEmo(SICD.last_played_emo,1);
     }
 #if 1 //EVTMASK_RADIO on/off
-    if(EvtMsk & EVTMASK_RADIO) {
+    if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
         //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
         Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", SnsTable.PTable->Size);
         // continue;
@@ -405,12 +368,19 @@ void App_t::Task() {
                 CurrentIntentionArraySize--;
                 continue;
             }
-            ArrayOfIncomingIntentions[i].power256=SnsTable.PTable->Row[i].Level;
+            if(SnsTable.PTable->Row[i].Level<70)
+                continue;
+            ArrayOfIncomingIntentions[i].power256=SnsTable.PTable->Row[i].Level-70;
+            //if(ArrayOfIncomingIntentions[i].power256
             ArrayOfIncomingIntentions[i].reason_indx=SnsTable.PTable->Row[i].ID;
             Uart.Printf("radio_in int_id %d, int_pw %d, val1 %d\r",ArrayOfIncomingIntentions[i].reason_indx,ArrayOfIncomingIntentions[i].power256,val1);
         }
 
+        //for(int i=0;i<CurrentIntentionArraySize;i++)
+
+
         Uart.Printf("radio incoming ends!!!\r");
+        int reason_id=MainCalculateReasons();
 /*
         int reason_id=MainCalculateReasons();
         if(reason_id==-1)

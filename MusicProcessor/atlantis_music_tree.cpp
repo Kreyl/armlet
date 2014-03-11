@@ -51,9 +51,9 @@ char * GetMusicFileNameFromList(int emo_id, int file_num)
     strcat(emonamebuffer,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING);
     Uart.Printf("GetMusicFileNameFromList3\r");
    // Uart.Printf("emonamebuffer %s , emotions[emo_id].name  %s \r",emonamebuffer,emotions[emo_id].name);
-    SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer);
-    if(0){//SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer)==FR_OK)
-
+    //SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer);
+    if(SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer)==FR_OK)
+    {
         Uart.Printf("GetNthFileByPrefix prefix: %s,fnum %d result: %s \r",emonamebuffer,file_num,GMFNFLbuffer);
         return GMFNFLbuffer;
     }
@@ -133,7 +133,7 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 	//TODO error to log here!
 	if(emo_id<0 || emo_id>emotions_number)
 	{
-		Uart.Printf("GetFileNameToPlayFromEmoId emo_id out of range");
+		Uart.Printf("GetFileNameToPlayFromEmoId emo_id out of range\r");
 		return NULL;
 	}
 	//if no file available for this emo, play from top emo
@@ -154,7 +154,7 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 	// если треков 2 и более
 	int rand_val=Random(emotions[emo_id].numTracks-2)+1; //рандомное число от максимум треков +1
 	if(emotions[emo_id].numTracks==0)
-	    Uart.Printf("GetFileNameToPlayFromEmoId smth wrong");
+	    Uart.Printf("GetFileNameToPlayFromEmoId smth wrong\r");
 
 	//Uart.Printf("emotions[emo_id].lastPlayedTrack %d",emotions[emo_id].lastPlayedTrack);
 	int track_num_calculated;
@@ -174,9 +174,10 @@ void PlayNewEmo(int emo_id,int err_id)
     //если гавно, то фон
     if(emo_id<0)
     {
-        Uart.Printf("emo_id <0 %d", emo_id);
+        Uart.Printf("emo_id <0 %d\r", emo_id);
         emo_id =0;
     }
+    //Uart.Printf("")
     SICD.last_played_emo=emo_id;
     char * fname = GetFileNameToPlayFromEmoId(SICD.last_played_emo);
     if(fname != nullptr)
