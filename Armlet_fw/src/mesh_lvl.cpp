@@ -39,56 +39,15 @@ void Mesh_t::ITask() {
     // Catch Event
     uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
     if(EvtMsk & EVTMSK_NEW_CYCLE) {
-//        Uart.Printf("i,%u, t=%u\r", AbsCycle, chTimeNow());
+        Uart.Printf("i,%u, t=%u\r", AbsCycle, chTimeNow());
         NewCycle();
     }
     if(EvtMsk & EVTMSK_UPDATE_CYCLE) {
-        uint8_t PriorityID = SelfID;
         uint32_t NewAbsTime=0;
         uint32_t NextCycleStart=0;
-        mshMsg_t MeshMsg;
-        if(PktBuf.GetFilledSlots() != 0) {
-            do {
-                PktBuf.ReadPkt(&MeshMsg);
-//                Uart.Printf("ID=%u %d\r", MeshMsg.PktRx.ID, MeshMsg.RSSI);
-                if(PriorityID > MeshMsg.PktRx.ID) {                /* Priority time checking */
-                    CycleTmr.Disable();
-                    NeedUpdateTime = true;
-                    NewAbsTime = MeshMsg.PktRx.CycleN + 1;
-                    PriorityID = MeshMsg.PktRx.TimeOwnerID;
-                    NextCycleStart = MeshMsg.Timestamp + (uint32_t)CYCLE_TIME - (SLOT_TIME * PriorityID);
-                }
-
-                if(MeshMsg.RSSI < -100) MeshMsg.RSSI = -100;
-                else if(MeshMsg.RSSI > -35) MeshMsg.RSSI = -35;
-                MeshMsg.RSSI += 100;    // 0...65
-                uint32_t Lvl = DbTranslate[MeshMsg.RSSI]; //1 + (uint32_t)(((int32_t)MeshMsg.RSSI * 99) / 65);
-                SnsTable.PutSnsInfo(MeshMsg.PktRx.ID, Lvl);   /* Put Information in SensTable */
-            } while(PktBuf.GetFilledSlots() != 0);
-        }
-
-        NeedToSendTable++;
-        if(NeedToSendTable == TABLE_SEND_N) {
-            Uart.Printf("Msh TabSnd,t=%u\r", chTimeNow());
-            SnsTable.SendEvtReady();
-            NeedToSendTable = 0;
-        }
-
-        if(NeedUpdateTime) {
-            Uart.Printf("Msh CycUpd=%u\r", NewAbsTime);
-            uint32_t timeNow = chTimeNow();
-            do {
-                NextCycleStart += CYCLE_TIME;
-                NewAbsTime++;
-            }
-            while (NextCycleStart < timeNow);
-            SetCurrCycleN(NewAbsTime);
-            CycleTmr.SetCounter(0);
-            NeedUpdateTime = false;
-            Uart.Printf("Msh Slp %u to %u\r", chTimeNow(), NextCycleStart);
-            chThdSleepUntil(NextCycleStart);
-            CycleTmr.Enable();
-        }
+        NeedUpdateTime = DispatchPkt(&NewAbsTime, &NextCycleStart);
+        TableSend();
+        UpdateTimer(NeedUpdateTime, NewAbsTime, NextCycleStart);
     }
 }
 
@@ -108,6 +67,59 @@ void Mesh_t::NewCycle() {
     else {
         chThdSleepMilliseconds(SleepTime);
         chEvtSignal(rLevel1.PrThd, EVTMSK_MESH_TX);
+    }
+}
+
+void Mesh_t::TableSend() {
+    NeedToSendTable++;
+    if(NeedToSendTable == TABLE_SEND_N) {
+        Uart.Printf("Msh TabSnd,t=%u\r", chTimeNow());
+        SnsTable.SendEvtReady();
+        NeedToSendTable = 0;
+    }
+}
+
+bool Mesh_t::DispatchPkt(uint32_t *PTime, uint32_t *PWakeUpSysTime) {
+    bool Rslt = false;
+    if(PktBuf.GetFilledSlots() != 0) {
+        uint8_t PriorityID = SelfID;
+        mshMsg_t MeshMsg;
+        do {
+            PktBuf.ReadPkt(&MeshMsg);
+//                Uart.Printf("ID=%u %d\r", MeshMsg.PktRx.ID, MeshMsg.RSSI);
+            if(PriorityID > MeshMsg.PktRx.ID) {                /* Priority time checking */
+                CycleTmr.Disable();
+                Rslt = true;
+                *PTime = MeshMsg.PktRx.CycleN + 1;
+                PriorityID = MeshMsg.PktRx.TimeOwnerID;
+                *PWakeUpSysTime = MeshMsg.Timestamp + (uint32_t)CYCLE_TIME - (SLOT_TIME * PriorityID);
+            }
+
+            if(MeshMsg.RSSI < -100) MeshMsg.RSSI = -100;
+            else if(MeshMsg.RSSI > -35) MeshMsg.RSSI = -35;
+            MeshMsg.RSSI += 100;    // 0...65
+            uint32_t Lvl = DbTranslate[MeshMsg.RSSI]; //1 + (uint32_t)(((int32_t)MeshMsg.RSSI * 99) / 65);
+            SnsTable.PutSnsInfo(MeshMsg.PktRx.ID, Lvl);   /* Put Information in SensTable */
+        } while(PktBuf.GetFilledSlots() != 0);
+    }
+    return Rslt;
+}
+
+void Mesh_t::UpdateTimer(bool NeedUpdate, uint32_t NewTime, uint32_t WakeUpSysTime) {
+    if(NeedUpdateTime) {
+        Uart.Printf("Msh CycUpd=%u\r", NewTime);
+        uint32_t timeNow = chTimeNow();
+        do {
+            WakeUpSysTime += CYCLE_TIME;
+            NewTime++;
+        }
+        while (WakeUpSysTime < timeNow);
+        SetCurrCycleN(NewTime);
+        CycleTmr.SetCounter(0);
+        NeedUpdateTime = false;
+        Uart.Printf("Msh Slp %u to %u\r", chTimeNow(), WakeUpSysTime);
+        chThdSleepUntil(WakeUpSysTime);
+        CycleTmr.Enable();
     }
 }
 

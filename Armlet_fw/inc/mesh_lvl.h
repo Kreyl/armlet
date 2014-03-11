@@ -79,6 +79,9 @@ private:
     void IncCurrCycle()     { AbsCycle++; CurrCycle++; if(CurrCycle >= COUNT_OF_CYCLES) { CurrCycle = 0; NewRxCycle(); } }
 
     void NewCycle();
+    void TableSend();
+    void UpdateTimer(bool NeedUpdate, uint32_t NewTime, uint32_t WakeUpSysTime);
+    bool DispatchPkt(uint32_t *PTime, uint32_t *PWakeUpSysTime);
 public:
     Mesh_t() :  PRndTable(RndTableBuf),
                 AbsCycle(0),
