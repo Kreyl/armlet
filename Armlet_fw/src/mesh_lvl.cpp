@@ -40,6 +40,7 @@ void Mesh_t::ITask() {
     uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
     if(EvtMsk & EVTMSK_NEW_CYCLE) {
         Uart.Printf("i,%u, t=%u\r", AbsCycle, chTimeNow());
+        Beeper.Beep(ShortBeep);
         NewCycle();
     }
     if(EvtMsk & EVTMSK_UPDATE_CYCLE) {

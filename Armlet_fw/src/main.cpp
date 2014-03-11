@@ -104,7 +104,7 @@ void Init() {
  //   Print_emotionTreeMusicNodeFiles_ToUART();
 
 //    Keys.Init();
-//    Beeper.Init();
+    Beeper.Init();
 //    Vibro.Init();
 
     //TODO  Lcd.Init(); - get last code version for this
