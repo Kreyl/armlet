@@ -39,6 +39,13 @@ public:
         chVTReset(&ITimer);
         chVTSet(&ITimer, MS2ST(1000), TimeTmrCallback, NULL);
     }
+    void Init ()
+    {
+        H = 0;
+        M = 0;
+        S = 0;
+        S_total = 0;
+    }
 };
 static Time_t Time;
 
@@ -165,7 +172,7 @@ static inline void KeysHandler() {
 
 
 // ===========================app thread ===============================
-//static char appbufftmp[MAX_MUSIC_FILENAME_CHAR_SIZE];
+static char appbufftmp[MAX_MUSIC_FILENAME_CHAR_SIZE];
 static WORKING_AREA(waAppThread, 256);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
@@ -343,6 +350,121 @@ void App_t::Task() {
     }
     if(EvtMsk & EVTMASK_PLAY_ENDS) {
         Uart.Printf("App PlayEnd\r");
+
+        //пересчитываем суммарные резоны
+        // по резону победителю считаем  новую эмоцию и включаем рандомный трек из неё.
+
+        int reason_id=MainCalculateReasons();
+        //if(reason_id==-1)
+        if(reason_id<0)
+          //играть фон, если надо играть фон, или если что не так )
+        {
+            strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
+            Sound.Play(appbufftmp);
+            Uart.Printf(appbufftmp);
+            Uart.Printf("\r");
+        }
+        else
+          //играть музыку по резону
+        {
+            char * fname = GetFileNameToPlayFromEmoId(reasons[reason_id].eID);
+            if(fname != nullptr)
+            {
+               strcpy(appbufftmp,fname);
+               Sound.Play(appbufftmp);
+               Uart.Printf(appbufftmp);
+               Uart.Printf("\r");
+
+            }
+            else
+            {
+                Uart.Printf("ERROR EvtMsk & EVTMASK_PLAY_ENDS on next string:\rGetFileNameToPlayFromEmoId nullptr!!! smth wrong. emo_id %d, reason_id %d \r",reasons[reason_id].eID,reason_id);
+
+            }
+           // strcpy(appbufftmp,));
+           // if(app
+
+        }
+
+    }
+    if(EvtMsk & EVTMASK_RADIO) {
+        //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
+        Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", SnsTable.PTable->Size);
+        // continue;
+        int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
+
+        //copy to ArrayOfIncomingIntentions
+        CurrentIntentionArraySize=val1;
+        for(int i=0;i<val1;i++)
+        {
+            ArrayOfIncomingIntentions[i].power256=SnsTable.PTable->Row[i].Level;
+            ArrayOfIncomingIntentions[i].reason_indx=SnsTable.PTable->Row[i].ID;
+            Uart.Printf("radio_in int_id %d, int_pw %d, val1 %d\r",ArrayOfIncomingIntentions[i].reason_indx,ArrayOfIncomingIntentions[i].power256,val1);
+        }
+
+        Uart.Printf("radio incoming ends!!!\r");
+        int reason_id=MainCalculateReasons();
+        if(reason_id==-1)
+            //играть фон
+        {
+            strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
+            Sound.Play(appbufftmp);
+            Uart.Printf(appbufftmp);
+            Uart.Printf("\r");
+        }
+        else
+            //играть музыку по резону, если у нас всё еще тот же победитель - не трогать музыку.
+        if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3)
+        {
+            Uart.Printf("REASON to play %d\r",reason_id);
+            char * fname = GetFileNameToPlayFromEmoId(reasons[reason_id].eID);
+            if(fname != nullptr)
+            {
+                strcpy(appbufftmp,GetFileNameToPlayFromEmoId(reasons[reason_id].eID));
+                Sound.Play(appbufftmp);
+                Uart.Printf(appbufftmp);
+                Uart.Printf("\r");
+            }
+            else
+            {
+                Uart.Printf("ERROR EVTMASK_RADIO 2 on next string:\rGetFileNameToPlayFromEmoId nullptr!!! smth wrong. emo_id %d, reason_id %d \r",reasons[reason_id].eID,reason_id);
+
+            }
+        }
+        if(reason_id==-3)
+        {
+            strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
+            Sound.Play(appbufftmp);
+            Uart.Printf(appbufftmp);
+            Uart.Printf("\r");
+        }
+
+        //   CalculateIntentionsRadioChange();
+        // int chmaxval=-1;
+        // int chmax_indx=-1;
+        // for(int i=0;i<val1;i++)
+        // {
+          //  if(chmaxval<
+
+
+        // }
+
+    }
+    if(EvtMsk & EVTMASK_NEWSECOND) {
+       //  Uart.Printf("New_second!");
+
+        if(Time.S_total % 4 ==0)
+        {
+            //CalculateIntentionsRadioChange();
+            //PrintSCIDToUart();
+            //Uart.Printf("every 4 sec\r");
+        }
+        if(on_run==0)
+        {
+            on_run=1;
+            Sound.Play("church_bells.wav");
+            Uart.Printf("church_bells.wav");
+        }
     }
 }
 
@@ -351,6 +473,11 @@ void App_t::Init() {
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
     SnsTable.RegisterAppThd(PThd);
     Sound.RegisterEvtPlayEnd(&EvtListenerSound,EVTMASK_PLAY_ENDS);
+    on_run=0;
+
+    Time.Init();
+    Time.Reset();
+    Uart.Printf("!!call  App_t::Init() ends!\r");
 }
 
 //NEW FROM BRAINENCH

@@ -24,6 +24,7 @@ public:
     void Init();
     void Task();
     void StopEverything();
+    int on_run;
 };
 
 extern App_t App;
