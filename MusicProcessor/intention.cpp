@@ -207,6 +207,11 @@ int MainCalculateReasons()
         if(SICD.is_empty_fon==false)
             return SICD.last_intention_index_winner;
         else
-            return -3; // play fon now!
+        {
+            if(SICD.last_played_emo!=0)
+                return -3; // play fon now!
+            else
+                return -1;
+        }
     }
 }
