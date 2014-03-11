@@ -57,5 +57,6 @@ int PrintFileToUART(char* filename);
 int GetRandomEmoToPlay();
 char * GetFileNameToPlayFromEmoId(int emo_id);
 void RebuildReasons();
+void PlayNewEmo(int emo_id,int err_id);
 
 #endif /* ATLANTIS_MUSIC_TREE_H_ */

@@ -76,9 +76,9 @@ void Init() {
 
 //    FRESULT r = SD.GetFirst("/");
 //    if(r == FR_OK) {
-//        Uart.Printf("%S\r", SD.FileInfo.lfname);
+//        Uart.Printf("%S\r", SD.Filename);
 //        r = SD.GetNext();
-//        if(r == FR_OK) Uart.Printf("%S\r", SD.FileInfo.lfname);
+//        if(r == FR_OK) Uart.Printf("%S\r", SD.Filename);
 //    }
 //
 //    char Name[128];

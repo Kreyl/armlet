@@ -5,7 +5,7 @@
 #include "ff.h"
 #include "cmd_uart.h"
 #include "kl_sd.h"
-
+#include "Sound.h"
 #include "kl_lib_f2xx.h" //random
 
 #define MUSIC_FILE_EMO_INFO_SEPARATOR -
@@ -25,7 +25,7 @@ static char GMFNFLbuffer[512];
 static char emonamebuffer[129];
 static char EmoNamebuffer[MAX_EMO_NAME_CHAR];
 static char MusicFileNamebuffer[MAX_MUSIC_FILENAME_CHAR_SIZE];
-
+static char PlayEmoBuffTmp[MAX_MUSIC_FILENAME_CHAR_SIZE];
 //полное дерево музыки
 Emotion * EmotionTreeGetParent(Emotion tree_node)
 {
@@ -45,11 +45,15 @@ Emotion * EmotionTreeGetParent2(int tree_node_indx)
 char * GetMusicFileNameFromList(int emo_id, int file_num)
 {
     //strcpy(emonamebuffer,strcat((char*)emotions[emo_id].name,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING));
+    Uart.Printf("GetMusicFileNameFromList1\r");
     strcpy(emonamebuffer,(char*)emotions[emo_id].name);
+    Uart.Printf("GetMusicFileNameFromList2\r");
     strcat(emonamebuffer,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING);
+    Uart.Printf("GetMusicFileNameFromList3\r");
    // Uart.Printf("emonamebuffer %s , emotions[emo_id].name  %s \r",emonamebuffer,emotions[emo_id].name);
-    if(SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer)==FR_OK)
-    {
+    SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer);
+    if(0){//SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer)==FR_OK)
+
         Uart.Printf("GetNthFileByPrefix prefix: %s,fnum %d result: %s \r",emonamebuffer,file_num,GMFNFLbuffer);
         return GMFNFLbuffer;
     }
@@ -123,6 +127,7 @@ int GetRandomEmoToPlay()
 	}
 	return 0;
 }
+
 char * GetFileNameToPlayFromEmoId(int emo_id)
 {
 	//TODO error to log here!
@@ -154,7 +159,7 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 	//Uart.Printf("emotions[emo_id].lastPlayedTrack %d",emotions[emo_id].lastPlayedTrack);
 	int track_num_calculated;
 	if(emotions[emo_id].lastPlayedTrack==-1)
-	    track_num_calculated=Random(emotions[emo_id].numTracks);
+	    track_num_calculated=Random(emotions[emo_id].numTracks-1);
 	// к текущему номе ру ртека прибавляем рандомное число по модулю числа треков - получаем номер другого трека
 	else
 	 track_num_calculated=(rand_val+emotions[emo_id].lastPlayedTrack) % emotions[emo_id].numTracks;
@@ -164,7 +169,30 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 	Uart.Printf("GetFileNameToPlayFromEmoId result: new last played %d\r",emotions[emo_id].lastPlayedTrack);
 	    return GetMusicFileNameFromList(emo_id,track_num_calculated);
 }
+void PlayNewEmo(int emo_id,int err_id)
+{
+    //если гавно, то фон
+    if(emo_id<0)
+    {
+        Uart.Printf("emo_id <0 %d", emo_id);
+        emo_id =0;
+    }
+    SICD.last_played_emo=emo_id;
+    char * fname = GetFileNameToPlayFromEmoId(SICD.last_played_emo);
+    if(fname != nullptr)
+    {
+       strcpy(PlayEmoBuffTmp,fname);
+       Sound.Play(PlayEmoBuffTmp);
+       Uart.Printf(PlayEmoBuffTmp);
+       Uart.Printf("\r");
 
+    }
+    else
+    {
+        Uart.Printf("PlayNewEmo GetFileNameToPlayFromEmoId nullptr!!! smth wrong. emo_id %d, err_id%d \r",emo_id,err_id);
+
+    }
+}
 int Init_emotionTreeMusicNodeFiles_FromFile(const char * filename)
 {
 	//init zero state
@@ -217,7 +245,7 @@ int Init_emotionTreeMusicNodeFiles_FromFileIterrator()
     }
     if(SD.GetFirst("/")==FR_OK)
     {
-        int emo_id=GetEmoIndxFromFileString(SD.FileInfo.lfname);
+        int emo_id=GetEmoIndxFromFileString(SD.Filename);
       //
         if(emo_id>=0)
                  {  //собственно инициализация
@@ -226,21 +254,21 @@ int Init_emotionTreeMusicNodeFiles_FromFileIterrator()
                      emotions[emo_id].numTracks++;
                  }
                  else
-                     Uart.Printf("cannot find emotion for file1 %s \r",SD.FileInfo.lfname);//MusicFileNamebuffer);
+                     Uart.Printf("cannot find emotion for file1 %s \r",SD.Filename);//MusicFileNamebuffer);
     }
 
     while(SD.GetNext()==FR_OK)
     {
-        int emo_id=GetEmoIndxFromFileString(SD.FileInfo.lfname);
+        int emo_id=GetEmoIndxFromFileString(SD.Filename);
 
         if(emo_id>=0)
         {  //собственно инициализация
             //увеличиваем счетчик файлов
-            Uart.Printf("emo id found3: %d, filename %s \r",emo_id,SD.FileInfo.lfname);
+            Uart.Printf("emo id found3: %d, filename %s \r",emo_id,SD.Filename);
             emotions[emo_id].numTracks++;
         }
         else
-            Uart.Printf("cannot find emotion for file2 %s \r",SD.FileInfo.lfname);//MusicFileNamebuffer);
+            Uart.Printf("cannot find emotion for file2 %s \r",SD.Filename);//MusicFileNamebuffer);
     }
     //TODO critical error, stop working
 

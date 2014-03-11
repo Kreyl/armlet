@@ -1,6 +1,7 @@
 #include "intention.h"
 #include <stddef.h>
 #include "cmd_uart.h"
+#include "Sound.h"
 //TODO move it right
 int CurrentIntentionArraySize=2;
 /*Intention intentionArray[INTENTIONS_ARRAY_SIZE]={
@@ -26,7 +27,8 @@ struct IntentionCalculationData SICD=
       0,//  last_intention_index_winner;
       0,//  winning_integral;//NORMALIZED
       10000,//  winning_integral_top_limit_normalizer;
-      false
+      false,
+      -1
         /*
 		10,//int Intention_weight_cost;
 		4,//	int Signal_power_weight_cost;
@@ -44,6 +46,9 @@ int last_intention_power_winner;//NOT NORMALIZED
 int last_intention_index_winner;
 int winning_integral;//NORMALIZED
 int winning_integral_top_limit_normalizer;*/
+
+
+
 
 void PrintSCIDToUart()
 {

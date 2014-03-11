@@ -353,20 +353,23 @@ void App_t::Task() {
         //пересчитываем суммарные резоны
         // по резону победителю считаем  новую эмоцию и включаем рандомный трек из неё.
 
-        int reason_id=MainCalculateReasons();
+       // int reason_id=MainCalculateReasons();
         //if(reason_id==-1)
-        if(reason_id<0)
+        //if(reason_id<0)
           //играть фон, если надо играть фон, или если что не так )
-        {
-            strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
-            Sound.Play(appbufftmp);
-            Uart.Printf(appbufftmp);
-            Uart.Printf("\r");
-        }
-        else
-          //играть музыку по резону
-        {
-            char * fname = GetFileNameToPlayFromEmoId(reasons[reason_id].eID);
+        //{
+        //    strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
+        //    Sound.Play(appbufftmp);
+        //    Uart.Printf(appbufftmp);
+       //    Uart.Printf("\r");
+       // }
+       // else
+          //играть музыку по текущей эмоции
+
+        PlayNewEmo(SICD.last_played_emo,1);
+      //  {
+            //SICD.last_intention_index_winner;
+          /*  char * fname = GetFileNameToPlayFromEmoId();
             if(fname != nullptr)
             {
                strcpy(appbufftmp,fname);
@@ -379,14 +382,14 @@ void App_t::Task() {
             {
                 Uart.Printf("ERROR EvtMsk & EVTMASK_PLAY_ENDS on next string:\rGetFileNameToPlayFromEmoId nullptr!!! smth wrong. emo_id %d, reason_id %d \r",reasons[reason_id].eID,reason_id);
 
-            }
+            }*/
            // strcpy(appbufftmp,));
            // if(app
 
-        }
+      //  }
 
     }
-#if 0 //EVTMASK_RADIO on/off
+#if 1 //EVTMASK_RADIO on/off
     if(EvtMsk & EVTMASK_RADIO) {
         //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
         Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", SnsTable.PTable->Size);
@@ -397,58 +400,36 @@ void App_t::Task() {
         CurrentIntentionArraySize=val1;
         for(int i=0;i<val1;i++)
         {
+            if(SnsTable.PTable->Row[i].ID>=reasons_number || SnsTable.PTable->Row[i].ID<0)
+            {
+                CurrentIntentionArraySize--;
+                continue;
+            }
             ArrayOfIncomingIntentions[i].power256=SnsTable.PTable->Row[i].Level;
             ArrayOfIncomingIntentions[i].reason_indx=SnsTable.PTable->Row[i].ID;
             Uart.Printf("radio_in int_id %d, int_pw %d, val1 %d\r",ArrayOfIncomingIntentions[i].reason_indx,ArrayOfIncomingIntentions[i].power256,val1);
         }
 
         Uart.Printf("radio incoming ends!!!\r");
+/*
         int reason_id=MainCalculateReasons();
         if(reason_id==-1)
             //играть фон
         {
-            strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
-            Sound.Play(appbufftmp);
-            Uart.Printf(appbufftmp);
-            Uart.Printf("\r");
+            PlayNewEmo(0,2);
         }
         else
             //играть музыку по резону, если у нас всё еще тот же победитель - не трогать музыку.
         if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3)
         {
             Uart.Printf("REASON to play %d\r",reason_id);
-            char * fname = GetFileNameToPlayFromEmoId(reasons[reason_id].eID);
-            if(fname != nullptr)
-            {
-                strcpy(appbufftmp,GetFileNameToPlayFromEmoId(reasons[reason_id].eID));
-                Sound.Play(appbufftmp);
-                Uart.Printf(appbufftmp);
-                Uart.Printf("\r");
-            }
-            else
-            {
-                Uart.Printf("ERROR EVTMASK_RADIO 2 on next string:\rGetFileNameToPlayFromEmoId nullptr!!! smth wrong. emo_id %d, reason_id %d \r",reasons[reason_id].eID,reason_id);
-
-            }
+            PlayNewEmo(reasons[reason_id].eID,3);
         }
         if(reason_id==-3)
         {
-            strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
-            Sound.Play(appbufftmp);
-            Uart.Printf(appbufftmp);
-            Uart.Printf("\r");
+            PlayNewEmo(0,4);
         }
-
-        //   CalculateIntentionsRadioChange();
-        // int chmaxval=-1;
-        // int chmax_indx=-1;
-        // for(int i=0;i<val1;i++)
-        // {
-          //  if(chmaxval<
-
-
-        // }
-
+*/
     }
 #endif
 
