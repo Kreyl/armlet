@@ -1,5 +1,6 @@
 #include "sound.h"
 #include <string.h>
+#include "evt_mask.h"
 
 //#if SOUND_ENABLED
 
@@ -55,7 +56,7 @@ void Sound_t::ITask() {
 //        Uart.Printf("cmp\r");
         AddCmd(VS_REG_MODE, 0x0004);
         if(IFilename != NULL) IPlayNew();
-        else chEvtBroadcast(&IEvtSrcPlayEnd);   // Raise event if nothing to play
+        else if(IPThd != nullptr) chEvtSignal(IPThd, EVTMASK_PLAY_ENDS);  // Raise event if nothing to play
     }
     // Stop request
     else if(EvtMsk & VS_EVT_STOP) {
@@ -110,7 +111,6 @@ void Sound_t::Init() {
     PBuf = &Buf1;
     IAttenuation = VS_INITIAL_ATTENUATION;
     chMBInit(&CmdBox, CmdBuf, VS_CMD_BUF_SZ);
-    chEvtInit(&IEvtSrcPlayEnd); // Event src
 
     // ==== Init VS ====
     Rst_Hi();
