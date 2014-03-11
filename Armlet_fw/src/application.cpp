@@ -171,8 +171,7 @@ static inline void KeysHandler() {
 
 
 // ===========================app thread ===============================
-static char appbufftmp[MAX_MUSIC_FILENAME_CHAR_SIZE];
-static WORKING_AREA(waAppThread, 256);
+static WORKING_AREA(waAppThread, 1024);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
     chRegSetThreadName("App");
@@ -350,7 +349,7 @@ void App_t::Task() {
     if(EvtMsk & EVTMASK_PLAY_ENDS) {
         Uart.Printf("App PlayEnd\r");
         //играть музыку по текущей эмоции
-      //  PlayNewEmo(SICD.last_played_emo,1);
+        PlayNewEmo(SICD.last_played_emo,1);
     }
 #if 1 //EVTMASK_RADIO on/off
     if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
@@ -380,13 +379,14 @@ void App_t::Task() {
 
 
         Uart.Printf("radio incoming ends!!!\r");
-        int reason_id=MainCalculateReasons();
-/*
+        //int reason_id=MainCalculateReasons();
+
         int reason_id=MainCalculateReasons();
         if(reason_id==-1)
             //играть фон
         {
-            PlayNewEmo(0,2);
+            //если нет победителя, ничего не делать!!
+            //PlayNewEmo(0,2);
         }
         else
             //играть музыку по резону, если у нас всё еще тот же победитель - не трогать музыку.
@@ -399,7 +399,7 @@ void App_t::Task() {
         {
             PlayNewEmo(0,4);
         }
-*/
+
     }
 #endif
 

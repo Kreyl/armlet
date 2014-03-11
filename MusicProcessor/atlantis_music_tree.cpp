@@ -45,11 +45,11 @@ Emotion * EmotionTreeGetParent2(int tree_node_indx)
 char * GetMusicFileNameFromList(int emo_id, int file_num)
 {
     //strcpy(emonamebuffer,strcat((char*)emotions[emo_id].name,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING));
-    Uart.Printf("GetMusicFileNameFromList1\r");
+   // Uart.Printf("GetMusicFileNameFromList1\r");
     strcpy(emonamebuffer,(char*)emotions[emo_id].name);
-    Uart.Printf("GetMusicFileNameFromList2\r");
+   // Uart.Printf("GetMusicFileNameFromList2\r");
     strcat(emonamebuffer,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING);
-    Uart.Printf("GetMusicFileNameFromList3\r");
+  //  Uart.Printf("GetMusicFileNameFromList3\r");
    // Uart.Printf("emonamebuffer %s , emotions[emo_id].name  %s \r",emonamebuffer,emotions[emo_id].name);
     //SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer);
     if(SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer)==FR_OK)
@@ -164,9 +164,9 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 	else
 	 track_num_calculated=(rand_val+emotions[emo_id].lastPlayedTrack) % emotions[emo_id].numTracks;
 
-	Uart.Printf("GetFileNameToPlayFromEmoId result: rand_val %d, track_num %d, last played %d \r", rand_val,track_num_calculated,emotions[emo_id].lastPlayedTrack);
+	//Uart.Printf("GetFileNameToPlayFromEmoId result: rand_val %d, track_num %d, last played %d \r", rand_val,track_num_calculated,emotions[emo_id].lastPlayedTrack);
 	emotions[emo_id].lastPlayedTrack=track_num_calculated;
-	Uart.Printf("GetFileNameToPlayFromEmoId result: new last played %d\r",emotions[emo_id].lastPlayedTrack);
+//	Uart.Printf("GetFileNameToPlayFromEmoId result: new last played %d\r",emotions[emo_id].lastPlayedTrack);
 	    return GetMusicFileNameFromList(emo_id,track_num_calculated);
 }
 void PlayNewEmo(int emo_id,int err_id)

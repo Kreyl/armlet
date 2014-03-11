@@ -59,7 +59,9 @@ void PrintSCIDToUart()
 //TODO
 int GetNotNormalizedIntegral(int power, int reason_id)
 {
-    return SICD.Intention_weight_cost*reasons[reason_id].weight+power*SICD.Signal_power_weight_cost;
+   int res=SICD.Intention_weight_cost*reasons[reason_id].weight+power*SICD.Signal_power_weight_cost;
+   Uart.Printf("#########################################  RID %d PW %d RES %d",reason_id,power,res);
+    return res;
 }
 
 int CalcWinIntegral(int first_winner_power,int winner_id, int second_winner_power, int second_id)
@@ -187,13 +189,14 @@ void CalculateIntentionsRadioChange()
 int MainCalculateReasons()
 {
     bool is_more_than_9000 = false;
+    int old_int=SICD.winning_integral;
     int old_winner= SICD.last_intention_index_winner;
-    if(SICD.winning_integral>WINING_INTEGRAL_SWITCH_LIMIT)
+    if(SICD.winning_integral>WINING_INTEGRAL_SWITCH_LIMIT && SICD.is_empty_fon==false)
         is_more_than_9000=true;
     CalculateIntentionsRadioChange();
-    if(is_more_than_9000 && old_winner==SICD.last_intention_index_winner)
+    if(is_more_than_9000 && old_winner==SICD.last_intention_index_winner && SICD.winning_integral>WINING_INTEGRAL_SWITCH_LIMIT && SICD.is_empty_fon==false)
     {
-        Uart.Printf("old winner stepped over 9000 again \r");
+        Uart.Printf("####### old_int %d, old_win %d, new_int %d, new_int %d 9000 again \r",old_int,old_winner,SICD.last_intention_index_winner,SICD.winning_integral);
         return -2;
     }
 

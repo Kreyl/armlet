@@ -4,7 +4,7 @@
 #include "atlantis_music_tree.h"
 #define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 10
 #define INTENTIONS_ARRAY_SIZE 5
-#define WINING_INTEGRAL_SWITCH_LIMIT 400
+#define WINING_INTEGRAL_SWITCH_LIMIT 50
 #define FON_RELAX_SPEED 50
 /*typedef struct Intention {
 	int weight1000;	//константа, определяющая степень и время роста
