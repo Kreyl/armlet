@@ -47,15 +47,17 @@ void sd_t::Init() {
     IsReady = TRUE;
 }
 
+// Get first file in folder
 FRESULT sd_t::GetFirst(const char* DirPath) {
-    FRESULT r = f_opendir(&Directory, DirPath);
+    FRESULT r = f_opendir(&Directory, DirPath); // Try to open the folder
     if(r != FR_OK) return r;
     FileInfo.lfname = LongFileName;
     FileInfo.lfsize = MAX_NAME_LEN;
-    while(true) {
+    while(true) {   // Read everything until file found
         r = f_readdir(&Directory, &FileInfo);
         if(r != FR_OK) return r;
-        if(FileInfo.fname[0] == 0) return FR_NO_FILE;
+        Filename = (FileInfo.lfname[0] == 0)? FileInfo.fname : FileInfo.lfname;
+        if(Filename[0] == 0) return FR_NO_FILE;
         if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
     }
     return FR_INT_ERR;
@@ -65,7 +67,8 @@ FRESULT sd_t::GetNext() {
     while(true) {
         FRESULT r = f_readdir(&Directory, &FileInfo);
         if(r != FR_OK) return r;
-        if(FileInfo.fname[0] == 0) return FR_NO_FILE;
+        Filename = (FileInfo.lfname[0] == 0)? FileInfo.fname : FileInfo.lfname;
+        if(Filename[0] == 0) return FR_NO_FILE;
         if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
     }
     return FR_INT_ERR;
@@ -76,9 +79,9 @@ uint8_t sd_t::GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName) {
     FRESULT r = GetFirst("/");
     while(r == FR_OK) {
         // Check if name begins with prefix
-        if(strncmp(FileInfo.lfname, Prefix, Len) == 0) {    // Prefix found
-            if(N == 0) {                                    // Required number of files found
-                strcpy(PName, FileInfo.lfname);             // Copy name
+        if(strncmp(Filename, Prefix, Len) == 0) {   // Prefix found
+            if(N == 0) {                            // Required number of files found
+                strcpy(PName, Filename);            // Copy name
                 return OK;
             }
             else N--;

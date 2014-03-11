@@ -20,9 +20,10 @@ class sd_t {
 private:
     FATFS SDC_FS;
     char LongFileName[MAX_NAME_LEN];
-public:
-    DIR Directory;
     FILINFO FileInfo;
+public:
+    char* Filename;
+    DIR Directory;
     FRESULT GetFirst(const char* DirPath);  // Put first file info into FileInfo field
     FRESULT GetNext();
     uint8_t GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName);
