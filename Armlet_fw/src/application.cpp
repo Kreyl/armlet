@@ -26,7 +26,6 @@
 #include "SensorTable.h"
 
 App_t App;
-static EventListener EvtListenerSound;
 
 #if 1 // ================================ Time =================================
 static void TimeTmrCallback(void *p);
@@ -387,6 +386,7 @@ void App_t::Task() {
         }
 
     }
+#if 0 //EVTMASK_RADIO on/off
     if(EvtMsk & EVTMASK_RADIO) {
         //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
         Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", SnsTable.PTable->Size);
@@ -450,14 +450,18 @@ void App_t::Task() {
         // }
 
     }
+#endif
+
     if(EvtMsk & EVTMASK_NEWSECOND) {
        //  Uart.Printf("New_second!");
 
-        if(Time.S_total % 4 ==0)
+        if(Time.S_total % 6 ==0)
         {
             //CalculateIntentionsRadioChange();
             //PrintSCIDToUart();
             //Uart.Printf("every 4 sec\r");
+            //Sound.SetVolume(0);
+          ///  Sound.Stop();
         }
         if(on_run==0)
         {
@@ -472,7 +476,7 @@ void App_t::Init() {
     State = asIdle;
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
     SnsTable.RegisterAppThd(PThd);
-    Sound.RegisterEvtPlayEnd(&EvtListenerSound,EVTMASK_PLAY_ENDS);
+    Sound.RegisterAppThd(PThd);
     on_run=0;
 
     Time.Init();

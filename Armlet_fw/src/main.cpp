@@ -114,8 +114,8 @@ void Init() {
 //    Power.Init();
 //    PillInit();
     //Init_emotionTreeMusicNodeFiles_FromFile("mt_settings.txt");
-//    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
-//    Print_emotionTreeMusicNodeFiles_ToUART();
+    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
+   // Print_emotionTreeMusicNodeFiles_ToUART();
 
     Sound.Init();
     Sound.SetVolume(254);

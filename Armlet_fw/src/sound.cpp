@@ -140,7 +140,7 @@ void Sound_t::IPlayNew() {
 
     FRESULT rslt;
     // Open new file
-    //Uart.Printf("Play %S\r", IFilename);
+    Uart.Printf("Play %S\r", IFilename);
     rslt = f_open(&IFile, IFilename, FA_READ+FA_OPEN_EXISTING);
     IFilename = NULL;
     if (rslt != FR_OK) {
