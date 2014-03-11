@@ -68,7 +68,7 @@ void Mesh_t::NewCycle() {
     }
     // TX
     else {
-        chThdSleepMilliseconds(SleepTime);
+        if(SleepTime > 0) chThdSleepMilliseconds(SleepTime);
         chEvtSignal(rLevel1.PrThd, EVTMSK_MESH_TX);
     }
 }
@@ -144,7 +144,7 @@ void Mesh_t::Init(uint32_t ID) {
     // Create RandomTable
     MsgBox.Init();
     SelfID = (uint8_t)ID;
-    SleepTime= ((SelfID-1)*SLOT_TIME);
+    SleepTime = ((SelfID-1)*SLOT_TIME);
     for(uint8_t i=0; i<RND_TBL_BUFFER_SZ; i++) {
         RndTableBuf[i] = GET_RND_VALUE(COUNT_OF_CYCLES);
     }
