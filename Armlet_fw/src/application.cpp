@@ -392,7 +392,9 @@ void App_t::Task() {
             //играть музыку по резону, если у нас всё еще тот же победитель - не трогать музыку.
         if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3)
         {
+
             Uart.Printf("REASON to play %d\r",reason_id);
+            if(reasons[reason_id].eID!= SICD.last_played_emo)
             PlayNewEmo(reasons[reason_id].eID,3);
         }
         if(reason_id==-3)
