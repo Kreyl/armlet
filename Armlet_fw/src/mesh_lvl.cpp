@@ -69,13 +69,13 @@ void Mesh_t::ITask() {
 
         NeedToSendTable++;
         if(NeedToSendTable == TABLE_SEND_N) {
-            Uart.Printf("MESH TS,t=%u\r", chTimeNow());
+            Uart.Printf("Msh TabSnd,t=%u\r", chTimeNow());
             SnsTable.SendEvtReady();
             NeedToSendTable = 0;
         }
 
         if(NeedUpdateTime) {
-            Uart.Printf("MESH CycUpdat=%u\r", NewAbsTime);
+            Uart.Printf("Msh CycUpd=%u\r", NewAbsTime);
             uint32_t timeNow = chTimeNow();
             do {
                 NextCycleStart += CYCLE_TIME;
@@ -85,7 +85,7 @@ void Mesh_t::ITask() {
             SetCurrCycleN(NewAbsTime);
             CycleTmr.SetCounter(0);
             NeedUpdateTime = false;
-            Uart.Printf("MESH Sl %u to %u\r", chTimeNow(), NextCycleStart);
+            Uart.Printf("Msh Slp %u to %u\r", chTimeNow(), NextCycleStart);
             chThdSleepUntil(NextCycleStart);
             CycleTmr.Enable();
         }

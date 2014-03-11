@@ -74,16 +74,16 @@ void Init() {
     Uart.Printf("ID=%u\r", ID);
 
 
-    FRESULT r = SD.GetFirst("/");
-    if(r == FR_OK) {
-        Uart.Printf("%S\r", SD.FileInfo.lfname);
-        r = SD.GetNext();
-        if(r == FR_OK) Uart.Printf("%S\r", SD.FileInfo.lfname);
-    }
-
-    char Name[128];
-    uint8_t ur = SD.GetNthFileByPrefix("aga", 2, Name);
-    if(ur == OK) Uart.Printf("%S\r", Name);
+//    FRESULT r = SD.GetFirst("/");
+//    if(r == FR_OK) {
+//        Uart.Printf("%S\r", SD.FileInfo.lfname);
+//        r = SD.GetNext();
+//        if(r == FR_OK) Uart.Printf("%S\r", SD.FileInfo.lfname);
+//    }
+//
+//    char Name[128];
+//    uint8_t ur = SD.GetNthFileByPrefix("aga", 2, Name);
+//    if(ur == OK) Uart.Printf("%S\r", Name);
 
 //    RLvl2.Init();
 
@@ -103,9 +103,9 @@ void Init() {
  //   Init_emotionTreeMusicNodeFiles_FromFile(filename);
  //   Print_emotionTreeMusicNodeFiles_ToUART();
 
-    Keys.Init();
-    Beeper.Init();
-    Vibro.Init();
+//    Keys.Init();
+//    Beeper.Init();
+//    Vibro.Init();
 
     //TODO  Lcd.Init(); - get last code version for this
 
@@ -114,14 +114,14 @@ void Init() {
 //    Power.Init();
 //    PillInit();
     //Init_emotionTreeMusicNodeFiles_FromFile("mt_settings.txt");
-    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
-    Print_emotionTreeMusicNodeFiles_ToUART();
+//    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
+//    Print_emotionTreeMusicNodeFiles_ToUART();
 
-    Sound.Init();
-    Sound.SetVolume(254);
+//    Sound.Init();
+//    Sound.SetVolume(254);
     //Sound.Play("alive.wav");
-    Uart.Printf("AFTER ALIVE ID=%u\r", ID);
-    App.Init();
+//    Uart.Printf("AFTER ALIVE ID=%u\r", ID);
+//    App.Init();
     //TCHAR filename2[]="msettings.ini";
 
    // char teststring1[]="write test string 1";
