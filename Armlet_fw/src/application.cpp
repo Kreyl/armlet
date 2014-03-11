@@ -26,20 +26,10 @@
 #include "SensorTable.h"
 
 App_t App;
-
-// transfer comments:
-//PAppThd from old code = App.PThd
-static EventListener EvtListenerKeys,EvtListenerSound;//EvtLstnrRadioRx, EvtListenerKeys, EvtListenerIR, EvtListenerTmr;
-
-
-
+static EventListener EvtListenerSound;
 
 #if 1 // ================================ Time =================================
-
-
-
 static void TimeTmrCallback(void *p);
-
 
 class Time_t {
 public:
@@ -85,7 +75,7 @@ public:
     void Lock();
     void Unlock();
 };
-static Keylock_t Keylock;
+//static Keylock_t Keylock;
 
 
 // Timer callback
@@ -109,6 +99,7 @@ void Keylock_t::Unlock() {
    // LcdHasChanged = true;
 }
 #endif
+/*
 #if 1 // =========================== Key handler ===============================
 static inline void KeysHandler() {
     Keylock.TimerReset();   // Reset timer as Any key pressed or released
@@ -126,7 +117,6 @@ static inline void KeysHandler() {
         Keylock.Lock();
     }
     // Not locked, not lock pressed
-   /*
 #define KEY_A   Keys.Status[0]
 #define KEY_B   Keys.Status[1]
 #define KEY_C   Keys.Status[2]
@@ -136,7 +126,6 @@ static inline void KeysHandler() {
 #define KEY_L   Keys.Status[6]
 #define KEY_E   Keys.Status[7]
 #define KEY_R   Keys.Status[8]
-    */
 
     else {
         for(uint8_t i=0; i<KEYS_CNT; i++) {
@@ -172,14 +161,18 @@ static inline void KeysHandler() {
     Keys.Reset();
 }
 #endif
+*/
 
 
 // ===========================app thread ===============================
-static char appbufftmp[MAX_MUSIC_FILENAME_CHAR_SIZE];
+//static char appbufftmp[MAX_MUSIC_FILENAME_CHAR_SIZE];
 static WORKING_AREA(waAppThread, 256);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
     chRegSetThreadName("App");
+    while(true) App.Task();
+}
+    /*
     uint32_t EvtMsk;
     int onrun=0;
     Uart.Printf("!!call  App_t::AppThread()\r");
@@ -209,7 +202,7 @@ static void AppThread(void *arg) {
 
             Uart.Printf("radio incoming ends!!!\r");
             int reason_id=MainCalculateReasons();
-           /* if(reason_id==-1)
+            if(reason_id==-1)
                 //играть фон
             {
                 strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
@@ -217,7 +210,7 @@ static void AppThread(void *arg) {
                 Uart.Printf(appbufftmp);
                 Uart.Printf("\r");
             }
-            else*/
+            else
                 //играть музыку по резону, если у нас всё еще тот же победитель - не трогать музыку.
             if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3)
             {
@@ -303,7 +296,7 @@ static void AppThread(void *arg) {
     }//while 1
 }
         // Keys
-  /*      if(EvtMsk & EVTMSK_KEY_START)            KeyStart();
+        if(EvtMsk & EVTMSK_KEY_START)            KeyStart();
         if(App.State == asIdle) {
            if(EvtMsk & EVTMSK_KEY_TIME_UP)      KeyTimeUp();
             if(EvtMsk & EVTMSK_KEY_TIME_DOWN)    KeyTimeDown();
@@ -331,29 +324,34 @@ static void AppThread(void *arg) {
                     App.StopEverything();
                     Interface.ShowFailure();
                 }
-            }*/
+            }
 
        // }
     //} // while 1
+*/
 
-
-
-void App_t::Init()
-{
-	State = asIdle;
-	    PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
-	    SnsTable.RegisterAppThd(PThd);
-	    // Time
-	    Time.H = 0;
-	    Time.M = 0;
-	    Time.S = 0;
-	    Time.S_total = 0;
-	    Time.Reset();
-	    Uart.Printf("!!call  App_t::Init() ends!\r");
+void App_t::Task() {
+    uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+    if(EvtMsk & EVTMASK_KEYS) {
+        Uart.Printf("App Keys\r");
+    }
+    if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
+        Uart.Printf("App TabGet, s=%u, t=%u\r", SnsTable.PTable->Size, chTimeNow());
+        for(uint32_t i=0; i<SnsTable.PTable->Size; i++) {
+            Uart.Printf(" ID=%u; Pwr=%u\r", SnsTable.PTable->Row[i].ID, SnsTable.PTable->Row[i].Level);
+        }
+    }
+    if(EvtMsk & EVTMASK_PLAY_ENDS) {
+        Uart.Printf("App PlayEnd\r");
+    }
 }
 
-
-
+void App_t::Init() {
+    State = asIdle;
+    PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
+    SnsTable.RegisterAppThd(PThd);
+    Sound.RegisterEvtPlayEnd(&EvtListenerSound,EVTMASK_PLAY_ENDS);
+}
 
 //NEW FROM BRAINENCH
 /*#include "application.h"
