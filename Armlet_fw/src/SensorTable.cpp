@@ -40,6 +40,6 @@ void SnsTable_t::PutSnsInfo(uint8_t ID, uint32_t Level) {
 void SnsTable_t::SendEvtReady() {
     chSysLock();
     ISwitchTableI();
-    if(IPThd != nullptr) chEvtSignalI(IPThd, EVTMASK_RADIO);
+    if(IPThd != nullptr) chEvtSignalI(IPThd, EVTMSK_SENS_TABLE_READY);
     chSysUnlock();
 }

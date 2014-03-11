@@ -22,6 +22,7 @@ public:
     Thread *PThd;
     AppState_t State;
     void Init();
+    void Task();
     void StopEverything();
 };
 

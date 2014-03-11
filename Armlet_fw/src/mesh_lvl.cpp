@@ -80,7 +80,9 @@ bool Mesh_t::DispatchPkt(uint32_t *PTime, uint32_t *PWakeUpSysTime) {
         mshMsg_t MeshMsg;
         do {
             PktBuf.ReadPkt(&MeshMsg);
-//                Uart.Printf("ID=%u %d\r", MeshMsg.PktRx.ID, MeshMsg.RSSI);
+#ifdef MESH_DBG
+//            Uart.Printf("Msh ID=%u %d\r", MeshMsg.PktRx.ID, MeshMsg.RSSI);
+#endif
             if(PriorityID > MeshMsg.PktRx.ID) {                /* Priority time checking */
                 CycleTmr.Disable();
                 Rslt = true;
