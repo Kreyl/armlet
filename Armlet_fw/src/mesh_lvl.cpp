@@ -9,10 +9,12 @@
 #include "mesh_lvl.h"
 #include "radio_lvl1.h"
 #include "SensorTable.h"
+
+#define MESH_DBG
+
 //pyton translation for db
 //[22:19:36] Jolaf: str(tuple(1 + int(sqrt(float(i) / 65) * 99) for i in xrange(0, 65 + 1)))
 const int DbTranslate[66] ={1, 13, 18, 22, 25, 28, 31, 33, 35, 37, 39, 41, 43, 45, 46, 48, 50, 51, 53, 54, 55, 57, 58, 59, 61, 62, 63, 64, 65, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 86, 87, 88, 89, 90, 91, 92, 92, 93, 94, 95, 96, 96, 97, 98, 99, 100};
-
 
 Mesh_t Mesh;
 
@@ -39,8 +41,8 @@ void Mesh_t::ITask() {
     // Catch Event
     uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
     if(EvtMsk & EVTMSK_NEW_CYCLE) {
-        Uart.Printf("i,%u, t=%u\r", AbsCycle, chTimeNow());
-        Beeper.Beep(ShortBeep);
+//        Uart.Printf("i,%u, t=%u\r", AbsCycle, chTimeNow());
+//        Beeper.Beep(ShortBeep);
         NewCycle();
     }
     if(EvtMsk & EVTMSK_UPDATE_CYCLE) {
@@ -71,15 +73,6 @@ void Mesh_t::NewCycle() {
     }
 }
 
-void Mesh_t::TableSend() {
-    NeedToSendTable++;
-    if(NeedToSendTable == TABLE_SEND_N) {
-        Uart.Printf("Msh TabSnd,t=%u\r", chTimeNow());
-        SnsTable.SendEvtReady();
-        NeedToSendTable = 0;
-    }
-}
-
 bool Mesh_t::DispatchPkt(uint32_t *PTime, uint32_t *PWakeUpSysTime) {
     bool Rslt = false;
     if(PktBuf.GetFilledSlots() != 0) {
@@ -106,9 +99,22 @@ bool Mesh_t::DispatchPkt(uint32_t *PTime, uint32_t *PWakeUpSysTime) {
     return Rslt;
 }
 
+void Mesh_t::TableSend() {
+    NeedToSendTable++;
+    if(NeedToSendTable == TABLE_SEND_N) {
+#ifdef MESH_DBG
+        Uart.Printf("Msh TabSnd,t=%u\r", chTimeNow());
+#endif
+        SnsTable.SendEvtReady();
+        NeedToSendTable = 0;
+    }
+}
+
 void Mesh_t::UpdateTimer(bool NeedUpdate, uint32_t NewTime, uint32_t WakeUpSysTime) {
     if(NeedUpdateTime) {
+#ifdef MESH_DBG
         Uart.Printf("Msh CycUpd=%u\r", NewTime);
+#endif
         uint32_t timeNow = chTimeNow();
         do {
             WakeUpSysTime += CYCLE_TIME;
@@ -118,7 +124,9 @@ void Mesh_t::UpdateTimer(bool NeedUpdate, uint32_t NewTime, uint32_t WakeUpSysTi
         SetCurrCycleN(NewTime);
         CycleTmr.SetCounter(0);
         NeedUpdateTime = false;
+#ifdef MESH_DBG
         Uart.Printf("Msh Slp %u to %u\r", chTimeNow(), WakeUpSysTime);
+#endif
         chThdSleepUntil(WakeUpSysTime);
         CycleTmr.Enable();
     }

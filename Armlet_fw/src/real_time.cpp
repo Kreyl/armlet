@@ -13,7 +13,6 @@ Time_t RTU; // Real Time Unit, based on RTC
 void Time_t::Init() {
     rccEnableAPB1(RCC_APB1ENR_PWREN, false);
     WaitConfiguration();
-
 }
 
 

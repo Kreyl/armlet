@@ -128,11 +128,9 @@ void Init() {
     //strcpy
     //CreateFileWithString(filename2,teststring1,strlen(teststring1),FA_CREATE_NEW);
 
-    rLevel1.Init(ID);
-    Mesh.Init(ID);
-    //AppInit();
+//    rLevel1.Init(ID);
+//    Mesh.Init(ID);
 
-    //
 //church_bells playgame.wav techview.wav titleview.wav
    // filedatalimited filedata;//={{"fon_1_music1.mp3"},{"fon_2_music2.mp3"},{"ravnodushie_1_music_3.mp3"},{"zlost_1_music_4.mp3"}};
     //char ** data_p=filedata;
