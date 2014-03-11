@@ -29,7 +29,7 @@ CH_IRQ_HANDLER(TIM5_IRQHandler) {
 }
 }
 
-static WORKING_AREA(waMeshLvlThread, 128);
+static WORKING_AREA(waMeshLvlThread, 256);
 __attribute__ ((__noreturn__))
 static void MeshLvlThread(void *arg) {
     chRegSetThreadName("MeshLvl");
@@ -135,6 +135,10 @@ void Mesh_t::UpdateTimer(bool NeedUpdate, uint32_t NewTime, uint32_t WakeUpSysTi
 }
 
 void Mesh_t::Init(uint32_t ID) {
+    if(ID == 0) {
+        Uart.Printf("Msh WrongID\r");
+        return;
+    }
     // Init Thread
     IPThread = chThdCreateStatic(waMeshLvlThread, sizeof(waMeshLvlThread), NORMALPRIO, (tfunc_t)MeshLvlThread, NULL);
     // Create RandomTable
