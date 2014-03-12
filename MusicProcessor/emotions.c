@@ -86,7 +86,7 @@ const int emotions_number = countof(emotions);
 Reason_t reasons[] = {
  /* 0 */ { "uliza1", 1, 0 }, 	/* fon */
  /* 1 */ { "uliza2", 1, 0 }, 	/* fon */
- /* 2 */ { "tuman", 2, 19 }, 	/* strah */
+ /* 2 */ { "tuman", 10, 19 }, 	/* strah */
  /* 3 */ { "church", 2, 32 }, 	/* positiv */
  /* 4 */ { "kabak", 2, 1 }, 	/* negativ */
 };

@@ -348,8 +348,15 @@ void App_t::Task() {
 #if 1 //EVTMASK_RADIO on/off
     if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
         Uart.Printf("App TabGet, s=%u, t=%u\r", SnsTable.PTable->Size, chTimeNow());
+
+        // FIXME: Lcd Clear before next ID print
+        for(uint8_t i=0; i<5; i++) {
+            Lcd.Printf(11, 31+(i*10), clRed, clBlack,"               ");
+        }
+
         for(uint32_t i=0; i<SnsTable.PTable->Size; i++) {
             Uart.Printf(" ID=%u; Pwr=%u\r", SnsTable.PTable->Row[i].ID, SnsTable.PTable->Row[i].Level);
+            Lcd.Printf(11, 31+(i*10), clRed, clBlack,"ID=%u; Pwr=%u", SnsTable.PTable->Row[i].ID, SnsTable.PTable->Row[i].Level);
         }
         int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
         CurrentIntentionArraySize = val1;
