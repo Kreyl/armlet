@@ -52,20 +52,13 @@ int main() {
 
     while(TRUE) {
         chThdSleepMilliseconds(999);
-        Lcd.Printf(21, 21, clWhite, clBlack, "%u:%u  ", (Mesh.GetAbsTimeMS()/1000), (Mesh.GetAbsTimeMS()%1000));
-//        chSysLock();
-//        chSchGoSleepS(THD_STATE_SUSPENDED); // Forever
-//        chSysUnlock();
-        // Ctrl-Alt-Del
-//        if(!PinIsSet(KEY_GPIO, 3) and !PinIsSet(KEY_GPIO, 4) and !PinIsSet(KEY_GPIO, 9)) {
-//            REBOOT();
-//        }
+        Lcd.Printf(11, 21, clWhite, clBlack, "%ums   ", Mesh.GetAbsTimeMS());
     }
 }
 
 void Init() {
     Uart.Init(256000);
-    Uart.Printf("Armlet3\r");
+    Uart.Printf("Atlantis Armlet\r");
 
     SD.Init();
     // Read config
@@ -73,32 +66,8 @@ void Init() {
     iniReadUint32("Radio", "ID", "settings.ini", &ID);
     Uart.Printf("ID=%u\r", ID);
 
-
-//    FRESULT r = SD.GetFirst("/");
-//    if(r == FR_OK) {
-//        Uart.Printf("%S\r", SD.Filename);
-//        r = SD.GetNext();
-//        if(r == FR_OK) Uart.Printf("%S\r", SD.Filename);
-//    }
-//
-//    char Name[128];
-//    uint8_t ur = SD.GetNthFileByPrefix("aga", 2, Name);
-//    if(ur == OK) Uart.Printf("%S\r", Name);
-
-//    RLvl2.Init();
-
     Lcd.Init();
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
-
- //   FIL *fp;
- //   TCHAR filename[]="msettings.ini";
-
- //   int open_code= f_open (
- //   	fp,
- //   	filename,
- //   	FA_READ
- //   );
- //  Uart.Printf("f_open_code %d filename %s \r",open_code,filename);
 
  //   Init_emotionTreeMusicNodeFiles_FromFile(filename);
  //   Print_emotionTreeMusicNodeFiles_ToUART();
@@ -107,34 +76,19 @@ void Init() {
     Beeper.Init();
 //    Vibro.Init();
 
-    //TODO  Lcd.Init(); - get last code version for this
-
 //    IR.TxInit();
 //    IR.RxInit();
 //    Power.Init();
 //    PillInit();
-    //Init_emotionTreeMusicNodeFiles_FromFile("mt_settings.txt");
+
     Init_emotionTreeMusicNodeFiles_FromFileIterrator();
-   // Print_emotionTreeMusicNodeFiles_ToUART();
 
     Sound.Init();
     Sound.SetVolume(254);
-   // Sound.Play("alive.wav");
-//    Uart.Printf("AFTER ALIVE ID=%u\r", ID);
-    App.Init();
-    //TCHAR filename2[]="msettings.ini";
+//    Sound.Play("alive.wav");
 
-   // char teststring1[]="write test string 1";
-    //strcpy
-    //CreateFileWithString(filename2,teststring1,strlen(teststring1),FA_CREATE_NEW);
+    App.Init();
 
     rLevel1.Init(ID);
     Mesh.Init(ID);
-
-//church_bells playgame.wav techview.wav titleview.wav
-   // filedatalimited filedata;//={{"fon_1_music1.mp3"},{"fon_2_music2.mp3"},{"ravnodushie_1_music_3.mp3"},{"zlost_1_music_4.mp3"}};
-    //char ** data_p=filedata;
-  //  CreateFileWithStringArray("m6_settings.ini",4,FA_CREATE_ALWAYS | FA_WRITE);
- //  PrintFileToUART("settings.ini");//mt_settings.txt");
-  //  PrintFileToUART("mt_settings.txt");
 }

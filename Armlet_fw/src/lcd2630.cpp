@@ -28,7 +28,8 @@ static inline void RD_Hi()   { PinSet  (LCD_GPIO, LCD_RD);   LCD_DELAY(); }
 
 void Lcd_t::Init() {
     // Init pins if not setup
-    PCharBuf = CharBuf;
+    PWCharBuf = CharBuf;
+    PRCharBuf = CharBuf;
     if(Brightness == 0) {
         BckLt.Init(LCD_BCKLT_GPIO, LCD_BCKLT_PIN, LCD_BCKLT_TMR, LCD_BCKLT_CHNL, LCD_TOP_BRIGHTNESS);
         PinSetupOut(LCD_GPIO, LCD_DC,   omPushPull, pudNone, ps100MHz);
@@ -176,7 +177,7 @@ uint16_t Lcd_t::PutChar(uint8_t x, uint8_t y, char c, Color_t ForeClr, Color_t B
     return x+nCols;
 }
 
-static inline void FLcdPutChar(char c) { Lcd.PutToBuf(c); }
+static inline void FLcdPutChar(char c) { Lcd.WriteBuf(c); }
 
 void Lcd_t::Printf(uint8_t x, uint8_t y, const Color_t ForeClr, const Color_t BckClr, const char *S, ...) {
     // Printf to buffer
@@ -185,8 +186,10 @@ void Lcd_t::Printf(uint8_t x, uint8_t y, const Color_t ForeClr, const Color_t Bc
     uint32_t Cnt = kl_vsprintf(FLcdPutChar, LCD_CHARBUF_SZ, S, args);
     va_end(args);
     // Draw what printed
+    char Byte;
     for(uint32_t i=0; i<Cnt; i++) {
-        x = PutChar(x, y, CharBuf[i], ForeClr, BckClr);
+        Byte = ReadBuf();
+        x = PutChar(x, y, Byte, ForeClr, BckClr);
         if(x>160) break;
     }
 }
