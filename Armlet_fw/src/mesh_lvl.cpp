@@ -10,7 +10,7 @@
 #include "radio_lvl1.h"
 #include "SensorTable.h"
 
-#define MESH_DBG        // On/Off Debug Message in MeshLvl
+//#define MESH_DBG        // On/Off Debug Message in MeshLvl
 
 //pyton translation for db
 //[22:19:36] Jolaf: str(tuple(1 + int(sqrt(float(i) / 65) * 99) for i in xrange(0, 65 + 1)))

@@ -340,12 +340,6 @@ void App_t::Task() {
     if(EvtMsk & EVTMASK_KEYS) {
         Uart.Printf("App Keys\r");
     }
-    if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
-        Uart.Printf("App TabGet, s=%u, t=%u\r", SnsTable.PTable->Size, chTimeNow());
-        for(uint32_t i=0; i<SnsTable.PTable->Size; i++) {
-            Uart.Printf(" ID=%u; Pwr=%u\r", SnsTable.PTable->Row[i].ID, SnsTable.PTable->Row[i].Level);
-        }
-    }
     if(EvtMsk & EVTMASK_PLAY_ENDS) {
         Uart.Printf("App PlayEnd\r");
         //играть музыку по текущей эмоции
@@ -353,53 +347,32 @@ void App_t::Task() {
     }
 #if 1 //EVTMASK_RADIO on/off
     if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
-        //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
-        Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", SnsTable.PTable->Size);
-        // continue;
+        Uart.Printf("App TabGet, s=%u, t=%u\r", SnsTable.PTable->Size, chTimeNow());
+        for(uint32_t i=0; i<SnsTable.PTable->Size; i++) {
+            Uart.Printf(" ID=%u; Pwr=%u\r", SnsTable.PTable->Row[i].ID, SnsTable.PTable->Row[i].Level);
+        }
         int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
-
-        //copy to ArrayOfIncomingIntentions
-        CurrentIntentionArraySize=val1;
-        for(int i=0;i<val1;i++)
-        {
-            if(SnsTable.PTable->Row[i].ID>=reasons_number || SnsTable.PTable->Row[i].ID<0 || SnsTable.PTable->Row[i].Level<70)
-            {
+        CurrentIntentionArraySize = val1;
+        int j=0;
+        for(int i=0; i<val1; i++) {
+            if(SnsTable.PTable->Row[i].ID >= reasons_number || (SnsTable.PTable->Row[i].ID < 0) || (SnsTable.PTable->Row[i].Level < 70) ) {
                 CurrentIntentionArraySize--;
                 continue;
             }
-            ArrayOfIncomingIntentions[i].power256=SnsTable.PTable->Row[i].Level-70;
-            //if(ArrayOfIncomingIntentions[i].power256
-            ArrayOfIncomingIntentions[i].reason_indx=SnsTable.PTable->Row[i].ID;
-            Uart.Printf("radio_in int_id %d, int_pw %d, val1 %d\r",ArrayOfIncomingIntentions[i].reason_indx,ArrayOfIncomingIntentions[i].power256,val1);
+            ArrayOfIncomingIntentions[j].power256 = SnsTable.PTable->Row[i].Level-70;
+            ArrayOfIncomingIntentions[j].reason_indx = SnsTable.PTable->Row[i].ID;
+            j++;
         }
-
-        //for(int i=0;i<CurrentIntentionArraySize;i++)
-
-
-        Uart.Printf("radio incoming ends!!!\r");
-        //int reason_id=MainCalculateReasons();
-
         int reason_id=MainCalculateReasons();
-        if(reason_id==-1)
-            //играть фон
-        {
-            //если нет победителя, ничего не делать!!
-            //PlayNewEmo(0,2);
-        }
-        else
-            //играть музыку по резону, если у нас всё еще тот же победитель - не трогать музыку.
-        if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3)
-        {
 
-            Uart.Printf("REASON to play %d\r",reason_id);
-            if(reasons[reason_id].eID!= SICD.last_played_emo)
+        if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3) {
+            Uart.Printf("ID to play=%d\r",reason_id);
+            if(reasons[reason_id].eID != SICD.last_played_emo)
             PlayNewEmo(reasons[reason_id].eID,3);
         }
-        if(reason_id==-3)
-        {
+        if(reason_id==-3) {
             PlayNewEmo(0,4);
         }
-
     }
 #endif
 
@@ -417,8 +390,8 @@ void App_t::Task() {
         if(on_run==0)
         {
             on_run=1;
-            Sound.Play("church_bells.wav");
-            Uart.Printf("church_bells.wav");
+//            Sound.Play("church_bells.wav");
+//            Uart.Printf("church_bells.wav");
         }
     }
 }
@@ -432,7 +405,6 @@ void App_t::Init() {
 
     Time.Init();
     Time.Reset();
-    Uart.Printf("!!call  App_t::Init() ends!\r");
 }
 
 //NEW FROM BRAINENCH

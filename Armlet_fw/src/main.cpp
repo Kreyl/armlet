@@ -52,7 +52,7 @@ int main() {
 
     while(TRUE) {
         chThdSleepMilliseconds(999);
-//        Lcd.Printf(11, 21, clWhite, clBlack, "%u:%u", (Mesh.GetAbsTimeMS()/1000), (Mesh.GetAbsTimeMS()%1000));
+        Lcd.Printf(21, 21, clWhite, clBlack, "%u:%u  ", (Mesh.GetAbsTimeMS()/1000), (Mesh.GetAbsTimeMS()%1000));
 //        chSysLock();
 //        chSchGoSleepS(THD_STATE_SUSPENDED); // Forever
 //        chSysUnlock();
