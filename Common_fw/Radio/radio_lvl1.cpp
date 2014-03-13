@@ -94,6 +94,7 @@ void rLevel1_t::Init(uint32_t ASelfID) {
 
     PktTx.ID = (uint8_t)ASelfID;
     PktTx.CycleN = 0;
+    ResetTimeAge();
     PktTx.TimeOwnerID = PktTx.ID;
 
     // Init radioIC

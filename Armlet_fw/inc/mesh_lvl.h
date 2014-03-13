@@ -82,6 +82,7 @@ private:
     void TableSend();
     void UpdateTimer(bool NeedUpdate, uint32_t NewTime, uint32_t WakeUpSysTime);
     bool DispatchPkt(uint32_t *PTime, uint32_t *PWakeUpSysTime);
+    void ResetTimeAge()     { rLevel1.ResetTimeAge(); }
 public:
     Mesh_t() :  PRndTable(RndTableBuf),
                 AbsCycle(0),

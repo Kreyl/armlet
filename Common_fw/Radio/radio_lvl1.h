@@ -54,6 +54,8 @@ public:
     void Shutdown();
     void RegisterAppThd(Thread *PThd) { PAppThd = PThd; }
 
+    // Mesh needed
+    void ResetTimeAge()     { PktTx.TimeAge = 0; }
     // Inner use
     void ITask();
 };
