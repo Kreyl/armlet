@@ -241,11 +241,11 @@ void cc1101_t::RfConfig() {
 void cc1101_t::IHandleAsync() {
     if(State == ccTransmitting) {
         State = ccIdle;
-//        chEvtBroadcastI(&IEvtSrcTx);  // FIXME
+//        chEvtBroadcastI(&IEvtSrcTx);  // FIXME: cc1101 IHandleAsync
     }
     else if(State == ccReceiving) {
         State = ccIdle;
-//        chEvtBroadcastI(&IEvtSrcRx);  // FIXME
+//        chEvtBroadcastI(&IEvtSrcRx);  // FIXME cc1101 IHandleAsync
     }
 }
 

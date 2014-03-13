@@ -14,23 +14,28 @@
 #include "msg_box.h"
 #include "BeepSequences.h"
 
-//#define SELF_ID             15
-#define TABLE_SEND_N        3
-#define MAX_ABONENTS        100   // max ID, started from 1
+/*********************** MESH ******************************
+ *  |_|_|_|_..._|_|_|_|_|_..._|_|_|_|_|_..._|_|   SLOTS
+ *  |_____________|_______...___|_____________|   CYCLES
+ *  |_____________________..._________________|   SUPER_CYCLE
+ */
 
-#define MESH_CHANNEL        1
-#define SLOT_TIME           4  // (uint32_t)( (((BYTE_RATE * (RPKT_SZ + 8)) * 5) * 2) / 1000)  // ms
+#define TABLE_SEND_N        3     /* send SnsTable after n cycles */
+#define MAX_ABONENTS        100   /* max ID, started from 1 */
 
-#define COUNT_OF_CYCLES     5
+#define MESH_CHANNEL        1     /* mesh RF channel */
+#define SLOT_TIME           4     /* ms */
+
+#define COUNT_OF_CYCLES     5     /* count of cycles in supercycle */
 #define CYCLE_TIME          (uint32_t)(SLOT_TIME * MAX_ABONENTS)
 #define S_CYCLE_TIME        (uint32_t)(CYCLE_TIME * COUNT_OF_CYCLES)
-
 
 
 #define GET_RND_VALUE(Top)  ( ( (Random(chTimeNow()) ) % Top ))
 #define START_OF_EPOCH      4000 // ms
 #define END_OF_EPOCH        4294967295 // ms = 2^32
-#define TIME_AGE_THRESHOLD  99
+
+#define TIME_AGE_THRESHOLD  99 // in cycles
 
 
 #if 1 // ======================== Circ Buf of Pkt ==============================
@@ -59,8 +64,8 @@ public:
 
 
 #if 1// ============================== Mesh Class =============================
-#define MESH_TIM        TIM5
-#define RND_TBL_BUFFER_SZ    50
+#define MESH_TIM            TIM5
+#define RND_TBL_BUFFER_SZ   50
 
 class Mesh_t {
 private:
@@ -83,7 +88,9 @@ private:
     void UpdateTimer(bool NeedUpdate, uint32_t NewTime, uint32_t WakeUpSysTime);
     bool DispatchPkt(uint32_t *PTime, uint32_t *PWakeUpSysTime);
     void ResetTimeAge(uint8_t ID)     { rLevel1.ResetTimeAge(ID);       }
+    uint8_t GetTimeAge()              { return rLevel1.GetTimeAge();    }
     uint8_t GetMeshID()               { return rLevel1.GetTimeOwner();  }
+
 public:
     Mesh_t() :  PRndTable(RndTableBuf),
                 AbsCycle(0),

@@ -36,15 +36,11 @@ static void MeshLvlThread(void *arg) {
     while(1) Mesh.ITask();
 }
 
-
 void Mesh_t::ITask() {
-    // Catch Event
     uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-    if(EvtMsk & EVTMSK_NEW_CYCLE) {
-//        Uart.Printf("i,%u, t=%u\r", AbsCycle, chTimeNow());
-//        Beeper.Beep(ShortBeep);
-        NewCycle();
-    }
+
+    if(EvtMsk & EVTMSK_NEW_CYCLE) NewCycle();
+
     if(EvtMsk & EVTMSK_UPDATE_CYCLE) {
         uint32_t NewAbsTime=0;
         uint32_t NextCycleStart=0;
@@ -55,18 +51,20 @@ void Mesh_t::ITask() {
 }
 
 void Mesh_t::NewCycle() {
+//    Uart.Printf("i,%u, t=%u\r", AbsCycle, chTimeNow());
+//    Beeper.Beep(ShortBeep);
     IncCurrCycle();
-    // RX
+    // ==== RX ====
     if(CurrCycle == RxCycleN) {
         chEvtSignal(rLevel1.PrThd, EVTMSK_MESH_RX);
         mshMsg_t MeshPkt;
         uint32_t Timeout = CYCLE_TIME; /* Wait Answer for Cycle Time */
         do {
-            if(MsgBox.TryFetchMsg(&MeshPkt) == OK) PktBuf.WritePkt(MeshPkt); // Put Msg to CircBuffer
+            if(MsgBox.TryFetchMsg(&MeshPkt) == OK) PktBuf.WritePkt(MeshPkt); /* Put Msg to CircBuffer */
             Timeout--;
         } while(Timeout != 0);
     }
-    // TX
+    // ==== TX ====
     else {
         if(SleepTime > 0) chThdSleepMilliseconds(SleepTime);
         chEvtSignal(rLevel1.PrThd, EVTMSK_MESH_TX);
@@ -90,6 +88,17 @@ bool Mesh_t::DispatchPkt(uint32_t *PTime, uint32_t *PWakeUpSysTime) {
                 PriorityID = MeshMsg.PktRx.TimeOwnerID;
                 ResetTimeAge(PriorityID);
                 *PWakeUpSysTime = MeshMsg.Timestamp + (uint32_t)CYCLE_TIME - (SLOT_TIME * PriorityID);
+            }
+            // FIXME: Next following the code which works if our current ID and recieved ID is the same
+            else if(PriorityID == MeshMsg.PktRx.TimeOwnerID) {
+                if(GetTimeAge() > MeshMsg.PktRx.TimeAge) {
+                    CycleTmr.Disable();
+                    Rslt = true;
+                    *PTime = MeshMsg.PktRx.CycleN + 1;
+                    PriorityID = MeshMsg.PktRx.TimeOwnerID;
+                    ResetTimeAge(PriorityID);
+                    *PWakeUpSysTime = MeshMsg.Timestamp + (uint32_t)CYCLE_TIME - (SLOT_TIME * PriorityID);
+                }
             }
 
             if(MeshMsg.RSSI < -100) MeshMsg.RSSI = -100;
@@ -121,7 +130,7 @@ void Mesh_t::UpdateTimer(bool NeedUpdate, uint32_t NewTime, uint32_t WakeUpSysTi
         uint32_t timeNow = chTimeNow();
         do {
             WakeUpSysTime += CYCLE_TIME;
-//            NewTime++;  /* FIXME: Thinking carefully about updating TimeAbs */
+//            NewTime++;  /* TODO: Thinking carefully about updating TimeAbs */
         }
         while (WakeUpSysTime < timeNow);
         SetCurrCycleN(NewTime);
@@ -130,7 +139,7 @@ void Mesh_t::UpdateTimer(bool NeedUpdate, uint32_t NewTime, uint32_t WakeUpSysTi
 #ifdef MESH_DBG
         Uart.Printf("Msh Slp %u to %u\r", chTimeNow(), WakeUpSysTime);
 #endif
-        chThdSleepUntil(WakeUpSysTime);
+        chThdSleepUntil(WakeUpSysTime); /* TODO: Thinking carefully about asynch switch on Timer with Virtual timer */
         CycleTmr.Enable();
     }
 }

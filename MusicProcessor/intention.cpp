@@ -56,7 +56,6 @@ void PrintSCIDToUart()
 //	Uart.Printf("last_id %d, last_pw %d,Win_int %d \r",SICD.last_intention_index_winner,SICD.last_intention_power_winner,SICD.winning_integral);
 	}
 
-//TODO
 int GetNotNormalizedIntegral(int power, int reason_id) {
     Uart.Printf("reas_id=%d, power=%d\r", reason_id, power);
     int res = SICD.Intention_weight_cost*reasons[reason_id].weight+power*SICD.Signal_power_weight_cost;

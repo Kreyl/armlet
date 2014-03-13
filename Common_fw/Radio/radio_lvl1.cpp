@@ -45,10 +45,10 @@ void rLevel1_t::ITask() {
 
 #if 1 // ==== Mesh v.2 ====
         uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+        PktTx.TimeAge++;
         if(EvtMsk & EVTMSK_MESH_TX) {
             PktTx.CycleN = Mesh.GetAbsTime();
 //            Uart.Printf("RadioTx\r");
-            PktTx.TimeAge++;
             if(PktTx.TimeAge > TIME_AGE_THRESHOLD) { ResetTimeAge(PktTx.ID); }
             CC.TransmitSync(&PktTx);
         }
