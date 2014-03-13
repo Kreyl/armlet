@@ -76,19 +76,19 @@ void Mesh_t::NewCycle() {
 bool Mesh_t::DispatchPkt(uint32_t *PTime, uint32_t *PWakeUpSysTime) {
     bool Rslt = false;
     if(PktBuf.GetFilledSlots() != 0) {
-        uint8_t PriorityID = SelfID;
+        uint8_t PriorityID = GetMeshID();
         mshMsg_t MeshMsg;
         do {
             PktBuf.ReadPkt(&MeshMsg);
 #ifdef MESH_DBG
-//            Uart.Printf("Msh ID=%u %d\r", MeshMsg.PktRx.ID, MeshMsg.RSSI);
+            Uart.Printf("Msh ID=%u, TimOwnID=%u, %d\r", MeshMsg.PktRx.ID, MeshMsg.PktRx.TimeOwnerID, MeshMsg.RSSI);
 #endif
             if(PriorityID > MeshMsg.PktRx.TimeOwnerID) {                /* Priority time checking */
                 CycleTmr.Disable();
                 Rslt = true;
                 *PTime = MeshMsg.PktRx.CycleN + 1;
                 PriorityID = MeshMsg.PktRx.TimeOwnerID;
-                ResetTimeAge();
+                ResetTimeAge(PriorityID);
                 *PWakeUpSysTime = MeshMsg.Timestamp + (uint32_t)CYCLE_TIME - (SLOT_TIME * PriorityID);
             }
 
@@ -121,7 +121,7 @@ void Mesh_t::UpdateTimer(bool NeedUpdate, uint32_t NewTime, uint32_t WakeUpSysTi
         uint32_t timeNow = chTimeNow();
         do {
             WakeUpSysTime += CYCLE_TIME;
-            NewTime++;
+//            NewTime++;  /* FIXME: Thinking carefully about updating TimeAbs */
         }
         while (WakeUpSysTime < timeNow);
         SetCurrCycleN(NewTime);

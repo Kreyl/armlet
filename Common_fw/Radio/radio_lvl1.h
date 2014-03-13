@@ -55,7 +55,8 @@ public:
     void RegisterAppThd(Thread *PThd) { PAppThd = PThd; }
 
     // Mesh needed
-    void ResetTimeAge()     { PktTx.TimeAge = 0; }
+    void ResetTimeAge(uint8_t ID)     { PktTx.TimeAge = 0; PktTx.TimeOwnerID = ID; }
+    uint8_t GetTimeOwner()            { return PktTx.TimeOwnerID; }
     // Inner use
     void ITask();
 };

@@ -48,7 +48,8 @@ void rLevel1_t::ITask() {
         if(EvtMsk & EVTMSK_MESH_TX) {
             PktTx.CycleN = Mesh.GetAbsTime();
 //            Uart.Printf("RadioTx\r");
-            if((PktTx.TimeAge - PktTx.CycleN) > TIME_AGE_THRESHOLD) { PktTx.TimeOwnerID = PktTx.ID; }
+            PktTx.TimeAge++;
+            if(PktTx.TimeAge > TIME_AGE_THRESHOLD) { ResetTimeAge(PktTx.ID); }
             CC.TransmitSync(&PktTx);
         }
         if(EvtMsk & EVTMSK_MESH_RX) {
@@ -94,8 +95,7 @@ void rLevel1_t::Init(uint32_t ASelfID) {
 
     PktTx.ID = (uint8_t)ASelfID;
     PktTx.CycleN = 0;
-    ResetTimeAge();
-    PktTx.TimeOwnerID = PktTx.ID;
+    ResetTimeAge(PktTx.ID);
 
     // Init radioIC
     CC.Init();
