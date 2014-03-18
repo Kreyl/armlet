@@ -46,6 +46,7 @@ private:
 
     // Mesh needed
     uint32_t RxTmt, RxStartTime, Time;
+    VirtualTimer MeshRxVT;
 
 public:
     Thread *PrThd;
@@ -60,6 +61,7 @@ public:
     uint8_t GetTimeOwner()            { return PktTx.TimeOwnerID; }
     // Inner use
     void ITask();
+    bool IMeshRx;
 };
 
 extern rLevel1_t rLevel1;

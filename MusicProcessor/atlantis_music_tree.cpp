@@ -71,7 +71,7 @@ int GetEmoIndxFromFileString(char * string)
 	//getting emo from filename
 	int sep_id=-1;
 	sep_id=strcspn(string,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING);
-	Uart.Printf("sepid=%d\r", sep_id);
+//	Uart.Printf("sepid=%d\r", sep_id);
 	if(sep_id > 20) return -3;
 	if(sep_id<=0)
 		return SEPARATOR_NOT_FOUND;

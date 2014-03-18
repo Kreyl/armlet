@@ -24,6 +24,11 @@
 
 rLevel1_t rLevel1;
 
+static void RxEnd(void *p) {
+//    Uart.Printf("RxTmt, t=%u\r", chTimeNow());
+    rLevel1.IMeshRx = false;
+}
+
 // Radiotask
 void rLevel1_t::ITask() {
     while(true) {
@@ -55,18 +60,23 @@ void rLevel1_t::ITask() {
         if(EvtMsk & EVTMSK_MESH_RX) {
             int8_t RSSI = 0;
             RxTmt = CYCLE_TIME;
-            RxStartTime = chTimeNow();
-//            Uart.Printf("RxStart, t=%u\r", chTimeNow());
+//            RxStartTime = chTimeNow();
+            IMeshRx = true;
+            Counter++;
+            // Init VirtualTimer
+            chVTSet(&MeshRxVT, MS2ST(CYCLE_TIME), RxEnd, nullptr);
+            Uart.Printf("RxStart=%u, t=%u\r", Counter, chTimeNow());
             do {
                 Time = chTimeNow();
+//                Uart.Printf("Rx for t=%u\r", RxTmt);
                 uint8_t RxRslt = CC.ReceiveSync(RxTmt, &PktRx, &RSSI);
                 if(RxRslt == OK) { // Pkt received correctly
-//                    Uart.Printf("Slot %u, ID=%u:%u, %d\r", i, PktRx.ID, PktRx.CycleN, RSSI);
+                    Uart.Printf("Rx ID=%u:%u, %d\r", PktRx.ID, PktRx.CycleN, RSSI);
                     Mesh.MsgBox.Post({chTimeNow(), PktRx, RSSI}); /* SendMsg to MeshThd with PktRx structure */
                 } // Pkt Ok
                 RxTmt = ((chTimeNow() - Time) > 0)? RxTmt - (chTimeNow() - Time) : 0;
-            } while ((chTimeNow() - RxStartTime) < CYCLE_TIME);
-//            Uart.Printf("RxEnd, t=%u\r", chTimeNow());
+            } while(IMeshRx);
+            Uart.Printf("RxEnd, t=%u\r\r", chTimeNow());
             chEvtSignal(Mesh.IPThread, EVTMSK_UPDATE_CYCLE);
 
         }

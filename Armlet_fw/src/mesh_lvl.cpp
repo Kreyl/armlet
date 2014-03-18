@@ -58,11 +58,11 @@ void Mesh_t::NewCycle() {
     if(CurrCycle == RxCycleN) {
         chEvtSignal(rLevel1.PrThd, EVTMSK_MESH_RX);
         mshMsg_t MeshPkt;
-        uint32_t Timeout = CYCLE_TIME; /* Wait Answer for Cycle Time */
+//        uint32_t Timeout = CYCLE_TIME; /* Wait Answer for Cycle Time */
         do {
             if(MsgBox.TryFetchMsg(&MeshPkt) == OK) PktBuf.WritePkt(MeshPkt); /* Put Msg to CircBuffer */
-            Timeout--;
-        } while(Timeout != 0);
+        } while(rLevel1.IMeshRx);
+
     }
     // ==== TX ====
     else {
@@ -78,9 +78,7 @@ bool Mesh_t::DispatchPkt(uint32_t *PTime, uint32_t *PWakeUpSysTime) {
         mshMsg_t MeshMsg;
         do {
             PktBuf.ReadPkt(&MeshMsg);
-#ifdef MESH_DBG
-            Uart.Printf("Msh ID=%u, TimOwnID=%u, %d\r", MeshMsg.PktRx.ID, MeshMsg.PktRx.TimeOwnerID, MeshMsg.RSSI);
-#endif
+//            Uart.Printf("Msh ID=%u, TimOwnID=%u, %d\r", MeshMsg.PktRx.ID, MeshMsg.PktRx.TimeOwnerID, MeshMsg.RSSI);
             if(PriorityID > MeshMsg.PktRx.TimeOwnerID) {                /* Priority time checking */
                 CycleTmr.Disable();
                 Rslt = true;
