@@ -331,3 +331,103 @@ void Lcd_t::PutPixel (uint8_t x0, uint8_t y0, uint16_t Clr) {
 #endif
     DC_Lo();
 }
+
+
+#if 1 // ============================= BMP =====================================
+struct BmpHeader_t {
+    uint16_t bfType;
+    uint32_t bfSize;
+    uint16_t Reserved[2];
+    uint32_t bfOffBits;
+} __packed;
+
+struct BmpInfo_t {  // Length is absent as read first
+    uint32_t Width;
+    uint32_t Height;
+    uint16_t Planes;
+    uint16_t BitCnt;
+    uint32_t Compression;
+    uint32_t SzImage;
+    uint32_t XPelsPerMeter, YPelsPerMeter;
+    uint32_t ClrUsed, ClrImportant;
+    // v4 begins. Only Adobe version here
+    uint32_t RedMsk, GreenMsk, BlueMsk, AlphaMsk;
+} __packed;
+
+
+void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
+    Uart.Printf("Draw %S\r", Filename);
+    // Open file
+    FRESULT rslt = f_open(&IFile, Filename, FA_READ+FA_OPEN_EXISTING);
+    if(rslt != FR_OK) {
+        if (rslt == FR_NO_FILE) Uart.Printf("%S: not found\r", Filename);
+        else Uart.Printf("OpenFile error: %u", rslt);
+        return;
+    }
+    // Check if zero file
+    if(IFile.fsize == 0) {
+        Uart.Printf("Empty file\r");
+        f_close(&IFile); return;
+    }
+
+    unsigned int RCnt=0;
+    // Read BITMAPFILEHEADER
+    if((rslt = f_read(&IFile, IBuf, sizeof(BmpHeader_t), &RCnt)) != 0) {
+        f_close(&IFile); return;
+    }
+    BmpHeader_t *PHdr = (BmpHeader_t*)IBuf;
+    Uart.Printf("T=%X; Sz=%u; Off=%u\r", PHdr->bfType, PHdr->bfSize, PHdr->bfOffBits);
+    uint32_t FOff = PHdr->bfOffBits;
+
+    // ==== Read BITMAPINFO ====
+    // Get struct size => version
+    uint32_t Sz=0;
+    if((rslt = f_read(&IFile, (uint8_t*)&Sz, 4, &RCnt)) != 0) {
+        f_close(&IFile); return;
+    }
+    if((Sz == 40) or (Sz == 52) or (Sz == 56)) {  // V3 or V4 adobe
+        BmpInfo_t Info;
+        if((rslt = f_read(&IFile, (uint8_t*)&Info, Sz-4, &RCnt)) != 0) {
+            f_close(&IFile); return;
+        }
+        Uart.Printf("W=%u; H=%u; BitCnt=%u; Cmp=%u; Sz=%u;  MskR=%X; MskG=%X; MskB=%X; MskA=%X\r",
+                Info.Width, Info.Height, Info.BitCnt, Info.Compression,
+                Info.SzImage, Info.RedMsk, Info.GreenMsk, Info.BlueMsk, Info.AlphaMsk);
+
+        // Move to pixel data
+        if((rslt = f_lseek(&IFile, FOff)) != 0) {
+            f_close(&IFile); return;
+        }
+
+        SetBounds(x0, x0+Info.Width, y0, y0+Info.Height);
+        // Write RAM
+        WriteByte(0x2C);    // Memory write
+        DC_Hi();
+        while(Info.SzImage) {
+            if((rslt = f_read(&IFile, IBuf, BUF_SZ, &RCnt)) != 0) break;
+            for(uint32_t i=0; i<RCnt; i+=2) {
+                WriteByte(IBuf[i+1]);
+                WriteByte(IBuf[i]);
+            }
+            Info.SzImage -= RCnt;
+        }
+        DC_Lo();
+    }
+
+    else {
+        Uart.Printf("Core, V4 or V5");
+    }
+
+
+//    if(strncmp(IBuf, PngSignature, 8) != 0) {
+//        Uart.Printf("SigErr\r");
+//        f_close(&IFile); return;
+//    }
+
+
+
+    f_close(&IFile);
+    Uart.Printf("Done\r");
+}
+#endif
+

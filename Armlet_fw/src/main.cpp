@@ -27,7 +27,7 @@
 
 #include "application.h"
 #include "atlantis_music_tree.h"
-
+#include "..\AtlGui\atlgui.h"
 static inline void Init();
 
 int main() {
@@ -68,6 +68,8 @@ void Init() {
 
     Lcd.Init();
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
+    Lcd.DrawBmpFile(0, 0, "splash.bmp");
+   // Lcd.PutBitmap(0,0,160,128,PBuf)
 
  //   Init_emotionTreeMusicNodeFiles_FromFile(filename);
  //   Print_emotionTreeMusicNodeFiles_ToUART();
@@ -88,6 +90,7 @@ void Init() {
 //    Sound.Play("alive.wav");
 
     App.Init();
+    AtlGui.Init();
 
     rLevel1.Init(ID);
     Mesh.Init(ID);

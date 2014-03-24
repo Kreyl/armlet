@@ -12,7 +12,7 @@
 #include "kl_lib_f2xx.h"
 #include "kl_sprintf.h"
 #include <string.h>
-
+#include "ff.h"
 #define LCD_PRINTF      TRUE
 
 // ================================ Defines ====================================
@@ -52,7 +52,7 @@ enum Color_t {
 #if LCD_PRINTF
 #define LCD_CHARBUF_SZ  198
 #endif
-
+#define BUF_SZ  72
 class Lcd_t {
 private:
     PwmPin_t BckLt;
@@ -61,6 +61,9 @@ private:
 #if LCD_PRINTF
     char CharBuf[LCD_CHARBUF_SZ];
     char *PWCharBuf, *PRCharBuf;
+
+    FIL IFile;
+    char IBuf[BUF_SZ];
 #endif
 public:
     // General use
@@ -82,6 +85,7 @@ public:
     void PutPixel (uint8_t x0, uint8_t y0, uint16_t Clr);
 //    void DrawImage(const uint8_t x, const uint8_t y, const uint8_t *Img);
 //    void DrawSymbol(const uint8_t x, const uint8_t y, const uint8_t ACode);
+    void DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename);
 };
 
 extern Lcd_t Lcd;

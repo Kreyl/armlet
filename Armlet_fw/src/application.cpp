@@ -24,7 +24,7 @@
 #include "ff.h"
 #include "../MusicProcessor/intention.h"
 #include "SensorTable.h"
-
+#include "..\AtlGui\atlgui.h"
 App_t App;
 
 #if 1 // ================================ Time =================================
@@ -397,8 +397,15 @@ void App_t::Task() {
         if(on_run==0)
         {
             on_run=1;
+            // включить сплеш скрин
+            AtlGui.ShowSplashscreen();
 //            Sound.Play("church_bells.wav");
 //            Uart.Printf("church_bells.wav");
+        }
+        else if(AtlGui.is_splash_screen_onrun==1 )
+        {
+            //черезсекундувключить основной
+            AtlGui.CallStateScreen(0);
         }
     }
 }
