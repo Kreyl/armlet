@@ -8,6 +8,10 @@
 #ifndef GUI_H
 #define GUI_H
 
+#ifndef nullptr
+#define nullptr 0
+#endif
+
 #ifndef countof
 #define countof(a) (sizeof(a) / sizeof(a[0]))
 #endif
@@ -19,10 +23,10 @@
 
 #define BUTTONS "ABCLERXYZ"
 
-#define NO_BUTTON {0, 0, 0, 0, 0, 0}
+#define NO_BUTTON {nullptr, 0, 0, nullptr, nullptr, nullptr}
 
 typedef struct Button {
-    char name;
+    const char* name; // Text to be displayed for a button if text interface is used.
     const int left;
     const int bottom;
     // All function arguments are screen number and button number, may be ignored.
@@ -32,7 +36,7 @@ typedef struct Button {
 } Button_t;
 
 typedef struct Screen {
-    const char* name;
+    const char* name; // Name of the subfolder containing respective imagery.
     const Button_t buttons[sizeof(BUTTONS)];
 } Screen_t;
 

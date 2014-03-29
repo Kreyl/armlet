@@ -15,6 +15,8 @@ except ImportError, ex:
 GUI_HTML = 'GUI.html'
 C_TARGET = 'gui.c'
 
+ENCODING = "Windows-1251"
+
 BUTTONS = 'ABCLERXYZ'
 
 INDENT = '    '
@@ -40,22 +42,33 @@ const int screens_number = countof(screens);
 // End of gui.c
 '''
 
-def getFileName(name):
-    return join(dirname(realpath(argv[0])), name)
+def getFileName(fileName):
+    return join(dirname(realpath(argv[0])), fileName)
 
 def getInt(s):
     return int(match(r'(\d+)', s).groups()[0]) if s else 0
 
+def cChar(c):
+    if c == r'\\':
+        return '\\\\'
+    if ord(c) < 128:
+        return c
+    return '\\x%2x' % ord(c)
+
+def cString(s):
+    return '"%s"' % ''.join(cChar(c) for c in s.encode(ENCODING))
+
 def cButton(node):
-    name = str(node.attrs['alt']).upper()
-    index = BUTTONS.index(name)
+    name = node.attrs['alt']
+    key = str(node.attrs['key']).upper()
+    index = BUTTONS.index(key)
     styles = dict(split(' *: *', pair) for pair in split(' *; *', str(node.attrs['style'])))
     left = getInt(styles.get('left'))
     bottom = getInt(styles.get('bottom'))
     isPressable = node.attrs.get('isPressable')
     getState = node.attrs.get('getState')
     press = node.attrs.get('press')
-    return (index, '{\'%s\', %d, %d, %s, %s, %s}' % (name, left, bottom, isPressable or 'buttonIsPressable', getState or 'buttonGetState', press or 'buttonPress'))
+    return (index, '{%s, %d, %d, %s, %s, %s}' % (cString(name), left, bottom, isPressable or 'buttonIsPressable', getState or 'buttonGetState', press or 'buttonPress'))
 
 def cScreen(node, indent = ''):
     name = str(node.attrs['id'])

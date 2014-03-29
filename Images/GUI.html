@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
+<meta charset="Windows-1251">
 <meta name="Author" content="Vasily Zakharov <vmzakhar@gmail.com>">
 <title>Armlet GUI Test</title>
 <style type="Text/CSS">
@@ -80,7 +80,7 @@ function setState(button, state) {
 
 function mouseDown() {
     var newState = null;
-    switch (this.letter) {
+    switch (this.key) {
     case B:
     case C:
     case E:
@@ -107,7 +107,7 @@ function mouseUp() {
         return;
     }
     var newScreen = currentScreen;
-    switch (this.letter) {
+    switch (this.key) {
     case L:
         newScreen = 0;
         locked = !locked;
@@ -159,10 +159,10 @@ function main() {
         }
         screen.buttons = screen.getElementsByClassName('button');
         for (var j = 0, button; button = screen.buttons[j++];) {
-            button.letter = button.alt;
+            button.key = button.getAttribute('key');
             button.enabled = false;
             var prefix = IMAGES + screen.id + '/';
-            var suffix = '/' + button.letter + '.bmp';
+            var suffix = '/' + button.key + '.bmp';
             button.states = [];
             for (var k = 0; k < STATES.length; k++) {
               button.states[k] = prefix + STATES[k] + suffix;
@@ -181,20 +181,20 @@ function main() {
 <body onload="main()">
   <div id="gui">
     <div id="main" class="screen">
-      <img class="button" alt="L" style="bottom: 0; left: 4px">
-      <img class="button" alt="E" style="bottom: 0; left: 59px">
-      <img class="button" alt="X" style="bottom: 68px; left: 130px">
-      <img class="button" alt="Y" style="bottom: 33px; left: 130px">
-      <img class="button" alt="Z" style="bottom: 0; left: 130px">
+      <img class="button" key="L" alt="lock" style="bottom: 0; left: 4px">
+      <img class="button" key="E" alt="экран" style="bottom: 0; left: 59px">
+      <img class="button" key="X" alt="музыка" style="bottom: 68px; left: 130px">
+      <img class="button" key="Y" alt="^^" style="bottom: 33px; left: 130px">
+      <img class="button" key="Z" alt="vv" style="bottom: 0; left: 130px">
     </div>
     <div id="intentions" class="screen">
-      <img class="button" alt="B" style="bottom: 56px">
-      <img class="button" alt="C" style="bottom: 17px">
-      <img class="button" alt="L" style="bottom: 0; left: 4px">
-      <img class="button" alt="E" style="bottom: 0; left: 59px">
-      <img class="button" alt="X" style="bottom: 74px; left: 109px">
-      <img class="button" alt="Y" style="bottom: 35px; left: 125px">
-      <img class="button" alt="Z" style="bottom: 1px; left: 103px">
+      <img class="button" key="B" alt="Убийство" style="bottom: 56px">
+      <img class="button" key="C" alt="Созидание" style="bottom: 17px">
+      <img class="button" key="L" alt="lock" style="bottom: 0; left: 4px">
+      <img class="button" key="E" alt="экран" style="bottom: 0; left: 59px">
+      <img class="button" key="X" alt="Что-то" style="bottom: 74px; left: 109px">
+      <img class="button" key="Y" alt="Ещё" style="bottom: 35px; left: 125px">
+      <img class="button" key="Z" alt="Разрушение" style="bottom: 1px; left: 103px">
     </div>
     <img id="lock" style="bottom: 44px; left: 63px">
   </div>

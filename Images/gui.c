@@ -14,23 +14,23 @@ Screen_t screens[] = {
         NO_BUTTON,
         NO_BUTTON,
         NO_BUTTON,
-        {'L', 4, 0, buttonIsPressable, buttonGetState, buttonPress},
-        {'E', 59, 0, buttonIsPressable, buttonGetState, buttonPress},
+        {"lock", 4, 0, buttonIsPressable, buttonGetState, buttonPress},
+        {"\xfd\xea\xf0\xe0\xed", 59, 0, buttonIsPressable, buttonGetState, buttonPress},
         NO_BUTTON,
-        {'X', 130, 68, buttonIsPressable, buttonGetState, buttonPress},
-        {'Y', 130, 33, buttonIsPressable, buttonGetState, buttonPress},
-        {'Z', 130, 0, buttonIsPressable, buttonGetState, buttonPress}
+        {"\xec\xf3\xe7\xfb\xea\xe0", 130, 68, buttonIsPressable, buttonGetState, buttonPress},
+        {"^^", 130, 33, buttonIsPressable, buttonGetState, buttonPress},
+        {"vv", 130, 0, buttonIsPressable, buttonGetState, buttonPress}
     }},
     {"intentions", {
         NO_BUTTON,
-        {'B', 0, 56, buttonIsPressable, buttonGetState, buttonPress},
-        {'C', 0, 17, buttonIsPressable, buttonGetState, buttonPress},
-        {'L', 4, 0, buttonIsPressable, buttonGetState, buttonPress},
-        {'E', 59, 0, buttonIsPressable, buttonGetState, buttonPress},
+        {"\xd3\xe1\xe8\xe9\xf1\xf2\xe2\xee", 0, 56, buttonIsPressable, buttonGetState, buttonPress},
+        {"\xd1\xee\xe7\xe8\xe4\xe0\xed\xe8\xe5", 0, 17, buttonIsPressable, buttonGetState, buttonPress},
+        {"lock", 4, 0, buttonIsPressable, buttonGetState, buttonPress},
+        {"\xfd\xea\xf0\xe0\xed", 59, 0, buttonIsPressable, buttonGetState, buttonPress},
         NO_BUTTON,
-        {'X', 109, 74, buttonIsPressable, buttonGetState, buttonPress},
-        {'Y', 125, 35, buttonIsPressable, buttonGetState, buttonPress},
-        {'Z', 103, 1, buttonIsPressable, buttonGetState, buttonPress}
+        {"\xd7\xf2\xee-\xf2\xee", 109, 74, buttonIsPressable, buttonGetState, buttonPress},
+        {"\xc5\xf9\xb8", 125, 35, buttonIsPressable, buttonGetState, buttonPress},
+        {"\xd0\xe0\xe7\xf0\xf3\xf8\xe5\xed\xe8\xe5", 103, 1, buttonIsPressable, buttonGetState, buttonPress}
     }}
 };
 
