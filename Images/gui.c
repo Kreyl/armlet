@@ -14,23 +14,23 @@ Screen_t screens[] = {
         NO_BUTTON,
         NO_BUTTON,
         NO_BUTTON,
-        {'L', 0, 0, buttonIsPressable, buttonGetState, buttonPress},
-        {'E', 28, 0, buttonIsPressable, buttonGetState, buttonPress},
+        {'L', 4, 0, buttonIsPressable, buttonGetState, buttonPress},
+        {'E', 59, 0, buttonIsPressable, buttonGetState, buttonPress},
         NO_BUTTON,
-        {'X', 98, 70, buttonIsPressable, buttonGetState, buttonPress},
-        {'Y', 98, 32, buttonIsPressable, buttonGetState, buttonPress},
-        {'Z', 98, 0, buttonIsPressable, buttonGetState, buttonPress}
+        {'X', 130, 68, buttonIsPressable, buttonGetState, buttonPress},
+        {'Y', 130, 33, buttonIsPressable, buttonGetState, buttonPress},
+        {'Z', 130, 0, buttonIsPressable, buttonGetState, buttonPress}
     }},
     {"intentions", {
         NO_BUTTON,
-        {'B', 0, 52, buttonIsPressable, buttonGetState, buttonPress},
-        {'C', 0, 14, buttonIsPressable, buttonGetState, buttonPress},
-        {'L', 0, 0, buttonIsPressable, buttonGetState, buttonPress},
-        {'E', 28, 0, buttonIsPressable, buttonGetState, buttonPress},
+        {'B', 0, 56, buttonIsPressable, buttonGetState, buttonPress},
+        {'C', 0, 17, buttonIsPressable, buttonGetState, buttonPress},
+        {'L', 4, 0, buttonIsPressable, buttonGetState, buttonPress},
+        {'E', 59, 0, buttonIsPressable, buttonGetState, buttonPress},
         NO_BUTTON,
-        {'X', 98, 70, buttonIsPressable, buttonGetState, buttonPress},
-        {'Y', 98, 32, buttonIsPressable, buttonGetState, buttonPress},
-        {'Z', 98, 0, buttonIsPressable, buttonGetState, buttonPress}
+        {'X', 109, 74, buttonIsPressable, buttonGetState, buttonPress},
+        {'Y', 125, 35, buttonIsPressable, buttonGetState, buttonPress},
+        {'Z', 103, 1, buttonIsPressable, buttonGetState, buttonPress}
     }}
 };
 

@@ -3,7 +3,6 @@
 # GUI Processor for Ticket to Atlantis LARP.
 #
 
-from itertools import chain
 from os.path import dirname, join, realpath
 from re import match, split
 from sys import argv
@@ -13,17 +12,8 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\nPlease install BeautifulSoup v4.3.2 or later: http://www.crummy.com/software/BeautifulSoup\n" % (ex.__class__.__name__, ex))
 
-try:
-    from wand.image import Image # We can't use PIL or PyGame as they can't handle our type of BMP
-except ImportError, ex:
-    raise ImportError("%s: %s\nPlease install Wand v0.3.6 or later: http://wand-py.org\n" % (ex.__class__.__name__, ex))
-
 GUI_HTML = 'GUI.html'
 C_TARGET = 'gui.c'
-
-IMAGES = join('..', 'SD', 'GUI')
-
-SCREEN_HEIGHT = 128
 
 BUTTONS = 'ABCLERXYZ'
 
@@ -56,12 +46,12 @@ def getFileName(name):
 def getInt(s):
     return int(match(r'(\d+)', s).groups()[0]) if s else 0
 
-def cButton(path, node):
+def cButton(node):
     name = str(node.attrs['alt']).upper()
     index = BUTTONS.index(name)
     styles = dict(split(' *: *', pair) for pair in split(' *; *', str(node.attrs['style'])))
     left = getInt(styles.get('left'))
-    bottom = SCREEN_HEIGHT - getInt(styles.get('top')) - Image(filename = join(path, 'normal', name + '.bmp')).height
+    bottom = getInt(styles.get('bottom'))
     isPressable = node.attrs.get('isPressable')
     getState = node.attrs.get('getState')
     press = node.attrs.get('press')
@@ -69,8 +59,7 @@ def cButton(path, node):
 
 def cScreen(node, indent = ''):
     name = str(node.attrs['id'])
-    path = join(IMAGES, name)
-    buttons = dict(cButton(path, button) for button in node.find_all(class_ = 'button'))
+    buttons = dict(cButton(button) for button in node.find_all(class_ = 'button'))
     buttonsText = indent + INDENT + (',\n' + indent + INDENT).join(buttons.get(i, 'NO_BUTTON') for i in xrange(len(BUTTONS)))
     return indent + ('{\"%s\", {\n' % name) + buttonsText + '\n' + indent +'}}'
 
