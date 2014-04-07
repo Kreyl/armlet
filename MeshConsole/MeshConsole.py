@@ -92,7 +92,7 @@ class DateValueLabel(QLabel):
 
     def setValue(self, date):
         self.setText(date.toString(DATE_FORMAT) if date else 'not set')
-        self.setStyleSheet(self.savedStyleSheet if date else '%s; %s' % (self.savedStyleSheet, HIGHLIGHT_STYLE))
+        self.setStyleSheet(self.savedStyleSheet if date else '%s; %s' % (self.savedStyleSheet, HIGHLIGHT_STYLE)) # ToDo Redo it with palettes
 
 class DateTimeValueLabel(QLabel):
     def configure(self):
@@ -118,7 +118,9 @@ class ConsoleEdit(QLineEdit):
         return ret
 
 class MeshConsole(QMainWindow):
-    comLogSignal = pyqtSignal(int, str)
+    comConnect = pyqtSignal(str)
+    comInput = pyqtSignal(str)
+    comLog = pyqtSignal(int, str)
 
     def __init__(self, *args, **kwargs):
         QMainWindow.__init__(self, *args, **kwargs)
@@ -150,7 +152,7 @@ class MeshConsole(QMainWindow):
             rootLogger.addHandler(handler)
         rootLogger.setLevel(INFO)
         self.logger = getLogger('MeshConsole')
-        self.comLogSignal.connect(getLogger('COM').log)
+        self.comLog.connect(getLogger('COM').log)
         self.logger.info("start")
         # Configure devices and columns
         self.startTime = None
@@ -173,7 +175,9 @@ class MeshConsole(QMainWindow):
         self.setStartTime()
         self.loadDump()
         self.playing = False # will be toggled immediately by pause()
-        self.port = SerialPort(COMMAND_PING, COMMAND_PONG, self.processConnect, self.processInput, self.portLabel.setPortStatus.emit, self.comLogSignal.emit)
+        self.comConnect.connect(self.processConnect)
+        self.comInput.connect(self.processInput)
+        self.port = SerialPort(COMMAND_PING, COMMAND_PONG, self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit, self.comLog.emit)
         self.pause()
         if self.savedMaximized:
             self.showMaximized()
@@ -213,6 +217,7 @@ class MeshConsole(QMainWindow):
         self.startTimeValueLabel.setValue(date)
 
     def processConnect(self, pong): # ToDo: make a special signal for this to avoid threading problems?
+        pong = str(pong)
         try:
             self.setStartTime(QDate(*(int(d) for d in pong.split()[1:])))
         except Exception:
@@ -231,6 +236,7 @@ class MeshConsole(QMainWindow):
         QTimer.singleShot(max(0, dt), self.updateTime)
 
     def processInput(self, inputLine): # ToDo: make a special signal for this to avoid threading problems?
+        inputLine = str(inputLine)
         if inputLine.startswith(COMMAND_NODE_INFO):
             try:
                 words = inputLine.split()
