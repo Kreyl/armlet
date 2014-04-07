@@ -3,6 +3,7 @@
 from binascii import hexlify, unhexlify
 from datetime import datetime
 from logging import getLogger, FileHandler, Formatter, Handler, INFO, NOTSET
+from re import match
 from sys import argv
 from traceback import format_exc
 
@@ -15,9 +16,9 @@ except ImportError, ex:
 
 # ToDo:
 #
-# Save startTime
 # Make some columns left-aligned
 # Make accented lines work
+# Make setTime regular
 #
 # Add console control capability
 
@@ -136,6 +137,7 @@ class MeshConsole(QMainWindow):
         self.resetButton.clicked.connect(self.reset)
         self.startTimeValueLabel.configure()
         self.timeValueLabel.configure()
+        self.sampleWidget.hide()
         self.statusBar.hide()
         # Setup logging
         formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
@@ -164,17 +166,16 @@ class MeshConsole(QMainWindow):
             action = ColumnAction(column, self.devicesTableView.setColumnHidden, self.columnsMenu)
             self.columnsMenu.addAction(action)
             self.columnActions.append(action)
-        self.sampleWidget.hide()
-        self.loadDump()
         # Starting up!
         self.setStartTime()
+        self.loadDump()
         self.playing = False # will be toggled immediately by pause()
+        self.port = SerialPort(COMMAND_PING, COMMAND_PONG, self.processConnect, self.processInput, self.portLabel.setPortStatus.emit, self.comLogSignal.emit)
         self.pause()
         if self.savedMaximized:
             self.showMaximized()
         else:
             self.show()
-        self.port = SerialPort(COMMAND_PING, COMMAND_PONG, self.processConnect, self.processInput, self.portLabel.setPortStatus.emit, self.comLogSignal.emit)
 
     @staticmethod
     def cycleSeconds(cycle):
@@ -219,7 +220,7 @@ class MeshConsole(QMainWindow):
         if self.playing:
             self.timeValueLabel.setValue(now)
         self.currentCycle = self.startTime.msecsTo(now) // CYCLE_LENGTH if self.startTime else None
-        if now.time().second() % 10 == 0:
+        if self.startTime and now.time().second() % 10 == 0:
             self.logger.info("Setting network time to %d" % self.currentCycle)
             self.port.write(COMMAND_SET_TIME % self.currentCycle)
         dt = QDateTime.currentDateTime().msecsTo(QDateTime.fromMSecsSinceEpoch((now.toMSecsSinceEpoch() // 1000 + 1) * 1000))
@@ -250,9 +251,11 @@ class MeshConsole(QMainWindow):
     def pause(self):
         self.playing = not self.playing
         self.logger.info("play" if self.playing else "pause")
+        v = self.logTextEdit.verticalScrollBar()
+        v.setValue(max(0, v.maximum() - (0 if self.playing else 1)))
+        self.updateTime()
         if self.playing:
             self.devicesModel.refresh()
-        self.updateTime()
 
     def saveDump(self):
         with open(DUMP_FILE_NAME, 'w') as dump:
@@ -260,6 +263,9 @@ class MeshConsole(QMainWindow):
             dump.write('window %d %d %d %d %s\n' % (max(0, self.pos().x()), max(0, self.pos().y()), self.size().width(), self.size().height(), self.isMaximized()))
             dump.write('state %s\n' % hexlify(self.saveState()))
             dump.write('columns %s\n' % ' '.join(str(action.isChecked()) for action in self.columnActions))
+            if self.startTime:
+                date = self.startTime.date()
+                dump.write('startTime %d %d %d\n' % (date.year(), date.month(), date.day()))
             for device in self.devices:
                 dumpStr = device.toDumpStr()
                 if dumpStr:
@@ -276,17 +282,19 @@ class MeshConsole(QMainWindow):
                         continue
                     words = line.split()
                     (tag, data) = (words[0], words[1:])
-                    if tag == 'columns':
-                        for (action, checked) in zip(self.columnActions, data):
-                            action.setChecked(checked == 'True')
-                    elif tag == 'window':
+                    if tag == 'window':
                         (x, y, width, height, isMaximized) = data
                         self.move(int(x), int(y))
                         self.resize(int(width), int(height))
                         self.savedMaximized = isMaximized == 'True'
                     elif tag == 'state':
                         self.restoreState(unhexlify(data[0]))
-                    else:
+                    elif tag == 'columns':
+                        for (action, checked) in zip(self.columnActions, data):
+                            action.setChecked(checked == 'True')
+                    elif tag == 'startTime':
+                        self.setStartTime(QDate(*(int(d) for d in data)))
+                    elif match('\d+', tag):
                         device = self.devices[int(tag) - 1]
                         if device.time != None:
                             self.error("Bad dump: duplicate entry for device %s" % device.number)
