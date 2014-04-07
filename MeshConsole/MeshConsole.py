@@ -216,12 +216,12 @@ class MeshConsole(QMainWindow):
         self.startTime = QDateTime(date) if date else None
         self.startTimeValueLabel.setValue(date)
 
-    def processConnect(self, pong): # ToDo: make a special signal for this to avoid threading problems?
+    def processConnect(self, pong):
         pong = str(pong)
         try:
             self.setStartTime(QDate(*(int(d) for d in pong.split()[1:])))
         except Exception:
-            self.logger.exception("Can't set start time from pong %s", pong) # ToDo: Called from other thread, must be wrapped
+            self.logger.exception("Can't set start time from pong %s", pong)
 
     def updateTime(self):
         now = QDateTime.currentDateTime()
@@ -235,7 +235,7 @@ class MeshConsole(QMainWindow):
         dt = QDateTime.currentDateTime().msecsTo(QDateTime.fromMSecsSinceEpoch((now.toMSecsSinceEpoch() // 1000 + 1) * 1000))
         QTimer.singleShot(max(0, dt), self.updateTime)
 
-    def processInput(self, inputLine): # ToDo: make a special signal for this to avoid threading problems?
+    def processInput(self, inputLine):
         inputLine = str(inputLine)
         if inputLine.startswith(COMMAND_NODE_INFO):
             try:
@@ -244,8 +244,8 @@ class MeshConsole(QMainWindow):
                 self.saveDump()
                 if self.playing:
                     self.devicesModel.refresh()
-            except: # ToDo: catch exceptions carefully
-                self.logger.exception("Bad info command %s", inputLine) # ToDo: Called from other thread, must be wrapped
+            except Exception:
+                self.logger.exception("Bad info command %s", inputLine)
 
     def consoleEnter(self):
         self.port.write(self.consoleEdit.getInput())
