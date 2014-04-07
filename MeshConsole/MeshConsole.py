@@ -294,7 +294,7 @@ class MeshConsole(QMainWindow):
                             action.setChecked(checked == 'True')
                     elif tag == 'startTime':
                         self.setStartTime(QDate(*(int(d) for d in data)))
-                    elif match('\d+', tag):
+                    elif match(r'\d+', tag):
                         device = self.devices[int(tag) - 1]
                         if device.time != None:
                             self.error("Bad dump: duplicate entry for device %s" % device.number)
