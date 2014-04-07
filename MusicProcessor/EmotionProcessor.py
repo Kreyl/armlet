@@ -78,7 +78,7 @@ def convertEmotion(s):
 def getFileName(name):
     return join(dirname(realpath(argv[0])), name)
 
-def readCSV(csv):
+def readCSV(csv): # generator
     with open(csv) as f:
         for row in CSVReader(f):
             assert row, "bad CSV file format"
