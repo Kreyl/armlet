@@ -17,11 +17,12 @@ RAW = 1
 PROC = 2
 
 class Column(object):
-    def __init__(self, number, checked, changing, highlight, name, description, fieldName, longestValue = 999, formatter = None, fmt = None):
+    def __init__(self, number, checked, changing, highlight, alignment, name, description, fieldName, longestValue = 999, formatter = None, fmt = None):
         self.number = number
         self.checked = checked
         self.changing = changing
         self.highlight = highlight
+        self.alignment = Qt.AlignRight if alignment else Qt.AlignLeft
         self.name = name
         self.description = description
         self.fieldName = fieldName
@@ -31,13 +32,13 @@ class Column(object):
         self.defaults = { # This really is a part of View, but moving it off here doesn't work well
             Qt.ToolTipRole: description or name,
             Qt.StatusTipRole: description or name,
-            Qt.TextAlignmentRole: Qt.AlignRight
+            Qt.TextAlignmentRole: self.alignment
         }
         self.headers = {
             Qt.DisplayRole: name,
             Qt.ToolTipRole: description or name,
             Qt.StatusTipRole: description or name,
-            Qt.TextAlignmentRole: Qt.AlignRight
+            Qt.TextAlignmentRole: self.alignment
         }
 
     def process(self, data):
@@ -70,12 +71,11 @@ class Cell(dict):
         self.column = column
 
     def setData(self, initial = False):
-        if not initial and self.column.changing is CONST:
-            return
-        data = getattr(self.device, self.column.fieldName)
         if self.column.changing is CONST:
-            self[Qt.DisplayRole] = data
+            if initial:
+                self[Qt.DisplayRole] = getattr(self.device, self.column.fieldName)
         elif self.column.changing is RAW:
+            data = getattr(self.device, self.column.fieldName)
             if data == self[RAW_ROLE]:
                 if self.column.highlight:
                     self[CHANGED_ROLE] = False
@@ -85,7 +85,7 @@ class Cell(dict):
                 self[RAW_ROLE] = data
                 self[Qt.DisplayRole] = self.column.process(data)
         elif self.column.changing is PROC:
-            data = self.column.process(data)
+            data = self.column.process(getattr(self.device, self.column.fieldName))
             if self.column.highlight:
                 self[CHANGED_ROLE] = False if data == self[Qt.DisplayRole] else not initial
             self[Qt.DisplayRole] = data
@@ -158,7 +158,7 @@ class DevicesTableDelegate(QItemDelegate): # QStyledItemDelegate doesn't handle 
         self.activePalette = activePalette
 
     def paint(self, paint, option, index):
-        option.palette = self.activePalette if index.data(CHANGED_ROLE).toBool() else self.customPalettes.get(index.data(ACCENT_ROLE), self.inactivePalette)
+        option.palette = self.activePalette if index.data(CHANGED_ROLE).toBool() else self.customPalettes.get(index.data(ACCENT_ROLE).toInt()[0], self.inactivePalette)
         QItemDelegate.paint(self, paint, option, index)
 
     def drawFocus(self, painter, option, rect):

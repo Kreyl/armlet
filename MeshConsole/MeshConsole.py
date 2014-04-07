@@ -16,8 +16,6 @@ except ImportError, ex:
 
 # ToDo:
 #
-# Make some columns left-aligned
-# Make accented lines work
 # Make setTime regular
 #
 # Add console control capability
@@ -54,15 +52,18 @@ WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
 def timeDeltaStr(seconds):
     negative = seconds < 0
     (minutes, seconds) = divmod(abs(seconds), 60)
-    ret = '%02d' % seconds
     if minutes:
         (hours, minutes) = divmod(minutes, 60)
-        ret = '%02d:%s' % (minutes, ret)
         if hours:
             (days, hours) = divmod(minutes, 24)
-            ret = '%02d:%s' % (hours, ret)
             if days:
-                ret = '%d %s' % (days, ret)
+                ret = '%d %02d:%02d:%02d' % (days, hours, minutes, seconds)
+            else:
+                ret = '%d:%02d:%02d' % (hours, minutes, seconds)
+        else:
+            ret = '%d:%02d' % (minutes, seconds)
+    else:
+        ret = '%d' % seconds
     return ('-' if negative else '') + ret
 
 def fixWidgetSize(widget, adjustment = 1):
@@ -247,6 +248,7 @@ class MeshConsole(QMainWindow):
         for device in self.devices:
             device.reset()
         self.devicesModel.refresh(True)
+        self.port.connect()
 
     def pause(self):
         self.playing = not self.playing

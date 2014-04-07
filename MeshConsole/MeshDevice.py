@@ -25,24 +25,24 @@ def getItem(what, index):
 
 def getColumnsData(processor):
     return ( # checked, changing, highlight, name, description, fieldName, longestValue, formatter, fmt
-        (True, CONST, False, 'ID', 'Device ID', 'number', NUM_DEVICES),
-        (True, RAW, True, 'Hops', 'Number of hops from device', 'hops', NUM_DEVICES),
-        (True, RAW, True, 'TimestampC', 'Information timestamp', 'time', 9999),
-        (True, RAW, True, 'TimestampD', 'Information timestamp date', 'time', 0, processor.cycleDateStr),
-        (True, PROC, False, 'AgeC', 'Age of information in cycles', 'time', 9999, processor.cycleAge),
-        (True, PROC, False, 'AgeS', 'Age of information in seconds', 'time', 9999, processor.cycleAgeSeconds),
-        (True, PROC, False, 'AgeT', 'Age of information as time', 'time', 0, processor.cycleAgeTimeStr),
-        (True, RAW, True, 'TimeDiffC', 'Time difference in cycles', 'td', 9999, None, '%+d'),
-        (True, RAW, True, 'TimeDiffS', 'Time difference in seconds', 'td', 9999, processor.cycleSeconds, '%+d'),
-        (True, RAW, True, 'TimeDiffT', 'Time difference as time', 'td', 0, processor.cycleTimeStr),
-        (True, PROC, False, 'LocalTimeC', 'Device local time in cycles', 'td', 9999, processor.tdTime),
-        (True, PROC, False, 'LocalTimeD', 'Device local date', 'td', 0, processor.tdDateStr),
-        (True, RAW, True, 'Location', 'Device location', 'location', len(REASONS)),
-        (True, RAW, True, 'LocationN', 'Device location name', 'location', LONGEST_REASON, partial(getItem, REASONS)),
-        (True, RAW, True, 'Reason', 'Actual reason', 'reason', len(REASONS)),
-        (True, RAW, True, 'ReasonN', 'Actual reason', 'reason', LONGEST_REASON, partial(getItem, REASONS)),
-        (True, RAW, True, 'Emotion', 'Emotion', 'emotion', len(EMOTIONS)),
-        (True, RAW, True, 'EmotionN', 'Emotion', 'emotion', LONGEST_EMOTION, partial(getItem, EMOTIONS))
+        (True, CONST, False, True, 'ID', 'Device ID', 'number', NUM_DEVICES),
+        (True, RAW, True, True, 'Hops', 'Number of hops from device', 'hops', NUM_DEVICES),
+        (True, RAW, True, True, 'TimestampC', 'Information timestamp', 'time', 9999),
+        (True, RAW, True, True, 'TimestampD', 'Information timestamp date', 'time', 0, processor.cycleDateStr),
+        (True, PROC, False, True, 'AgeC', 'Age of information in cycles', 'time', 9999, processor.cycleAge),
+        (True, PROC, False, True, 'AgeS', 'Age of information in seconds', 'time', 9999, processor.cycleAgeSeconds),
+        (True, PROC, False, True, 'AgeT', 'Age of information as time', 'time', 0, processor.cycleAgeTimeStr),
+        (True, RAW, True, True, 'TimeDiffC', 'Time difference in cycles', 'td', 9999, None, '%+d'),
+        (True, RAW, True, True, 'TimeDiffS', 'Time difference in seconds', 'td', 9999, processor.cycleSeconds, '%+d'),
+        (True, RAW, True, True, 'TimeDiffT', 'Time difference as time', 'td', 0, processor.cycleTimeStr),
+        (True, PROC, False, True, 'LocalTimeC', 'Device local time in cycles', 'td', 9999, processor.tdTime),
+        (True, PROC, False, True, 'LocalTimeD', 'Device local date', 'td', 0, processor.tdDateStr),
+        (True, RAW, True, True, 'Location', 'Device location', 'location', len(REASONS)),
+        (True, RAW, True, False, 'LocationN', 'Device location name', 'location', LONGEST_REASON, partial(getItem, REASONS)),
+        (True, RAW, True, True, 'Reason', 'Actual reason', 'reason', len(REASONS)),
+        (True, RAW, True, False, 'ReasonN', 'Actual reason', 'reason', LONGEST_REASON, partial(getItem, REASONS)),
+        (True, RAW, True, True, 'Emotion', 'Emotion', 'emotion', len(EMOTIONS)),
+        (True, RAW, True, False, 'EmotionN', 'Emotion', 'emotion', LONGEST_EMOTION, partial(getItem, EMOTIONS))
     )
 
 class Device(object): # pylint: disable=R0902
