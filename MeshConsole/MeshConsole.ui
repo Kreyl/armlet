@@ -96,14 +96,14 @@
          <string notr="true">font-weight: bold</string>
         </property>
         <property name="text">
-         <string>9999.99.99</string>
+         <string>9999 . 99 . 99</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="timeLabel">
         <property name="text">
-         <string>Time</string>
+         <string>Current time</string>
         </property>
         <property name="indent">
          <number>5</number>

@@ -14,12 +14,12 @@ REASONS_CSV = '../MusicProcessor/Reasons.csv'
 EMOTIONS = tuple(row[-1].decode('utf-8') for row in CSVReader(open(EMOTIONS_CSV)) if row and not row[0].startswith('#'))
 REASONS = tuple(row[0] for row in CSVReader(open(REASONS_CSV)) if row and not row[0].startswith('#'))
 
-LONGEST_EMOTION = max(len(emotion) for emotion in EMOTIONS)
-LONGEST_REASON = max(len(reason) for reason in REASONS_CSV)
+LONGEST_EMOTION = max((len(emotion), n) for (n, emotion) in enumerate(EMOTIONS))[1]
+LONGEST_REASON = max((len(reason), n) for (n, reason) in enumerate(REASONS))[1]
 
 def getItem(what, index):
     try:
-        return what[index]
+        return what[index].lower()
     except IndexError:
         return index
 
@@ -37,9 +37,12 @@ def getColumnsData(processor):
         (True, RAW, True, 'TimeDiffT', 'Time difference as time', 'td', 0, processor.cycleTimeStr),
         (True, PROC, False, 'LocalTimeC', 'Device local time in cycles', 'td', 9999, processor.tdTime),
         (True, PROC, False, 'LocalTimeD', 'Device local date', 'td', 0, processor.tdDateStr),
-        (True, RAW, True, 'Location', 'Device location', 'location', LONGEST_REASON, partial(getItem, REASONS)),
-        (True, RAW, True, 'Reason', 'Actual reason', 'reason', LONGEST_REASON, partial(getItem, REASONS)),
-        (True, RAW, True, 'Emotion', 'Emotion', 'emotion', LONGEST_EMOTION, partial(getItem, EMOTIONS))
+        (True, RAW, True, 'Location', 'Device location', 'location', len(REASONS)),
+        (True, RAW, True, 'LocationN', 'Device location name', 'location', LONGEST_REASON, partial(getItem, REASONS)),
+        (True, RAW, True, 'Reason', 'Actual reason', 'reason', len(REASONS)),
+        (True, RAW, True, 'ReasonN', 'Actual reason', 'reason', LONGEST_REASON, partial(getItem, REASONS)),
+        (True, RAW, True, 'Emotion', 'Emotion', 'emotion', len(EMOTIONS)),
+        (True, RAW, True, 'EmotionN', 'Emotion', 'emotion', LONGEST_EMOTION, partial(getItem, EMOTIONS))
     )
 
 class Device(object): # pylint: disable=R0902

@@ -3,7 +3,7 @@ from PyQt4.QtCore import Qt, QAbstractTableModel, QVariant
 from PyQt4.QtGui import QAction, QPalette, QStyle
 from PyQt4.QtGui import QItemDelegate, QItemSelection, QSortFilterProxyModel, QTableView
 
-FONT_METRICS_CORRECTION = 1.3
+FONT_METRICS_CORRECTION = 1.1
 
 INVALID_DATA = QVariant()
 
@@ -45,7 +45,7 @@ class Column(object):
             return None
         if self.formatter:
             data = self.formatter(data)
-        return self.fmt % data if self.fmt else unicode(data)
+        return self.fmt % data if self.fmt else unicode(data) if data != None else ''
 
 class ColumnAction(QAction):
     def __init__(self, column, toggleCallback, menu):
@@ -73,7 +73,9 @@ class Cell(dict):
         if not initial and self.column.changing is CONST:
             return
         data = getattr(self.device, self.column.fieldName)
-        if self.column.changing is RAW:
+        if self.column.changing is CONST:
+            self[Qt.DisplayRole] = data
+        elif self.column.changing is RAW:
             if data == self[RAW_ROLE]:
                 if self.column.highlight:
                     self[CHANGED_ROLE] = False

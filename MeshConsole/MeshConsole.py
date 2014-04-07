@@ -14,7 +14,11 @@ except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
 # ToDo:
-# Create connected device emulator
+#
+# Save startTime
+# Make some columns left-aligned
+# Make accented lines work
+#
 # Add console control capability
 
 from MeshView import DevicesModel, Column, ColumnAction
@@ -61,7 +65,7 @@ def timeDeltaStr(seconds):
     return ('-' if negative else '') + ret
 
 def fixWidgetSize(widget, adjustment = 1):
-    widget.setFixedWidth(widget.fontMetrics().boundingRect(widget.text()).width() * adjustment) # Yes, it's a hack on a hack
+    widget.setFixedWidth(widget.fontMetrics().boundingRect(widget.text()).width() * adjustment) # This is a bad hack, but there's no better idea
 
 class PortLabel(QLabel):
     STATUS_COLORS = {
@@ -204,33 +208,33 @@ class MeshConsole(QMainWindow):
         self.startTime = QDateTime(date) if date else None
         self.startTimeValueLabel.setValue(date)
 
-    def processConnect(self, pong):
+    def processConnect(self, pong): # ToDo: make a special signal for this to avoid threading problems?
         try:
             self.setStartTime(QDate(*(int(d) for d in pong.split()[1:])))
         except Exception:
-            self.logger.exception("Can't set start time from pong %s", pong)
+            self.logger.exception("Can't set start time from pong %s", pong) # ToDo: Called from other thread, must be wrapped
 
     def updateTime(self):
         now = QDateTime.currentDateTime()
         if self.playing:
             self.timeValueLabel.setValue(now)
         self.currentCycle = self.startTime.msecsTo(now) // CYCLE_LENGTH if self.startTime else None
-        if self.currentCycle:
+        if now.time().second() % 10 == 0:
             self.logger.info("Setting network time to %d" % self.currentCycle)
             self.port.write(COMMAND_SET_TIME % self.currentCycle)
         dt = QDateTime.currentDateTime().msecsTo(QDateTime.fromMSecsSinceEpoch((now.toMSecsSinceEpoch() // 1000 + 1) * 1000))
         QTimer.singleShot(max(0, dt), self.updateTime)
 
-    def processInput(self, inputLine):
+    def processInput(self, inputLine): # ToDo: make a special signal for this to avoid threading problems?
         if inputLine.startswith(COMMAND_NODE_INFO):
             try:
                 words = inputLine.split()
-                self.devices[int(words[1])].update(*words[2:])
+                self.devices[int(words[1]) - 1].update(*words[2:])
                 self.saveDump()
                 if self.playing:
                     self.devicesModel.refresh()
-            except:
-                self.logger.exception("Bad info command %s", inputLine)
+            except: # ToDo: catch exceptions carefully
+                self.logger.exception("Bad info command %s", inputLine) # ToDo: Called from other thread, must be wrapped
 
     def closeEvent(self, _event):
         self.saveDump()
@@ -241,7 +245,7 @@ class MeshConsole(QMainWindow):
         self.setStartTime()
         for device in self.devices:
             device.reset()
-        self.devicesModel.refresh()
+        self.devicesModel.refresh(True)
 
     def pause(self):
         self.playing = not self.playing
@@ -287,6 +291,7 @@ class MeshConsole(QMainWindow):
                         if device.time != None:
                             self.error("Bad dump: duplicate entry for device %s" % device.number)
                         device.update(*data)
+                self.devicesModel.refresh(True)
                 self.logger.info("Loaded dump file")
         except IOError:
             self.logger.warning("Error loading dump file, resetting to defaults")
