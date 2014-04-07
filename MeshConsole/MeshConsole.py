@@ -16,8 +16,6 @@ except ImportError, ex:
 
 # ToDo:
 #
-# Make setTime regular
-#
 # Add console control capability
 
 from MeshView import DevicesModel, Column, ColumnAction
@@ -34,6 +32,8 @@ COMMAND_PING = 'getStartTime'
 COMMAND_PONG = 'startTime'
 COMMAND_SET_TIME = 'setTime %d'
 COMMAND_NODE_INFO = 'node'
+
+TIME_SET_INTERVAL = 10
 
 HIGHLIGHT_STYLE = 'color: red'
 
@@ -154,6 +154,7 @@ class MeshConsole(QMainWindow):
         # Configure devices and columns
         self.startTime = None
         self.currentCycle = None
+        self.previousTimeSet = None
         Device.configure(self)
         self.devices = Device.devices
         self.columns = tuple(Column(nColumn, *args) for (nColumn, args) in enumerate(getColumnsData(self)))
@@ -221,7 +222,8 @@ class MeshConsole(QMainWindow):
         if self.playing:
             self.timeValueLabel.setValue(now)
         self.currentCycle = self.startTime.msecsTo(now) // CYCLE_LENGTH if self.startTime else None
-        if self.startTime and now.time().second() % 10 == 0:
+        if self.startTime and self.port.port and (not self.previousTimeSet or self.previousTimeSet.secsTo(now) >= TIME_SET_INTERVAL):
+            self.previousTimeSet = now
             self.logger.info("Setting network time to %d" % self.currentCycle)
             self.port.write(COMMAND_SET_TIME % self.currentCycle)
         dt = QDateTime.currentDateTime().msecsTo(QDateTime.fromMSecsSinceEpoch((now.toMSecsSinceEpoch() // 1000 + 1) * 1000))
