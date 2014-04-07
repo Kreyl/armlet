@@ -127,7 +127,7 @@ class SerialPort(object):
                 self.statusUpdate("No COM", self.NONE)
 
     def write(self, data):
-        self.info("> %s" % data)
+        self.info(" > %s" % data)
         if EMULATED:
             pass
         else:
