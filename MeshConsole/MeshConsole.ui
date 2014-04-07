@@ -215,12 +215,15 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="consoleEdit">
+         <widget class="ConsoleEdit" name="consoleEdit">
           <property name="toolTip">
            <string>Enter console commands here</string>
           </property>
           <property name="statusTip">
            <string>Enter console commands here</string>
+          </property>
+          <property name="placeholderText">
+           <string>Enter console command here</string>
           </property>
          </widget>
         </item>
@@ -425,6 +428,11 @@
   <customwidget>
    <class>DateTimeValueLabel</class>
    <extends>QLabel</extends>
+   <header>MeshConsole</header>
+  </customwidget>
+  <customwidget>
+   <class>ConsoleEdit</class>
+   <extends>QLineEdit</extends>
    <header>MeshConsole</header>
   </customwidget>
  </customwidgets>

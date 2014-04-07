@@ -10,18 +10,12 @@ from traceback import format_exc
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import QDate, QDateTime, QTimer, pyqtSignal
-    from PyQt4.QtGui import QApplication, QDesktopWidget, QLabel, QMainWindow, QPushButton
+    from PyQt4.QtGui import QApplication, QDesktopWidget, QLabel, QLineEdit, QMainWindow, QPushButton
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
-# ToDo:
-#
-# Add console control capability
-
 from MeshView import DevicesModel, Column, ColumnAction
-
 from MeshDevice import Device, getColumnsData
-
 from SerialPort import SerialPort
 
 DATE_FORMAT = 'yyyy.MM.dd'
@@ -117,6 +111,12 @@ class CallableHandler(Handler):
     def emit(self, record):
         self.emitCallable(self.format(record))
 
+class ConsoleEdit(QLineEdit):
+    def getInput(self):
+        ret = self.text()
+        self.clear()
+        return ret
+
 class MeshConsole(QMainWindow):
     comLogSignal = pyqtSignal(int, str)
 
@@ -138,6 +138,7 @@ class MeshConsole(QMainWindow):
         self.resetButton.clicked.connect(self.reset)
         self.startTimeValueLabel.configure()
         self.timeValueLabel.configure()
+        self.consoleEdit.returnPressed.connect(self.consoleEnter)
         self.sampleWidget.hide()
         self.statusBar.hide()
         # Setup logging
@@ -239,6 +240,9 @@ class MeshConsole(QMainWindow):
                     self.devicesModel.refresh()
             except: # ToDo: catch exceptions carefully
                 self.logger.exception("Bad info command %s", inputLine) # ToDo: Called from other thread, must be wrapped
+
+    def consoleEnter(self):
+        self.port.write(self.consoleEdit.getInput())
 
     def closeEvent(self, _event):
         self.saveDump()
