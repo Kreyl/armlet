@@ -49,7 +49,7 @@ def timeDeltaStr(seconds):
     if minutes:
         (hours, minutes) = divmod(minutes, 60)
         if hours:
-            (days, hours) = divmod(minutes, 24)
+            (days, hours) = divmod(hours, 24)
             if days:
                 ret = '%d %02d:%02d:%02d' % (days, hours, minutes, seconds)
             else:
@@ -92,7 +92,7 @@ class DateValueLabel(QLabel):
 
     def setValue(self, date):
         self.setText(date.toString(DATE_FORMAT) if date else 'not set')
-        self.setStyleSheet(self.savedStyleSheet if date else '%s; %s' % (self.savedStyleSheet, HIGHLIGHT_STYLE)) # ToDo Redo it with palettes
+        self.setStyleSheet(self.savedStyleSheet if date else '%s; %s' % (self.savedStyleSheet, HIGHLIGHT_STYLE))
 
 class DateTimeValueLabel(QLabel):
     def configure(self):

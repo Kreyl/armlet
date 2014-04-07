@@ -64,7 +64,7 @@ class SerialPort(object):
             try:
                 if EMULATED:
                     sleep(float(randint(0, 1000)) / 1000)
-                    num = randint(0, 100)
+                    num = randint(1, 100)
                     line = 'node %s %s %s %s %s %s %s' % (num, 0 if num == 1 else randint(1, 5), randint(0, 10000), randint(0, 200) - 100, randint(0, 20), randint(0, 20), randint(0, 20))
                 else:
                     line = self.port.readline()
