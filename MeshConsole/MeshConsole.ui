@@ -81,9 +81,9 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="startTimeLabel">
+       <widget class="QLabel" name="startDateLabel">
         <property name="text">
-         <string>Start time</string>
+         <string>Start date</string>
         </property>
         <property name="indent">
          <number>5</number>
@@ -91,12 +91,9 @@
        </widget>
       </item>
       <item>
-       <widget class="DateValueLabel" name="startTimeValueLabel">
-        <property name="styleSheet">
-         <string notr="true">font-weight: bold</string>
-        </property>
-        <property name="text">
-         <string>9999 . 99 . 99</string>
+       <widget class="StartDateEdit" name="startDateEdit">
+        <property name="calendarPopup">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -111,7 +108,7 @@
        </widget>
       </item>
       <item>
-       <widget class="DateTimeValueLabel" name="timeValueLabel">
+       <widget class="DateTimeValueLabel" name="dateTimeValueLabel">
         <property name="font">
          <font>
           <weight>75</weight>
@@ -421,13 +418,13 @@
    <header>MeshConsole</header>
   </customwidget>
   <customwidget>
-   <class>DateValueLabel</class>
+   <class>DateTimeValueLabel</class>
    <extends>QLabel</extends>
    <header>MeshConsole</header>
   </customwidget>
   <customwidget>
-   <class>DateTimeValueLabel</class>
-   <extends>QLabel</extends>
+   <class>StartDateEdit</class>
+   <extends>QDateEdit</extends>
    <header>MeshConsole</header>
   </customwidget>
   <customwidget>

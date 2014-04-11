@@ -111,10 +111,10 @@ class SerialPort(object):
                         if self.ping:
                             self.info("> %s" % self.ping)
                             if EMULATED:
-                                pong = '%s 2014 04 07' % self.pong
-                                self.info("< %s" % pong)
+                                self.info("< %s" % self.pong)
+                                pong = self.pong
                             else:
-                                self.port.write('%s\r\n' % self.ping)
+                                self.port.write('%s\n' % self.ping)
                                 pong = self.expect(self.pong or '')
                             if pong:
                                 if self.connectCallBack:
@@ -131,7 +131,7 @@ class SerialPort(object):
         if EMULATED:
             pass
         else:
-            self.writeBuffer.extend('%s\r\n' % data)
+            self.writeBuffer.extend('%s\n' % data)
 
     def expect(self, prefix):
         timeout = time() + self.port.timeout

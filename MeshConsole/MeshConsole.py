@@ -3,14 +3,14 @@
 from binascii import hexlify, unhexlify
 from datetime import datetime
 from logging import getLogger, FileHandler, Formatter, Handler, INFO, NOTSET
-from re import match
+from re import match, split
 from sys import argv
 from traceback import format_exc
 
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import QDate, QDateTime, QTimer, pyqtSignal
-    from PyQt4.QtGui import QApplication, QDesktopWidget, QLabel, QLineEdit, QMainWindow, QPushButton
+    from PyQt4.QtGui import QApplication, QDateEdit, QDesktopWidget, QLabel, QLineEdit, QMainWindow, QPushButton
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -18,14 +18,20 @@ from MeshView import DevicesModel, Column, ColumnAction
 from MeshDevice import Device, getColumnsData
 from SerialPort import SerialPort
 
+# ToDo
+# Redo play/pause button
+# Correctly process replies to commands
+# Set minimum start date to avoid cycle# overflow (1 year before? make sure some reserve is left for the future, take note of sign)
+# Split updateTime in two, to update mesh time and view immediately
+
 DATE_FORMAT = 'yyyy.MM.dd'
 TIME_FORMAT = 'hh:mm:ss'
 DATETIME_FORMAT = 'dd %s' % TIME_FORMAT
 
-COMMAND_PING = 'getStartTime'
-COMMAND_PONG = 'startTime'
-COMMAND_SET_TIME = 'setTime %d'
-COMMAND_NODE_INFO = 'node'
+COMMAND_PING = '#01'
+COMMAND_PONG = '#90,00'
+COMMAND_SET_TIME = '#71,%d'
+COMMAND_NODE_INFO = 'node '
 
 TIME_SET_INTERVAL = 10
 
@@ -70,6 +76,7 @@ class PortLabel(QLabel):
         SerialPort.VERIFIED: 'green',
         SerialPort.ERROR: 'red'
     }
+
     setPortStatus = pyqtSignal(str, int)
 
     def configure(self):
@@ -85,22 +92,21 @@ class ResetButton(QPushButton):
     def configure(self):
         fixWidgetSize(self, 1.5)
 
-class DateValueLabel(QLabel):
-    def configure(self):
-        self.savedStyleSheet = self.styleSheet()
-        fixWidgetSize(self)
-
-    def setValue(self, date):
-        self.setText(date.toString(DATE_FORMAT) if date else 'not set')
-        self.setStyleSheet(self.savedStyleSheet if date else '%s; %s' % (self.savedStyleSheet, HIGHLIGHT_STYLE))
+class StartDateEdit(QDateEdit):
+    def configure(self, dateFormat):
+        self.setDisplayFormat(dateFormat)
+        now = QDate.currentDate()
+        self.setMaximumDate(now)
+        self.setDate(now)
 
 class DateTimeValueLabel(QLabel):
-    def configure(self):
+    def configure(self, dateTimeFormat):
+        self.dateTimeFormat = dateTimeFormat
         self.savedStyleSheet = self.styleSheet()
         fixWidgetSize(self)
 
     def setValue(self, dateTime):
-        self.setText(dateTime.toString(DATETIME_FORMAT) if dateTime else 'not set')
+        self.setText(dateTime.toString(self.dateTimeFormat) if dateTime else 'not set')
         self.setStyleSheet(self.savedStyleSheet if dateTime else '%s; %s' % (self.savedStyleSheet, HIGHLIGHT_STYLE))
 
 class CallableHandler(Handler):
@@ -138,8 +144,8 @@ class MeshConsole(QMainWindow):
         self.pauseButton.setFocus()
         self.resetButton.configure()
         self.resetButton.clicked.connect(self.reset)
-        self.startTimeValueLabel.configure()
-        self.timeValueLabel.configure()
+        self.startDateEdit.configure(DATE_FORMAT)
+        self.dateTimeValueLabel.configure(DATETIME_FORMAT)
         self.consoleEdit.returnPressed.connect(self.consoleEnter)
         self.sampleWidget.hide()
         self.statusBar.hide()
@@ -172,8 +178,9 @@ class MeshConsole(QMainWindow):
             self.columnsMenu.addAction(action)
             self.columnActions.append(action)
         # Starting up!
-        self.setStartTime()
         self.loadDump()
+        self.setStartTime()
+        self.startDateEdit.dateChanged.connect(self.setStartTime)
         self.playing = False # will be toggled immediately by pause()
         self.comConnect.connect(self.processConnect)
         self.comInput.connect(self.processInput)
@@ -212,25 +219,22 @@ class MeshConsole(QMainWindow):
     def tdDateStr(self, td):
         return self.cycleDateStr(self.tdTime(td)) if self.startTime and self.currentCycle != None and td != None else None
 
-    def setStartTime(self, date = None):
-        self.startTime = QDateTime(date) if date else None
-        self.startTimeValueLabel.setValue(date)
+    def setStartTime(self):
+        date = self.startDateEdit.date()
+        self.startTime = QDateTime(date)
+        self.logger.info("Start date set to %s" % date.toString(DATE_FORMAT))
 
-    def processConnect(self, pong):
-        pong = str(pong)
-        try:
-            self.setStartTime(QDate(*(int(d) for d in pong.split()[1:])))
-        except Exception:
-            self.logger.exception("Can't set start time from pong %s", pong)
+    def processConnect(self, _pong):
+        self.logger.info("connected device found")
 
     def updateTime(self):
         now = QDateTime.currentDateTime()
         if self.playing:
-            self.timeValueLabel.setValue(now)
+            self.dateTimeValueLabel.setValue(now)
         self.currentCycle = self.startTime.msecsTo(now) // CYCLE_LENGTH if self.startTime else None
         if self.startTime and self.port.port and (not self.previousTimeSet or self.previousTimeSet.secsTo(now) >= TIME_SET_INTERVAL):
             self.previousTimeSet = now
-            self.logger.info("Setting network time to %d" % self.currentCycle)
+            self.logger.info("Setting mesh time to %d" % self.currentCycle)
             self.port.write(COMMAND_SET_TIME % self.currentCycle)
         dt = QDateTime.currentDateTime().msecsTo(QDateTime.fromMSecsSinceEpoch((now.toMSecsSinceEpoch() // 1000 + 1) * 1000))
         QTimer.singleShot(max(0, dt), self.updateTime)
@@ -239,7 +243,7 @@ class MeshConsole(QMainWindow):
         inputLine = str(inputLine)
         if inputLine.startswith(COMMAND_NODE_INFO):
             try:
-                words = inputLine.split()
+                words = split(' *[, ] *', inputLine.strip())
                 self.devices[int(words[1]) - 1].update(*words[2:])
                 self.saveDump()
                 if self.playing:
@@ -256,7 +260,6 @@ class MeshConsole(QMainWindow):
 
     def reset(self):
         self.logger.info("reset")
-        self.setStartTime()
         for device in self.devices:
             device.reset()
         self.devicesModel.refresh(True)
@@ -279,7 +282,7 @@ class MeshConsole(QMainWindow):
             dump.write('columns %s\n' % ' '.join(str(action.isChecked()) for action in self.columnActions))
             if self.startTime:
                 date = self.startTime.date()
-                dump.write('startTime %d %d %d\n' % (date.year(), date.month(), date.day()))
+                dump.write('startDate %d %d %d\n' % (date.year(), date.month(), date.day()))
             for device in self.devices:
                 dumpStr = device.toDumpStr()
                 if dumpStr:
@@ -306,8 +309,8 @@ class MeshConsole(QMainWindow):
                     elif tag == 'columns':
                         for (action, checked) in zip(self.columnActions, data):
                             action.setChecked(checked == 'True')
-                    elif tag == 'startTime':
-                        self.setStartTime(QDate(*(int(d) for d in data)))
+                    elif tag == 'startDate':
+                        self.startDateEdit.setDate(QDate(*(int(d) for d in data)))
                     elif match(r'\d+', tag):
                         device = self.devices[int(tag) - 1]
                         if device.time != None:
