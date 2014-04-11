@@ -4,7 +4,7 @@ from binascii import hexlify, unhexlify
 from datetime import datetime
 from logging import getLogger, FileHandler, Formatter, Handler, INFO, NOTSET
 from re import match, split
-from sys import argv
+from sys import argv, exit # pylint: disable=W0622
 from traceback import format_exc
 
 try:
@@ -20,8 +20,8 @@ from SerialPort import SerialPort
 
 # ToDo
 # Correctly process replies to commands
-# Set minimum start date to avoid cycle# overflow (1 year before? make sure some reserve is left for the future, take note of sign)
 # Split updateTime in two, to update mesh time and view immediately
+# Set cycleLength from device
 
 DATE_FORMAT = 'yyyy.MM.dd'
 TIME_FORMAT = 'hh:mm:ss'
@@ -44,6 +44,8 @@ LOG_FILE_NAME = 'MeshConsole.log'
 DUMP_FILE_NAME = 'MeshConsole.dmp'
 
 CYCLE_LENGTH = 400
+
+MAX_CYCLE_NUMBER = 256 ** 3 // 2 - 1 # 3 signed bytes
 
 WINDOW_SIZE = 2.0 / 3
 WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
@@ -106,6 +108,7 @@ class StartDateEdit(QDateEdit):
         self.setDisplayFormat(dateFormat)
         now = QDate.currentDate()
         self.setMaximumDate(now)
+        self.setMinimumDate(now.addDays(-(MAX_CYCLE_NUMBER * CYCLE_LENGTH // (1000 * 3600 * 24 * 2))))
         self.setDate(now)
         self.dateChanged.connect(callback)
 
@@ -242,6 +245,8 @@ class MeshConsole(QMainWindow):
         if self.playing:
             self.dateTimeValueLabel.setValue(now)
         self.currentCycle = self.startTime.msecsTo(now) // CYCLE_LENGTH if self.startTime else None
+        if self.currentCycle >= MAX_CYCLE_NUMBER:
+            self.error("Cycle number overflow, aborting")
         if self.startTime and self.port.port and (not self.previousTimeSet or self.previousTimeSet.secsTo(now) >= TIME_SET_INTERVAL):
             self.previousTimeSet = now
             self.logger.info("Setting mesh time to %d" % self.currentCycle)
@@ -332,8 +337,9 @@ class MeshConsole(QMainWindow):
             self.logger.warning("Error loading dump file, resetting to defaults")
 
     def error(self, message):
+        print "ERROR", message
         self.logger.error(message)
-        raise Exception(message)
+        exit(-1)
 
 def main():
     try:
@@ -342,6 +348,8 @@ def main():
         return application.exec_()
     except KeyboardInterrupt:
         pass
+    except SystemExit:
+        raise
     except BaseException:
         print format_exc()
 
