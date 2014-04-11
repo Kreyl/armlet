@@ -21,11 +21,12 @@ from SerialPort import SerialPort
 # ToDo
 # Correctly process replies to commands
 # Split updateTime in two, to update mesh time and view immediately
+# Create confirmation window to change start date
 # Set cycleLength from device
 
-DATE_FORMAT = 'yyyy.MM.dd'
+DATE_FORMAT = 'MM.dd'
 TIME_FORMAT = 'hh:mm:ss'
-DATETIME_FORMAT = 'dd %s' % TIME_FORMAT
+DATETIME_FORMAT = 'dd  %s' % TIME_FORMAT
 
 COMMAND_PING = '#01'
 COMMAND_PONG = '#90,00'
@@ -95,7 +96,6 @@ class PauseButton(QPushButton):
         self.clicked.connect(self.processClick)
 
     def processClick(self):
-        print self.icon().name()
         self.callback()
 
 class ResetButton(QPushButton):
@@ -116,10 +116,9 @@ class DateTimeValueLabel(QLabel):
     def configure(self, dateTimeFormat):
         self.dateTimeFormat = dateTimeFormat
         self.savedStyleSheet = self.styleSheet()
-        fixWidgetSize(self)
 
-    def setValue(self, dateTime):
-        self.setText(dateTime.toString(self.dateTimeFormat) if dateTime else 'not set')
+    def setValue(self, dateTime, cycle):
+        self.setText(("%s  %s" % (dateTime.toString(self.dateTimeFormat), cycle)) if dateTime else 'not set')
         self.setStyleSheet(self.savedStyleSheet if dateTime else '%s; %s' % (self.savedStyleSheet, HIGHLIGHT_STYLE))
 
 class CallableHandler(Handler):
@@ -242,11 +241,11 @@ class MeshConsole(QMainWindow):
 
     def updateTime(self):
         now = QDateTime.currentDateTime()
-        if self.playing:
-            self.dateTimeValueLabel.setValue(now)
         self.currentCycle = self.startTime.msecsTo(now) // CYCLE_LENGTH if self.startTime else None
         if self.currentCycle >= MAX_CYCLE_NUMBER:
             self.error("Cycle number overflow, aborting")
+        if self.playing:
+            self.dateTimeValueLabel.setValue(now, self.currentCycle)
         if self.startTime and self.port.port and (not self.previousTimeSet or self.previousTimeSet.secsTo(now) >= TIME_SET_INTERVAL):
             self.previousTimeSet = now
             self.logger.info("Setting mesh time to %d" % self.currentCycle)
@@ -337,7 +336,7 @@ class MeshConsole(QMainWindow):
             self.logger.warning("Error loading dump file, resetting to defaults")
 
     def error(self, message):
-        print "ERROR", message
+        print "ERROR:", message
         self.logger.error(message)
         exit(-1)
 

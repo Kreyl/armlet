@@ -120,7 +120,7 @@
          <string>Time</string>
         </property>
         <property name="text">
-         <string>99  99:99:99</string>
+         <string>99  99:99:99  9999999</string>
         </property>
        </widget>
       </item>
