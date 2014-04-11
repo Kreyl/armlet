@@ -144,6 +144,10 @@ class StartDateChangeConfirmationDialog(QDialog):
         QDialog.__init__(self)
         uic.loadUi(CONFIRMATION_UI_FILE_NAME, self)
 
+    def popup(self):
+        self.buttonBox.button(self.buttonBox.No).setFocus()
+        return self.exec_()
+
 class MeshConsole(QMainWindow):
     comConnect = pyqtSignal(str)
     comInput = pyqtSignal(str)
@@ -241,7 +245,7 @@ class MeshConsole(QMainWindow):
     def setStartTime(self):
         date = self.startDateEdit.date()
         if date != self.savedStartDate:
-            if not self.savedStartDate or self.startDateChangeConfirmationDialog.exec_():
+            if not self.savedStartDate or self.startDateChangeConfirmationDialog.popup():
                 self.savedStartDate = date
                 self.startTime = QDateTime(date)
                 self.logger.info("Start date set to %s" % date.toString(DATE_FORMAT))
