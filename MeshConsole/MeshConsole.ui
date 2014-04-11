@@ -32,7 +32,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="pauseButton">
+       <widget class="PauseButton" name="pauseButton">
         <property name="toolTip">
          <string>Pause</string>
         </property>
@@ -41,15 +41,13 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>images/pause.png</normaloff>images/pause.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>18</width>
-          <height>17</height>
-         </size>
+          <normaloff>images/pause.png</normaloff>
+          <normalon>images/play.png</normalon>images/pause.png</iconset>
         </property>
         <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="default">
          <bool>true</bool>
         </property>
        </widget>
@@ -430,6 +428,11 @@
   <customwidget>
    <class>ConsoleEdit</class>
    <extends>QLineEdit</extends>
+   <header>MeshConsole</header>
+  </customwidget>
+  <customwidget>
+   <class>PauseButton</class>
+   <extends>QPushButton</extends>
    <header>MeshConsole</header>
   </customwidget>
  </customwidgets>

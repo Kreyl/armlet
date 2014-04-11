@@ -19,7 +19,6 @@ from MeshDevice import Device, getColumnsData
 from SerialPort import SerialPort
 
 # ToDo
-# Redo play/pause button
 # Correctly process replies to commands
 # Set minimum start date to avoid cycle# overflow (1 year before? make sure some reserve is left for the future, take note of sign)
 # Split updateTime in two, to update mesh time and view immediately
@@ -88,16 +87,27 @@ class PortLabel(QLabel):
         self.setText(portName)
         self.setStyleSheet(self.savedStyleSheet + '; color: %s' % self.STATUS_COLORS.get(portStatus, 'gray'))
 
+class PauseButton(QPushButton):
+    def configure(self, callback):
+        self.callback = callback
+        self.clicked.connect(self.processClick)
+
+    def processClick(self):
+        print self.icon().name()
+        self.callback()
+
 class ResetButton(QPushButton):
-    def configure(self):
+    def configure(self, callback):
         fixWidgetSize(self, 1.5)
+        self.clicked.connect(callback)
 
 class StartDateEdit(QDateEdit):
-    def configure(self, dateFormat):
+    def configure(self, dateFormat, callback):
         self.setDisplayFormat(dateFormat)
         now = QDate.currentDate()
         self.setMaximumDate(now)
         self.setDate(now)
+        self.dateChanged.connect(callback)
 
 class DateTimeValueLabel(QLabel):
     def configure(self, dateTimeFormat):
@@ -118,6 +128,9 @@ class CallableHandler(Handler):
         self.emitCallable(self.format(record))
 
 class ConsoleEdit(QLineEdit):
+    def configure(self, callback):
+        self.returnPressed.connect(callback)
+
     def getInput(self):
         ret = self.text()
         self.clear()
@@ -140,13 +153,10 @@ class MeshConsole(QMainWindow):
         self.setGeometry(width * WINDOW_POSITION, height * WINDOW_POSITION, width * WINDOW_SIZE, height * WINDOW_SIZE)
         # Configuring widgets
         self.portLabel.configure()
-        self.pauseButton.clicked.connect(self.pause)
-        self.pauseButton.setFocus()
-        self.resetButton.configure()
-        self.resetButton.clicked.connect(self.reset)
-        self.startDateEdit.configure(DATE_FORMAT)
+        self.pauseButton.configure(self.pause)
+        self.resetButton.configure(self.reset)
         self.dateTimeValueLabel.configure(DATETIME_FORMAT)
-        self.consoleEdit.returnPressed.connect(self.consoleEnter)
+        self.consoleEdit.configure(self.consoleEnter)
         self.sampleWidget.hide()
         self.statusBar.hide()
         # Setup logging
@@ -180,7 +190,7 @@ class MeshConsole(QMainWindow):
         # Starting up!
         self.loadDump()
         self.setStartTime()
-        self.startDateEdit.dateChanged.connect(self.setStartTime)
+        self.startDateEdit.configure(DATE_FORMAT, self.setStartTime)
         self.playing = False # will be toggled immediately by pause()
         self.comConnect.connect(self.processConnect)
         self.comInput.connect(self.processInput)
