@@ -2,6 +2,7 @@
 
 from binascii import hexlify, unhexlify
 from datetime import datetime
+from functools import partial
 from logging import getLogger, FileHandler, Formatter, Handler, INFO, NOTSET
 from re import match, split
 from sys import argv, exit # pylint: disable=W0622
@@ -10,7 +11,7 @@ from traceback import format_exc
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import QDate, QDateTime, QTimer, pyqtSignal
-    from PyQt4.QtGui import QApplication, QDateEdit, QDesktopWidget, QLabel, QLineEdit, QMainWindow, QPushButton
+    from PyQt4.QtGui import QApplication, QDateEdit, QDesktopWidget, QDialog, QLabel, QLineEdit, QMainWindow, QPushButton
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -21,7 +22,7 @@ from SerialPort import SerialPort
 # ToDo
 # Correctly process replies to commands
 # Split updateTime in two, to update mesh time and view immediately
-# Create confirmation window to change start date
+# Move widgets to a separate file
 # Set cycleLength from device
 
 DATE_FORMAT = 'MM.dd'
@@ -41,6 +42,7 @@ ACCENT_PREFIX = 'deviceTableViewAccentSample'
 ACCENT_PREFIX_LENGTH = len(ACCENT_PREFIX)
 
 UI_FILE_NAME = 'MeshConsole.ui'
+CONFIRMATION_UI_FILE_NAME = 'Confirmation.ui'
 LOG_FILE_NAME = 'MeshConsole.log'
 DUMP_FILE_NAME = 'MeshConsole.dmp'
 
@@ -109,7 +111,6 @@ class StartDateEdit(QDateEdit):
         now = QDate.currentDate()
         self.setMaximumDate(now)
         self.setMinimumDate(now.addDays(-(MAX_CYCLE_NUMBER * CYCLE_LENGTH // (1000 * 3600 * 24 * 2))))
-        self.setDate(now)
         self.dateChanged.connect(callback)
 
 class DateTimeValueLabel(QLabel):
@@ -138,6 +139,11 @@ class ConsoleEdit(QLineEdit):
         self.clear()
         return ret
 
+class StartDateChangeConfirmationDialog(QDialog):
+    def __init__(self):
+        QDialog.__init__(self)
+        uic.loadUi(CONFIRMATION_UI_FILE_NAME, self)
+
 class MeshConsole(QMainWindow):
     comConnect = pyqtSignal(str)
     comInput = pyqtSignal(str)
@@ -157,10 +163,12 @@ class MeshConsole(QMainWindow):
         self.portLabel.configure()
         self.pauseButton.configure(self.pause)
         self.resetButton.configure(self.reset)
+        self.startDateEdit.configure(DATE_FORMAT, self.setStartTime)
         self.dateTimeValueLabel.configure(DATETIME_FORMAT)
         self.consoleEdit.configure(self.consoleEnter)
         self.sampleWidget.hide()
         self.statusBar.hide()
+        self.startDateChangeConfirmationDialog = StartDateChangeConfirmationDialog()
         # Setup logging
         formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
         handlers = (FileHandler(LOG_FILE_NAME), CallableHandler(self.logTextEdit.appendPlainText))
@@ -174,6 +182,7 @@ class MeshConsole(QMainWindow):
         self.logger.info("start")
         # Configure devices and columns
         self.startTime = None
+        self.savedStartDate = None
         self.currentCycle = None
         self.previousTimeSet = None
         Device.configure(self)
@@ -191,8 +200,6 @@ class MeshConsole(QMainWindow):
             self.columnActions.append(action)
         # Starting up!
         self.loadDump()
-        self.setStartTime()
-        self.startDateEdit.configure(DATE_FORMAT, self.setStartTime)
         self.playing = False # will be toggled immediately by pause()
         self.comConnect.connect(self.processConnect)
         self.comInput.connect(self.processInput)
@@ -233,8 +240,14 @@ class MeshConsole(QMainWindow):
 
     def setStartTime(self):
         date = self.startDateEdit.date()
-        self.startTime = QDateTime(date)
-        self.logger.info("Start date set to %s" % date.toString(DATE_FORMAT))
+        if date != self.savedStartDate:
+            if not self.savedStartDate or self.startDateChangeConfirmationDialog.exec_():
+                self.savedStartDate = date
+                self.startTime = QDateTime(date)
+                self.logger.info("Start date set to %s" % date.toString(DATE_FORMAT))
+            else:
+                QTimer.singleShot(0, partial(self.startDateEdit.setDate, self.savedStartDate)) # direct call works incorrectly
+        self.pauseButton.setFocus()
 
     def processConnect(self, _pong):
         self.logger.info("connected device found")
@@ -274,6 +287,7 @@ class MeshConsole(QMainWindow):
 
     def reset(self):
         self.logger.info("reset")
+        self.pauseButton.setFocus()
         for device in self.devices:
             device.reset()
         self.devicesModel.refresh(True)
@@ -304,6 +318,7 @@ class MeshConsole(QMainWindow):
             dump.write('# end\n')
 
     def loadDump(self):
+        startDate = None
         self.savedMaximized = None
         try:
             with open(DUMP_FILE_NAME) as dump:
@@ -324,7 +339,7 @@ class MeshConsole(QMainWindow):
                         for (action, checked) in zip(self.columnActions, data):
                             action.setChecked(checked == 'True')
                     elif tag == 'startDate':
-                        self.startDateEdit.setDate(QDate(*(int(d) for d in data)))
+                        startDate = QDate(*(int(d) for d in data))
                     elif match(r'\d+', tag):
                         device = self.devices[int(tag) - 1]
                         if device.time != None:
@@ -334,6 +349,7 @@ class MeshConsole(QMainWindow):
                 self.logger.info("Loaded dump file")
         except IOError:
             self.logger.warning("Error loading dump file, resetting to defaults")
+        self.startDateEdit.setDate(startDate if startDate else QDate.currentDate())
 
     def error(self, message):
         print "ERROR:", message

@@ -90,6 +90,9 @@
       </item>
       <item>
        <widget class="StartDateEdit" name="startDateEdit">
+        <property name="keyboardTracking">
+         <bool>false</bool>
+        </property>
         <property name="calendarPopup">
          <bool>true</bool>
         </property>
