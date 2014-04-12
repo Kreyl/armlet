@@ -137,6 +137,9 @@ class SerialPort(object):
             self.writeBuffer.extend('%s\n' % data)
 
     def expect(self, prefix):
+        if EMULATED:
+            self.info("< %s" % prefix)
+            return '%s\n' % prefix
         timeout = time() + self.port.timeout
         while time() < timeout:
             line = self.port.readline()

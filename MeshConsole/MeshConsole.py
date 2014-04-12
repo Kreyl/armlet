@@ -24,9 +24,8 @@ from MeshView import DevicesModel, Column, ColumnAction
 from SerialPort import SerialPort
 
 # ToDo
-# Correctly process replies to commands
-# Split updateTime in two, to update mesh time and view immediately
 # Use QSettings instead of dump file
+# Redesign Serial emulation as a proper class
 # Set cycleLength from device
 
 def timeDeltaStr(seconds):
@@ -115,6 +114,7 @@ class MeshConsole(QMainWindow):
         self.comInput.connect(self.processInput)
         self.port = SerialPort(COMMAND_PING, COMMAND_PONG, self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit, self.comLog.emit)
         self.pause()
+        self.updateTime()
         if self.savedMaximized:
             self.showMaximized()
         else:
@@ -173,7 +173,9 @@ class MeshConsole(QMainWindow):
             self.previousTimeSet = now
             self.logger.info("Setting mesh time to %d" % self.currentCycle)
             self.port.write(COMMAND_SET_TIME % self.currentCycle)
-        dt = QDateTime.currentDateTime().msecsTo(QDateTime.fromMSecsSinceEpoch((now.toMSecsSinceEpoch() // 1000 + 1) * 1000))
+            if not self.port.expect(COMMAND_PONG):
+                self.logger.warning("Time set failed")
+        dt = QDateTime.currentDateTime().msecsTo(now.addMSecs(TIME_UPDATE_INTERVAL))
         QTimer.singleShot(max(0, dt), self.updateTime)
 
     def processInput(self, inputLine):
@@ -206,9 +208,8 @@ class MeshConsole(QMainWindow):
     def pause(self):
         self.playing = not self.playing
         self.logger.info("play" if self.playing else "pause")
-        v = self.logTextEdit.verticalScrollBar()
-        v.setValue(max(0, v.maximum() - (0 if self.playing else 1)))
-        self.updateTime()
+        scrollBar = self.logTextEdit.verticalScrollBar()
+        scrollBar.setValue(max(0, scrollBar.maximum() - (0 if self.playing else 1)))
         if self.playing:
             self.devicesModel.refresh()
 
