@@ -1,5 +1,8 @@
 #!/usr/bin/python
-
+#
+# Mesh Console
+# Device implementation
+#
 from csv import reader as CSVReader
 from functools import partial
 

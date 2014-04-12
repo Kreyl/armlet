@@ -1,7 +1,14 @@
 #!/usr/bin/python
-from PyQt4.QtCore import Qt, QAbstractTableModel, QVariant
-from PyQt4.QtGui import QAction, QPalette, QStyle
-from PyQt4.QtGui import QItemDelegate, QItemSelection, QSortFilterProxyModel, QTableView
+#
+# Mesh Console
+# Device table visualization
+#
+try:
+    from PyQt4.QtCore import Qt, QAbstractTableModel, QVariant
+    from PyQt4.QtGui import QAction, QPalette, QStyle
+    from PyQt4.QtGui import QItemDelegate, QItemSelection, QSortFilterProxyModel, QTableView
+except ImportError, ex:
+    raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
 FONT_METRICS_CORRECTION = 1.1
 

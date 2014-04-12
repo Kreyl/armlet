@@ -1,5 +1,8 @@
 #!/usr/bin/python
-
+#
+# Mesh Console
+# Serial port operation routines
+#
 from collections import deque
 from logging import DEBUG, INFO, WARNING
 from random import randint
