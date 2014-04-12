@@ -26,6 +26,7 @@ from SerialPort import SerialPort
 # ToDo
 # Correctly process replies to commands
 # Split updateTime in two, to update mesh time and view immediately
+# Use QSettings instead of dump file
 # Set cycleLength from device
 
 def timeDeltaStr(seconds):
@@ -150,7 +151,7 @@ class MeshConsole(QMainWindow):
     def setStartTime(self):
         date = self.startDateEdit.date()
         if date != self.savedStartDate:
-            if not self.savedStartDate or self.startDateChangeConfirmationDialog.popup():
+            if not self.savedStartDate or self.startDateChangeConfirmationDialog.popup(date, self.savedStartDate):
                 self.savedStartDate = date
                 self.startTime = QDateTime(date)
                 self.logger.info("Start date set to %s" % date.toString(DATE_FORMAT))

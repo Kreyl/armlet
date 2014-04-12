@@ -105,7 +105,9 @@ class StartDateChangeConfirmationDialog(QDialog):
     def __init__(self):
         QDialog.__init__(self)
         uic.loadUi(CONFIRMATION_UI_FILE_NAME, self)
+        self.text = str(self.label.text())
 
-    def popup(self):
+    def popup(self, newDate, oldDate):
+        self.label.setText(self.text % (oldDate.toString(DATE_FORMAT), newDate.toString(DATE_FORMAT)))
         self.buttonBox.button(self.buttonBox.No).setFocus()
         return self.exec_()
