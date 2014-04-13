@@ -218,7 +218,7 @@ class MeshConsole(QMainWindow):
             dump.write('# Mesh Console dump at %s\n' % datetime.now())
             dump.write('window %d %d %d %d %s\n' % (max(0, self.pos().x()), max(0, self.pos().y()), self.size().width(), self.size().height(), self.isMaximized()))
             dump.write('state %s\n' % hexlify(self.saveState()))
-            dump.write('columns %s\n' % ' '.join(str(action.isChecked()) for action in self.columnActions))
+            dump.write('columns %s\n' % ' '.join(str(int(action.isChecked())) for action in self.columnActions))
             if self.startTime:
                 date = self.startTime.date()
                 dump.write('startDate %d %d %d\n' % (date.year(), date.month(), date.day()))
@@ -248,7 +248,7 @@ class MeshConsole(QMainWindow):
                         self.restoreState(unhexlify(data[0]))
                     elif tag == 'columns':
                         for (action, checked) in zip(self.columnActions, data):
-                            action.setChecked(checked == 'True')
+                            action.setChecked(int(checked))
                     elif tag == 'startDate':
                         startDate = QDate(*(int(d) for d in data))
                     elif match(r'\d+', tag):
