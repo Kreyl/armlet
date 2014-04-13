@@ -60,7 +60,7 @@ class MeshConsole(QMainWindow):
 
     def __init__(self, *args, **kwargs):
         QMainWindow.__init__(self, *args, **kwargs)
-        uic.loadUi(UI_FILE_NAME, self)
+        uic.loadUi(MAIN_UI_FILE_NAME, self)
 
     def configure(self):
         # Setting window size
@@ -77,7 +77,8 @@ class MeshConsole(QMainWindow):
         self.consoleEdit.configure(self.consoleEnter)
         self.sampleWidget.hide()
         self.statusBar.hide()
-        self.startDateChangeConfirmationDialog = StartDateChangeConfirmationDialog()
+        self.aboutDialog = AboutDialog(self.aboutAction.triggered)
+        self.confirmationDialog = ConfirmationDialog(DATE_FORMAT)
         # Setup logging
         formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
         handlers = (FileHandler(LOG_FILE_NAME), CallableHandler(self.logTextEdit.appendPlainText))
@@ -151,7 +152,7 @@ class MeshConsole(QMainWindow):
     def setStartTime(self):
         date = self.startDateEdit.date()
         if date != self.savedStartDate:
-            if not self.savedStartDate or self.startDateChangeConfirmationDialog.popup(date, self.savedStartDate):
+            if not self.savedStartDate or self.confirmationDialog.popup(date, self.savedStartDate):
                 self.savedStartDate = date
                 self.startTime = QDateTime(date)
                 self.logger.info("Start date set to %s" % date.toString(DATE_FORMAT))
@@ -278,6 +279,7 @@ def main():
         raise
     except BaseException:
         print format_exc()
+        return -1
 
 if __name__ == '__main__':
     main()

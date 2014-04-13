@@ -27,8 +27,10 @@ TIME_UPDATE_INTERVAL = 100 # milliseconds
 ACCENT_PREFIX = 'deviceTableViewAccentSample'
 ACCENT_PREFIX_LENGTH = len(ACCENT_PREFIX)
 
-UI_FILE_NAME = 'MeshConsole.ui'
+MAIN_UI_FILE_NAME = 'MeshConsole.ui'
+ABOUT_UI_FILE_NAME = 'About.ui'
 CONFIRMATION_UI_FILE_NAME = 'Confirmation.ui'
+
 LOG_FILE_NAME = 'MeshConsole.log'
 DUMP_FILE_NAME = 'MeshConsole.dmp'
 
@@ -102,13 +104,20 @@ class ConsoleEdit(QLineEdit):
         self.clear()
         return ret
 
-class StartDateChangeConfirmationDialog(QDialog):
-    def __init__(self):
+class AboutDialog(QDialog):
+    def __init__(self, trigger):
+        QDialog.__init__(self)
+        uic.loadUi(ABOUT_UI_FILE_NAME, self)
+        trigger.connect(self.exec_)
+
+class ConfirmationDialog(QDialog):
+    def __init__(self, dateFormat):
         QDialog.__init__(self)
         uic.loadUi(CONFIRMATION_UI_FILE_NAME, self)
+        self.dateFormat = dateFormat
         self.text = str(self.label.text())
 
     def popup(self, newDate, oldDate):
-        self.label.setText(self.text % (oldDate.toString(DATE_FORMAT), newDate.toString(DATE_FORMAT)))
+        self.label.setText(self.text % (oldDate.toString(self.dateFormat), newDate.toString(self.dateFormat)))
         self.buttonBox.button(self.buttonBox.No).setFocus()
         return self.exec_()

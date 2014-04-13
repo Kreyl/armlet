@@ -389,8 +389,15 @@
      <string>Columns</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="aboutAction"/>
+   </widget>
    <addaction name="fileMenu"/>
    <addaction name="columnsMenu"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="quitAction">
@@ -399,6 +406,11 @@
    </property>
    <property name="statusTip">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="aboutAction">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>
