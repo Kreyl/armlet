@@ -25,7 +25,6 @@ from SerialPort import SerialPort
 
 # ToDo
 # Use QSettings instead of dump file
-# Redesign Serial emulation as a proper class
 # Set cycleLength from device
 
 def timeDeltaStr(seconds):
@@ -173,8 +172,7 @@ class MeshConsole(QMainWindow):
         if self.startTime and self.port.port and (not self.previousTimeSet or self.previousTimeSet.secsTo(now) >= TIME_SET_INTERVAL):
             self.previousTimeSet = now
             self.logger.info("Setting mesh time to %d" % self.currentCycle)
-            self.port.write(COMMAND_SET_TIME % self.currentCycle)
-            if not self.port.expect(COMMAND_PONG):
+            if not self.port.command(COMMAND_SET_TIME % self.currentCycle, COMMAND_PONG):
                 self.logger.warning("Time set failed")
         dt = QDateTime.currentDateTime().msecsTo(now.addMSecs(TIME_UPDATE_INTERVAL))
         QTimer.singleShot(max(0, dt), self.updateTime)
@@ -192,7 +190,8 @@ class MeshConsole(QMainWindow):
                 self.logger.exception("Bad info command %s", inputLine)
 
     def consoleEnter(self):
-        self.port.write(self.consoleEdit.getInput())
+        if not self.port.command(self.consoleEdit.getInput(), COMMAND_PONG):
+            self.logger.warning("Command failed")
 
     def closeEvent(self, _event):
         self.saveDump()

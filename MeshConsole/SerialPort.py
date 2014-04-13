@@ -23,8 +23,33 @@ BAUD_RATE = 115200
 TIMEOUT = 1
 DT = 0.1
 
-class SerialPort(object):
+class EmulatedSerial(object):
+    def __init__(self, timeout, pong):
+        self.timeout = timeout
+        self.pong = pong
+        self.buffer = deque()
+        self.ready = False
 
+    def readline(self):
+        data = None
+        while data is None:
+            if self.buffer:
+                data = self.buffer.popleft()
+            else:
+                sleep(float(randint(0, 1000)) / 1000)
+                if self.ready and not self.buffer:
+                    num = randint(1, 100)
+                    data = 'node %s %s %s %s %s %s %s' % (num, 0 if num == 1 else randint(1, 5), randint(0, 10000), randint(0, 200) - 100, randint(0, 20), randint(0, 20), randint(0, 20))
+        return data
+
+    def write(self, data):
+        numLines = data.count('\n')
+        if numLines:
+            self.ready = True
+            self.buffer.extend(self.pong for i in xrange(numLines))
+        return len(data)
+
+class SerialPort(object):
     TRYING = 0
     CONNECTED = 1
     VERIFIED = 2
@@ -65,12 +90,7 @@ class SerialPort(object):
             if not self.port:
                 self.connect()
             try:
-                if EMULATED:
-                    sleep(float(randint(0, 1000)) / 1000)
-                    num = randint(1, 100)
-                    line = 'node %s %s %s %s %s %s %s' % (num, 0 if num == 1 else randint(1, 5), randint(0, 10000), randint(0, 200) - 100, randint(0, 20), randint(0, 20), randint(0, 20))
-                else:
-                    line = self.port.readline()
+                line = self.port.readline()
                 if line:
                     self.info("< %s" % line)
                     if self.readCallBack:
@@ -86,7 +106,7 @@ class SerialPort(object):
                     while not self.port:
                         sleep(DT)
                     try:
-                        if EMULATED or self.port.write(data) == len(data):
+                        if self.port.write(data) == len(data):
                             break
                     except SerialTimeoutException:
                         pass
@@ -106,20 +126,14 @@ class SerialPort(object):
                         displayPortName = sub('^/dev/', '', portName)
                         self.statusUpdate(displayPortName, self.TRYING)
                         if EMULATED:
-                            self.port = True
+                            self.port = EmulatedSerial(timeout = TIMEOUT, pong = self.pong)
                         else:
                             self.port = Serial(portName, baudrate = BAUD_RATE, timeout = TIMEOUT, writeTimeout = TIMEOUT)
                         self.statusUpdate(displayPortName, self.CONNECTED)
                         self.info("connected to %s" % portName)
                         if self.ping:
-                            self.info("> %s" % self.ping)
-                            if EMULATED:
-                                self.info("< %s" % self.pong)
-                                pong = self.pong
-                            else:
-                                self.port.write('%s\n' % self.ping)
-                                pong = self.expect(self.pong or '')
-                            if pong:
+                            pong = self.command(self.ping, self.pong or '')
+                            if pong != None:
                                 if self.connectCallBack:
                                     self.connectCallBack(pong)
                                 return pong
@@ -131,15 +145,9 @@ class SerialPort(object):
 
     def write(self, data):
         self.info(" > %s" % data)
-        if EMULATED:
-            pass
-        else:
-            self.writeBuffer.extend('%s\n' % data)
+        self.writeBuffer.extend('%s\n' % data)
 
     def expect(self, prefix):
-        if EMULATED:
-            self.info("< %s" % prefix)
-            return '%s\n' % prefix
         timeout = time() + self.port.timeout
         while time() < timeout:
             line = self.port.readline()
@@ -147,3 +155,7 @@ class SerialPort(object):
                 self.info("< %s" % line)
                 if line.startswith(prefix):
                     return line
+
+    def command(self, command, expectedPrefix = None):
+        self.write(command)
+        return self.expect(expectedPrefix) if expectedPrefix != None else None
