@@ -2,20 +2,12 @@
 <ui version="4.0">
  <class>aboutDialog</class>
  <widget class="QDialog" name="aboutDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>383</width>
-    <height>146</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>About Mesh Console</string>
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>C:/Users/Jolaf/.designer/backup/images/icon.png</normaloff>C:/Users/Jolaf/.designer/backup/images/icon.png</iconset>
+    <normaloff>images/icon.png</normaloff>images/icon.png</iconset>
   </property>
   <property name="modal">
    <bool>true</bool>
