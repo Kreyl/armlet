@@ -39,7 +39,8 @@
  * GUI_STATE_NOT - red
  */
 
-typedef struct button_state {
+/*
+ typedef struct button_state {
  int state_id;
  int x_pos;
  int y_pos;
@@ -56,10 +57,11 @@ typedef struct gui_state{
     int (* fptr_gui_state_array_switch_functions[GUI_BUTTON_NUMBER])(); // apply datachanges from gui on screenchanges
    struct button_state * sptr_button_state[GUI_BUTTON_NUMBER];// list of button states
 }gui_state;
+*/
 
 
-extern gui_state gui_states[];
-extern const int gui_states_number;
+//extern gui_state gui_states[];
+//extern const int gui_states_number;
 
 class AtlGui_t {
 public:
@@ -68,9 +70,11 @@ public:
     void Init();
     void ShowSplashscreen();
     void CallStateScreen(int screen_id);
-    //основная очередьсобытийпоклику кнопки
+    //основная очередь событий по клику кнопки
     void ButtonIsClicked(int button_id);
+    void ButtonIsReleased(int button_id);
     void RenderFullScreen(int screen_id);
+    void RenderSingleButton(int screen_id,int button_id,int button_state);
     int on_run;
     int is_splash_screen_onrun;//0 - not showed, 1- on show now, 2 - show finished
     int current_state;

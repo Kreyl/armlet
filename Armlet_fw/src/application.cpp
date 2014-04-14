@@ -138,14 +138,19 @@ static inline void KeysHandler() {
             if(Keys.Status[i].HasChanged) {
                 if(Keys.Status[i].State == ksReleased) {
                     //KEY RELEASE
-
+                    Uart.Printf(" !AtlGui.ButtonIsReleased\r");
+                    AtlGui.ButtonIsReleased(i);
+                    Uart.Printf(" !!!AtlGui.ButtonIsReleased\r");
                    // ArmletApi::OnButtonRelease(i);
                 	Beeper.Beep(ShortBeep);	//doesnt work?!
                 }
                 else {
+                    Uart.Printf(" !AtlGui.ButtonIsClicked\r");
+                    AtlGui.ButtonIsClicked(i);
+                    Uart.Printf(" !!!AtlGui.ButtonIsClicked\r");
                     //KEY PRESS
 //                    Beeper.Beep(ShortBeep);
-                	if(i==0)
+    /*            	if(i==0)
                 	{
                 		Sound.Stop();
                 		Uart.Printf("sound stop");
@@ -160,6 +165,7 @@ static inline void KeysHandler() {
                 		Sound.Play("techview.wav");
                 		Uart.Printf("techview.wav");
                 	}
+                	*/
                     Vibro.Vibrate(ShortBrr);
                     //ArmletApi::OnButtonPress(i);
                 }
