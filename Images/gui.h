@@ -8,6 +8,10 @@
 #ifndef GUI_H
 #define GUI_H
 
+#ifndef nullptr
+#define nullptr 0
+#endif
+
 #ifndef countof
 #define countof(a) (sizeof(a) / sizeof(a[0]))
 #endif
@@ -22,13 +26,12 @@
 
 #define BUTTON_PRESSABLE 1
 #define BUTTON_LOCKED 2
-
 #define BUTTONS "ABCLERXYZ"
 
-#define NO_BUTTON { 0, 0, 0, 0, 0, 0, 0}
+#define NO_BUTTON {nullptr, 0, 0, 0, nullptr, nullptr, nullptr}
 
 typedef struct Button {
-    char name;
+    const char* name; // Text to be displayed for a button if text interface is used.
     int state_id;
     const int left;
     const int bottom;
@@ -39,7 +42,7 @@ typedef struct Button {
 } Button_t;
 
 typedef struct Screen {
-    const char* name;
+    const char* name; // Name of the subfolder containing respective imagery.
     int screen_switch[GUI_BUTTON_NUMBER]; //list of new states on sucessifull clicks on buttons
     int (* fptr_gui_state_array_switch_functions[GUI_BUTTON_NUMBER])(); // apply datachanges from gui on screenchanges
     const Button_t buttons[sizeof(BUTTONS)];
@@ -48,9 +51,9 @@ typedef struct Screen {
 extern Screen_t screens[];
 extern const int screens_number;
 
-int buttonIsPressable(int, int);
-int buttonGetState(int, int);
-int buttonPress(int, int);
+extern int buttonIsPressable(int, int);
+extern int buttonGetState(int, int);
+extern int buttonPress(int, int);
 
 #endif
 

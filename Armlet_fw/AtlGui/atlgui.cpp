@@ -68,7 +68,7 @@ void AtlGui_t::ButtonIsReleased(int button_id)
 {
     if(current_state>=0 && current_state<screens_number)
     {
-        if( screens[current_state].buttons[button_id].isPressable!= 0)
+        if( screens[current_state].buttons[button_id].isPressable!= nullptr)
         {
             int button_state_val=screens[current_state].buttons[button_id].isPressable(current_state,button_id);//sptr_button_state[button_id]->fptr_on_press());
             Uart.Printf("button_state_val %d\r",button_state_val);
@@ -100,7 +100,7 @@ void AtlGui_t::ButtonIsClicked(int button_id)
     Uart.Printf("current_state %d screens_number %d button id %d \r",current_state,screens_number,button_id);
     if(current_state>=0 && current_state<screens_number)
     {
-        if( screens[current_state].buttons[button_id].isPressable!= 0)
+        if( screens[current_state].buttons[button_id].isPressable!= nullptr)
         {
            int button_state_val=screens[current_state].buttons[button_id].isPressable(current_state,button_id);//sptr_button_state[button_id]->fptr_on_press());
            Uart.Printf("button_state_val %d\r",button_state_val);
@@ -109,7 +109,7 @@ void AtlGui_t::ButtonIsClicked(int button_id)
                Uart.Printf("button%d on screen %d is pressable %d\r",button_id,current_state );
                //on red andgreenchange state
                //если геттер успешен,и можем что-то сделать,вызываем сеттер кнопки
-               if( screens[current_state].buttons[button_id].press!= 0)
+               if( screens[current_state].buttons[button_id].press!= nullptr)
                {
                   int new_b_state= screens[current_state].buttons[button_id].press(current_state,button_id);
                   RenderSingleButton(current_state,button_id,new_b_state);
