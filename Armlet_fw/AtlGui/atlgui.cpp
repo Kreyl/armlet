@@ -8,6 +8,7 @@
 #include"emotions.h"
 #include"stddef.h"
 #include "AtlGuiCF.h"
+#include "lcd2630.h"
 AtlGui_t AtlGui;
 gui_state gui_states[]={
         {
@@ -39,16 +40,19 @@ void AtlGui_t::ShowSplashscreen()
 {
 
     is_splash_screen_onrun=1;
-
+    Lcd.Printf(11, 11, clGreen, clBlack, "SPLASH SCREEN");
 }
 void AtlGui_t::CallStateScreen(int screen_id)
 {
-
+    Lcd.Printf(11, 21, clGreen, clBlack, "STATESCREEN %u", screen_id);
    if(current_state==screen_id)
+   {
+       Lcd.Printf(11, 31, clGreen, clBlack, "C stscr %u same", screen_id);
        return;
+   }
 
    current_state=screen_id;
-
+   Lcd.Printf(11, 31, clGreen, clBlack, "C stscr %u new", screen_id);
    //TODO render??
 }
 void AtlGui_t::RenderFullScreen(int screen_id)

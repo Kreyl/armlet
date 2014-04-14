@@ -72,7 +72,7 @@ public:
     void ButtonIsClicked(int button_id);
     void RenderFullScreen(int screen_id);
     int on_run;
-    int is_splash_screen_onrun;
+    int is_splash_screen_onrun;//0 - not showed, 1- on show now, 2 - show finished
     int current_state;
     bool is_gui_shown;
 };

@@ -76,7 +76,9 @@ void rLevel1_t::ITask() {
                 } // Pkt Ok
                 RxTmt = ((chTimeNow() - Time) > 0)? RxTmt - (chTimeNow() - Time) : 0;
             } while(IMeshRx);
+#ifdef       UART_MESH_DEBUG
             Uart.Printf("RxEnd, t=%u\r\r", chTimeNow());
+#endif
             chEvtSignal(Mesh.IPThread, EVTMSK_UPDATE_CYCLE);
 
         }

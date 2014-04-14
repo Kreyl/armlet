@@ -146,11 +146,15 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 	//if 1 file, always use it.
 	if(emotions[emo_id].numTracks ==1)
 	{
+#ifdef UART_EMOTREE_DEBUG
 		Uart.Printf("GetFileNameToPlayFromEmoId only one file for emo %s \r", emotions[emo_id]);
+#endif
 		return GetMusicFileNameFromList(emo_id,0);//"TODO get full filename";// emotionTreeMusicNodeFiles[emo_id].music_files[0].full_filename;
 	}
+#ifdef UART_EMOTREE_DEBUG
 	else
 		Uart.Printf("GetFileNameToPlayFromEmoId found %d files for for emo %s \r",emotions[emo_id].numTracks, emotions[emo_id]);
+#endif
 	// если треков 2 и более
 	int rand_val=Random(emotions[emo_id].numTracks-2)+1; //рандомное число от максимум треков +1
 	if(emotions[emo_id].numTracks==0) Uart.Printf("GetFileNameToPlayFromEmoId smth wrong\r");

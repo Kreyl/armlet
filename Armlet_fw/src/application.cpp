@@ -26,7 +26,7 @@
 #include "SensorTable.h"
 #include "..\AtlGui\atlgui.h"
 App_t App;
-
+static EventListener EvtListenerKeys;
 #if 1 // ================================ Time =================================
 static void TimeTmrCallback(void *p);
 
@@ -81,7 +81,7 @@ public:
     void Lock();
     void Unlock();
 };
-//static Keylock_t Keylock;
+static Keylock_t Keylock;
 
 
 // Timer callback
@@ -105,7 +105,7 @@ void Keylock_t::Unlock() {
    // LcdHasChanged = true;
 }
 #endif
-/*
+
 #if 1 // =========================== Key handler ===============================
 static inline void KeysHandler() {
     Keylock.TimerReset();   // Reset timer as Any key pressed or released
@@ -137,10 +137,13 @@ static inline void KeysHandler() {
         for(uint8_t i=0; i<KEYS_CNT; i++) {
             if(Keys.Status[i].HasChanged) {
                 if(Keys.Status[i].State == ksReleased) {
+                    //KEY RELEASE
+
                    // ArmletApi::OnButtonRelease(i);
                 	Beeper.Beep(ShortBeep);	//doesnt work?!
                 }
                 else {
+                    //KEY PRESS
 //                    Beeper.Beep(ShortBeep);
                 	if(i==0)
                 	{
@@ -167,7 +170,7 @@ static inline void KeysHandler() {
     Keys.Reset();
 }
 #endif
-*/
+
 
 
 // ===========================app thread ===============================
@@ -175,6 +178,7 @@ static WORKING_AREA(waAppThread, 1024);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
     chRegSetThreadName("App");
+    Keys.RegisterEvt(&EvtListenerKeys, EVTMASK_KEYS);
     while(true) App.Task();
 }
     /*
@@ -339,6 +343,7 @@ void App_t::Task() {
     uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
     if(EvtMsk & EVTMASK_KEYS) {
         Uart.Printf("App Keys\r");
+        KeysHandler();
     }
     if(EvtMsk & EVTMASK_PLAY_ENDS) {
         Uart.Printf("App PlayEnd\r");
@@ -347,6 +352,7 @@ void App_t::Task() {
     }
 #if 1 //EVTMASK_RADIO on/off
     if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
+#ifdef       UART_MESH_DEBUG
         Uart.Printf("App TabGet, s=%u, t=%u\r", SnsTable.PTable->Size, chTimeNow());
 
         // FIXME: Lcd Clear before next ID print
@@ -358,6 +364,9 @@ void App_t::Task() {
             Uart.Printf(" ID=%u; Pwr=%u\r", SnsTable.PTable->Row[i].ID, SnsTable.PTable->Row[i].Level);
             Lcd.Printf(11, 31+(i*10), clRed, clBlack,"ID=%u; Pwr=%u", SnsTable.PTable->Row[i].ID, SnsTable.PTable->Row[i].Level);
         }
+#endif
+
+
         int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
         CurrentIntentionArraySize = val1;
         int j=0;
@@ -406,6 +415,7 @@ void App_t::Task() {
         {
             //черезсекундувключить основной
             AtlGui.CallStateScreen(0);
+            AtlGui.is_splash_screen_onrun=2;
         }
     }
 }
