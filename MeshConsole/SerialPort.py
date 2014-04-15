@@ -29,24 +29,25 @@ class EmulatedSerial(object):
         self.pong = pong
         self.buffer = deque()
         self.ready = False
+        self.nextNode = None
 
     def readline(self):
-        data = None
-        while data is None:
+        while True:
             if self.buffer:
                 data = self.buffer.popleft()
-            else:
-                sleep(float(randint(0, 1000)) / 1000)
-                if self.ready and not self.buffer:
-                    num = randint(1, 100)
-                    data = 'node %s %s %s %s %s %s %s' % (num, 0 if num == 1 else randint(1, 5), randint(0, 10000), randint(0, 200) - 100, randint(0, 20), randint(0, 20), randint(0, 20))
+                break
+            now = time()
+            if self.ready and now > self.nextNode:
+                self.nextNode = now + float(randint(0, 1000)) / 1000
+                num = randint(1, 100)
+                data = 'node %s %s %s %s %s %s %s' % (num, 0 if num == 1 else randint(1, 5), randint(0, 10000), randint(0, 200) - 100, randint(0, 20), randint(0, 20), randint(0, 20))
+                break
+            sleep(DT)
         return data
 
     def write(self, data):
-        numLines = data.count('\n')
-        if numLines:
-            self.ready = True
-            self.buffer.extend(self.pong for i in xrange(numLines))
+        self.buffer.append(self.pong)
+        self.ready = True
         return len(data)
 
 class SerialPort(object):
@@ -56,7 +57,7 @@ class SerialPort(object):
     ERROR = 3
     NONE = 4
 
-    def __init__(self, ping = None, pong = None, connectCallBack = None, readCallBack = None, portTryCallBack = None, loggingCallBack = None):
+    def __init__(self, ping = None, pong = '', connectCallBack = None, readCallBack = None, portTryCallBack = None, loggingCallBack = None):
         self.ping = ping
         self.pong = pong
         self.connectCallBack = connectCallBack
@@ -65,6 +66,10 @@ class SerialPort(object):
         self.loggingCallBack = loggingCallBack
         self.writeBuffer = deque()
         self.port = None
+        self.ready = None
+        self.expectTimeout = None
+        self.expectPrefix = None
+        self.expectResult = None
         readThread = Thread(target = self.reader, name = '%s 0x%x' % (self.__class__.__name__, id(self)))
         readThread.setDaemon(True)
         readThread.start()
@@ -93,15 +98,19 @@ class SerialPort(object):
                 line = self.port.readline()
                 if line:
                     self.info("< %s" % line)
-                    if self.readCallBack:
+                    if time() < self.expectTimeout and line.startswith(self.expectPrefix):
+                        self.expectResult = line
+                    elif self.readCallBack:
                         self.readCallBack(line)
             except Exception:
                 self.warning("connection broken")
+                self.port = None
+            sleep(DT)
 
     def writer(self):
         while True:
             if self.writeBuffer:
-                data = self.writeBuffer.popleft()
+                data = self.writeBuffer.popleft() + '\n'
                 while True:
                     while not self.port:
                         sleep(DT)
@@ -112,10 +121,11 @@ class SerialPort(object):
                         pass
                     self.port = None
             else:
-                sleep(1)
+                sleep(DT)
 
     def connect(self):
         self.port = None
+        self.ready = None
         while True:
             self.statusUpdate("SCAN", self.TRYING)
             sleep(DT)
@@ -132,11 +142,19 @@ class SerialPort(object):
                         self.statusUpdate(displayPortName, self.CONNECTED)
                         self.info("connected to %s" % portName)
                         if self.ping:
-                            pong = self.command(self.ping, self.pong or '')
-                            if pong != None:
-                                if self.connectCallBack:
-                                    self.connectCallBack(pong)
-                                return pong
+                            self.info(" > %s" % self.ping)
+                            self.port.write('%s\n' % self.ping)
+                            timeout = time() + self.port.timeout
+                            while time() < timeout:
+                                line = self.port.readline()
+                                if line:
+                                    self.info("< %s" % line.rstrip())
+                                    if line.startswith(self.pong):
+                                        if self.connectCallBack:
+                                            self.connectCallBack(line)
+                                        #print '!A'
+                                        self.ready = True
+                                        return line
                             self.port.close()
                     except Exception:
                         self.statusUpdate(displayPortName, self.ERROR)
@@ -144,18 +162,22 @@ class SerialPort(object):
                 self.statusUpdate("No COM", self.NONE)
 
     def write(self, data):
-        self.info(" > %s" % data)
-        self.writeBuffer.extend('%s\n' % data)
+        if self.port and self.ready:
+            self.info(" > %s" % data)
+            self.writeBuffer.append(data)
+        else:
+            self.info(" >! %s" % data)
 
     def expect(self, prefix):
-        timeout = time() + self.port.timeout
-        while time() < timeout:
-            line = self.port.readline()
-            if line:
-                self.info("< %s" % line)
-                if line.startswith(prefix):
-                    return line
+        if self.port and self.ready:
+            self.expectPrefix = prefix
+            self.expectResult = None
+            self.expectTimeout = time() + self.port.timeout
+            while self.expectResult is None and time() < self.expectTimeout:
+                sleep(DT)
+            self.expectTimeout = None
+            return self.expectResult
 
-    def command(self, command, expectedPrefix = None):
+    def command(self, command, expectPrefix = None):
         self.write(command)
-        return self.expect(expectedPrefix) if expectedPrefix != None else None
+        return self.expect(expectPrefix) if expectPrefix != None else None

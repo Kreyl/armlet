@@ -24,6 +24,7 @@ from MeshView import DevicesModel, Column, ColumnAction
 from SerialPort import SerialPort
 
 # ToDo
+# Do all logging through events
 # Use QSettings instead of dump file
 # Set cycleLength from device
 
@@ -160,6 +161,7 @@ class MeshConsole(QMainWindow):
         self.pauseButton.setFocus()
 
     def processConnect(self, _pong):
+        QApplication.processEvents()
         self.logger.info("connected device found")
 
     def updateTime(self):
@@ -169,15 +171,21 @@ class MeshConsole(QMainWindow):
             self.error("Cycle number overflow, aborting")
         if self.playing:
             self.dateTimeValueLabel.setValue(now, self.currentCycle)
-        if self.startTime and self.port.port and (not self.previousTimeSet or self.previousTimeSet.secsTo(now) >= TIME_SET_INTERVAL):
+        if self.startTime and self.port.ready and (not self.previousTimeSet or self.previousTimeSet.secsTo(now) >= TIME_SET_INTERVAL):
+            QApplication.processEvents()
             self.previousTimeSet = now
             self.logger.info("Setting mesh time to %d" % self.currentCycle)
-            if not self.port.command(COMMAND_SET_TIME % self.currentCycle, COMMAND_PONG):
+            ret = self.port.command(COMMAND_SET_TIME % self.currentCycle, COMMAND_PONG)
+            QApplication.processEvents()
+            if ret:
+                self.logger.info("Time set OK")
+            else:
                 self.logger.warning("Time set failed")
         dt = QDateTime.currentDateTime().msecsTo(now.addMSecs(TIME_UPDATE_INTERVAL))
         QTimer.singleShot(max(0, dt), self.updateTime)
 
     def processInput(self, inputLine):
+        QApplication.processEvents()
         inputLine = str(inputLine)
         if inputLine.startswith(COMMAND_NODE_INFO):
             try:
@@ -191,6 +199,7 @@ class MeshConsole(QMainWindow):
 
     def consoleEnter(self):
         if not self.port.command(self.consoleEdit.getInput(), COMMAND_PONG):
+            QApplication.processEvents()
             self.logger.warning("Command failed")
 
     def closeEvent(self, _event):
