@@ -4,7 +4,6 @@
 # Serial port operation routines
 #
 from collections import deque
-from logging import DEBUG, INFO, WARNING
 from random import randint
 from re import sub
 from threading import Thread
@@ -57,34 +56,25 @@ class SerialPort(object):
     ERROR = 3
     NONE = 4
 
-    def __init__(self, ping = None, pong = '', connectCallBack = None, readCallBack = None, portTryCallBack = None, loggingCallBack = None):
+    def __init__(self, logger, ping = None, pong = '', connectCallBack = None, readCallBack = None, portTryCallBack = None):
+        self.logger = logger
         self.ping = ping
         self.pong = pong
         self.connectCallBack = connectCallBack
         self.readCallBack = readCallBack
         self.portTryCallBack = portTryCallBack
-        self.loggingCallBack = loggingCallBack
         self.writeBuffer = deque()
         self.port = None
         self.ready = None
         self.expectTimeout = None
         self.expectPrefix = None
         self.expectResult = None
-        readThread = Thread(target = self.reader, name = '%s 0x%x' % (self.__class__.__name__, id(self)))
+        readThread = Thread(target = self.reader, name = '%s 0x%x reader' % (self.__class__.__name__, id(self)))
         readThread.setDaemon(True)
         readThread.start()
-        writeThread = Thread(target = self.writer, name = '%s 0x%x' % (self.__class__.__name__, id(self)))
+        writeThread = Thread(target = self.writer, name = '%s 0x%x writer' % (self.__class__.__name__, id(self)))
         writeThread.setDaemon(True)
         writeThread.start()
-
-    def debug(self, message):
-        self.loggingCallBack(DEBUG, message)
-
-    def info(self, message):
-        self.loggingCallBack(INFO, message)
-
-    def warning(self, message):
-        self.loggingCallBack(WARNING, message)
 
     def statusUpdate(self, portName, portStatus):
         if self.portTryCallBack:
@@ -97,13 +87,13 @@ class SerialPort(object):
             try:
                 line = self.port.readline()
                 if line:
-                    self.info("< %s" % line)
+                    self.logger.info("< %s" % line)
                     if time() < self.expectTimeout and line.startswith(self.expectPrefix):
                         self.expectResult = line
                     elif self.readCallBack:
                         self.readCallBack(line)
             except Exception:
-                self.warning("connection broken")
+                self.logger.warning("connection broken")
                 self.port = None
             sleep(DT)
 
@@ -140,19 +130,18 @@ class SerialPort(object):
                         else:
                             self.port = Serial(portName, baudrate = BAUD_RATE, timeout = TIMEOUT, writeTimeout = TIMEOUT)
                         self.statusUpdate(displayPortName, self.CONNECTED)
-                        self.info("connected to %s" % portName)
+                        self.logger.info("connected to %s" % portName)
                         if self.ping:
-                            self.info(" > %s" % self.ping)
+                            self.logger.info(" > %s" % self.ping)
                             self.port.write('%s\n' % self.ping)
                             timeout = time() + self.port.timeout
                             while time() < timeout:
                                 line = self.port.readline()
                                 if line:
-                                    self.info("< %s" % line.rstrip())
+                                    self.logger.info("< %s" % line.rstrip())
                                     if line.startswith(self.pong):
                                         if self.connectCallBack:
                                             self.connectCallBack(line)
-                                        #print '!A'
                                         self.ready = True
                                         return line
                             self.port.close()
@@ -163,21 +152,22 @@ class SerialPort(object):
 
     def write(self, data):
         if self.port and self.ready:
-            self.info(" > %s" % data)
+            self.logger.info(" > %s" % data)
             self.writeBuffer.append(data)
         else:
-            self.info(" >! %s" % data)
+            self.logger.info(" >! %s" % data)
 
-    def expect(self, prefix):
+    def expect(self, prefix, idle = None):
         if self.port and self.ready:
             self.expectPrefix = prefix
             self.expectResult = None
             self.expectTimeout = time() + self.port.timeout
             while self.expectResult is None and time() < self.expectTimeout:
-                sleep(DT)
+                idle()
+            idle()
             self.expectTimeout = None
             return self.expectResult
 
-    def command(self, command, expectPrefix = None):
+    def command(self, command, expectPrefix = None, idle = None):
         self.write(command)
-        return self.expect(expectPrefix) if expectPrefix != None else None
+        return self.expect(expectPrefix, idle) if expectPrefix != None else None

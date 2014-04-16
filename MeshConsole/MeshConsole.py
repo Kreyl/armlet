@@ -6,14 +6,14 @@
 from binascii import hexlify, unhexlify
 from datetime import datetime
 from functools import partial
-from logging import getLogger, FileHandler, Formatter, Handler, INFO, NOTSET
+from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
 from re import match, split
 from sys import argv, exit # pylint: disable=W0622
 from traceback import format_exc
 
 try:
     from PyQt4 import uic
-    from PyQt4.QtCore import QDate, QDateTime, QTimer, pyqtSignal
+    from PyQt4.QtCore import QDate, QDateTime, QObject, QTimer, pyqtSignal
     from PyQt4.QtGui import QApplication, QDesktopWidget, QMainWindow
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
@@ -53,10 +53,22 @@ class CallableHandler(Handler):
     def emit(self, record):
         self.emitCallable(self.format(record))
 
+class EventLogger(getLoggerClass(), QObject):
+    logSignal = pyqtSignal(tuple, dict)
+
+    def configure(self, parent = None):
+        QObject.__init__(self, parent)
+        self.logSignal.connect(self.doLog)
+
+    def doLog(self, args, kwargs):
+        super(EventLogger, self)._log(*args, **kwargs)
+
+    def _log(self, *args, **kwargs):
+        self.logSignal.emit(args, kwargs)
+
 class MeshConsole(QMainWindow):
     comConnect = pyqtSignal(str)
     comInput = pyqtSignal(str)
-    comLog = pyqtSignal(int, str)
 
     def __init__(self, *args, **kwargs):
         QMainWindow.__init__(self, *args, **kwargs)
@@ -87,8 +99,9 @@ class MeshConsole(QMainWindow):
             handler.setFormatter(formatter)
             rootLogger.addHandler(handler)
         rootLogger.setLevel(INFO)
+        setLoggerClass(EventLogger)
         self.logger = getLogger('MeshConsole')
-        self.comLog.connect(getLogger('COM').log)
+        self.logger.configure(self) # pylint: disable=E1103
         self.logger.info("start")
         # Configure devices and columns
         self.startTime = None
@@ -113,7 +126,7 @@ class MeshConsole(QMainWindow):
         self.playing = False # will be toggled immediately by pause()
         self.comConnect.connect(self.processConnect)
         self.comInput.connect(self.processInput)
-        self.port = SerialPort(COMMAND_PING, COMMAND_PONG, self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit, self.comLog.emit)
+        self.port = SerialPort(self.logger, COMMAND_PING, COMMAND_PONG, self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit)
         self.pause()
         self.updateTime()
         if self.savedMaximized:
@@ -161,7 +174,6 @@ class MeshConsole(QMainWindow):
         self.pauseButton.setFocus()
 
     def processConnect(self, _pong):
-        QApplication.processEvents()
         self.logger.info("connected device found")
 
     def updateTime(self):
@@ -172,11 +184,9 @@ class MeshConsole(QMainWindow):
         if self.playing:
             self.dateTimeValueLabel.setValue(now, self.currentCycle)
         if self.startTime and self.port.ready and (not self.previousTimeSet or self.previousTimeSet.secsTo(now) >= TIME_SET_INTERVAL):
-            QApplication.processEvents()
             self.previousTimeSet = now
             self.logger.info("Setting mesh time to %d" % self.currentCycle)
-            ret = self.port.command(COMMAND_SET_TIME % self.currentCycle, COMMAND_PONG)
-            QApplication.processEvents()
+            ret = self.port.command(COMMAND_SET_TIME % self.currentCycle, COMMAND_PONG, QApplication.processEvents)
             if ret:
                 self.logger.info("Time set OK")
             else:
@@ -185,7 +195,6 @@ class MeshConsole(QMainWindow):
         QTimer.singleShot(max(0, dt), self.updateTime)
 
     def processInput(self, inputLine):
-        QApplication.processEvents()
         inputLine = str(inputLine)
         if inputLine.startswith(COMMAND_NODE_INFO):
             try:
@@ -198,8 +207,7 @@ class MeshConsole(QMainWindow):
                 self.logger.exception("Bad info command %s", inputLine)
 
     def consoleEnter(self):
-        if not self.port.command(self.consoleEdit.getInput(), COMMAND_PONG):
-            QApplication.processEvents()
+        if not self.port.command(self.consoleEdit.getInput(), COMMAND_PONG, QApplication.processEvents):
             self.logger.warning("Command failed")
 
     def closeEvent(self, _event):
