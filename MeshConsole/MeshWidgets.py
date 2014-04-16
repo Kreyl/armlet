@@ -16,6 +16,8 @@ DATE_FORMAT = 'MM.dd'
 TIME_FORMAT = 'hh:mm:ss'
 DATETIME_FORMAT = 'dd  %s' % TIME_FORMAT
 
+SEPARATOR = ' *[, ] *'
+
 COMMAND_PING = '#01'
 COMMAND_PONG = '#90,00'
 COMMAND_SET_TIME = '#71,%d'
@@ -34,7 +36,7 @@ CONFIRMATION_UI_FILE_NAME = 'Confirmation.ui'
 LOG_FILE_NAME = 'MeshConsole.log'
 DUMP_FILE_NAME = 'MeshConsole.dmp'
 
-CYCLE_LENGTH = 400
+CYCLE_LENGTH = 1000
 
 MAX_CYCLE_NUMBER = 256 ** 3 // 2 - 1 # 3 signed bytes
 
@@ -79,12 +81,14 @@ class ResetButton(QPushButton):
         self.clicked.connect(callback)
 
 class StartDateEdit(QDateEdit):
-    def configure(self, dateFormat, callback):
+    def configure(self, dateFormat, callback, cycleLength = None):
         self.setDisplayFormat(dateFormat)
-        now = QDate.currentDate()
-        self.setMaximumDate(now)
-        self.setMinimumDate(now.addDays(-(MAX_CYCLE_NUMBER * CYCLE_LENGTH // (1000 * 3600 * 24 * 2))))
+        self.setMaximumDate(QDate.currentDate())
+        self.reConfigure(cycleLength)
         self.dateChanged.connect(callback)
+
+    def reConfigure(self, cycleLength = None):
+        self.setMinimumDate(QDate.currentDate().addDays(-(MAX_CYCLE_NUMBER * (cycleLength or CYCLE_LENGTH) // (1000 * 3600 * 24 * 2))))
 
 class DateTimeValueLabel(QLabel):
     def configure(self, dateTimeFormat):

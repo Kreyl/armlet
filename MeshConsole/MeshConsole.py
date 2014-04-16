@@ -24,9 +24,7 @@ from MeshView import DevicesModel, Column, ColumnAction
 from SerialPort import SerialPort
 
 # ToDo
-# Do all logging through events
 # Use QSettings instead of dump file
-# Set cycleLength from device
 
 def timeDeltaStr(seconds):
     negative = seconds < 0
@@ -108,6 +106,7 @@ class MeshConsole(QMainWindow):
         self.savedStartDate = None
         self.currentCycle = None
         self.previousTimeSet = None
+        self.cycleLength = CYCLE_LENGTH
         Device.configure(self)
         self.devices = Device.devices
         self.columns = tuple(Column(nColumn, *args) for (nColumn, args) in enumerate(getColumnsData(self)))
@@ -134,15 +133,14 @@ class MeshConsole(QMainWindow):
         else:
             self.show()
 
-    @staticmethod
-    def cycleSeconds(cycle):
-        return cycle * CYCLE_LENGTH // 1000 if cycle != None else None
+    def cycleSeconds(self, cycle):
+        return cycle * self.cycleLength // 1000 if cycle != None else None
 
     def cycleTimeStr(self, cycle):
         return timeDeltaStr(self.cycleSeconds(cycle)) if cycle != None else None
 
     def cycleDate(self, cycle):
-        return self.startTime.addMSecs(cycle * CYCLE_LENGTH) if self.startTime and cycle != None else None
+        return self.startTime.addMSecs(cycle * self.cycleLength) if self.startTime and cycle != None else None
 
     def cycleDateStr(self, cycle):
         return self.cycleDate(cycle).toString(DATETIME_FORMAT) if self.startTime and cycle != None else None
@@ -173,12 +171,9 @@ class MeshConsole(QMainWindow):
                 QTimer.singleShot(0, partial(self.startDateEdit.setDate, self.savedStartDate)) # direct call works incorrectly
         self.pauseButton.setFocus()
 
-    def processConnect(self, _pong):
-        self.logger.info("connected device found")
-
     def updateTime(self):
         now = QDateTime.currentDateTime()
-        self.currentCycle = self.startTime.msecsTo(now) // CYCLE_LENGTH if self.startTime else None
+        self.currentCycle = self.startTime.msecsTo(now) // self.cycleLength if self.startTime else None
         if self.currentCycle >= MAX_CYCLE_NUMBER:
             self.error("Cycle number overflow, aborting")
         if self.playing:
@@ -194,11 +189,20 @@ class MeshConsole(QMainWindow):
         dt = QDateTime.currentDateTime().msecsTo(now.addMSecs(TIME_UPDATE_INTERVAL))
         QTimer.singleShot(max(0, dt), self.updateTime)
 
+    def processConnect(self, pong):
+        self.logger.info("connected device detected")
+        try:
+            self.cycleLength = int(split(SEPARATOR, unicode(pong).strip())[-1])
+            self.logger.info("cycle length set to %dms", self.cycleLength)
+        except:
+            self.cycleLength = CYCLE_LENGTH
+            self.logger.warning("Error detecting cycle length, using default: %dms", self.cycleLength)
+
     def processInput(self, inputLine):
-        inputLine = str(inputLine)
+        inputLine = unicode(inputLine)
         if inputLine.startswith(COMMAND_NODE_INFO):
             try:
-                words = split(' *[, ] *', inputLine.strip())
+                words = split(SEPARATOR, inputLine.strip())
                 self.devices[int(words[1]) - 1].update(*words[2:])
                 self.saveDump()
                 if self.playing:
@@ -220,7 +224,7 @@ class MeshConsole(QMainWindow):
         for device in self.devices:
             device.reset()
         self.devicesModel.refresh(True)
-        self.port.connect()
+        self.port.reset()
 
     def pause(self):
         self.playing = not self.playing
