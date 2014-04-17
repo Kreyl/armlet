@@ -27,8 +27,9 @@ def getItem(what, index):
         return index
 
 def getColumnsData(processor):
-    return ( # checked, changing, highlight, name, description, fieldName, longestValue, formatter, fmt
+    return ( # checked, changing, highlight, alignment, name, description, fieldName, longestValue, formatter, fmt
         (True, CONST, False, True, 'ID', 'Device ID', 'number', NUM_DEVICES),
+        (True, CONST, False, False, 'Name', 'Device name', 'number', LONGEST_REASON, partial(getItem, REASONS)),
         (True, RAW, True, True, 'Hops', 'Number of hops from device', 'hops', NUM_DEVICES),
         (True, RAW, True, True, 'TimestampC', 'Information timestamp', 'time', 9999),
         (True, RAW, True, True, 'TimestampD', 'Information timestamp date', 'time', 0, processor.cycleDateStr),
@@ -71,5 +72,5 @@ class Device(object): # pylint: disable=R0902
     def update(self, *args):
         (self.hops, self.time, self.td, self.location, self.reason, self.emotion) = ((int(arg) if arg != 'None' else None) for arg in args)
 
-    def toDumpStr(self):
-        return ('%s %s %s %s %s %s %s' % (self.number, self.hops, self.time, self.td, self.location, self.reason, self.emotion)) if self.time else None
+    def settings(self):
+        return ' '.join(str(x) for x in (self.hops, self.time, self.td, self.location, self.reason, self.emotion)) if self.time else ''

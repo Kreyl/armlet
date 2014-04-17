@@ -3,17 +3,15 @@
 # Mesh Console
 # Main widget and startup
 #
-from binascii import hexlify, unhexlify
-from datetime import datetime
 from functools import partial
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
-from re import match, split
+from re import split
 from sys import argv, exit # pylint: disable=W0622
 from traceback import format_exc
 
 try:
     from PyQt4 import uic
-    from PyQt4.QtCore import QDate, QDateTime, QObject, QTimer, pyqtSignal
+    from PyQt4.QtCore import QCoreApplication, QDate, QDateTime, QObject, QSettings, QTimer, pyqtSignal
     from PyQt4.QtGui import QApplication, QDesktopWidget, QMainWindow
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
@@ -24,7 +22,9 @@ from MeshView import DevicesModel, Column, ColumnAction
 from SerialPort import SerialPort
 
 # ToDo
-# Use QSettings instead of dump file
+# Change packet format to text-hex
+# Avoid extra bold in table heading popups
+# Get devices number from device?
 
 def timeDeltaStr(seconds):
     negative = seconds < 0
@@ -121,7 +121,7 @@ class MeshConsole(QMainWindow):
             self.columnsMenu.addAction(action)
             self.columnActions.append(action)
         # Starting up!
-        self.loadDump()
+        self.loadSettings()
         self.playing = False # will be toggled immediately by pause()
         self.comConnect.connect(self.processConnect)
         self.comInput.connect(self.processInput)
@@ -204,7 +204,7 @@ class MeshConsole(QMainWindow):
             try:
                 words = split(SEPARATOR, inputLine.strip())
                 self.devices[int(words[1]) - 1].update(*words[2:])
-                self.saveDump()
+                self.saveSettings()
                 if self.playing:
                     self.devicesModel.refresh()
             except Exception:
@@ -215,7 +215,7 @@ class MeshConsole(QMainWindow):
             self.logger.warning("Command failed")
 
     def closeEvent(self, _event):
-        self.saveDump()
+        self.saveSettings()
         self.logger.info("close")
 
     def reset(self):
@@ -234,54 +234,63 @@ class MeshConsole(QMainWindow):
         if self.playing:
             self.devicesModel.refresh()
 
-    def saveDump(self):
-        with open(DUMP_FILE_NAME, 'w') as dump:
-            dump.write('# Mesh Console dump at %s\n' % datetime.now())
-            dump.write('window %d %d %d %d %s\n' % (max(0, self.pos().x()), max(0, self.pos().y()), self.size().width(), self.size().height(), self.isMaximized()))
-            dump.write('state %s\n' % hexlify(self.saveState()))
-            dump.write('columns %s\n' % ' '.join(str(int(action.isChecked())) for action in self.columnActions))
-            if self.startTime:
-                date = self.startTime.date()
-                dump.write('startDate %d %d %d\n' % (date.year(), date.month(), date.day()))
-            for device in self.devices:
-                dumpStr = device.toDumpStr()
-                if dumpStr:
-                    dump.write('%s\n' % dumpStr)
-            dump.write('# end\n')
-
-    def loadDump(self):
-        startDate = None
-        self.savedMaximized = None
+    def saveSettings(self):
+        settings = QSettings()
         try:
-            with open(DUMP_FILE_NAME) as dump:
-                for line in dump:
-                    line = line.strip()
-                    if line.startswith('#'):
-                        continue
-                    words = line.split()
-                    (tag, data) = (words[0], words[1:])
-                    if tag == 'window':
-                        (x, y, width, height, isMaximized) = data
-                        self.move(int(x), int(y))
-                        self.resize(int(width), int(height))
-                        self.savedMaximized = isMaximized == 'True'
-                    elif tag == 'state':
-                        self.restoreState(unhexlify(data[0]))
-                    elif tag == 'columns':
-                        for (action, checked) in zip(self.columnActions, data):
-                            action.setChecked(int(checked))
-                    elif tag == 'startDate':
-                        startDate = QDate(*(int(d) for d in data))
-                    elif match(r'\d+', tag):
-                        device = self.devices[int(tag) - 1]
-                        if device.time != None:
-                            self.error("Bad dump: duplicate entry for device %s" % device.number)
-                        device.update(*data)
-                self.devicesModel.refresh(True)
-                self.logger.info("Loaded dump file")
-        except IOError:
-            self.logger.warning("Error loading dump file, resetting to defaults")
+            settings.setValue('timeStamp', QDateTime.currentDateTime().toString(LONG_DATETIME_FORMAT))
+            settings.beginGroup('window')
+            settings.setValue('width', self.size().width())
+            settings.setValue('height', self.size().height())
+            settings.setValue('x', max(0, self.pos().x()))
+            settings.setValue('y', max(0, self.pos().y()))
+            settings.setValue('maximized', self.isMaximized())
+            settings.setValue('state', self.saveState())
+            settings.endGroup()
+            settings.setValue('columnsVisible', ' '.join(str(int(action.isChecked())) for action in self.columnActions))
+            settings.setValue('startDate', self.startTime.date().toString(LONG_DATE_FORMAT))
+            settings.beginGroup('devices')
+            for device in self.devices:
+                settings.setValue(str(device.number), device.settings())
+            settings.endGroup()
+        except:
+            self.logger.exception("Error saving settings")
+            settings.clear()
+        settings.sync()
+
+    def loadSettings(self):
+        QCoreApplication.setOrganizationName('Ostranna')
+        QCoreApplication.setOrganizationDomain('ostranna.ru')
+        QCoreApplication.setApplicationName('MeshConsole')
+        settings = QSettings()
+        self.logger.info("Loading settings from %s", settings.fileName())
+        startDate = None
+        self.savedMaximized = False
+        try:
+            timeStamp = settings.value('timeStamp').toString()
+            if timeStamp:
+                settings.beginGroup('window')
+                self.resize(settings.value('width').toInt()[0], settings.value('height').toInt()[0])
+                self.move(settings.value('x').toInt()[0], settings.value('y').toInt()[0])
+                self.savedMaximized = settings.value('maximized', False).toBool()
+                self.restoreState(settings.value('state').toByteArray())
+                settings.endGroup()
+                columnsVisible = str(settings.value('columnsVisible').toString()).strip().split()
+                for (action, checked) in zip(self.columnActions, columnsVisible):
+                    action.setChecked(int(checked))
+                startDate = QDate.fromString(settings.value('startDate').toString(), LONG_DATE_FORMAT)
+                settings.beginGroup('devices')
+                for tag in settings.childKeys():
+                    data = str(settings.value(tag).toString()).strip()
+                    if data:
+                        self.devices[int(tag) - 1].update(*data.split())
+                settings.endGroup()
+                self.logger.info("Loaded settings dated %s", timeStamp)
+            else:
+                self.logger.info("No settings found")
+        except:
+            self.logger.exception("Error loading settings")
         self.startDateEdit.setDate(startDate if startDate else QDate.currentDate())
+        self.devicesModel.refresh(True)
 
     def error(self, message):
         print "ERROR:", message

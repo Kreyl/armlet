@@ -13,8 +13,10 @@ except ImportError, ex:
 from SerialPort import SerialPort
 
 DATE_FORMAT = 'MM.dd'
+LONG_DATE_FORMAT = 'yyyy.MM.dd'
 TIME_FORMAT = 'hh:mm:ss'
 DATETIME_FORMAT = 'dd  %s' % TIME_FORMAT
+LONG_DATETIME_FORMAT = '%s %s' % (LONG_DATE_FORMAT, TIME_FORMAT)
 
 SEPARATOR = ' *[, ] *'
 
@@ -34,7 +36,6 @@ ABOUT_UI_FILE_NAME = 'About.ui'
 CONFIRMATION_UI_FILE_NAME = 'Confirmation.ui'
 
 LOG_FILE_NAME = 'MeshConsole.log'
-DUMP_FILE_NAME = 'MeshConsole.dmp'
 
 CYCLE_LENGTH = 1000
 

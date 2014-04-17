@@ -129,9 +129,6 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
       <widget class="DevicesTableView" name="devicesTableView">
        <property name="palette">
         <palette>

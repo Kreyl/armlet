@@ -80,7 +80,7 @@ class Cell(dict):
     def setData(self, initial = False):
         if self.column.changing is CONST:
             if initial:
-                self[Qt.DisplayRole] = getattr(self.device, self.column.fieldName)
+                self[Qt.DisplayRole] = self.column.process(getattr(self.device, self.column.fieldName))
         elif self.column.changing is RAW:
             data = getattr(self.device, self.column.fieldName)
             if data == self[RAW_ROLE]:
