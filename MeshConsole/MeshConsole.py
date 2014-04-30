@@ -3,9 +3,10 @@
 # Mesh Console
 # Main widget and startup
 #
+from binascii import unhexlify
 from functools import partial
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
-from re import split
+from re import split, sub
 from sys import argv, exit # pylint: disable=W0622
 from traceback import format_exc
 
@@ -24,7 +25,40 @@ from SerialPort import SerialPort
 # ToDo
 # Change packet format to text-hex
 # Avoid extra bold in table heading popups
-# Get devices number from device?
+# Get devices number from device OR make devices list dynamic, start with empty table
+
+def decodeDecHex(data):
+    def sumDecBytes(hundreds, ones):
+        return hundreds * 100 + ones
+    if not data:
+        return -1
+    parts = (divmod(ord(d), 16) for d in data)
+    decBytes = (tens * 10 + ones for (tens, ones) in parts)
+    return reduce(sumDecBytes, decBytes)
+
+def decodeParams(data, lengths):
+    ret = []
+    index = 0
+    for length in lengths:
+        ret.append(decodeDecHex(data[index : index + length] if length else data[index:]))
+        if length:
+            index += length
+        else:
+            break
+    return tuple(ret)
+
+COMMAND_PARAM_LENGTHS = {90: (0,), 82: (4, 2), 88: (2, 1, 4, 2, 1, 1, 1)}
+
+def decodeCommand(s):
+    s = s.strip()
+    if not s.startswith('#'):
+        return None
+    data = unhexlify(sub('[, ]+', '', s))
+    command = decodeDecHex(data[0])
+    paramLengths = COMMAND_PARAM_LENGTHS.get(command)
+    if not paramLengths:
+        return (None, None)
+    return (command, decodeParams(data[1:], paramLengths))
 
 def timeDeltaStr(seconds):
     negative = seconds < 0
