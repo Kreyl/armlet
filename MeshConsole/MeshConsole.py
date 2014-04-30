@@ -36,6 +36,12 @@ def decodeDecHex(data):
     decBytes = (tens * 10 + ones for (tens, ones) in parts)
     return reduce(sumDecBytes, decBytes)
 
+def encodeDecHex(value, length):
+    if length <= 0:
+        raise ValueError("Length %d is not enough to convert value %d" % (length, value))
+    (hundreds, ones) = divmod(value, 100)
+    return ('%s%02d' % (encodeDecHex(hundreds, length - 1) if hundreds else '0' * 2 * (length - 1), ones))
+
 def decodeParams(data, lengths):
     ret = []
     index = 0
@@ -47,7 +53,7 @@ def decodeParams(data, lengths):
             break
     return tuple(ret)
 
-COMMAND_PARAM_LENGTHS = {90: (0,), 82: (4, 2), 88: (2, 1, 4, 2, 1, 1, 1)}
+COMMAND_PARAM_LENGTHS = {90: (0,), 82: (4, 2), 88: (2, 1, 4, 2, 1, 1, 1)} # ToDo: Use proper constants for commands
 
 def decodeCommand(s):
     s = s.strip()
@@ -59,6 +65,14 @@ def decodeCommand(s):
     if not paramLengths:
         return (None, None)
     return (command, decodeParams(data[1:], paramLengths))
+
+def encodeCommand(command, *args):
+    paramLengths = COMMAND_PARAM_LENGTHS.get(command)
+    if not paramLengths:
+        return None
+    if len(args) != len(paramLengths):
+        raise ValueError("Bad number of arguments for command %d: %d, expected %s" % (command, len(args), len(paramLengths)))
+    return '#%s\n' % ','.join(encodeDecHex(data, length) for (data, length) in zip((command,) + args, (1,) + paramLengths))
 
 def timeDeltaStr(seconds):
     negative = seconds < 0
