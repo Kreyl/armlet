@@ -7,7 +7,8 @@
  */
 #ifndef GUI_H
 #define GUI_H
-
+#include "AtlGuiCF.h"
+//#include "..\Armlet_fw\Atlgui\AtlGuiCF.h"
 #ifndef nullptr
 #define nullptr 0
 #endif
@@ -22,6 +23,7 @@
 #define BUTTON_DISABLED 3
 #define BUTTON_ABSENT 4
 #define BUTTON_PRESSED 5
+#define BUTTON_ERROR 6
 #define GUI_BUTTON_NUMBER 9
 
 #define BUTTON_PRESSABLE 1
@@ -29,6 +31,8 @@
 #define BUTTONS "ABCLERXYZ"
 
 #define NO_BUTTON {nullptr, 0, 0, 0, nullptr, nullptr, nullptr}
+
+
 
 typedef struct Button {
     const char* name; // Text to be displayed for a button if text interface is used.
@@ -51,9 +55,7 @@ typedef struct Screen {
 extern Screen_t screens[];
 extern const int screens_number;
 
-extern int buttonIsPressable(int, int);
-extern int buttonGetState(int, int);
-extern int buttonPress(int, int);
+
 
 #endif
 

@@ -9,7 +9,7 @@
 #include"stddef.h"
 #include "AtlGuiCF.h"
 #include "lcd2630.h"
-#include "..\Images\gui.h"
+#include "gui.h"
 AtlGui_t AtlGui;
 //gui_state gui_states[]={
 //        {

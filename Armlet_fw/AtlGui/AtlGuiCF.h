@@ -3,8 +3,26 @@
 void CallMainToReason();
 void CallReasonToMain();
 
-void bSoundUpCheck(int screen_id, int button_id);
-void bSoundDownCheck(int screen_id, int button_id);
-void bSoundUpChange(int screen_id, int button_id);
-void bSoundDownChange(int screen_id, int button_id);
+
+//extern int buttonIsPressable(int, int);
+//extern int buttonGetState(int, int);
+//extern int buttonPress(int, int);
+
+//int buttonIsPressable(int, int);
+//int buttonGetState(int , int );
+//int buttonPress(int, int);
+int buttonIsPressable(int, int);
+int buttonGetState(int, int);
+int buttonPress(int, int);
+//sound buttons
+int bSoundUpCheck(int screen_id, int button_id);
+int bSoundDownCheck(int screen_id, int button_id);
+int bSoundUpChange(int screen_id, int button_id);
+int bSoundDownChange(int screen_id, int button_id);
+//lock button
+int bLockCheck(int screen_id, int button_id);
+int bLockChange(int screen_id, int button_id);
+//reason button
+int bReasonCheck(int screen_id, int button_id);
+int bReasonChange(int screen_id, int button_id);
 #endif

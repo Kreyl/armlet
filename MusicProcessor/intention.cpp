@@ -18,6 +18,20 @@ struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRA
 		{1,2},{4,3},
 		{1,2},{4,3}
 };
+struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
+        {0,20,5,5,5},//murder
+        {1,40,5,5,5}//creation
+        //destruction
+        //smth else
+};
+//typedef struct UserIntentions {
+//    int reason_indx;    //индекс из стандартного массива
+//    int power256_plateau; //[power256] сила сигнала наплато -1 если не включено, 0-256 если включено.
+//    int time_to_plateau;//[sec]
+//    int time_after_plateau;//[sec]
+//    int current_time;//[sec]
+//} UserIntentions;
+
 struct IntentionCalculationData SICD=
 {
       10,//  Intention_weight_cost;
@@ -156,3 +170,40 @@ int MainCalculateReasons() {
     if(SICD.last_played_emo!=0)  return -3; // play fon now!
     return -1;
 }
+
+
+int GetPlayerReasonCurrentPower(int reason_id)
+{
+    for(int i =0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
+    {
+        if(reason_id==ArrayOfUserIntentions[i].reason_indx)
+            return CalculateCurrentPowerOfPlayerReason(i);
+    }
+    return -1;
+    //search in last incoming array, where it's based??
+}
+int CalculateCurrentPowerOfPlayerReason(int array_indx)
+{//TODO normal func
+    if(ArrayOfUserIntentions[array_indx].current_time>0)
+        return ArrayOfUserIntentions[array_indx].power256_plateau;
+    else return -1;
+}
+void SwitchPlayerReason(int reason_id,bool is_turn_on)
+{
+    for(int i =0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
+       {
+           if(reason_id==ArrayOfUserIntentions[i].reason_indx)
+           {
+               if(is_turn_on)
+               {
+                   ArrayOfUserIntentions[i].current_time=0;
+               }
+               else
+               {
+                   ArrayOfUserIntentions[i].current_time=-1;
+               }
+               return;
+           }
+       }
+}
+

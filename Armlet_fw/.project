@@ -34,15 +34,5 @@
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/MusicProcessor</locationURI>
 		</link>
-		<link>
-			<name>AtlGui/gui.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Images/gui.c</locationURI>
-		</link>
-		<link>
-			<name>AtlGui/gui.h</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Images/gui.h</locationURI>
-		</link>
 	</linkedResources>
 </projectDescription>
