@@ -3,10 +3,9 @@
 # Mesh Console
 # Main widget and startup
 #
-from binascii import unhexlify
 from functools import partial
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
-from re import split, sub
+from re import split
 from sys import argv, exit # pylint: disable=W0622
 from traceback import format_exc
 
@@ -23,56 +22,8 @@ from MeshView import DevicesModel, Column, ColumnAction
 from SerialPort import SerialPort
 
 # ToDo
-# Change packet format to text-hex
 # Avoid extra bold in table heading popups
 # Get devices number from device OR make devices list dynamic, start with empty table
-
-def decodeDecHex(data):
-    def sumDecBytes(hundreds, ones):
-        return hundreds * 100 + ones
-    if not data:
-        return -1
-    parts = (divmod(ord(d), 16) for d in data)
-    decBytes = (tens * 10 + ones for (tens, ones) in parts)
-    return reduce(sumDecBytes, decBytes)
-
-def encodeDecHex(value, length):
-    if length <= 0:
-        raise ValueError("Length %d is not enough to convert value %d" % (length, value))
-    (hundreds, ones) = divmod(value, 100)
-    return ('%s%02d' % (encodeDecHex(hundreds, length - 1) if hundreds else '0' * 2 * (length - 1), ones))
-
-def decodeParams(data, lengths):
-    ret = []
-    index = 0
-    for length in lengths:
-        ret.append(decodeDecHex(data[index : index + length] if length else data[index:]))
-        if length:
-            index += length
-        else:
-            break
-    return tuple(ret)
-
-COMMAND_PARAM_LENGTHS = {90: (0,), 82: (4, 2), 88: (2, 1, 4, 2, 1, 1, 1)} # ToDo: Use proper constants for commands
-
-def decodeCommand(s):
-    s = s.strip()
-    if not s.startswith('#'):
-        return None
-    data = unhexlify(sub('[, ]+', '', s))
-    command = decodeDecHex(data[0])
-    paramLengths = COMMAND_PARAM_LENGTHS.get(command)
-    if not paramLengths:
-        return (None, None)
-    return (command, decodeParams(data[1:], paramLengths))
-
-def encodeCommand(command, *args):
-    paramLengths = COMMAND_PARAM_LENGTHS.get(command)
-    if not paramLengths:
-        return None
-    if len(args) != len(paramLengths):
-        raise ValueError("Bad number of arguments for command %d: %d, expected %s" % (command, len(args), len(paramLengths)))
-    return '#%s\n' % ','.join(encodeDecHex(data, length) for (data, length) in zip((command,) + args, (1,) + paramLengths))
 
 def timeDeltaStr(seconds):
     negative = seconds < 0
@@ -214,7 +165,7 @@ class MeshConsole(QMainWindow):
             if not self.savedStartDate or self.confirmationDialog.popup(date, self.savedStartDate):
                 self.savedStartDate = date
                 self.startTime = QDateTime(date)
-                self.logger.info("Start date set to %s" % date.toString(DATE_FORMAT))
+                self.logger.info("Start date set to %s", date.toString(DATE_FORMAT))
             else:
                 QTimer.singleShot(0, partial(self.startDateEdit.setDate, self.savedStartDate)) # direct call works incorrectly
         self.pauseButton.setFocus()
@@ -228,7 +179,7 @@ class MeshConsole(QMainWindow):
             self.dateTimeValueLabel.setValue(now, self.currentCycle)
         if self.startTime and self.port.ready and (not self.previousTimeSet or self.previousTimeSet.secsTo(now) >= TIME_SET_INTERVAL):
             self.previousTimeSet = now
-            self.logger.info("Setting mesh time to %d" % self.currentCycle)
+            self.logger.info("Setting mesh time to %d", self.currentCycle)
             ret = self.port.command(COMMAND_SET_TIME % self.currentCycle, COMMAND_PONG, QApplication.processEvents)
             if ret:
                 self.logger.info("Time set OK")
