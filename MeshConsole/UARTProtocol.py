@@ -21,8 +21,8 @@ TYPES_DEC = (TYPE_SIGNED_DEC, TYPE_UNSIGNED_DEC)
 
 class Param(object):
     HEX_FORMAT = '%%0%dX'
-    SIGN_PLUS = '\x00'
-    SIGN_MINUS = '\xff'
+    SIGN_PLUS = '\x00' # ToDo: Not use a special byte for positive values
+    SIGN_MINUS = '\xff' # ToDo: Use only half-byte F to indicate negative value
     ENCODE_SIGNS = {True: hexlify(SIGN_PLUS).upper(), False: hexlify(SIGN_MINUS).upper()}
     DECODE_SIGNS = {SIGN_PLUS: 1, SIGN_MINUS: -1}
 
@@ -41,8 +41,9 @@ class Param(object):
             self.limit = 100 ** length - 1 if self.isDecCoded else 0x100 ** length // 2 if self.isSigned else 0x100 ** length - 1
             if not self.isDecCoded:
                 self.ret = self.HEX_FORMAT % (2 * self.length)
-        self.zero = None
-        self.zero = self.encode(0)
+        if not self.isStr:
+            self.zero = None
+            self.zero = self.encode(0)
 
     @staticmethod
     def encodeDecHex(value):
@@ -53,6 +54,12 @@ class Param(object):
         return '%s%02d' % (Param.encodeDecHex(hundreds), ones)
 
     def encode(self, value):
+        if self.isStr:
+            if not value:
+                raise ValueError("Empty value")
+            if self.length and len(value) != self.length:
+                raise ValueError("Bad value length %d, expected %d" % (len(value), self.length))
+            return hexlify(value)
         if not self.isSigned and value < 0:
             raise ValueError("Negative value %d for unsigned parameter" % value)
         if self.isDecCoded:
@@ -86,10 +93,14 @@ class Param(object):
         return reduce(lambda h, c: 100 * h + c, (t * 10 + c for (t, c) in (divmod(ord(d), 16) for d in data)))
 
     def decode(self, data):
-        if len(data) < self.encodedLength:
+        data = unhexlify(data)
+        if self.length:
+            if len(data) != self.encodedLength:
+                raise ValueError("Got %d bytes of data, expected %d" % (len(data), self.encodedLength))
+        elif len(data) < self.encodedLength:
             raise ValueError("Got %d bytes of data, expected at least %d bytes" % (len(data), self.encodedLength))
-        if self.length and len(data) != self.encodedLength:
-            raise ValueError("Got %d bytes of data, expected %d" % (len(data), self.encodedLength))
+        if self.isStr:
+            return data
         if self.isDecCoded:
             if self.isSigned:
                 sign = self.DECODE_SIGNS.get(data[0])
@@ -99,12 +110,16 @@ class Param(object):
             else:
                 return self.decodeDecHex(data)
         else: # pure hex
-            value = reduce(lambda h, c: 0x100 * h + c, data)
+            value = reduce(lambda h, c: 0x100 * h + c, (ord(c) for c in data), 0)
             if self.isSigned:
                 limit = self.limit if self.length else 0x100 ** len(data) // 2
                 if value >= limit:
                     value -= 2 * limit
             return value
+
+    def test(self, value, data):
+        assert self.encode(value) == data, "encode(%s) is %s, not %s" % (value, self.encode(value), data)
+        assert self.decode(data) == value, "decode(%s) is %s, not %s" % (data, self.decode(data), value)
 
 class Command(object):
     MAX_TOTAL_LENGTH = 252
@@ -149,16 +164,16 @@ class Command(object):
         index = 0
         for param in self.params:
             if param.length:
-                yield param.decode(data[index : index + param.length])
-                index += param.length
+                yield param.decode(data[index : index + 2 * param.length])
+                index += 2 * param.length
             else:
                 yield param.decode(data[index:])
                 break # not in fact needed, zero length may only occur in last parameter
 
     def decode(self, data):
-        if len(data) < self.minLength:
+        if len(data) < 2 * self.minLength:
             raise ValueError("Data too short, got %d bytes, expected at least %d bytes" % (len(data), self.minLength))
-        if len(data) > self.maxLength:
+        if len(data) > 2 * self.maxLength:
             raise ValueError("Data too long, got %d bytes, expected at most %d bytes" % (len(data), self.maxLength))
         return (self.tag, tuple(self.decodeParams(data)))
 
@@ -167,9 +182,89 @@ class Command(object):
         data = data.strip()
         if len(data) < 2 and not data.startswith('#'):
             return (None, None)
-        data = unhexlify(sub('[, ]+', '', data[1:]))
-        tag = ord(data[0])
+        data = sub('[, ]+', '', data[1:])
+        tag = ord(unhexlify(data[:2]))
         command = cls.commands.get(tag)
         if not command:
             raise ValueError("Unknown command %s" % hexlify(chr(tag)).upper())
-        return command.decode(data[1:])
+        return command.decode(data[2:])
+
+def testAll():
+    p = Param()
+    p.test(0, '00')
+    p.test(1, '01')
+    p.test(0xff, 'FF')
+    p = Param(4)
+    p.test(0, '00000000')
+    p.test(1, '00000001')
+    p.test(0xff00ff00, 'FF00FF00')
+    p = Param(0, TYPE_SIGNED_HEX)
+    p.test(0, '00')
+    p.test(1, '01')
+    p.test(-1, 'FF')
+    p.test(127, '7F')
+    p.test(-127, '81')
+    p.test(-128, '80')
+    p.test(128, '0080')
+    p.test(0xff, '00FF')
+    p.test(0xff00ff00, '00FF00FF00')
+    p = Param(1, TYPE_SIGNED_HEX)
+    p.test(0, '00')
+    p.test(1, '01')
+    p.test(-1, 'FF')
+    p.test(127, '7F')
+    p.test(-127, '81')
+    p.test(-128, '80')
+    p = Param(4, TYPE_SIGNED_HEX)
+    p.test(0, '00000000')
+    p.test(1, '00000001')
+    p.test(0xff00ff, '00FF00FF')
+    p = Param(0, TYPE_UNSIGNED_DEC)
+    p.test(0, '00')
+    p.test(1, '01')
+    p.test(99, '99')
+    p.test(100, '0100')
+    p.test(127, '0127')
+    p.test(128, '0128')
+    p.test(0xff00ff00, '4278255360')
+    p.test(999999999, '0999999999')
+    p = Param(1, TYPE_UNSIGNED_DEC)
+    p.test(0, '00')
+    p.test(1, '01')
+    p.test(99, '99')
+    p = Param(4, TYPE_UNSIGNED_DEC)
+    p.test(0, '00000000')
+    p.test(1, '00000001')
+    p.test(0xff00ff, '16711935')
+    p = Param(0, TYPE_SIGNED_DEC)
+    p.test(0, '0000')
+    p.test(1, '0001')
+    p.test(-1, 'FF01')
+    p.test(99, '0099')
+    p.test(100, '000100')
+    p.test(127, '000127')
+    p.test(-127, 'FF0127')
+    p.test(-128, 'FF0128')
+    p.test(128, '000128')
+    p.test(0xff00ff00, '004278255360')
+    p = Param(1, TYPE_SIGNED_DEC)
+    p.test(0, '0000')
+    p.test(1, '0001')
+    p.test(-1, 'FF01')
+    p.test(99, '0099')
+    p = Param(4, TYPE_SIGNED_DEC)
+    p.test(0, '0000000000')
+    p.test(1, '0000000001')
+    p.test(-1, 'FF00000001')
+    p.test(0xff00ff, '0016711935')
+    p.test(-99999999, 'FF99999999')
+    p = Param(0, TYPE_STR)
+    p.test('a', '61')
+    p.test('abcd', '61626364')
+    p = Param(1, TYPE_STR)
+    p.test('a', '61')
+    p = Param(2, TYPE_STR)
+    p.test('aa', '6161')
+
+if __name__ == '__main__':
+    testAll()
