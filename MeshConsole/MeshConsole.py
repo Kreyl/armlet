@@ -5,7 +5,6 @@
 #
 from functools import partial
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
-from re import split
 from sys import argv, exit # pylint: disable=W0622
 from traceback import format_exc
 
@@ -19,11 +18,18 @@ except ImportError, ex:
 from MeshDevice import Device, getColumnsData
 from MeshWidgets import * # pylint: disable=W0401
 from MeshView import DevicesModel, Column, ColumnAction
+from UARTCommands import Command, meshNodeInfoResponse
+from UARTCommands import meshGetSettingsCommand, meshGetSettingsResponse
+from UARTCommands import meshSetTimeCommand, meshSetTimeResponse
 from SerialPort import SerialPort
 
 # ToDo
+# ToDo: replace int tags with char tags
+# Move SerialPort emulator to a separate file
+# Change signed dec-coded values handling in UARTProtocol
 # Avoid extra bold in table heading popups
 # Get devices number from device OR make devices list dynamic, start with empty table
+# If devices number from device is different from existing, abort? restart? think about it
 
 def timeDeltaStr(seconds):
     negative = seconds < 0
@@ -124,7 +130,7 @@ class MeshConsole(QMainWindow):
         self.playing = False # will be toggled immediately by pause()
         self.comConnect.connect(self.processConnect)
         self.comInput.connect(self.processInput)
-        self.port = SerialPort(self.logger, COMMAND_PING, COMMAND_PONG, self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit)
+        self.port = SerialPort(self.logger, meshGetSettingsCommand.prefix, meshGetSettingsResponse.prefix, self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit)
         self.pause()
         self.updateTime()
         if self.savedMaximized:
@@ -180,9 +186,9 @@ class MeshConsole(QMainWindow):
         if self.startTime and self.port.ready and (not self.previousTimeSet or self.previousTimeSet.secsTo(now) >= TIME_SET_INTERVAL):
             self.previousTimeSet = now
             self.logger.info("Setting mesh time to %d", self.currentCycle)
-            ret = self.port.command(COMMAND_SET_TIME % self.currentCycle, COMMAND_PONG, QApplication.processEvents)
-            if ret:
-                self.logger.info("Time set OK")
+            data = self.port.command(meshSetTimeCommand.encode(self.currentCycle), meshSetTimeResponse.prefix, QApplication.processEvents)
+            if data:
+                self.logger.info("Time adjusted %d", meshSetTimeResponse.decode(data)[0])
             else:
                 self.logger.warning("Time set failed")
         dt = QDateTime.currentDateTime().msecsTo(now.addMSecs(TIME_UPDATE_INTERVAL))
@@ -191,27 +197,36 @@ class MeshConsole(QMainWindow):
     def processConnect(self, pong):
         self.logger.info("connected device detected")
         try:
-            self.cycleLength = int(split(SEPARATOR, unicode(pong).strip())[-1])
+            (numDevices, self.cycleLength) = meshGetSettingsResponse.decode(pong)
             self.logger.info("cycle length set to %dms", self.cycleLength)
+            if numDevices != len(self.devices): # ToDo: Do something clever with it
+                self.error("Number of devices mismatch, got %d, expected %d" % (numDevices, len(self.devices)))
         except:
             self.cycleLength = CYCLE_LENGTH
             self.logger.warning("Error detecting cycle length, using default: %dms", self.cycleLength)
 
     def processInput(self, inputLine):
-        inputLine = unicode(inputLine)
-        if inputLine.startswith(COMMAND_NODE_INFO):
+        inputLine = unicode(inputLine).strip()
+        (tag, args) = Command.decodeCommand(inputLine)
+        if tag == meshNodeInfoResponse.tag:
             try:
-                words = split(SEPARATOR, inputLine.strip())
-                self.devices[int(words[1]) - 1].update(*words[2:])
+                assert 1 <= args[1] <= len(self.devices)
+                self.devices[args[0] - 1].update(args[1:])
                 self.saveSettings()
                 if self.playing:
                     self.devicesModel.refresh()
             except Exception:
-                self.logger.exception("Bad info command %s", inputLine)
+                self.logger.exception("Error proocessing info command: %s", inputLine)
+        elif args: # unexpected valid command
+            self.logger.warning("Unexpected command: %s %s", tag, ' '.join(args))
+        elif tag: # unknown command
+            self.logger.warning("Unknown command: %s", inputLine)
+        else: # not a command
+            self.logger.warning("Unexpected input: %s", inputLine)
 
     def consoleEnter(self):
-        if not self.port.command(self.consoleEdit.getInput(), COMMAND_PONG, QApplication.processEvents):
-            self.logger.warning("Command failed")
+        if not self.port.command(self.consoleEdit.getInput(), Command.MARKER, QApplication.processEvents):
+            self.logger.warning("Command failed") # ToDo: perform more elaborate analysis. Is waiting a good idea? Won't we capture some useful input?
 
     def closeEvent(self, _event):
         self.saveSettings()

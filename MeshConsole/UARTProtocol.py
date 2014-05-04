@@ -6,6 +6,7 @@
 # See https://docs.google.com/document/d/1J2z4WCSR-WekH4tEe7bfqvjPJ0Hx7Ww-26ECBoLwl4s
 #
 from binascii import hexlify, unhexlify
+from itertools import chain
 from re import sub
 
 # Value types
@@ -122,12 +123,14 @@ class Param(object):
         assert self.decode(data) == value, "decode(%s) is %s, not %s" % (data, self.decode(data), value)
 
 class Command(object):
+    MARKER = '#'
     MAX_TOTAL_LENGTH = 252
     commands = {}
 
     def __init__(self, tag, params = None, reply = None):
         self.tag = tag
         self.encodedTag = hexlify(chr(tag)).upper()
+        self.prefix = self.MARKER + self.encodedTag
         self.params = tuple(params or ())
         self.minLength = self.maxLength = 0
         for (i, param) in enumerate(self.params):
@@ -148,17 +151,34 @@ class Command(object):
             if command.reply and command.reply not in cls.commands:
                 raise ValueError("Unknown reply %s for command %s" % (hexlify(chr(command.reply)).upper(), hexlify(chr(tag)).upper()))
 
+    @classmethod
+    def getCommand(cls, tag):
+        originalTag = tag
+        if hasattr(tag, 'len') and hasattr(tag, 'startswith'):
+            if hasattr(tag, 'strip'):
+                tag = tag.strip()
+            if len(tag) == 1:
+                tag = ord(tag)
+            else:
+                if tag.startswith(cls.MARKER):
+                    tag = tag[len(cls.MARKER):]
+                try:
+                    tag = unhexlify(tag)
+                except TypeError:
+                    pass
+        command = cls.commands.get(tag)
+        if not command:
+            raise ValueError("Unknown command %s" % originalTag)
+        return command
+
     def encode(self, *args):
         if len(args) != len(self.params):
             raise ValueError("Bad number of arguments for command %s: %d, expected %s" % (self.encodedTag, len(args), len(self.params)))
-        return '#%s,%s\n' % (self.encodedTag, ','.join(param.encode(arg) for (param, arg) in zip(self.params, args)))
+        return ','.join(chain((self.prefix,), (param.encode(arg) for (param, arg) in zip(self.params, args))))
 
     @classmethod
     def encodeCommand(cls, tag, *args):
-        command = cls.commands.get(tag)
-        if not command:
-            raise ValueError("Unknown command %s" % hexlify(chr(tag)).upper())
-        return command.encode(*args)
+        return cls.getCommand(tag).encode(*args)
 
     def decodeParams(self, data): # generator
         index = 0
@@ -171,11 +191,17 @@ class Command(object):
                 break # not in fact needed, zero length may only occur in last parameter
 
     def decode(self, data):
+        data = data.strip()
+        if data.startswith(self.MARKER):
+            tag = data[len(self.MARKER) : len(self.MARKER) + 2].upper()
+            if tag != self.encodedTag:
+                raise ValueError("Wrong command tag %s, expected %s" % (tag, self.encodedTag))
+            data = data[len(self.MARKER) + 2:]
         if len(data) < 2 * self.minLength:
             raise ValueError("Data too short, got %d bytes, expected at least %d bytes" % (len(data), self.minLength))
         if len(data) > 2 * self.maxLength:
             raise ValueError("Data too long, got %d bytes, expected at most %d bytes" % (len(data), self.maxLength))
-        return (self.tag, tuple(self.decodeParams(data)))
+        return tuple(self.decodeParams(data))
 
     @classmethod
     def decodeCommand(cls, data):
@@ -187,7 +213,7 @@ class Command(object):
         command = cls.commands.get(tag)
         if not command:
             raise ValueError("Unknown command %s" % hexlify(chr(tag)).upper())
-        return command.decode(data[2:])
+        return (tag, command.decode(data[2:]))
 
     @classmethod
     def testCommand(cls, tag, data, *args):
@@ -278,13 +304,15 @@ def testCommand():
     Command(1, (Param(2), Param(1, TYPE_UNSIGNED_DEC), Param(4, TYPE_SIGNED_DEC), Param(0, TYPE_SIGNED_HEX)), 2)
     Command(2, (Param(1, TYPE_SIGNED_HEX), Param(4, TYPE_UNSIGNED_DEC), Param(1, TYPE_STR), Param(0, TYPE_SIGNED_DEC)), 3)
     Command(3, (Param(0, TYPE_UNSIGNED_HEX),), 4)
-    Command(4, (Param(0, TYPE_UNSIGNED_DEC),))
+    Command(4, (Param(0, TYPE_UNSIGNED_DEC),), 5)
+    Command(5, ())
     Command.checkReplies()
-    Command.testCommand(0, '#00,FF,7FFFFFFF,FF99,3939393939393939\n', 0xff, 0x7fffffff, -99, '99999999')
-    Command.testCommand(1, '#01,1000,99,0099999999,FF00000000000000000001\n', 0x1000, 99, 99999999, -0xffffffffffffffffffff)
-    Command.testCommand(2, '#02,80,99999999,61,FF0999999999999999\n', -0x80, 99999999, 'a', -999999999999999)
-    Command.testCommand(3, '#03,FFFFFFFFFFFFFFFFFFFF\n', 0xffffffffffffffffffff)
-    Command.testCommand(4, '#04,0999999999999999\n', 999999999999999)
+    Command.testCommand(0, '#00,FF,7FFFFFFF,FF99,3939393939393939', 0xff, 0x7fffffff, -99, '99999999')
+    Command.testCommand(1, '#01,1000,99,0099999999,FF00000000000000000001', 0x1000, 99, 99999999, -0xffffffffffffffffffff)
+    Command.testCommand(2, '#02,80,99999999,61,FF0999999999999999', -0x80, 99999999, 'a', -999999999999999)
+    Command.testCommand(3, '#03,FFFFFFFFFFFFFFFFFFFF', 0xffffffffffffffffffff)
+    Command.testCommand(4, '#04,0999999999999999', 999999999999999)
+    Command.testCommand(5, '#05')
     Command.commands.clear()
 
 if __name__ == '__main__':

@@ -50,7 +50,7 @@ UART_MESH_NODE_INFO = 0x91
 #Command(tag, (Param(length = 1, type = TYPE_UNSIGNED_HEX),), replyTag or None)
 
 Command(UART_PING, (), UART_ACK)
-Command(UART_ACK, (Param(),))
+ackResponse = Command(UART_ACK, (Param(),))
 
 Command(UART_PILL_STATUS, (Param(),), UART_RET_PILL_STATUS)
 Command(UART_RET_PILL_STATUS, (Param(), Param()))
@@ -69,12 +69,12 @@ Command(UART_SET_TYPE, (Param(),), UART_ACK)
 Command(UART_GET_TYPE, (), UART_RET_GET_TYPE)
 Command(UART_RET_GET_TYPE, (Param(),))
 
-Command(UART_MESH_GET_SETTINGS, (), UART_MESH_SETTINGS)
-Command(UART_MESH_SETTINGS, (Param(2, TYPE_UNSIGNED_DEC), Param(3, TYPE_UNSIGNED_DEC)))
+meshGetSettingsCommand = Command(UART_MESH_GET_SETTINGS, (), UART_MESH_SETTINGS)
+meshGetSettingsResponse = Command(UART_MESH_SETTINGS, (Param(2, TYPE_UNSIGNED_DEC), Param(3, TYPE_UNSIGNED_DEC)))
 
-Command(UART_MESH_SET_TIME, (Param(0, TYPE_UNSIGNED_DEC),), UART_MESH_TIME_SET)
-Command(UART_MESH_TIME_SET, (Param(0, TYPE_SIGNED_DEC),))
+meshSetTimeCommand = Command(UART_MESH_SET_TIME, (Param(0, TYPE_UNSIGNED_DEC),), UART_MESH_TIME_SET)
+meshSetTimeResponse = Command(UART_MESH_TIME_SET, (Param(0, TYPE_SIGNED_DEC),))
 
-Command(UART_MESH_NODE_INFO, (Param(2), Param(1, TYPE_UNSIGNED_DEC), Param(4, TYPE_SIGNED_HEX), Param(4, TYPE_SIGNED_HEX), Param(2), Param(2), Param()))
+meshNodeInfoResponse = Command(UART_MESH_NODE_INFO, (Param(2), Param(1, TYPE_UNSIGNED_DEC), Param(4, TYPE_SIGNED_HEX), Param(4, TYPE_SIGNED_HEX), Param(2), Param(2), Param()))
 
 Command.checkReplies()
