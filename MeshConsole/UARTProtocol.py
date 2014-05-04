@@ -81,7 +81,7 @@ class Param(object):
                     raise ValueError("Value %d is out of range [0..%d]" % (value, self.limit))
                 ret = self.ret
             else: # length not specified
-                length = (len('%x' % (value if not self.isSigned else 2 * value if value >= 0 else -value - 1)) + 1) // 2
+                length = (len('%x' % (value if not self.isSigned else 2 * (value if value >= 0 else -value - 1))) + 1) // 2
                 if value < 0:
                     value += 0x100 ** length
                 ret = self.HEX_FORMAT % (2 * length)
@@ -118,7 +118,7 @@ class Param(object):
             return value
 
     def test(self, value, data):
-        assert self.encode(value) == data, "encode(%s) is %s, not %s" % (value, self.encode(value), data)
+        assert self.encode(value) == data.upper(), "encode(%s) is %s, not %s" % (value, self.encode(value), data)
         assert self.decode(data) == value, "decode(%s) is %s, not %s" % (data, self.decode(data), value)
 
 class Command(object):
@@ -150,7 +150,7 @@ class Command(object):
 
     def encode(self, *args):
         if len(args) != len(self.params):
-            raise ValueError("Bad number of arguments for command %d: %d, expected %s" % (self.encodedTag, len(args), len(self.params)))
+            raise ValueError("Bad number of arguments for command %s: %d, expected %s" % (self.encodedTag, len(args), len(self.params)))
         return '#%s,%s\n' % (self.encodedTag, ','.join(param.encode(arg) for (param, arg) in zip(self.params, args)))
 
     @classmethod
@@ -164,8 +164,8 @@ class Command(object):
         index = 0
         for param in self.params:
             if param.length:
-                yield param.decode(data[index : index + 2 * param.length])
-                index += 2 * param.length
+                yield param.decode(data[index : index + 2 * param.encodedLength])
+                index += 2 * param.encodedLength
             else:
                 yield param.decode(data[index:])
                 break # not in fact needed, zero length may only occur in last parameter
@@ -189,7 +189,12 @@ class Command(object):
             raise ValueError("Unknown command %s" % hexlify(chr(tag)).upper())
         return command.decode(data[2:])
 
-def testAll():
+    @classmethod
+    def testCommand(cls, tag, data, *args):
+        assert cls.encodeCommand(tag, *args) == data.upper(), "encodeCommand(%s, %s) is %s, not %s" % (hexlify(chr(tag)).upper(), ', '.join(repr(arg) for arg in args), cls.encodeCommand(tag, *args), data)
+        assert cls.decodeCommand(data) == (tag, args), "decodeCommand(%s, %s) is %s, not %s" % (hexlify(chr(tag)).upper(), data, cls.decodeCommand(data), (tag, args))
+
+def testParam():
     p = Param()
     p.test(0, '00')
     p.test(1, '01')
@@ -200,6 +205,8 @@ def testAll():
     p.test(0xff00ff00, 'FF00FF00')
     p = Param(0, TYPE_SIGNED_HEX)
     p.test(0, '00')
+    p.test(-0xffff, 'FF0001')
+    p.test(-0xfffffffffffffffffff, 'F0000000000000000001')
     p.test(1, '01')
     p.test(-1, 'FF')
     p.test(127, '7F')
@@ -266,5 +273,20 @@ def testAll():
     p = Param(2, TYPE_STR)
     p.test('aa', '6161')
 
+def testCommand():
+    Command(0, (Param(), Param(4, TYPE_SIGNED_HEX), Param(1, TYPE_SIGNED_DEC), Param(0, TYPE_STR)), 1)
+    Command(1, (Param(2), Param(1, TYPE_UNSIGNED_DEC), Param(4, TYPE_SIGNED_DEC), Param(0, TYPE_SIGNED_HEX)), 2)
+    Command(2, (Param(1, TYPE_SIGNED_HEX), Param(4, TYPE_UNSIGNED_DEC), Param(1, TYPE_STR), Param(0, TYPE_SIGNED_DEC)), 3)
+    Command(3, (Param(0, TYPE_UNSIGNED_HEX),), 4)
+    Command(4, (Param(0, TYPE_UNSIGNED_DEC),))
+    Command.checkReplies()
+    Command.testCommand(0, '#00,FF,7FFFFFFF,FF99,3939393939393939\n', 0xff, 0x7fffffff, -99, '99999999')
+    Command.testCommand(1, '#01,1000,99,0099999999,FF00000000000000000001\n', 0x1000, 99, 99999999, -0xffffffffffffffffffff)
+    Command.testCommand(2, '#02,80,99999999,61,FF0999999999999999\n', -0x80, 99999999, 'a', -999999999999999)
+    Command.testCommand(3, '#03,FFFFFFFFFFFFFFFFFFFF\n', 0xffffffffffffffffffff)
+    Command.testCommand(4, '#04,0999999999999999\n', 999999999999999)
+    Command.commands.clear()
+
 if __name__ == '__main__':
-    testAll()
+    testParam()
+    testCommand()
