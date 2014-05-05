@@ -128,8 +128,10 @@ class Command(object):
     commands = {}
 
     def __init__(self, tag, params = None, reply = None):
+        if len(tag) != 1:
+            raise ValueError("Bad tag length %d, expected 1" % len(tag))
         self.tag = tag
-        self.encodedTag = hexlify(chr(tag)).upper()
+        self.encodedTag = hexlify(tag).upper()
         self.prefix = self.MARKER + self.encodedTag
         self.params = tuple(params or ())
         self.minLength = self.maxLength = 0
@@ -153,22 +155,19 @@ class Command(object):
 
     @classmethod
     def getCommand(cls, tag):
-        originalTag = tag
-        if hasattr(tag, 'len') and hasattr(tag, 'startswith'):
-            if hasattr(tag, 'strip'):
-                tag = tag.strip()
-            if len(tag) == 1:
-                tag = ord(tag)
-            else:
-                if tag.startswith(cls.MARKER):
-                    tag = tag[len(cls.MARKER):]
-                try:
-                    tag = unhexlify(tag)
-                except TypeError:
-                    pass
+        tag = tag.strip()
+        if not tag:
+            raise ValueError("Empty command tag")
+        if len(tag) > 1:
+            if tag.startswith(cls.MARKER):
+                tag = tag[len(cls.MARKER):]
+            try:
+                tag = unhexlify(tag)
+            except TypeError:
+                pass
         command = cls.commands.get(tag)
         if not command:
-            raise ValueError("Unknown command %s" % originalTag)
+            raise ValueError("Unknown command tag %s" % tag)
         return command
 
     def encode(self, *args):
@@ -209,10 +208,11 @@ class Command(object):
         if len(data) < 2 and not data.startswith('#'):
             return (None, None)
         data = sub('[, ]+', '', data[1:])
-        tag = ord(unhexlify(data[:2]))
+        hexTag = data[:2].upper()
+        tag = unhexlify(hexTag)
         command = cls.commands.get(tag)
         if not command:
-            raise ValueError("Unknown command %s" % hexlify(chr(tag)).upper())
+            raise ValueError("Unknown command %s" % hexTag)
         return (tag, command.decode(data[2:]))
 
     @classmethod
@@ -300,19 +300,19 @@ def testParam():
     p.test('aa', '6161')
 
 def testCommand():
-    Command(0, (Param(), Param(4, TYPE_SIGNED_HEX), Param(1, TYPE_SIGNED_DEC), Param(0, TYPE_STR)), 1)
-    Command(1, (Param(2), Param(1, TYPE_UNSIGNED_DEC), Param(4, TYPE_SIGNED_DEC), Param(0, TYPE_SIGNED_HEX)), 2)
-    Command(2, (Param(1, TYPE_SIGNED_HEX), Param(4, TYPE_UNSIGNED_DEC), Param(1, TYPE_STR), Param(0, TYPE_SIGNED_DEC)), 3)
-    Command(3, (Param(0, TYPE_UNSIGNED_HEX),), 4)
-    Command(4, (Param(0, TYPE_UNSIGNED_DEC),), 5)
-    Command(5, ())
+    Command('\x00', (Param(), Param(4, TYPE_SIGNED_HEX), Param(1, TYPE_SIGNED_DEC), Param(0, TYPE_STR)), '\x01')
+    Command('\x01', (Param(2), Param(1, TYPE_UNSIGNED_DEC), Param(4, TYPE_SIGNED_DEC), Param(0, TYPE_SIGNED_HEX)), '\x02')
+    Command('\x02', (Param(1, TYPE_SIGNED_HEX), Param(4, TYPE_UNSIGNED_DEC), Param(1, TYPE_STR), Param(0, TYPE_SIGNED_DEC)), '\x03')
+    Command('\x03', (Param(0, TYPE_UNSIGNED_HEX),), '\x04')
+    Command('\x04', (Param(0, TYPE_UNSIGNED_DEC),), '\x05')
+    Command('\x05', ())
     Command.checkReplies()
-    Command.testCommand(0, '#00,FF,7FFFFFFF,FF99,3939393939393939', 0xff, 0x7fffffff, -99, '99999999')
-    Command.testCommand(1, '#01,1000,99,0099999999,FF00000000000000000001', 0x1000, 99, 99999999, -0xffffffffffffffffffff)
-    Command.testCommand(2, '#02,80,99999999,61,FF0999999999999999', -0x80, 99999999, 'a', -999999999999999)
-    Command.testCommand(3, '#03,FFFFFFFFFFFFFFFFFFFF', 0xffffffffffffffffffff)
-    Command.testCommand(4, '#04,0999999999999999', 999999999999999)
-    Command.testCommand(5, '#05')
+    Command.testCommand('\x00', '#00,FF,7FFFFFFF,FF99,3939393939393939', 0xff, 0x7fffffff, -99, '99999999')
+    Command.testCommand('\x01', '#01,1000,99,0099999999,FF00000000000000000001', 0x1000, 99, 99999999, -0xffffffffffffffffffff)
+    Command.testCommand('\x02', '#02,80,99999999,61,FF0999999999999999', -0x80, 99999999, 'a', -999999999999999)
+    Command.testCommand('\x03', '#03,FFFFFFFFFFFFFFFFFFFF', 0xffffffffffffffffffff)
+    Command.testCommand('\x04', '#04,0999999999999999', 999999999999999)
+    Command.testCommand('\x05', '#05')
     Command.commands.clear()
 
 if __name__ == '__main__':
