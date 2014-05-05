@@ -58,16 +58,20 @@ class Param(object):
         if self.isStr:
             if not value:
                 raise ValueError("Empty value")
+            try:
+                value = str(value)
+            except UnicodeError:
+                raise ValueError("Unsupported unicode value: %s" % value)
             if self.length and len(value) != self.length:
-                raise ValueError("Bad value length %d, expected %d" % (len(value), self.length))
+                raise ValueError("Bad value length %d, expected %d: %s" % (len(value), self.length, value))
             return hexlify(value)
         if not self.isSigned and value < 0:
-            raise ValueError("Negative value %d for unsigned parameter" % value)
+            raise ValueError("Negative value for unsigned parameter: %r" % value)
         if self.isDecCoded:
             sign = '' if not self.isSigned else self.ENCODE_SIGNS[value >= 0]
             if value:
                 if self.length and abs(value) > self.limit:
-                    raise ValueError("Value %r is out of range [%d..%d]" % (value, -self.limit, self.limit))
+                    raise ValueError("Value is out of range [%d..%d]: %r" % (value, -self.limit, self.limit))
                 return sign + self.encodeDecHex(abs(value)).rjust(2 * self.length, '0')
             else: # value is 0
                 return self.zero or sign + '0' * 2 * (self.length or 1)
@@ -75,11 +79,11 @@ class Param(object):
             if self.length:
                 if self.isSigned:
                     if not -self.limit <= value < self.limit:
-                        raise ValueError("Value %d is out of range [%d..%d]" % (value, -self.limit, self.limit - 1))
+                        raise ValueError("Value is out of range [%d..%d]: %r" % (value, -self.limit, self.limit - 1))
                     if value < 0:
                         value += 2 * self.limit
                 elif value > self.limit: # unsigned
-                    raise ValueError("Value %d is out of range [0..%d]" % (value, self.limit))
+                    raise ValueError("Value is out of range [0..%d]: %r" % (value, self.limit))
                 ret = self.ret
             else: # length not specified
                 length = (len('%x' % (value if not self.isSigned else 2 * (value if value >= 0 else -value - 1))) + 1) // 2
@@ -94,19 +98,24 @@ class Param(object):
         return reduce(lambda h, c: 100 * h + c, (t * 10 + c for (t, c) in (divmod(ord(d), 16) for d in data)))
 
     def decode(self, data):
-        data = unhexlify(data)
+        if len(data) % 2:
+            raise ValueError("Odd data length %d: %s" % (len(data), data))
+        try:
+            data = unhexlify(data)
+        except TypeError:
+            raise ValueError("Bad hexlified format data: %s" % data)
         if self.length:
             if len(data) != self.encodedLength:
-                raise ValueError("Got %d bytes of data, expected %d" % (len(data), self.encodedLength))
+                raise ValueError("Got %d bytes of data, expected %d: %s" % (len(data), self.encodedLength, data))
         elif len(data) < self.encodedLength:
-            raise ValueError("Got %d bytes of data, expected at least %d bytes" % (len(data), self.encodedLength))
+            raise ValueError("Got %d bytes of data, expected at least %d bytes: %s" % (len(data), self.encodedLength, data))
         if self.isStr:
             return data
         if self.isDecCoded:
             if self.isSigned:
                 sign = self.DECODE_SIGNS.get(data[0])
                 if not sign:
-                    raise ValueError("Bad sign byte in value %s" % hexlify(data).upper())
+                    raise ValueError("Bad sign byte in value: %s" % hexlify(data).upper())
                 return sign * self.decodeDecHex(data[1:])
             else:
                 return self.decodeDecHex(data)
@@ -167,7 +176,7 @@ class Command(object):
                 pass
         command = cls.commands.get(tag)
         if not command:
-            raise ValueError("Unknown command tag %s" % tag)
+            raise ValueError("Unknown command tag: %s" % tag)
         return command
 
     def encode(self, *args):
@@ -190,29 +199,35 @@ class Command(object):
                 break # not in fact needed, zero length may only occur in last parameter
 
     def decode(self, data):
-        data = data.strip()
+        data = sub('[, ]+', '', unicode(data).strip())
         if data.startswith(self.MARKER):
             tag = data[len(self.MARKER) : len(self.MARKER) + 2].upper()
             if tag != self.encodedTag:
                 raise ValueError("Wrong command tag %s, expected %s" % (tag, self.encodedTag))
             data = data[len(self.MARKER) + 2:]
         if len(data) < 2 * self.minLength:
-            raise ValueError("Data too short, got %d bytes, expected at least %d bytes" % (len(data), self.minLength))
+            raise ValueError("Data too short, got %d bytes, expected at least %d bytes: %s" % (len(data), self.minLength, data))
         if len(data) > 2 * self.maxLength:
-            raise ValueError("Data too long, got %d bytes, expected at most %d bytes" % (len(data), self.maxLength))
+            raise ValueError("Data too long, got %d bytes, expected at most %d bytes: %s" % (len(data), self.maxLength, data))
         return tuple(self.decodeParams(data))
 
     @classmethod
     def decodeCommand(cls, data):
-        data = data.strip()
-        if len(data) < 2 and not data.startswith('#'):
+        data = unicode(data).strip()
+        if len(data) < 2:
             return (None, None)
-        data = sub('[, ]+', '', data[1:])
+        if data.startswith(cls.MARKER):
+            if len(data) < 2 + len(cls.MARKER):
+                return (None, None)
+            data = data[1:]
         hexTag = data[:2].upper()
-        tag = unhexlify(hexTag)
+        try:
+            tag = unhexlify(hexTag)
+        except TypeError:
+            return (None, None)
         command = cls.commands.get(tag)
         if not command:
-            raise ValueError("Unknown command %s" % hexTag)
+            return (tag, None)
         return (tag, command.decode(data[2:]))
 
     @classmethod

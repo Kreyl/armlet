@@ -25,7 +25,7 @@ from MeshView import DevicesModel, Column, ColumnAction
 from UARTCommands import Command, meshNodeInfoResponse
 from UARTCommands import meshGetSettingsCommand, meshGetSettingsResponse
 from UARTCommands import meshSetTimeCommand, meshSetTimeResponse
-from SerialPort import SerialPort, DT
+from SerialPort import SerialPort, DT, TIMEOUT
 
 # ToDo
 # Change signed dec-coded values handling in UARTProtocol
@@ -74,6 +74,7 @@ class EventLogger(getLoggerClass(), QObject):
 
 class EmulatedSerial(object):
     def __init__(self):
+        self.timeout = TIMEOUT
         self.buffer = deque()
         self.ready = False
         self.nextNode = None
@@ -97,7 +98,7 @@ class EmulatedSerial(object):
         if tag == meshGetSettingsCommand.tag:
             self.buffer.append(meshGetSettingsResponse.encode(len(Device.devices), CYCLE_LENGTH))
         elif tag == meshSetTimeCommand.tag:
-            self.buffer.append(meshSetTimeCommand.encode(randint(-10, 10)))
+            self.buffer.append(meshSetTimeResponse.encode(randint(-10, 10)))
         self.ready = True
         return len(data)
 
@@ -233,30 +234,26 @@ class MeshConsole(QMainWindow):
 
     def processConnect(self, pong):
         self.logger.info("connected device detected")
-        try:
-            (numDevices, self.cycleLength) = meshGetSettingsResponse.decode(pong)
-            if self.cycleLength < 1:
-                self.error("Bad cycle length %d" % self.cycleLength)
-            self.logger.info("cycle length set to %dms", self.cycleLength)
-            if numDevices != len(self.devices): # ToDo: Do something clever with it
-                self.error("Number of devices mismatch, got %d, expected %d" % (numDevices, len(self.devices)))
-        except:
-            self.cycleLength = CYCLE_LENGTH
-            self.logger.warning("Error detecting cycle length, using default: %dms", self.cycleLength)
+        (numDevices, self.cycleLength) = meshGetSettingsResponse.decode(pong)
+        self.logger.info("Mesh settings: %d devices, cycle length %dms", numDevices, self.cycleLength)
+        if numDevices != len(self.devices): # ToDo: Do something clever with it
+            self.error("Number of devices mismatch, got %d, expected %d" % (numDevices, len(self.devices)))
+        if self.cycleLength < 1:
+            self.error("Bad cycle length %d" % self.cycleLength)
 
     def processInput(self, inputLine):
         inputLine = unicode(inputLine).strip()
         (tag, args) = Command.decodeCommand(inputLine)
         if tag == meshNodeInfoResponse.tag:
             try:
-                assert 1 <= args[1] <= len(self.devices)
-                self.devices[args[0] - 1].update(args[1:])
+                assert 1 <= args[0] <= len(self.devices)
+                self.devices[args[0] - 1].update(*args[1:])
                 self.saveSettings()
                 if self.playing:
                     self.devicesModel.refresh()
             except Exception:
                 self.logger.exception("Error proocessing node info: %s", inputLine)
-        elif args: # unexpected valid command
+        elif args != None: # unexpected valid command
             self.logger.warning("Unexpected command: %s %s", hexlify(tag).upper(), ' '.join(args))
         elif tag: # unknown command
             self.logger.warning("Unknown command: %s", inputLine)
@@ -264,10 +261,7 @@ class MeshConsole(QMainWindow):
             self.logger.warning("Unexpected input: %s", inputLine)
 
     def consoleEnter(self):
-        if self.port.command(self.consoleEdit.getInput(), Command.MARKER, QApplication.processEvents):
-            self.logger.warning("Command OK")
-        else:
-            self.logger.warning("Command failed")
+        self.port.write(self.consoleEdit.getInput())
 
     def closeEvent(self, _event):
         self.saveSettings()
