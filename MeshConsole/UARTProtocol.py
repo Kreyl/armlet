@@ -22,10 +22,6 @@ TYPES_DEC = (TYPE_SIGNED_DEC, TYPE_UNSIGNED_DEC)
 
 class Param(object):
     HEX_FORMAT = '%%0%dX'
-    SIGN_PLUS = '\x00' # ToDo: Not use a special byte for positive values
-    SIGN_MINUS = '\xff' # ToDo: Use only half-byte F to indicate negative value
-    ENCODE_SIGNS = {True: hexlify(SIGN_PLUS).upper(), False: hexlify(SIGN_MINUS).upper()}
-    DECODE_SIGNS = {SIGN_PLUS: 1, SIGN_MINUS: -1}
 
     def __init__(self, length = 1, typ = TYPE_UNSIGNED_HEX):
         if not TYPE_MIN <= typ <= TYPE_MAX:
@@ -37,10 +33,20 @@ class Param(object):
         self.isSigned = self.typ in TYPES_SIGNED
         self.isDecCoded = self.typ in TYPES_DEC
         self.length = length
-        self.encodedLength = (self.length or 1) + int(self.isDecCoded and self.isSigned)
+        self.encodedLength = self.length or 1
         if self.length:
-            self.limit = 100 ** length - 1 if self.isDecCoded else 0x100 ** length // 2 if self.isSigned else 0x100 ** length - 1
-            if not self.isDecCoded:
+            if self.isDecCoded:
+                limit = 100 ** length - 1
+                if self.isSigned:
+                    (self.limitMin, self.limitMax) = (-(limit // 10), limit)
+                else:
+                    (self.limitMin, self.limitMax) = (-limit, limit)
+            else:
+                limit = 0x100 ** length
+                if self.isSigned:
+                    (self.limitMin, self.limitMax) = (-limit // 2, limit // 2 - 1)
+                else:
+                    (self.limitMin, self.limitMax) = (0, limit - 1)
                 self.ret = self.HEX_FORMAT % (2 * self.length)
         if not self.isStr:
             self.zero = None
@@ -67,30 +73,24 @@ class Param(object):
             return hexlify(value)
         if not self.isSigned and value < 0:
             raise ValueError("Negative value for unsigned parameter: %r" % value)
+        if self.length and not self.limitMin <= value <= self.limitMax:
+            raise ValueError("Value is out of range [%d..%d]: %r" % (self.limitMin, self.limitMax, value))
         if self.isDecCoded:
-            sign = '' if not self.isSigned else self.ENCODE_SIGNS[value >= 0]
             if value:
-                if self.length and abs(value) > self.limit:
-                    raise ValueError("Value is out of range [%d..%d]: %r" % (value, -self.limit, self.limit))
-                return sign + self.encodeDecHex(abs(value)).rjust(2 * self.length, '0')
+                ret = self.encodeDecHex(abs(value)).rjust(2 * self.length, '0')
+                return ret if value >= 0 else 'F' + ret[1:] if ret[0] == '0' else 'F0' + ret
             else: # value is 0
-                return self.zero or sign + '0' * 2 * (self.length or 1)
+                return self.zero or '0' * 2 * (self.length or 1)
         else: # pure hex
             if self.length:
-                if self.isSigned:
-                    if not -self.limit <= value < self.limit:
-                        raise ValueError("Value is out of range [%d..%d]: %r" % (value, -self.limit, self.limit - 1))
-                    if value < 0:
-                        value += 2 * self.limit
-                elif value > self.limit: # unsigned
-                    raise ValueError("Value is out of range [0..%d]: %r" % (value, self.limit))
-                ret = self.ret
+                if self.isSigned and value < 0:
+                    value += 2 * (self.limitMax + 1)
+                return self.ret % value
             else: # length not specified
                 length = (len('%x' % (value if not self.isSigned else 2 * (value if value >= 0 else -value - 1))) + 1) // 2
                 if value < 0:
                     value += 0x100 ** length
-                ret = self.HEX_FORMAT % (2 * length)
-            return ret % value
+                return self.HEX_FORMAT % (2 * length) % value
 
     @staticmethod
     def decodeDecHex(data):
@@ -113,16 +113,16 @@ class Param(object):
             return data
         if self.isDecCoded:
             if self.isSigned:
-                sign = self.DECODE_SIGNS.get(data[0])
-                if not sign:
-                    raise ValueError("Bad sign byte in value: %s" % hexlify(data).upper())
-                return sign * self.decodeDecHex(data[1:])
+                sign = data[0]
+                if sign >= '\xA0':
+                    return -self.decodeDecHex(chr(ord(sign) % 16) + data[1:])
+                return self.decodeDecHex(data)
             else:
                 return self.decodeDecHex(data)
         else: # pure hex
             value = reduce(lambda h, c: 0x100 * h + c, (ord(c) for c in data), 0)
             if self.isSigned:
-                limit = self.limit if self.length else 0x100 ** len(data) // 2
+                limit = self.limitMax + 1 if self.length else 0x100 ** len(data) // 2
                 if value >= limit:
                     value -= 2 * limit
             return value
@@ -160,7 +160,7 @@ class Command(object):
     def checkReplies(cls):
         for (tag, command) in cls.commands.iteritems():
             if command.reply and command.reply not in cls.commands:
-                raise ValueError("Unknown reply %s for command %s" % (hexlify(chr(command.reply)).upper(), hexlify(chr(tag)).upper()))
+                raise ValueError("Unknown reply %s for command %s" % (hexlify(command.reply).upper(), hexlify(tag).upper()))
 
     @classmethod
     def getCommand(cls, tag):
@@ -232,8 +232,8 @@ class Command(object):
 
     @classmethod
     def testCommand(cls, tag, data, *args):
-        assert cls.encodeCommand(tag, *args) == data.upper(), "encodeCommand(%s, %s) is %s, not %s" % (hexlify(chr(tag)).upper(), ', '.join(repr(arg) for arg in args), cls.encodeCommand(tag, *args), data)
-        assert cls.decodeCommand(data) == (tag, args), "decodeCommand(%s, %s) is %s, not %s" % (hexlify(chr(tag)).upper(), data, cls.decodeCommand(data), (tag, args))
+        assert cls.encodeCommand(tag, *args) == data.upper(), "encodeCommand(%s, %s) is %s, not %s" % (hexlify(tag).upper(), ', '.join(repr(arg) for arg in args), cls.encodeCommand(tag, *args), data)
+        assert cls.decodeCommand(data) == (tag, args), "decodeCommand(%s, %s) is %s, not %s" % (hexlify(tag).upper(), data, cls.decodeCommand(data), (tag, args))
 
 def testParam():
     p = Param()
@@ -285,27 +285,29 @@ def testParam():
     p.test(1, '00000001')
     p.test(0xff00ff, '16711935')
     p = Param(0, TYPE_SIGNED_DEC)
-    p.test(0, '0000')
-    p.test(1, '0001')
-    p.test(-1, 'FF01')
-    p.test(99, '0099')
-    p.test(100, '000100')
-    p.test(127, '000127')
-    p.test(-127, 'FF0127')
-    p.test(-128, 'FF0128')
-    p.test(128, '000128')
-    p.test(0xff00ff00, '004278255360')
+    p.test(0, '00')
+    p.test(1, '01')
+    p.test(-1, 'F1')
+    p.test(99, '99')
+    p.test(-99, 'F099')
+    p.test(100, '0100')
+    p.test(127, '0127')
+    p.test(-127, 'F127')
+    p.test(-128, 'F128')
+    p.test(128, '0128')
+    p.test(0xff00ff00, '4278255360')
+    p.test(-0xff00ff00, 'F04278255360')
     p = Param(1, TYPE_SIGNED_DEC)
-    p.test(0, '0000')
-    p.test(1, '0001')
-    p.test(-1, 'FF01')
-    p.test(99, '0099')
+    p.test(0, '00')
+    p.test(1, '01')
+    p.test(-1, 'F1')
+    p.test(99, '99')
     p = Param(4, TYPE_SIGNED_DEC)
-    p.test(0, '0000000000')
-    p.test(1, '0000000001')
-    p.test(-1, 'FF00000001')
-    p.test(0xff00ff, '0016711935')
-    p.test(-99999999, 'FF99999999')
+    p.test(0, '00000000')
+    p.test(1, '00000001')
+    p.test(-1, 'F0000001')
+    p.test(0xff00ff, '16711935')
+    p.test(-9999999, 'F9999999')
     p = Param(0, TYPE_STR)
     p.test('a', '61')
     p.test('abcd', '61626364')
@@ -322,9 +324,9 @@ def testCommand():
     Command('\x04', (Param(0, TYPE_UNSIGNED_DEC),), '\x05')
     Command('\x05', ())
     Command.checkReplies()
-    Command.testCommand('\x00', '#00,FF,7FFFFFFF,FF99,3939393939393939', 0xff, 0x7fffffff, -99, '99999999')
-    Command.testCommand('\x01', '#01,1000,99,0099999999,FF00000000000000000001', 0x1000, 99, 99999999, -0xffffffffffffffffffff)
-    Command.testCommand('\x02', '#02,80,99999999,61,FF0999999999999999', -0x80, 99999999, 'a', -999999999999999)
+    Command.testCommand('\x00', '#00,FF,7FFFFFFF,F9,3939393939393939', 0xff, 0x7fffffff, -9, '99999999')
+    Command.testCommand('\x01', '#01,1000,99,99999999,FF00000000000000000001', 0x1000, 99, 99999999, -0xffffffffffffffffffff)
+    Command.testCommand('\x02', '#02,80,99999999,61,F999999999999999', -0x80, 99999999, 'a', -999999999999999)
     Command.testCommand('\x03', '#03,FFFFFFFFFFFFFFFFFFFF', 0xffffffffffffffffffff)
     Command.testCommand('\x04', '#04,0999999999999999', 999999999999999)
     Command.testCommand('\x05', '#05')

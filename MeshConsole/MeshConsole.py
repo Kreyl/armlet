@@ -28,7 +28,6 @@ from UARTCommands import meshSetTimeCommand, meshSetTimeResponse
 from SerialPort import SerialPort, DT, TIMEOUT
 
 # ToDo
-# Change signed dec-coded values handling in UARTProtocol
 # Avoid extra bold in table heading popups
 # Get devices number from device OR make devices list dynamic, start with empty table
 
@@ -96,7 +95,7 @@ class EmulatedSerial(object):
     def write(self, data):
         (tag, _args) = Command.decodeCommand(data)
         if tag == meshGetSettingsCommand.tag:
-            self.buffer.append(meshGetSettingsResponse.encode(len(Device.devices), CYCLE_LENGTH))
+            self.buffer.append(meshGetSettingsResponse.encode(len(Device.devices), 400))
         elif tag == meshSetTimeCommand.tag:
             self.buffer.append(meshSetTimeResponse.encode(randint(-10, 10)))
         self.ready = True
