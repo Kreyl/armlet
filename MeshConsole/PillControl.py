@@ -143,8 +143,8 @@ class CommandButtonWidget(QWidget):
                 button.configure(styleSheets, name, command, self.highlight)
                 layout.addWidget(button)
 
-    def highlight(self, button = None, checked = False): # pylint: disable=W0613
-        error = self.callback(button, checked) if button else None
+    def highlight(self, button = None, _checked = False):
+        error = self.callback(button) if button else None
         for b in self.findChildren(CommandButton):
             b.highlight(error if b is button else None)
 
@@ -213,7 +213,7 @@ class PillControl(QMainWindow):
     def processConnect(self, pong): # pylint: disable=W0613
         self.logger.info("connected device detected")
 
-    def command(self, source, checked = False): # pylint: disable=W0613
+    def command(self, source):
         data = self.port.command(source.command, Command.MARKER, QApplication.processEvents)
         if data:
             (tag, args) = Command.decodeCommand(data)
