@@ -49,7 +49,7 @@ UART_MESH_NODE_INFO = '\x91'
 
 #Command(tag, (Param(length = 1, type = TYPE_UNSIGNED_HEX),), replyTag or None)
 
-Command(UART_PING, (), UART_ACK)
+pingCommand = Command(UART_PING, (), UART_ACK)
 ackResponse = Command(UART_ACK, (Param(),))
 
 Command(UART_PILL_STATUS, (Param(),), UART_RET_PILL_STATUS)

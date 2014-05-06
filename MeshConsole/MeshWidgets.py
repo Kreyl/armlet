@@ -25,7 +25,7 @@ ACCENT_PREFIX = 'deviceTableViewAccentSample'
 ACCENT_PREFIX_LENGTH = len(ACCENT_PREFIX)
 
 MAIN_UI_FILE_NAME = 'MeshConsole.ui'
-ABOUT_UI_FILE_NAME = 'About.ui'
+ABOUT_UI_FILE_NAME = 'AboutMC.ui'
 CONFIRMATION_UI_FILE_NAME = 'Confirmation.ui'
 
 LOG_FILE_NAME = 'MeshConsole.log'
