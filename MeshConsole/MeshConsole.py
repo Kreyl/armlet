@@ -17,7 +17,7 @@ try:
     from PyQt4.QtCore import QCoreApplication, QDate, QDateTime, QObject, QSettings, QTimer, pyqtSignal
     from PyQt4.QtGui import QApplication, QDesktopWidget, QMainWindow
 except ImportError, ex:
-    raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
+    raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
 from MeshDevice import Device, getColumnsData
 from MeshWidgets import * # pylint: disable=W0401

@@ -16,7 +16,7 @@ try:
     from PyQt4.QtCore import QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
     from PyQt4.QtGui import QApplication, QDesktopWidget, QDialog, QLabel, QLineEdit, QMainWindow, QPushButton, QWidget
 except ImportError, ex:
-    raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
+    raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
 from UARTCommands import Command, pingCommand, ackResponse
 from SerialPort import SerialPort, DT, TIMEOUT
