@@ -214,12 +214,9 @@ class Command(object):
     @classmethod
     def decodeCommand(cls, data):
         data = unicode(data).strip()
-        if len(data) < 2:
+        if len(data) < 2 + len(cls.MARKER) or not data.startswith(cls.MARKER):
             return (None, None)
-        if data.startswith(cls.MARKER):
-            if len(data) < 2 + len(cls.MARKER):
-                return (None, None)
-            data = data[1:]
+        data = data[len(cls.MARKER):]
         hexTag = data[:2].upper()
         try:
             tag = unhexlify(hexTag)

@@ -176,31 +176,31 @@ class MeshConsole(QMainWindow):
             self.show()
 
     def cycleSeconds(self, cycle):
-        return cycle * self.cycleLength // 1000 if cycle != None else None
+        return cycle * self.cycleLength // 1000 if cycle is not None else None
 
     def cycleTimeStr(self, cycle):
-        return timeDeltaStr(self.cycleSeconds(cycle)) if cycle != None else None
+        return timeDeltaStr(self.cycleSeconds(cycle)) if cycle is not None else None
 
     def cycleDate(self, cycle):
-        return self.startTime.addMSecs(cycle * self.cycleLength) if self.startTime and cycle != None else None
+        return self.startTime.addMSecs(cycle * self.cycleLength) if self.startTime and cycle is not None else None
 
     def cycleDateStr(self, cycle):
-        return self.cycleDate(cycle).toString(DATETIME_FORMAT) if self.startTime and cycle != None else None
+        return self.cycleDate(cycle).toString(DATETIME_FORMAT) if self.startTime and cycle is not None else None
 
     def cycleAge(self, age):
-        return self.currentCycle - age if self.currentCycle != None and age != None else None
+        return self.currentCycle - age if self.currentCycle is not None and age is not None else None
 
     def cycleAgeSeconds(self, age):
-        return self.cycleSeconds(self.cycleAge(age)) if self.currentCycle != None and age != None else None
+        return self.cycleSeconds(self.cycleAge(age)) if self.currentCycle is not None and age is not None else None
 
     def cycleAgeTimeStr(self, age):
-        return self.cycleTimeStr(self.cycleAge(age)) if self.currentCycle != None and age != None else None
+        return self.cycleTimeStr(self.cycleAge(age)) if self.currentCycle is not None and age is not None else None
 
     def tdTime(self, td):
-        return self.currentCycle + td if self.currentCycle != None and td != None else None
+        return self.currentCycle + td if self.currentCycle is not None and td is not None else None
 
     def tdDateStr(self, td):
-        return self.cycleDateStr(self.tdTime(td)) if self.startTime and self.currentCycle != None and td != None else None
+        return self.cycleDateStr(self.tdTime(td)) if self.startTime and self.currentCycle is not None and td is not None else None
 
     def setStartTime(self):
         date = self.startDateEdit.date()
@@ -225,7 +225,7 @@ class MeshConsole(QMainWindow):
             self.logger.info("Setting mesh time to %d", self.currentCycle)
             data = self.port.command(meshSetTimeCommand.encode(self.currentCycle), meshSetTimeResponse.prefix, QApplication.processEvents)
             if data:
-                self.logger.info("Time adjusted %d", meshSetTimeResponse.decode(data)[0])
+                self.logger.info("Time adjusted %+d", meshSetTimeResponse.decode(data)[0])
             else:
                 self.logger.warning("Time set failed")
         dt = QDateTime.currentDateTime().msecsTo(now.addMSecs(TIME_UPDATE_INTERVAL))
@@ -252,10 +252,10 @@ class MeshConsole(QMainWindow):
                     self.devicesModel.refresh()
             except Exception:
                 self.logger.exception("Error proocessing node info: %s", inputLine)
-        elif args != None: # unexpected valid command
-            self.logger.warning("Unexpected command: %s %s", hexlify(tag).upper(), ' '.join(args))
+        elif args is not None: # unexpected valid command
+            self.logger.warning("Unexpected command: %s %s", hexlify(tag).upper(), ' '.join(str(arg) for arg in args))
         elif tag: # unknown command
-            self.logger.warning("Unknown command: %s", inputLine)
+            self.logger.warning("Unknown command %s: %s", tag, inputLine)
         else: # not a command
             self.logger.warning("Unexpected input: %s", inputLine)
 

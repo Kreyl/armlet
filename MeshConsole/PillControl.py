@@ -4,6 +4,7 @@
 #
 from binascii import hexlify
 from collections import deque
+from functools import partial
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
 from random import randint
 from sys import argv, exit # pylint: disable=W0622
@@ -13,12 +14,16 @@ from traceback import format_exc
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
-    from PyQt4.QtGui import QApplication, QDesktopWidget, QDialog, QLabel, QLineEdit, QMainWindow, QPushButton
+    from PyQt4.QtGui import QApplication, QDesktopWidget, QDialog, QLabel, QLineEdit, QMainWindow, QPushButton, QWidget
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
 from UARTCommands import Command, pingCommand, ackResponse
 from SerialPort import SerialPort, DT, TIMEOUT
+
+# ToDo
+# Remove UARTCommands dependency OR treat config as parameters to commands
+# Create reasonable button layout
 
 EMULATED = True
 
@@ -26,6 +31,8 @@ LONG_DATETIME_FORMAT = 'yyyy.MM.dd hh:mm:ss'
 
 MAIN_UI_FILE_NAME = 'PillControl.ui'
 ABOUT_UI_FILE_NAME = 'AboutPC.ui'
+
+PILL_COMMANDS_FILE_NAME = 'PillCommands.txt'
 
 LOG_FILE_NAME = 'PillControl.log'
 
@@ -74,7 +81,7 @@ class EmulatedSerial(object):
     def write(self, data):
         (tag, _args) = Command.decodeCommand(data)
         if tag:
-            self.buffer.append(ackResponse.encode(max(0, randint(0, 20) - 10)))
+            self.buffer.append(ackResponse.encode(max(0, randint(0, 13) - 10)))
         self.ready = True
         return len(data)
 
@@ -106,7 +113,43 @@ class ResetButton(QPushButton):
         self.clicked.connect(callback)
 
 class CommandButton(QPushButton):
-    pass
+    def __init__(self, parent):
+        QPushButton.__init__(self, parent)
+
+    def configure(self, styleSheets, name, command, callback):
+        self.setObjectName(name)
+        self.setText(name)
+        self.styleSheets = styleSheets
+        self.command = command
+        self.clicked.connect(partial(callback, self))
+
+    def highlight(self, key):
+        self.setStyleSheet(self.styleSheets.get(bool(key) if key is not None else None, ''))
+
+class CommandButtonWidget(QWidget):
+    def configure(self, okButton, errorButton, fileName, callback):
+        self.callback = callback
+        layout = self.layout()
+        while layout.count():
+            layout.takeAt(0).widget().deleteLater()
+        styleSheets = {
+            False: okButton.styleSheet() if okButton else '',
+            True: errorButton.styleSheet() if errorButton else ''
+        }
+        with open(fileName) as f:
+            for line in f:
+                (name, command) = line.strip().split(',', 1)
+                button = CommandButton(self)
+                button.configure(styleSheets, name, command, self.highlight)
+                layout.addWidget(button)
+
+    def highlight(self, button = None, checked = False): # pylint: disable=W0613
+        error = self.callback(button, checked) if button else None
+        for b in self.findChildren(CommandButton):
+            b.highlight(error if b is button else None)
+
+    def reset(self):
+        self.highlight()
 
 class ConsoleEdit(QLineEdit):
     def configure(self, callback):
@@ -140,6 +183,7 @@ class PillControl(QMainWindow):
         # Configuring widgets
         self.portLabel.configure()
         self.resetButton.configure(self.reset)
+        self.commandButtonWidget.configure(self.okButton, self.errorButton, PILL_COMMANDS_FILE_NAME, self.command)
         self.consoleEdit.configure(self.consoleEnter)
         self.statusBar.hide()
         self.aboutDialog = AboutDialog(self.aboutAction.triggered)
@@ -158,7 +202,6 @@ class PillControl(QMainWindow):
         # Starting up!
         self.loadSettings()
         self.comConnect.connect(self.processConnect)
-        self.comInput.connect(self.processInput)
         self.port = SerialPort(self.logger, pingCommand.prefix, ackResponse.prefix,
                                self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit,
                                EmulatedSerial() if EMULATED else None)
@@ -170,15 +213,25 @@ class PillControl(QMainWindow):
     def processConnect(self, pong): # pylint: disable=W0613
         self.logger.info("connected device detected")
 
-    def processInput(self, inputLine):
-        inputLine = unicode(inputLine).strip()
-        (tag, args) = Command.decodeCommand(inputLine)
-        if args != None: # unexpected valid command
-            self.logger.warning("Unexpected command: %s %s", hexlify(tag).upper(), ' '.join(args))
-        elif tag: # unknown command
-            self.logger.warning("Unknown command: %s", inputLine)
-        else: # not a command
-            self.logger.warning("Unexpected input: %s", inputLine)
+    def command(self, source, checked = False): # pylint: disable=W0613
+        data = self.port.command(source.command, Command.MARKER, QApplication.processEvents)
+        if data:
+            (tag, args) = Command.decodeCommand(data)
+            if tag == ackResponse.tag:
+                error = args[0]
+                if not error:
+                    self.logger.info("OK")
+                else:
+                    self.logger.warning("Error: %d", error)
+                return error
+            elif args is not None: # unexpected valid command
+                self.logger.warning("Unexpected command: %s %s", hexlify(tag).upper(), ' '.join(str(arg) for arg in args))
+            elif tag: # unknown command
+                self.logger.warning("Unknown command %s: %s", tag, data)
+            else: # not a command
+                self.logger.warning("Unexpected input: %s", data)
+        else:
+            self.logger.warning("command timed out")
 
     def consoleEnter(self):
         self.port.write(self.consoleEdit.getInput())
@@ -190,6 +243,7 @@ class PillControl(QMainWindow):
     def reset(self):
         self.logger.info("reset")
         self.port.reset()
+        self.commandButtonWidget.reset()
 
     def saveSettings(self):
         settings = QSettings()
@@ -238,7 +292,8 @@ class PillControl(QMainWindow):
 def main():
     try:
         application = QApplication(argv)
-        PillControl().configure()
+        pillControl = PillControl() # retain reference
+        pillControl.configure()
         return application.exec_()
     except KeyboardInterrupt:
         pass

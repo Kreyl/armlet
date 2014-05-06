@@ -102,7 +102,7 @@ class SerialPort(object):
                         self.logger.info("connected to %s" % portName)
                         if self.ping:
                             pong = self.command(self.ping, self.pong, notReady = True)
-                            if pong != None:
+                            if pong is not None:
                                 if self.connectCallBack:
                                     self.connectCallBack(pong)
                                 self.ready = True
@@ -147,4 +147,4 @@ class SerialPort(object):
 
     def command(self, command, expectPrefix = None, idle = None, notReady = False):
         self.write(command, notReady)
-        return self.expect(expectPrefix, idle, notReady) if expectPrefix != None else None
+        return self.expect(expectPrefix, idle, notReady) if expectPrefix is not None else None

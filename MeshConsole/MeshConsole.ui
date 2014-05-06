@@ -357,20 +357,10 @@
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>589</width>
-     <height>21</height>
-    </rect>
-   </property>
    <widget class="QMenu" name="fileMenu">
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="separator"/>
-    <addaction name="separator"/>
     <addaction name="quitAction"/>
    </widget>
    <widget class="QMenu" name="columnsMenu">
@@ -447,16 +437,6 @@
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
   </connection>
  </connections>
 </ui>

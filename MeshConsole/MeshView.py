@@ -53,7 +53,7 @@ class Column(object):
             return None
         if self.formatter:
             data = self.formatter(data)
-        return self.fmt % data if self.fmt else unicode(data) if data != None else ''
+        return self.fmt % data if self.fmt else unicode(data) if data is not None else ''
 
 class ColumnAction(QAction):
     def __init__(self, column, toggleCallback, menu):
@@ -100,7 +100,7 @@ class Cell(dict):
 
     def getData(self, role):
         data = self.get(role)
-        return data if data != None else self.column.defaults.get(role, INVALID_DATA)
+        return data if data is not None else self.column.defaults.get(role, INVALID_DATA)
 
 class DevicesModel(QAbstractTableModel):
     def __init__(self, devices, columns, parent):
@@ -128,7 +128,7 @@ class DevicesModel(QAbstractTableModel):
         if section in xrange(len(self.columns)):
             headers = self.columns[section].headers
             ret = headers.get(role)
-            if ret != None:
+            if ret is not None:
                 return ret
         return INVALID_DATA
 
