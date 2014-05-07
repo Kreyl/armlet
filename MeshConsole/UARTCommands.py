@@ -5,7 +5,7 @@
 # See https://docs.google.com/document/d/1J2z4WCSR-WekH4tEe7bfqvjPJ0Hx7Ww-26ECBoLwl4s
 #
 from UARTProtocol import Command, Param
-from UARTProtocol import TYPE_STR, TYPE_SIGNED_HEX, TYPE_SIGNED_DEC, TYPE_UNSIGNED_DEC
+from UARTProtocol import TYPE_STR, TYPE_SIGNED_HEX_LE, TYPE_SIGNED_DEC, TYPE_UNSIGNED_DEC
 
 # ACK status codes
 UART_STATUS_OK = 0
@@ -75,6 +75,6 @@ meshGetSettingsResponse = Command(UART_MESH_SETTINGS, (Param(2, TYPE_UNSIGNED_DE
 meshSetTimeCommand = Command(UART_MESH_SET_TIME, (Param(0, TYPE_UNSIGNED_DEC),), UART_MESH_TIME_SET)
 meshSetTimeResponse = Command(UART_MESH_TIME_SET, (Param(0, TYPE_SIGNED_DEC),))
 
-meshNodeInfoResponse = Command(UART_MESH_NODE_INFO, (Param(2), Param(1, TYPE_UNSIGNED_DEC), Param(4, TYPE_SIGNED_HEX), Param(4, TYPE_SIGNED_HEX), Param(2), Param(2), Param()))
+meshNodeInfoResponse = Command(UART_MESH_NODE_INFO, (Param(2), Param(1, TYPE_UNSIGNED_DEC), Param(4, TYPE_SIGNED_HEX_LE), Param(4, TYPE_SIGNED_HEX_LE), Param(2), Param(2), Param()))
 
 Command.checkReplies()
