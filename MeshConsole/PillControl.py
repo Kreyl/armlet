@@ -25,8 +25,6 @@ from SerialPort import SerialPort, DT, TIMEOUT
 # Remove UARTCommands dependency OR treat config as parameters to commands
 # Create reasonable button layout
 
-EMULATED = True
-
 LONG_DATETIME_FORMAT = 'yyyy.MM.dd hh:mm:ss'
 
 MAIN_UI_FILE_NAME = 'PillControl.ui'
@@ -65,6 +63,7 @@ class EventLogger(getLoggerClass(), QObject):
 
 class EmulatedSerial(object):
     def __init__(self):
+        self.name = 'EMUL'
         self.timeout = TIMEOUT
         self.buffer = deque()
         self.ready = False
@@ -170,9 +169,10 @@ class PillControl(QMainWindow):
     comConnect = pyqtSignal(str)
     comInput = pyqtSignal(str)
 
-    def __init__(self, *args, **kwargs):
-        QMainWindow.__init__(self, *args, **kwargs)
+    def __init__(self, args):
+        QMainWindow.__init__(self)
         uic.loadUi(MAIN_UI_FILE_NAME, self)
+        self.emulated = len(args) > 1 and args[1].lower() in ('-e', '--emulated')
 
     def configure(self):
         # Setting window size
@@ -204,7 +204,7 @@ class PillControl(QMainWindow):
         self.comConnect.connect(self.processConnect)
         self.port = SerialPort(self.logger, pingCommand.prefix, ackResponse.prefix,
                                self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit,
-                               EmulatedSerial() if EMULATED else None)
+                               EmulatedSerial() if self.emulated else None)
         if self.savedMaximized:
             self.showMaximized()
         else:
@@ -292,7 +292,7 @@ class PillControl(QMainWindow):
 def main():
     try:
         application = QApplication(argv)
-        pillControl = PillControl() # retain reference
+        pillControl = PillControl(argv) # retain reference
         pillControl.configure()
         return application.exec_()
     except KeyboardInterrupt:

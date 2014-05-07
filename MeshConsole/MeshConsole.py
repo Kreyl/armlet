@@ -31,8 +31,6 @@ from SerialPort import SerialPort, DT, TIMEOUT
 # Avoid extra bold in table heading popups
 # Get devices number from device OR make devices list dynamic, start with empty table
 
-EMULATED = True
-
 def timeDeltaStr(seconds):
     negative = seconds < 0
     (minutes, seconds) = divmod(abs(seconds), 60)
@@ -73,6 +71,7 @@ class EventLogger(getLoggerClass(), QObject):
 
 class EmulatedSerial(object):
     def __init__(self):
+        self.name = 'EMUL'
         self.timeout = TIMEOUT
         self.buffer = deque()
         self.ready = False
@@ -108,9 +107,10 @@ class MeshConsole(QMainWindow):
     comConnect = pyqtSignal(str)
     comInput = pyqtSignal(str)
 
-    def __init__(self, *args, **kwargs):
-        QMainWindow.__init__(self, *args, **kwargs)
+    def __init__(self, args):
+        QMainWindow.__init__(self)
         uic.loadUi(MAIN_UI_FILE_NAME, self)
+        self.emulated = len(args) > 1 and args[1].lower() in ('-e', '--emulated')
 
     def configure(self):
         # Setting window size
@@ -167,7 +167,7 @@ class MeshConsole(QMainWindow):
         self.comInput.connect(self.processInput)
         self.port = SerialPort(self.logger, meshGetSettingsCommand.prefix, meshGetSettingsResponse.prefix,
                                self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit,
-                               EmulatedSerial() if EMULATED else None)
+                               EmulatedSerial() if self.emulated else None)
         self.pause()
         self.updateTime()
         if self.savedMaximized:
@@ -296,7 +296,7 @@ class MeshConsole(QMainWindow):
             settings.endGroup()
             settings.setValue('columnsVisible', ' '.join(str(int(action.isChecked())) for action in self.columnActions))
             settings.setValue('startDate', self.startTime.date().toString(LONG_DATE_FORMAT))
-            settings.beginGroup('devices')
+            settings.beginGroup('emulated' if self.emulated else 'devices')
             for device in self.devices:
                 settings.setValue(str(device.number), device.settings())
             settings.endGroup()
@@ -326,7 +326,7 @@ class MeshConsole(QMainWindow):
                 for (action, checked) in zip(self.columnActions, columnsVisible):
                     action.setChecked(int(checked))
                 startDate = QDate.fromString(settings.value('startDate').toString(), LONG_DATE_FORMAT)
-                settings.beginGroup('devices')
+                settings.beginGroup('emulated' if self.emulated else 'devices')
                 for tag in settings.childKeys():
                     data = str(settings.value(tag).toString()).strip()
                     if data:
@@ -348,7 +348,8 @@ class MeshConsole(QMainWindow):
 def main():
     try:
         application = QApplication(argv)
-        MeshConsole().configure()
+        meshConsole = MeshConsole(argv) # retain reference
+        meshConsole.configure()
         return application.exec_()
     except KeyboardInterrupt:
         pass

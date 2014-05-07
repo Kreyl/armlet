@@ -91,7 +91,7 @@ class SerialPort(object):
                 sleep(DT)
             self.statusUpdate("SCAN", self.TRYING)
             sleep(DT)
-            portNames = tuple(portName for (portName, _description, _address) in comports())
+            portNames = (self.externalPort.name,) if self.externalPort else tuple(portName for (portName, _description, _address) in comports())
             if portNames:
                 for portName in portNames:
                     try:
