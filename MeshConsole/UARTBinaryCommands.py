@@ -1,11 +1,11 @@
 #!/usr/bin/python
 #
-# Ostranna UART commands
+# Ostranna UART binary protocol commands
 #
 # See https://docs.google.com/document/d/1J2z4WCSR-WekH4tEe7bfqvjPJ0Hx7Ww-26ECBoLwl4s
 #
-from UARTProtocol import Command, Param
-from UARTProtocol import TYPE_STR, TYPE_SIGNED_HEX_LE, TYPE_SIGNED_DEC, TYPE_UNSIGNED_DEC
+from UARTBinaryProtocol import Command, Param
+from UARTBinaryProtocol import TYPE_STR, TYPE_SIGNED_HEX_LE, TYPE_SIGNED_DEC, TYPE_UNSIGNED_DEC
 
 # ACK status codes
 UART_STATUS_OK = 0

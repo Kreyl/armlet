@@ -22,9 +22,9 @@ except ImportError, ex:
 from MeshDevice import Device, getColumnsData
 from MeshWidgets import * # pylint: disable=W0401
 from MeshView import DevicesModel, Column, ColumnAction
-from UARTCommands import Command, meshNodeInfoResponse
-from UARTCommands import meshGetSettingsCommand, meshGetSettingsResponse
-from UARTCommands import meshSetTimeCommand, meshSetTimeResponse
+from UARTTextCommands import Command, meshNodeInfoResponse
+from UARTTextCommands import meshGetSettingsCommand, meshGetSettingsResponse
+from UARTTextCommands import meshSetTimeCommand, meshSetTimeResponse
 from SerialPort import SerialPort, DT, TIMEOUT
 
 # ToDo

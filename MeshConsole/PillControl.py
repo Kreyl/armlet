@@ -18,7 +18,8 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
-from UARTCommands import Command, pingCommand, ackResponse
+from UARTTextProtocol import Command, COMMAND_MARKER
+from UARTTextCommands import pingCommand, ackResponse
 from SerialPort import SerialPort, DT, TIMEOUT
 
 # ToDo
@@ -214,7 +215,7 @@ class PillControl(QMainWindow):
         self.logger.info("connected device detected")
 
     def command(self, source):
-        data = self.port.command(source.command, Command.MARKER, QApplication.processEvents)
+        data = self.port.command(source.command, COMMAND_MARKER, QApplication.processEvents)
         if data:
             (tag, args) = Command.decodeCommand(data)
             if tag == ackResponse.tag:

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
-# Ostranna UART protocol
-# See UARTCommands.py for particular values
+# Ostranna UART binary protocol
+# See UARTBinaryCommands.py for particular values
 #
 # See https://docs.google.com/document/d/1J2z4WCSR-WekH4tEe7bfqvjPJ0Hx7Ww-26ECBoLwl4s
 #
@@ -150,7 +150,7 @@ class Command(object):
 
     def __init__(self, tag, params = None, reply = None):
         if len(tag) != 1:
-            raise ValueError("Bad tag length %d, expected 1" % len(tag))
+            raise ValueError("Bad tag length %d, expected 1: %r" % (len(tag), tag))
         self.tag = tag
         self.encodedTag = hexlify(tag).upper()
         self.prefix = self.MARKER + self.encodedTag
@@ -211,7 +211,7 @@ class Command(object):
                 break # not in fact needed, zero length may only occur in last parameter
 
     def decode(self, data):
-        data = sub('[, ]+', '', unicode(data).strip())
+        data = sub(' *[, ] *', '', unicode(data).strip())
         if data.startswith(self.MARKER):
             tag = data[len(self.MARKER) : len(self.MARKER) + 2].upper()
             if tag != self.encodedTag:
