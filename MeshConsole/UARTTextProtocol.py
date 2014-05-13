@@ -18,6 +18,8 @@ SEPARATOR = ','
 
 SEPARATORS = reCompile(' *[, ] *')
 
+REPEAT = 'repeat'
+
 MAX_COMMAND_ARGS = 16
 
 MAX_COMMAND_LENGTH = 252
@@ -55,7 +57,8 @@ FORMATS = { # 'format': (encoder, decoder)
     'x': (hexInt, parseInt),
     'f': (partial(formatStr, '%f'), float),
     's': (checkStr, nop),
-    'h': (hexStr, unhexlify)
+    'h': (hexStr, unhexlify),
+    '*': (REPEAT, REPEAT)
 }
 
 class Command(object):
@@ -65,40 +68,62 @@ class Command(object):
         if not tag:
             raise ValueError("Bad tag: %r" % tag)
         if args and len(args) > MAX_COMMAND_ARGS:
-            raise ValueError("Too many arguments for a command: %d, expected no more than %d" % (len(args), MAX_COMMAND_ARGS))
-        self.tag = tag.lower()
+            raise ValueError("Bad number of arguments for command %s, expected at most %d, found %d: %s" % (tag, MAX_COMMAND_ARGS, len(args), ' '.join(args)))
+        self.tag = tag
         self.prefix = COMMAND_MARKER + self.tag
-        try:
-            (self.encoders, self.decoders) = zip(*(FORMATS[c.lower()] for c in args)) if args else ((), ())
-        except KeyError, e:
-            raise ValueError("Unknown format tag: %s" % e.message)
+        self.encoders = []
+        self.decoders = []
+        self.varArgs = False
+        if args:
+            try:
+                for (encoder, decoder) in (FORMATS[c.lower()] for c in args):
+                    if self.varArgs:
+                        raise ValueError("Repeat argument * may only be the last one")
+                    if encoder == REPEAT:
+                        if not self.encoders:
+                            raise ValueError("Repeat argument * must be preceded by a conventional argument")
+                        self.varArgs = True
+                    else:
+                        self.encoders.append(encoder)
+                        self.decoders.append(decoder)
+            except KeyError, e:
+                raise ValueError("Unknown format tag: %s" % e.message)
         self.reply = reply
-        if tag in self.commands:
+        if tag.lower() in self.commands:
             raise ValueError("Duplicate command tag: %s" % tag)
-        self.commands[tag] = self
+        self.commands[tag.lower()] = self
 
     @classmethod
-    def checkReplies(cls):
+    def linkReplies(cls):
         for (tag, command) in cls.commands.iteritems():
-            if command.reply and command.reply not in cls.commands:
-                raise ValueError("Unknown reply %s for command %s" % (command.reply, tag))
+            if command.reply and not isinstance(command.reply, Command):
+                reply = cls.commands.get(command.reply.lower())
+                if reply:
+                    command.reply = reply
+                else:
+                    raise ValueError("Unknown reply %s for command %s" % (command.reply, tag))
 
     @classmethod
     def getCommand(cls, tag):
-        tag = tag.strip().lower()
+        tag = tag.strip()
         if not tag:
             raise ValueError("Empty command tag")
         if tag.startswith(COMMAND_MARKER):
             tag = tag[len(COMMAND_MARKER):]
-        command = cls.commands.get(tag)
+        command = cls.commands.get(tag.lower())
         if not command:
             raise ValueError("Unknown command tag: %s" % tag)
         return command
 
     def encode(self, *args):
-        if len(args) != len(self.encoders):
-            raise ValueError("Bad number of arguments for command %s, expected %d, found %d: %s" % (self.tag, len(self.encoders), len(args), ' '.join(args)))
-        ret = COMMAND_MARKER + self.tag + SEPARATOR.join(chain(('',), (encoder(arg) for (encoder, arg) in zip(self.encoders, args))))
+        if self.varArgs:
+            if len(args) < len(self.encoders):
+                raise ValueError("Bad number of arguments for command %s, expected at least %d, found %d: %s" % (self.tag, len(self.encoders), len(args), ' '.join(str(arg) for arg in args)))
+            if len(args) > MAX_COMMAND_ARGS:
+                raise ValueError("Bad number of arguments for command %s, expected at most %d, found %d: %s" % (self.tag, MAX_COMMAND_ARGS, len(args), ' '.join(str(arg) for arg in args)))
+        elif len(args) != len(self.encoders):
+            raise ValueError("Bad number of arguments for command %s, expected %d, found %d: %s" % (self.tag, len(self.encoders), len(args), ' '.join(str(arg) for arg in args)))
+        ret = COMMAND_MARKER + self.tag + SEPARATOR.join(chain(('',), (encoder(arg) for (encoder, arg) in zip(self.encoders, args)), (self.encoders[-1](arg) for arg in args[len(self.encoders):])))
         if len(ret) > MAX_COMMAND_LENGTH:
             raise ValueError("Encoded command length %d larger than maximum %d: %s" % (len(ret), MAX_COMMAND_LENGTH, ret))
         return ret
@@ -108,13 +133,16 @@ class Command(object):
         return cls.getCommand(tag).encode(*args)
 
     def decodeArgs(self, args):
-        if len(args) != len(self.decoders):
+        if self.varArgs:
+            if len(args) < len(self.encoders):
+                raise ValueError("Bad number of arguments for command %s, expected at least %d, found %d: %s" % (self.tag, len(self.decoders), len(args), ' '.join(args)))
+        elif len(args) != len(self.encoders):
             raise ValueError("Bad number of arguments for command %s, expected %d, found %d: %s" % (self.tag, len(self.decoders), len(args), ' '.join(args)))
-        return tuple(decoder(arg) for (decoder, arg) in zip(self.decoders, args))
+        return tuple(chain((decoder(arg) for (decoder, arg) in zip(self.decoders, args)), (self.decoders[-1](arg) for arg in args[len(self.decoders):])))
 
     def decode(self, data):
         (tag, args) = self.decodeCommand(data)
-        if tag != self.tag:
+        if tag.lower() != self.tag.lower():
             raise ValueError("Bad tag %s, expected %s: %s" % (tag, self.tag, data))
         return args
 
@@ -125,10 +153,10 @@ class Command(object):
             return (None, None)
         words = SEPARATORS.split(data[len(COMMAND_MARKER):])
         tag = words[0].lower()
-        command = cls.commands.get(tag)
+        command = cls.commands.get(tag.lower())
         if not command:
             return (tag, None)
-        return (tag, command.decodeArgs(words[1:]))
+        return (command.tag, command.decodeArgs(words[1:]))
 
     @classmethod
     def testCommand(cls, tag, data, *args):
@@ -171,17 +199,18 @@ def testFormats(): # ToDo: Add negative tests
 
 def testCommands(): # ToDo: Add negative tests
     Command('0', 'dixfsh', '1')
-    Command('1', 'xdsfih', '2')
+    Command('1', 'xdsfih*', '2')
     Command('2', 'fdhisx', '3')
     Command('3', 'hsxidf', '4')
-    Command('4', 'hhddssii', '5')
+    Command('4', 'i*', '5')
     Command('5', '')
-    Command.checkReplies()
+    Command.linkReplies()
     Command.testCommand('0', '#0,0,-1,0x40000000,1.000000,a,61', 0, -1, 2 ** 30, 1, 'a', 'a')
-    Command.testCommand('1', '#1,0x0,-1,,0.000000,0,614263', 0, -1, '', 0, 0, 'aBc')
+    Command.testCommand('1', '#1,0x0,-1,,0.000000,0,614263,446546,674869', 0, -1, '', 0, 0, 'aBc', 'DeF', 'gHi')
     Command.testCommand('2', '#2,-1.000000,2147483648,,-2147483648,aBc,0x80000000', -1, 2 ** 31, '', -2 ** 31, 'aBc', -2 ** 31)
     Command.testCommand('3', '#3,,,0x80000000,-1,255,-0.000001', '', '', -2 ** 31, -1, 255, -0.000001)
-    Command.testCommand('4', '#4,61,62,7,5,c,d,4294967296,2147483648', 'a', 'b', 7, 5, 'c', 'd', 2 ** 32, 2 ** 31)
+    Command.testCommand('4', '#4,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 11, 12, 13, 14, 15)
+    Command.testCommand('4', '#4,0', 0)
     Command.testCommand('5', '#5')
     Command.commands.clear()
 

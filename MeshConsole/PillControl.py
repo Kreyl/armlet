@@ -138,9 +138,9 @@ class CommandButtonWidget(QWidget):
         }
         with open(fileName) as f:
             for line in f:
-                (name, command) = line.strip().split(',', 1)
+                (name, command) = line.split(',', 1)
                 button = CommandButton(self)
-                button.configure(styleSheets, name, command, self.highlight)
+                button.configure(styleSheets, name.strip(), command.strip(), self.highlight)
                 layout.addWidget(button)
 
     def highlight(self, button = None, _checked = False):

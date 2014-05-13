@@ -7,6 +7,7 @@
 from UARTTextProtocol import Command
 
 # ACK status codes
+
 UART_STATUS_OK = 0
 UART_STATUS_FAIL = 1
 UART_STATUS_TIMEOUT = 2
@@ -18,6 +19,7 @@ UART_STATUS_CMD_ERROR = 7
 UART_STATUS_WRITE_PROTECT = 8
 
 # Command tags
+
 UART_PING = 'ping'
 UART_ACK = 'ack'
 
@@ -53,7 +55,7 @@ UART_MESH_TIME_SET = 'time'
 
 UART_MESH_NODE_INFO = 'node'
 
-#Command(tag, (Param(length = 1, type = TYPE_UNSIGNED_HEX),), replyTag or None)
+# Command definitions
 
 pingCommand = Command(UART_PING, '', UART_ACK)
 ackResponse = Command(UART_ACK, 'd')
@@ -83,4 +85,4 @@ meshSetTimeResponse = Command(UART_MESH_TIME_SET, 'd')
 
 meshNodeInfoResponse = Command(UART_MESH_NODE_INFO, 'ddddddd')
 
-Command.checkReplies()
+Command.linkReplies()
