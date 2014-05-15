@@ -66,6 +66,7 @@ Command(UART_PILL_RET_STATE, 'dd')
 Command(UART_PILL_WRITE, 'dd*', UART_ACK)
 Command(UART_PILL_READ, 'dd', UART_PILL_DATA)
 Command(UART_PILL_DATA, 'd*')
+pillRepeatWriteCommand = Command(UART_PILL_REPEAT_WRITE, 'dd*', UART_ACK)
 
 Command(UART_SET_ID, 'd', UART_ACK)
 Command(UART_GET_ID, '', UART_RET_ID)

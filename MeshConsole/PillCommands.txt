@@ -1,5 +1,26 @@
-Heal 3,#EE,0900,00,00000003
-Heal 5,#EE,0900,00,00000005
-Heal 20,#EE,0900,00,00000020
-Heal 50,#EE,0900,00,00000050
-Heal 100,#EE,0900,00,00000050
+#
+# Pill Control commands
+#
+# buttonObjectName,description,command
+# 
+
+dontWritePillButton,,#pillRepeatWrite32,0,0
+
+cureOneButton,21600b (6h),#pillRepeatWrite32,0,9,1,21600
+drugOneButton,144000b (40h) : 20m,#pillRepeatWrite32,0,10,1,144000,1200
+
+cureInfButton,21600b (6h),#pillRepeatWrite32,0,9,999999999,21600
+damageLightButton,7200b (2h),#pillRepeatWrite32,0,9,999999999,-7200
+damageSeriousButton,43200b (12h),#pillRepeatWrite32,0,9,999999999,-43200
+
+panaceaButton,,#pillRepeatWrite32,0,11
+diagnosticsButton,,#pillRepeatWrite32,0,27
+autoDocButton,60b (1h) / 1s,#pillRepeatWrite32,0,12
+
+empBreakButton,,#pillRepeatWrite32,0,31
+empFixButton,,#pillRepeatWrite32,0,32
+empRechargeButton,,#pillRepeatWrite32,0,33
+
+uniqueIDButton,,#pillRepeatWrite32,0,1
+doseTopButton,,#pillRepeatWrite32,0,18,
+deviceTypeButton,,#pillRepeatWrite32,0,99,
