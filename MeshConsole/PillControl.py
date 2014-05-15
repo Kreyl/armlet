@@ -14,7 +14,7 @@ from traceback import format_exc
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
-    from PyQt4.QtGui import QApplication, QDesktopWidget, QDialog, QIntValidator, QLabel, QLineEdit, QMainWindow, QPushButton
+    from PyQt4.QtGui import QApplication, QDesktopWidget, QComboBox, QDialog, QIntValidator, QLabel, QLineEdit, QMainWindow, QPushButton
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -23,7 +23,6 @@ from UARTTextCommands import pingCommand, ackResponse
 from SerialPort import SerialPort, DT, TIMEOUT
 
 # ToDo
-# Configure and link custom controls
 # Cross-link command buttons
 # Invalidate current button by any other output
 # Verify pill response diagnostics
@@ -45,6 +44,22 @@ STATE_SETUP_OK = 0
 STATE_SETUP_ERROR = 1
 STATE_PILL_OK = 2
 STATE_PILL_ERROR = 3
+
+DEVICE_TYPES = (
+    ('player', 1),
+    ('radClear', 10),
+    ('radLight', 11),
+    ('radHeavy', 12),
+    ('radDeath', 13),
+    ('mobDetector', 21),
+    ('statDetector', 22),
+    ('empMech', 31),
+    ('empGrenade', 32),
+    ('finder', 41),
+    ('pillControl', 51)
+)
+
+DEVICE_INDEXES = dict((i, v) for (i, (k, v)) in enumerate(DEVICE_TYPES))
 
 def fixWidgetSize(widget, adjustment = 1):
     widget.setFixedWidth(widget.fontMetrics().boundingRect(widget.text()).width() * adjustment) # This is a bad hack, but there's no better idea
@@ -127,26 +142,48 @@ class CompactButton(QPushButton):
 
 class CommandButton(QPushButton):
     PADDING = '  '
-
-    def __init__(self, parent):
-        QPushButton.__init__(self, parent)
+    COMMAND_SEPARATOR = ','
 
     def configure(self, styleSheets, comment, command, callback):
         self.styleSheets = styleSheets
-        self.command = command
+        self.commandBase = command
         if comment:
             self.setText('%s%s: %s%s' % (self.PADDING, self.text(), comment, self.PADDING))
         else:
             self.setText('%s%s%s' % (self.PADDING, self.text(), self.PADDING))
-        self.setStatusTip('Command: %s' % command)
+        self.setArguments()
         self.highlight()
         self.clicked.connect(partial(callback, self))
+
+    def setArguments(self, values = ()):
+        self.values = values
+        self.command = self.commandBase + self.COMMAND_SEPARATOR.join(str(value) for value in values)
+        self.setStatusTip('Command: %s' % self.command)
 
     def highlight(self, key = None):
         self.setStyleSheet(self.styleSheets.get(key, ''))
 
+class DoseTopEdit(QLineEdit):
+    def configure(self, defaultButton, callback):
+        self.setPlaceholderText(self.text())
+        self.setValidator(QIntValidator(99, 10 ** 9 - 1, self))
+        defaultButton.clicked.connect(lambda: self.setText(self.placeholderText()))
+        self.callback = callback
+        self.textChanged.connect(self.report)
+        self.report()
+
+    def report(self):
+        self.callback(self.text() or self.placeholderText())
+
+class DeviceTypeComboBox(QComboBox): # pylint: disable=R0924
+    def configure(self, callback):
+        self.addItems(tuple('%02d: %s' % (value, key) for (key, value) in sorted(DEVICE_TYPES, key = lambda kv: kv[1])))
+        self.activated.connect(callback)
+        callback(0)
+
 class ConsoleEdit(QLineEdit):
     def configure(self, callback):
+        self.setStatusTip(self.placeholderText())
         self.returnPressed.connect(callback)
 
     def getInput(self):
@@ -181,7 +218,6 @@ class PillControl(QMainWindow):
         self.consoleEdit.configure(self.consoleEnter)
         self.aboutDialog = AboutDialog(self.aboutAction.triggered)
         self.dontWritePillButton.setFocus()
-        self.doseTopEdit.setValidator(QIntValidator(0, 10 ** 9 - 1, self.doseTopEdit))
         # Configuring command buttons
         buttonStyleSheets = {
             STATE_SETUP_OK: self.setupOKLabel.styleSheet(),
@@ -196,6 +232,8 @@ class PillControl(QMainWindow):
                 if not button:
                     raise ValueError("Unknown button name: %s" % objectName)
                 button.configure(buttonStyleSheets, comment.strip(), command.strip(), self.processCommand)
+        self.doseTopEdit.configure(self.doseTopDefaultButton, lambda value: self.doseTopButton.setArguments((value,)))
+        self.deviceTypeComboBox.configure(lambda index: self.deviceTypeButton.setArguments((DEVICE_INDEXES[index],)))
         self.lastCommandButton = None
         # Setup logging
         formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
@@ -278,6 +316,7 @@ class PillControl(QMainWindow):
         settings = QSettings()
         try:
             settings.setValue('timeStamp', QDateTime.currentDateTime().toString(LONG_DATETIME_FORMAT))
+            settings.setValue('doseTop', int(self.doseTopEdit.text() or self.doseTopEdit.placeholderText()))
             settings.beginGroup('window')
             settings.setValue('width', self.size().width())
             settings.setValue('height', self.size().height())
@@ -301,6 +340,7 @@ class PillControl(QMainWindow):
         try:
             timeStamp = settings.value('timeStamp').toString()
             if timeStamp:
+                self.doseTopEdit.setText(settings.value('doseTop').toString())
                 settings.beginGroup('window')
                 self.resize(settings.value('width').toInt()[0], settings.value('height').toInt()[0])
                 self.move(settings.value('x').toInt()[0], settings.value('y').toInt()[0])
