@@ -224,7 +224,6 @@ class PillControl(QMainWindow):
         self.portLabel.configure()
         self.resetButton.configure(self.reset)
         self.consoleEdit.configure(self.consoleEnter)
-        self.dontWritePillButton.setFocus()
         self.aboutDialog = AboutDialog(self.aboutAction.triggered)
         # Configuring command buttons
         buttonStyleSheets = {

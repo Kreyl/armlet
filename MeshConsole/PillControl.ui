@@ -315,6 +315,9 @@
        </item>
        <item row="16" column="0" colspan="3">
         <widget class="QScrollArea" name="documentationScrollArea">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
          <property name="frameShape">
           <enum>QFrame::NoFrame</enum>
          </property>
@@ -379,6 +382,9 @@
            <family>Courier, Courier New, monospace</family>
            <pointsize>7</pointsize>
           </font>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
          </property>
          <property name="statusTip">
           <string>Terminal console: &lt; denotes input from device, &gt; output to device, other lines are program status messages and diagnostics</string>
@@ -625,6 +631,28 @@
    <header>PillControl</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>dontWritePillButton</tabstop>
+  <tabstop>cureOneButton</tabstop>
+  <tabstop>drugOneButton</tabstop>
+  <tabstop>cureInfButton</tabstop>
+  <tabstop>autoDocButton</tabstop>
+  <tabstop>damageLightButton</tabstop>
+  <tabstop>damageSeriousButton</tabstop>
+  <tabstop>panaceaButton</tabstop>
+  <tabstop>diagnosticsButton</tabstop>
+  <tabstop>empBreakButton</tabstop>
+  <tabstop>empFixButton</tabstop>
+  <tabstop>empRechargeButton</tabstop>
+  <tabstop>doseTopDefaultButton</tabstop>
+  <tabstop>doseTopEdit</tabstop>
+  <tabstop>doseTopButton</tabstop>
+  <tabstop>deviceTypeComboBox</tabstop>
+  <tabstop>deviceTypeButton</tabstop>
+  <tabstop>uniqueIDButton</tabstop>
+  <tabstop>resetButton</tabstop>
+  <tabstop>consoleEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
