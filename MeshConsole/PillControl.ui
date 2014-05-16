@@ -20,7 +20,23 @@
     </item>
     <item row="0" column="0">
      <widget class="QWidget" name="commandWidget" native="true">
-      <layout class="QGridLayout" name="commandLayout" columnstretch="0,1,1">
+      <layout class="QGridLayout" name="commandLayout">
+       <item row="8" column="0">
+        <widget class="QLabel" name="empLabel">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>EMP</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
        <item row="7" column="0" colspan="3">
         <widget class="Line" name="line3">
          <property name="orientation">
@@ -44,8 +60,11 @@
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="playerLabel">
-         <property name="styleSheet">
-          <string notr="true">font-weight: bold</string>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
          </property>
          <property name="text">
           <string>Player</string>
@@ -112,8 +131,11 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="styleSheet">
-          <string notr="true">font-weight: bold</string>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
          </property>
          <property name="text">
           <string>Advanced</string>
@@ -130,47 +152,16 @@
          </property>
         </widget>
        </item>
-       <item row="16" column="0" colspan="3">
-        <widget class="QLabel" name="documentationLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+       <item row="4" column="0">
+        <widget class="QLabel" name="masterLabel">
          <property name="font">
           <font>
-           <pointsize>7</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
           </font>
          </property>
          <property name="text">
-          <string>Here be documentation</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="masterLabel">
-         <property name="styleSheet">
-          <string notr="true">font-weight: bold</string>
-         </property>
-         <property name="text">
           <string>Master</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="0">
-        <widget class="QLabel" name="empLabel">
-         <property name="styleSheet">
-          <string notr="true">font-weight: bold</string>
-         </property>
-         <property name="text">
-          <string>EMP</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -234,7 +225,7 @@
        </item>
        <item row="10" column="1" colspan="2">
         <widget class="QWidget" name="advancedWidget1" native="true">
-         <layout class="QHBoxLayout" name="advancedLayout1" stretch="0,0,1">
+         <layout class="QHBoxLayout" name="advancedLayout1">
           <item>
            <widget class="QPushButton" name="doseTopDefaultButton">
             <property name="sizePolicy">
@@ -269,6 +260,12 @@
           </item>
           <item>
            <widget class="CommandButton" name="doseTopButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Dose Top</string>
             </property>
@@ -316,12 +313,64 @@
          </layout>
         </widget>
        </item>
+       <item row="16" column="0" colspan="3">
+        <widget class="QScrollArea" name="documentationScrollArea">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QLabel" name="documentationLabel">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>540</width>
+            <height>225</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>7</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Here be documentation</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+          <property name="textInteractionFlags">
+           <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+          </property>
+         </widget>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
     <item row="0" column="1">
      <widget class="QWidget" name="consoleWidget" native="true">
       <layout class="QVBoxLayout" name="consoleLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>1</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
        <property name="bottomMargin">
         <number>2</number>
        </property>
@@ -355,11 +404,23 @@
     </item>
     <item row="1" column="0">
      <widget class="QWidget" name="controlWidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <layout class="QHBoxLayout" name="controlLayout">
        <item>
         <widget class="PortLabel" name="portLabel">
          <property name="enabled">
           <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
          <property name="minimumSize">
           <size>
@@ -367,11 +428,17 @@
            <height>0</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="statusTip">
           <string>Current connected port</string>
          </property>
          <property name="styleSheet">
-          <string notr="true">font-weight: bold</string>
+          <string notr="true">background: rgb(192,192,192)</string>
          </property>
          <property name="text">
           <string>No COM</string>
@@ -386,6 +453,12 @@
          <property name="enabled">
           <bool>true</bool>
          </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="statusTip">
           <string>Reset connection</string>
          </property>
@@ -395,27 +468,29 @@
         </widget>
        </item>
        <item>
-        <spacer name="controlSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
         <widget class="QLabel" name="legendLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
-          <string>Legend:</string>
+          <string>     Legend:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QLabel" name="setupOKLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="statusTip">
           <string>Button colors if device setup was OK</string>
          </property>
@@ -429,6 +504,12 @@
        </item>
        <item>
         <widget class="QLabel" name="setupErrorLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="statusTip">
           <string>Button colors if device setup failed</string>
          </property>
@@ -442,6 +523,12 @@
        </item>
        <item>
         <widget class="QLabel" name="pillOKLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="statusTip">
           <string>Button colors if pill write was OK</string>
          </property>
@@ -455,6 +542,12 @@
        </item>
        <item>
         <widget class="QLabel" name="pillErrorLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="statusTip">
           <string>Button colors if pill write failed</string>
          </property>

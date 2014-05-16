@@ -25,6 +25,7 @@ from SerialPort import SerialPort, DT, TIMEOUT
 # ToDo
 # Change way of highlighting buttons: http://qt-project.org/doc/qt-4.8/stylesheet-examples.html#customizing-qpushbutton
 # Provide some padding to command buttons
+# Fix command buttons jitter on Linux
 # Migrate advancements back to MeshConsole
 
 LONG_DATETIME_FORMAT = 'yyyy.MM.dd hh:mm:ss'
@@ -33,6 +34,8 @@ MAIN_UI_FILE_NAME = 'PillControl.ui'
 ABOUT_UI_FILE_NAME = 'AboutPC.ui'
 
 PILL_COMMANDS_FILE_NAME = 'PillCommands.txt'
+
+DOCUMENTATION_FILE_NAME = 'PillControl.html'
 
 LOG_FILE_NAME = 'PillControl.log'
 
@@ -218,11 +221,12 @@ class PillControl(QMainWindow):
         height = resolution.height()
         self.setGeometry(width * WINDOW_POSITION, height * WINDOW_POSITION, width * WINDOW_SIZE, height * WINDOW_SIZE)
         # Configuring widgets
+        self.documentationLabel.setText(open(DOCUMENTATION_FILE_NAME).read())
         self.portLabel.configure()
         self.resetButton.configure(self.reset)
         self.consoleEdit.configure(self.consoleEnter)
-        self.aboutDialog = AboutDialog(self.aboutAction.triggered)
         self.dontWritePillButton.setFocus()
+        self.aboutDialog = AboutDialog(self.aboutAction.triggered)
         # Configuring command buttons
         buttonStyleSheets = {
             STATE_SETUP_OK: str(self.setupOKLabel.styleSheet()),
