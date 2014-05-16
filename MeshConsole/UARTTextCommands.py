@@ -60,23 +60,23 @@ UART_MESH_NODE_INFO = 'node'
 pingCommand = Command(UART_PING, '', UART_ACK)
 ackResponse = Command(UART_ACK, 'd')
 
-Command(UART_PILL_GET_STATE, 'd', UART_PILL_RET_STATE)
-Command(UART_PILL_RET_STATE, 'dd')
+pillGetStateCommand = Command(UART_PILL_GET_STATE, 'd', UART_PILL_RET_STATE)
+pillRetStateResponse = Command(UART_PILL_RET_STATE, 'dd')
 
-Command(UART_PILL_WRITE, 'dd*', UART_ACK)
-Command(UART_PILL_READ, 'dd', UART_PILL_DATA)
-Command(UART_PILL_DATA, 'd*')
-pillRepeatWriteCommand = Command(UART_PILL_REPEAT_WRITE, 'dd*', UART_ACK)
+pillWrite32Command = Command(UART_PILL_WRITE, 'dd*', UART_ACK)
+pillRead32Command = Command(UART_PILL_READ, 'dd', UART_PILL_DATA)
+pillData32Response = Command(UART_PILL_DATA, 'd*')
+pillRepeatWrite32Command = Command(UART_PILL_REPEAT_WRITE, 'dd*', UART_ACK)
 
-Command(UART_SET_ID, 'd', UART_ACK)
-Command(UART_GET_ID, '', UART_RET_ID)
-Command(UART_RET_ID, 'd')
+setIDCommand = Command(UART_SET_ID, 'd', UART_ACK)
+getIDCommand = Command(UART_GET_ID, '', UART_RET_ID)
+retIDResponse = Command(UART_RET_ID, 'd')
 
-Command(UART_SET_TYPE, 'd', UART_ACK)
-Command(UART_GET_TYPE, '', UART_RET_TYPE)
-Command(UART_RET_TYPE, 'd')
+setTypeCommand = Command(UART_SET_TYPE, 'd', UART_ACK)
+getTypeCommand = Command(UART_GET_TYPE, '', UART_RET_TYPE)
+retTypeResponse = Command(UART_RET_TYPE, 'd')
 
-Command(UART_SET_DOSE_TOP, 'd')
+setDoseTopCommand = Command(UART_SET_DOSE_TOP, 'd')
 
 meshGetSettingsCommand = Command(UART_MESH_GET_SETTINGS, '', UART_MESH_SETTINGS)
 meshGetSettingsResponse = Command(UART_MESH_SETTINGS, 'dd')

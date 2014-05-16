@@ -19,13 +19,12 @@ except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
 from UARTTextProtocol import Command, COMMAND_MARKER
-from UARTTextCommands import pingCommand, ackResponse
+from UARTTextCommands import pingCommand, ackResponse, pillWrite32Command, pillRead32Command, pillData32Response
 from SerialPort import SerialPort, DT, TIMEOUT
 
 # ToDo
 # Change way of highlighting buttons: http://qt-project.org/doc/qt-4.8/stylesheet-examples.html#customizing-qpushbutton
 # Provide some padding to command buttons
-# Verify pill response diagnostics
 # Migrate advancements back to MeshConsole
 
 LONG_DATETIME_FORMAT = 'yyyy.MM.dd hh:mm:ss'
@@ -174,7 +173,7 @@ class DoseTopEdit(QLineEdit):
     def report(self):
         self.callback(self.text() or self.placeholderText())
 
-class DeviceTypeComboBox(QComboBox):
+class DeviceTypeComboBox(QComboBox): # pylint: disable=R0924
     def configure(self, callback):
         self.addItems(tuple('%02d: %s' % (value, key) for (key, value) in sorted(DEVICE_TYPES, key = lambda kv: kv[1])))
         self.activated.connect(callback)
@@ -242,10 +241,10 @@ class PillControl(QMainWindow):
         self.deviceTypeComboBox.configure(lambda index: self.deviceTypeButton.setArguments((DEVICE_INDEXES[index],)))
         if not self.advanced:
             for w in self.commandWidget.findChildren(QWidget):
-                print w.objectName()
                 if str(w.objectName()).startswith('advanced'):
                     w.hide()
         self.lastCommandButton = None
+        self.writingPill = None
         # Setup logging
         formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
         handlers = (FileHandler(LOG_FILE_NAME), CallableHandler(self.logTextEdit.appendPlainText))
@@ -295,25 +294,47 @@ class PillControl(QMainWindow):
         error = True
         data = self.port.command(source.command, COMMAND_MARKER, QApplication.processEvents)
         if data:
-            error = self.parseCommand(data)
-            if error != None:
+            data = str(data).strip()
+            (tag, args) = Command.decodeCommand(data)
+            if tag == ackResponse.tag:
+                error = args[0]
                 if error:
                     self.logger.warning("Setup ERROR: %d", error)
                 else:
                     self.lastCommandButton = source
                     self.logger.info("Setup OK")
+            elif args is not None: # unexpected valid command
+                self.logger.warning("Unexpected command: %s %s", tag, ' '.join(str(arg) for arg in args))
+            elif tag: # unknown command
+                self.logger.warning("Unknown command %s: %s", tag, data)
+            else: # not a command
+                self.logger.warning("Unexpected input: %s", data)
         else:
-            error = True
             self.logger.warning("command timed out")
         self.highlightCommandButton(source, STATE_SETUP_ERROR if error else STATE_SETUP_OK)
 
     def processInput(self, data):
-        error = self.parseCommand(data)
-        if error != None:
+        error = True
+        data = str(data).strip()
+        (tag, args) = Command.decodeCommand(data)
+        if tag == ackResponse.tag:
+            prefix = 'Pill ' if self.writingPill else ''
+            self.writingPill = False
+            error = args[0]
             if error:
-                self.logger.warning("Pill ERROR: %d", error)
+                self.logger.warning("%sERROR: %d", prefix, error)
             else:
-                self.logger.info("Pill OK")
+                self.logger.info("%sOK", prefix)
+        elif tag == pillWrite32Command.tag:
+            self.writingPill = True
+        elif tag in (pillRead32Command.tag, pillData32Response.tag):
+            pass
+        elif args is not None: # unexpected valid command
+            self.logger.warning("Unexpected command: %s %s", tag, ' '.join(str(arg) for arg in args))
+        elif tag: # unknown command
+            self.logger.warning("Unknown command %s: %s", tag, data.rstrip())
+        else: # not a command
+            self.logger.warning("Unexpected input: %s", data.rstrip())
         self.highlightCommandButton(self.lastCommandButton, STATE_PILL_ERROR if error else STATE_PILL_OK)
 
     def consoleEnter(self):
