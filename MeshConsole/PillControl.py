@@ -23,8 +23,6 @@ from UARTTextCommands import pingCommand, ackResponse, pillWrite32Command, pillR
 from SerialPort import SerialPort, DT, TIMEOUT
 
 # ToDo
-# Change way of highlighting buttons: http://qt-project.org/doc/qt-4.8/stylesheet-examples.html#customizing-qpushbutton
-# Provide some padding to command buttons
 # Fix command buttons jitter on Linux
 # Migrate advancements back to MeshConsole
 
@@ -103,7 +101,8 @@ class EmulatedSerial(object):
             now = time()
             if self.ready and now > self.nextPill:
                 self.nextPill = now + float(randint(3000, 10000)) / 1000
-                data = ackResponse.encode(max(0, randint(0, 13) - 10))
+                self.buffer.append(ackResponse.encode(max(0, randint(0, 13) - 10)))
+                data = pillWrite32Command.encode(0, 0)
                 break
             sleep(DT)
         return data
@@ -149,7 +148,7 @@ class CommandButton(QPushButton):
         self.commandBase = command
         self.savedStyleSheet = str(self.styleSheet())
         if comment:
-            self.setText('%s: %s' % (self.text(), comment))
+            self.setText('  %s: %s  ' % (self.text(), comment))
         else:
             self.setText(self.text())
         self.setArguments()
@@ -176,7 +175,7 @@ class DoseTopEdit(QLineEdit):
     def report(self):
         self.callback(self.text() or self.placeholderText())
 
-class DeviceTypeComboBox(QComboBox): # pylint: disable=R0924
+class DeviceTypeComboBox(QComboBox):
     def configure(self, callback):
         self.addItems(tuple('%02d: %s' % (value, key) for (key, value) in sorted(DEVICE_TYPES, key = lambda kv: kv[1])))
         self.activated.connect(callback)
@@ -303,6 +302,7 @@ class PillControl(QMainWindow):
             if tag == ackResponse.tag:
                 error = args[0]
                 if error:
+                    self.lastCommandButton = None
                     self.logger.warning("Setup ERROR: %d", error)
                 else:
                     self.lastCommandButton = source
@@ -331,8 +331,9 @@ class PillControl(QMainWindow):
                 self.logger.info("%sOK", prefix)
         elif tag == pillWrite32Command.tag:
             self.writingPill = True
+            return
         elif tag in (pillRead32Command.tag, pillData32Response.tag):
-            pass
+            return
         elif args is not None: # unexpected valid command
             self.logger.warning("Unexpected command: %s %s", tag, ' '.join(str(arg) for arg in args))
         elif tag: # unknown command
