@@ -11,146 +11,6 @@
   </property>
   <widget class="QWidget" name="mainWidget">
    <layout class="QGridLayout" name="mainLayout" rowstretch="1,0" columnstretch="0,1">
-    <item row="0" column="1">
-     <layout class="QVBoxLayout" name="consoleLayout">
-      <property name="bottomMargin">
-       <number>2</number>
-      </property>
-      <item>
-       <widget class="QPlainTextEdit" name="logTextEdit">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Courier, Courier New, monospace</family>
-          <pointsize>7</pointsize>
-         </font>
-        </property>
-        <property name="statusTip">
-         <string>Terminal console: &lt; denotes input from device, &gt; output to device, other lines are program status messages and diagnostics</string>
-        </property>
-        <property name="lineWrapMode">
-         <enum>QPlainTextEdit::NoWrap</enum>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="0">
-     <layout class="QHBoxLayout" name="controlLayout">
-      <item>
-       <widget class="PortLabel" name="portLabel">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="statusTip">
-         <string>Current connected port</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">font-weight: bold</string>
-        </property>
-        <property name="text">
-         <string>No COM</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="CompactButton" name="resetButton">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="statusTip">
-         <string>Reset connection</string>
-        </property>
-        <property name="text">
-         <string>Reset</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="controlSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="legendLabel">
-        <property name="text">
-         <string>Legend:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="setupOKLabel">
-        <property name="statusTip">
-         <string>Button colors if device setup was OK</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background: green</string>
-        </property>
-        <property name="text">
-         <string>  Setup OK  </string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="setupErrorLabel">
-        <property name="statusTip">
-         <string>Button colors if device setup failed</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background: red</string>
-        </property>
-        <property name="text">
-         <string>  Setup ERR  </string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="pillOKLabel">
-        <property name="statusTip">
-         <string>Button colors if pill write was OK</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background: rgb(192, 255, 192)</string>
-        </property>
-        <property name="text">
-         <string>  Pill OK  </string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="pillErrorLabel">
-        <property name="statusTip">
-         <string>Button colors if pill write failed</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background: rgb(255, 192, 192)</string>
-        </property>
-        <property name="text">
-         <string>  Pill ERR  </string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
     <item row="1" column="1">
      <widget class="ConsoleEdit" name="consoleEdit">
       <property name="placeholderText">
@@ -159,288 +19,455 @@
      </widget>
     </item>
     <item row="0" column="0">
-     <layout class="QGridLayout" name="commandLayout">
-      <item row="0" column="1" colspan="2">
-       <widget class="CommandButton" name="dontWritePillButton">
-        <property name="text">
-         <string>Don't write pill</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="CommandButton" name="panaceaButton">
-        <property name="text">
-         <string>Panacea</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="3">
-       <widget class="Line" name="line2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="16" column="0" colspan="3">
-       <widget class="Line" name="line9">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0" colspan="3">
-       <widget class="Line" name="line3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="CommandButton" name="damageLightButton">
-        <property name="text">
-         <string>Damage Light</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0" colspan="3">
-       <widget class="Line" name="line4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="3">
-       <widget class="Line" name="line1">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="masterLabel">
-        <property name="styleSheet">
-         <string notr="true">font-weight: bold</string>
-        </property>
-        <property name="text">
-         <string>Master</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="2">
-       <widget class="CommandButton" name="diagnosticsButton">
-        <property name="text">
-         <string>Diagnostics</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2">
-       <widget class="CommandButton" name="autoDocButton">
-        <property name="text">
-         <string>AutoDoc</string>
-        </property>
-       </widget>
-      </item>
-      <item row="15" column="0" colspan="3">
-       <widget class="QLabel" name="documentationLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>7</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Here be documentation</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-        </property>
-       </widget>
-      </item>
-      <item row="14" column="0" colspan="3">
-       <widget class="Line" name="line5">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="0">
-       <widget class="QLabel" name="advancedLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">font-weight: bold</string>
-        </property>
-        <property name="text">
-         <string>Advanced</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1" colspan="2">
-       <layout class="QHBoxLayout" name="empLayout">
-        <item>
-         <widget class="CommandButton" name="empBreakButton">
-          <property name="text">
-           <string>Break</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="CommandButton" name="empFixButton">
-          <property name="text">
-           <string>Fix</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="CommandButton" name="empRechargeButton">
-          <property name="text">
-           <string>Recharge</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="empLabel">
-        <property name="styleSheet">
-         <string notr="true">font-weight: bold</string>
-        </property>
-        <property name="text">
-         <string>EMP</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2">
-       <widget class="CommandButton" name="damageSeriousButton">
-        <property name="text">
-         <string>Damage Serious</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="CommandButton" name="drugOneButton">
-        <property name="text">
-         <string>Drug One</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="CommandButton" name="cureOneButton">
-        <property name="text">
-         <string>Cure One</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="playerLabel">
-        <property name="styleSheet">
-         <string notr="true">font-weight: bold</string>
-        </property>
-        <property name="text">
-         <string>Player</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="CommandButton" name="cureInfButton">
-        <property name="text">
-         <string>Cure INF</string>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="1" colspan="2">
-       <widget class="CommandButton" name="uniqueIDButton">
-        <property name="text">
-         <string>Unique ID</string>
-        </property>
-       </widget>
-      </item>
-      <item row="12" column="1" colspan="2">
-       <layout class="QHBoxLayout" name="advancedLayout1">
-        <item>
-         <widget class="QPushButton" name="doseTopDefaultButton">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>default</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="DoseTopEdit" name="doseTopEdit">
-          <property name="maximumSize">
-           <size>
-            <width>65</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>216000</string>
-          </property>
-          <property name="maxLength">
-           <number>9</number>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="CommandButton" name="doseTopButton">
-          <property name="text">
-           <string>Dose Top</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="13" column="1" colspan="2">
-       <layout class="QHBoxLayout" name="advancedLayout2">
-        <item>
-         <widget class="DeviceTypeComboBox" name="deviceTypeComboBox">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="CommandButton" name="deviceTypeButton">
-          <property name="text">
-           <string>Device Type</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
+     <widget class="QWidget" name="commandWidget" native="true">
+      <layout class="QGridLayout" name="commandLayout" columnstretch="0,1,1">
+       <item row="7" column="0" colspan="3">
+        <widget class="Line" name="line3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="15" column="0" colspan="3">
+        <widget class="Line" name="line5">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
+        <widget class="CommandButton" name="dontWritePillButton">
+         <property name="text">
+          <string>Don't write pill</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="playerLabel">
+         <property name="styleSheet">
+          <string notr="true">font-weight: bold</string>
+         </property>
+         <property name="text">
+          <string>Player</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="3">
+        <widget class="Line" name="line1">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="CommandButton" name="cureInfButton">
+         <property name="text">
+          <string>Cure INF</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="CommandButton" name="drugOneButton">
+         <property name="text">
+          <string>Drug One</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="CommandButton" name="damageSeriousButton">
+         <property name="text">
+          <string>Damage Serious</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="3">
+        <widget class="Line" name="line2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0" colspan="3">
+        <widget class="Line" name="advancedLine">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="CommandButton" name="cureOneButton">
+         <property name="text">
+          <string>Cure One</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="0">
+        <widget class="QLabel" name="advancedLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font-weight: bold</string>
+         </property>
+         <property name="text">
+          <string>Advanced</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="CommandButton" name="autoDocButton">
+         <property name="text">
+          <string>AutoDoc</string>
+         </property>
+        </widget>
+       </item>
+       <item row="16" column="0" colspan="3">
+        <widget class="QLabel" name="documentationLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>7</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Here be documentation</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="masterLabel">
+         <property name="styleSheet">
+          <string notr="true">font-weight: bold</string>
+         </property>
+         <property name="text">
+          <string>Master</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="empLabel">
+         <property name="styleSheet">
+          <string notr="true">font-weight: bold</string>
+         </property>
+         <property name="text">
+          <string>EMP</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="CommandButton" name="panaceaButton">
+         <property name="text">
+          <string>Panacea</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="CommandButton" name="damageLightButton">
+         <property name="text">
+          <string>Damage Light</string>
+         </property>
+        </widget>
+       </item>
+       <item row="17" column="0" colspan="3">
+        <widget class="Line" name="line9">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="2">
+        <widget class="CommandButton" name="diagnosticsButton">
+         <property name="text">
+          <string>Diagnostics</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1" colspan="2">
+        <widget class="QWidget" name="empWidget" native="true">
+         <layout class="QHBoxLayout" name="empLayout">
+          <item>
+           <widget class="CommandButton" name="empBreakButton">
+            <property name="text">
+             <string>Break</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="CommandButton" name="empFixButton">
+            <property name="text">
+             <string>Fix</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="CommandButton" name="empRechargeButton">
+            <property name="text">
+             <string>Recharge</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="10" column="1" colspan="2">
+        <widget class="QWidget" name="advancedWidget1" native="true">
+         <layout class="QHBoxLayout" name="advancedLayout1" stretch="0,0,1">
+          <item>
+           <widget class="QPushButton" name="doseTopDefaultButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>default</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="DoseTopEdit" name="doseTopEdit">
+            <property name="maximumSize">
+             <size>
+              <width>65</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>216000</string>
+            </property>
+            <property name="maxLength">
+             <number>9</number>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="CommandButton" name="doseTopButton">
+            <property name="text">
+             <string>Dose Top</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="13" column="1" colspan="2">
+        <widget class="QWidget" name="advancedWidget3" native="true">
+         <layout class="QHBoxLayout" name="advancedLayout3">
+          <item>
+           <widget class="CommandButton" name="uniqueIDButton">
+            <property name="text">
+             <string>Unique ID</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="11" column="1" colspan="2">
+        <widget class="QWidget" name="advancedWidget2" native="true">
+         <layout class="QHBoxLayout" name="advancedLayout2">
+          <item>
+           <widget class="DeviceTypeComboBox" name="deviceTypeComboBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maxVisibleItems">
+             <number>12</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="CommandButton" name="deviceTypeButton">
+            <property name="text">
+             <string>Device Type</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QWidget" name="consoleWidget" native="true">
+      <layout class="QVBoxLayout" name="consoleLayout">
+       <property name="bottomMargin">
+        <number>2</number>
+       </property>
+       <item>
+        <widget class="QPlainTextEdit" name="logTextEdit">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Courier, Courier New, monospace</family>
+           <pointsize>7</pointsize>
+          </font>
+         </property>
+         <property name="statusTip">
+          <string>Terminal console: &lt; denotes input from device, &gt; output to device, other lines are program status messages and diagnostics</string>
+         </property>
+         <property name="lineWrapMode">
+          <enum>QPlainTextEdit::NoWrap</enum>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QWidget" name="controlWidget" native="true">
+      <layout class="QHBoxLayout" name="controlLayout">
+       <item>
+        <widget class="PortLabel" name="portLabel">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>65</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="statusTip">
+          <string>Current connected port</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font-weight: bold</string>
+         </property>
+         <property name="text">
+          <string>No COM</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="CompactButton" name="resetButton">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="statusTip">
+          <string>Reset connection</string>
+         </property>
+         <property name="text">
+          <string>Reset</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="controlSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="legendLabel">
+         <property name="text">
+          <string>Legend:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="setupOKLabel">
+         <property name="statusTip">
+          <string>Button colors if device setup was OK</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: rgb(0, 192, 0)</string>
+         </property>
+         <property name="text">
+          <string>  Setup OK  </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="setupErrorLabel">
+         <property name="statusTip">
+          <string>Button colors if device setup failed</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: red</string>
+         </property>
+         <property name="text">
+          <string>  Setup ERR  </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="pillOKLabel">
+         <property name="statusTip">
+          <string>Button colors if pill write was OK</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: rgb(192, 255, 192)</string>
+         </property>
+         <property name="text">
+          <string>  Pill OK  </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="pillErrorLabel">
+         <property name="statusTip">
+          <string>Button colors if pill write failed</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: rgb(255, 192, 192)</string>
+         </property>
+         <property name="text">
+          <string>  Pill ERR  </string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
    </layout>
   </widget>

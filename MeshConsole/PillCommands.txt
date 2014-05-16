@@ -4,14 +4,14 @@
 # buttonObjectName,description,command
 # 
 
-dontWritePillButton,,#pillRepeatWrite32,0,0
+dontWritePillButton,,#pillRepeatWrite32,0
 
-cureOneButton,21600b (6h),#pillRepeatWrite32,0,9,1,21600
-drugOneButton,144000b (40h) : 20m,#pillRepeatWrite32,0,10,1,144000,1200
+cureOneButton,21600b (6h),#pillRepeatWrite32,0,9,0,1,21600
+drugOneButton,144000b (40h) : 20m,#pillRepeatWrite32,0,10,0,1,144000,1200
 
-cureInfButton,21600b (6h),#pillRepeatWrite32,0,9,999999999,21600
-damageLightButton,7200b (2h),#pillRepeatWrite32,0,9,999999999,-7200
-damageSeriousButton,43200b (12h),#pillRepeatWrite32,0,9,999999999,-43200
+cureInfButton,21600b (6h),#pillRepeatWrite32,0,9,0,999999999,21600
+damageLightButton,7200b (2h),#pillRepeatWrite32,0,9,0,999999999,-7200
+damageSeriousButton,43200b (12h),#pillRepeatWrite32,0,9,0,999999999,-43200
 
 panaceaButton,,#pillRepeatWrite32,0,11
 diagnosticsButton,,#pillRepeatWrite32,0,27

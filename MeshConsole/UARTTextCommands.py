@@ -28,7 +28,7 @@ UART_PILL_RET_STATE = 'pill'
 
 UART_PILL_WRITE = 'pillWrite32'
 UART_PILL_READ = 'pillRead32'
-UART_PILL_DATA = 'pillData'
+UART_PILL_DATA = 'pillData32'
 UART_PILL_REPEAT_WRITE = 'pillRepeatWrite32'
 
 UART_SET_ID = 'setID'

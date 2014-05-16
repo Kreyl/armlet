@@ -59,8 +59,8 @@ class SerialPort(object):
                 if self.port:
                     line = self.port.readline()
                     if line:
-                        self.logger.info("< %s" % line)
-                        if time() < self.expectTimeout and line.startswith(self.expectPrefix):
+                        self.logger.info("< %s" % line.rstrip())
+                        if time() < self.expectTimeout and line.lower().startswith(self.expectPrefix.lower()):
                             self.expectResult = line
                         elif self.ready and self.readCallBack:
                             self.readCallBack(line)
@@ -122,8 +122,9 @@ class SerialPort(object):
             self.port = None
 
     def write(self, data, notReady = False):
+        data = str(data)
         if self.port and (self.ready or notReady):
-            self.logger.info(" > %s" % data)
+            self.logger.info(" > %s" % data.rstrip())
             self.writeBuffer.append(data)
         else:
             self.logger.info(" >! %s" % data)

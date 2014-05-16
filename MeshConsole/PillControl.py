@@ -2,9 +2,9 @@
 #
 # Pill Control
 #
-from binascii import hexlify
 from collections import deque
 from functools import partial
+from getopt import getopt
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
 from random import randint
 from sys import argv, exit # pylint: disable=W0622
@@ -14,7 +14,7 @@ from traceback import format_exc
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
-    from PyQt4.QtGui import QApplication, QDesktopWidget, QComboBox, QDialog, QIntValidator, QLabel, QLineEdit, QMainWindow, QPushButton
+    from PyQt4.QtGui import QApplication, QDesktopWidget, QComboBox, QDialog, QIntValidator, QLabel, QLineEdit, QMainWindow, QPushButton, QWidget
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -23,8 +23,8 @@ from UARTTextCommands import pingCommand, ackResponse
 from SerialPort import SerialPort, DT, TIMEOUT
 
 # ToDo
-# Cross-link command buttons
-# Invalidate current button by any other output
+# Change way of highlighting buttons: http://qt-project.org/doc/qt-4.8/stylesheet-examples.html#customizing-qpushbutton
+# Provide some padding to command buttons
 # Verify pill response diagnostics
 # Migrate advancements back to MeshConsole
 
@@ -127,8 +127,7 @@ class PortLabel(QLabel):
     setPortStatus = pyqtSignal(str, int)
 
     def configure(self):
-        self.savedStyleSheet = self.styleSheet()
-        fixWidgetSize(self)
+        self.savedStyleSheet = str(self.styleSheet())
         self.setPortStatus.connect(self.setValue)
 
     def setValue(self, portName, portStatus):
@@ -141,16 +140,16 @@ class CompactButton(QPushButton):
         self.clicked.connect(callback)
 
 class CommandButton(QPushButton):
-    PADDING = '  '
     COMMAND_SEPARATOR = ','
 
     def configure(self, styleSheets, comment, command, callback):
         self.styleSheets = styleSheets
         self.commandBase = command
+        self.savedStyleSheet = str(self.styleSheet())
         if comment:
-            self.setText('%s%s: %s%s' % (self.PADDING, self.text(), comment, self.PADDING))
+            self.setText('%s: %s' % (self.text(), comment))
         else:
-            self.setText('%s%s%s' % (self.PADDING, self.text(), self.PADDING))
+            self.setText(self.text())
         self.setArguments()
         self.highlight()
         self.clicked.connect(partial(callback, self))
@@ -161,7 +160,7 @@ class CommandButton(QPushButton):
         self.setStatusTip('Command: %s' % self.command)
 
     def highlight(self, key = None):
-        self.setStyleSheet(self.styleSheets.get(key, ''))
+        self.setStyleSheet(' ;'.join((self.savedStyleSheet, self.styleSheets.get(key, ''))))
 
 class DoseTopEdit(QLineEdit):
     def configure(self, defaultButton, callback):
@@ -175,7 +174,7 @@ class DoseTopEdit(QLineEdit):
     def report(self):
         self.callback(self.text() or self.placeholderText())
 
-class DeviceTypeComboBox(QComboBox): # pylint: disable=R0924
+class DeviceTypeComboBox(QComboBox):
     def configure(self, callback):
         self.addItems(tuple('%02d: %s' % (value, key) for (key, value) in sorted(DEVICE_TYPES, key = lambda kv: kv[1])))
         self.activated.connect(callback)
@@ -204,7 +203,14 @@ class PillControl(QMainWindow):
     def __init__(self, args):
         QMainWindow.__init__(self)
         uic.loadUi(MAIN_UI_FILE_NAME, self)
-        self.emulated = len(args) > 1 and args[1].lower() in ('-e', '--emulated')
+        self.emulated = False
+        self.advanced = False
+        (options, _parameters) = getopt(args, 'ae', ('advanced, emulate'))
+        for (option, _value) in options:
+            if option in ('-a', '--advanced'):
+                self.advanced = True
+            elif option in ('-e', '--emulated'):
+                self.emulated = True
 
     def configure(self):
         # Setting window size
@@ -220,10 +226,10 @@ class PillControl(QMainWindow):
         self.dontWritePillButton.setFocus()
         # Configuring command buttons
         buttonStyleSheets = {
-            STATE_SETUP_OK: self.setupOKLabel.styleSheet(),
-            STATE_SETUP_ERROR: self.setupErrorLabel.styleSheet(),
-            STATE_PILL_OK: self.pillOKLabel.styleSheet(),
-            STATE_PILL_ERROR: self.pillErrorLabel.styleSheet()
+            STATE_SETUP_OK: str(self.setupOKLabel.styleSheet()),
+            STATE_SETUP_ERROR: str(self.setupErrorLabel.styleSheet()),
+            STATE_PILL_OK: str(self.pillOKLabel.styleSheet()),
+            STATE_PILL_ERROR: str(self.pillErrorLabel.styleSheet())
         }
         with open(PILL_COMMANDS_FILE_NAME) as f:
             for line in (line for line in (line.strip() for line in f) if line and not line.strip().startswith('#')):
@@ -234,6 +240,11 @@ class PillControl(QMainWindow):
                 button.configure(buttonStyleSheets, comment.strip(), command.strip(), self.processCommand)
         self.doseTopEdit.configure(self.doseTopDefaultButton, lambda value: self.doseTopButton.setArguments((value,)))
         self.deviceTypeComboBox.configure(lambda index: self.deviceTypeButton.setArguments((DEVICE_INDEXES[index],)))
+        if not self.advanced:
+            for w in self.commandWidget.findChildren(QWidget):
+                print w.objectName()
+                if str(w.objectName()).startswith('advanced'):
+                    w.hide()
         self.lastCommandButton = None
         # Setup logging
         formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
@@ -259,36 +270,42 @@ class PillControl(QMainWindow):
         else:
             self.show()
 
+    def highlightCommandButton(self, button = None, key = None):
+        for b in self.commandWidget.findChildren(QPushButton):
+            if b.__class__.__name__ == CommandButton.__name__: # isinstance doesn't work cross-module
+                b.highlight(key if b is button else None)
+
     def processConnect(self, pong): # pylint: disable=W0613
         self.logger.info("connected device detected")
 
     def parseCommand(self, data):
+        data = str(data)
         (tag, args) = Command.decodeCommand(data)
         if tag == ackResponse.tag:
             return args[0]
         if args is not None: # unexpected valid command
-            self.logger.warning("Unexpected command: %s %s", hexlify(tag).upper(), ' '.join(str(arg) for arg in args))
+            self.logger.warning("Unexpected command: %s %s", tag, ' '.join(str(arg) for arg in args))
         elif tag: # unknown command
-            self.logger.warning("Unknown command %s: %s", tag, data)
+            self.logger.warning("Unknown command %s: %s", tag, data.rstrip())
         else: # not a command
-            self.logger.warning("Unexpected input: %s", data)
+            self.logger.warning("Unexpected input: %s", data.rstrip())
         return None # error
 
     def processCommand(self, source, _checked = False):
         error = True
         data = self.port.command(source.command, COMMAND_MARKER, QApplication.processEvents)
-        self.lastCommandButton = source
         if data:
             error = self.parseCommand(data)
             if error != None:
                 if error:
                     self.logger.warning("Setup ERROR: %d", error)
                 else:
+                    self.lastCommandButton = source
                     self.logger.info("Setup OK")
         else:
             error = True
             self.logger.warning("command timed out")
-        source.highlight(STATE_SETUP_ERROR if error else STATE_SETUP_OK)
+        self.highlightCommandButton(source, STATE_SETUP_ERROR if error else STATE_SETUP_OK)
 
     def processInput(self, data):
         error = self.parseCommand(data)
@@ -297,11 +314,13 @@ class PillControl(QMainWindow):
                 self.logger.warning("Pill ERROR: %d", error)
             else:
                 self.logger.info("Pill OK")
-        if self.lastCommandButton:
-            self.lastCommandButton.highlight(STATE_PILL_ERROR if error else STATE_PILL_OK)
+        self.highlightCommandButton(self.lastCommandButton, STATE_PILL_ERROR if error else STATE_PILL_OK)
 
     def consoleEnter(self):
-        self.port.write(self.consoleEdit.getInput())
+        data = self.consoleEdit.getInput()
+        if data:
+            self.lastCommandButton = None
+            self.port.write(data)
 
     def closeEvent(self, _event):
         self.saveSettings()
@@ -358,10 +377,10 @@ class PillControl(QMainWindow):
         self.logger.error(message)
         exit(-1)
 
-def main():
+def main(args):
     try:
-        application = QApplication(argv)
-        pillControl = PillControl(argv) # retain reference
+        application = QApplication(args)
+        pillControl = PillControl(args[1:]) # retain reference
         pillControl.configure()
         return application.exec_()
     except KeyboardInterrupt:
@@ -373,4 +392,4 @@ def main():
         return -1
 
 if __name__ == '__main__':
-    main()
+    main(argv)
