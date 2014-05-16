@@ -60,9 +60,12 @@ void Init() {
     // Read config
 
     Lcd.Init();
-    Lcd.Printf(11, 11, clGreen, clBlack, "Armlet Player");
+    Lcd.Printf(10, 11, clGreen, clBlack, "ARMLET MP3 PLAYER");
+    Lcd.Printf(124, 118, clYellow, clBlack, ">>>");
+    Lcd.Printf(2, 118, clYellow, clBlack, "<<<");
+    Lcd.Printf(58, 118, clYellow, clBlack, "PLAY");
 
-//    Keys.Init();
+    Keys.Init();
     Beeper.Init();
 //    Vibro.Init();
 
@@ -72,8 +75,15 @@ void Init() {
 //    PillInit();
 
     Sound.Init();
-    Sound.SetVolume(254);
-//    Sound.Play("alive.wav");
+    Sound.SetVolume(180);
+//    Sound.Play("Beasty Boys - Sabotage.mp3");
+
+    uint32_t Len;
+    SD.GetFirst("/");
+    do {
+        SD.GetNext();
+        Len = strlen(SD.Filename);
+    } while (strcmp(&SD.Filename[Len-3], "mp3") != 0);
 
     App.Init();
 }

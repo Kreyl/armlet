@@ -7,8 +7,19 @@
 
 #include "keys.h"
 #include "ch.h"
+#include "evt_mask.h"
+#include "application.h"
 
 Keys_t Keys;
+
+#define KEY_CHECK_TIME 150
+
+void KeyCheckTmrCallback(void *p) {
+    chSysLockFromIsr();
+    chVTSetI(&Keys.ITmr, MS2ST(KEY_CHECK_TIME), KeyCheckTmrCallback, NULL);
+    chEvtSignalI(App.PThd, EVTMASK_KEYS);
+    chSysUnlockFromIsr();
+}
 
 // ==== Keys Thread ====
 static WORKING_AREA(waKeysThread, 128);
@@ -41,4 +52,5 @@ void Keys_t::Init() {
     for(uint8_t i=0; i<KEYS_CNT; i++) PinSetupIn(KEY_GPIO, KeyPin[i], pudPullUp);
     // Create and start thread
     chThdCreateStatic(waKeysThread, sizeof(waKeysThread), NORMALPRIO, (tfunc_t)KeysThread, NULL);
+    chVTSet(&ITmr, MS2ST(KEY_CHECK_TIME), KeyCheckTmrCallback, NULL);
 }

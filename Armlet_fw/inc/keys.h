@@ -40,6 +40,7 @@ struct KeyStatus_t {
 class Keys_t {
 public:
     EventSource EvtSrcKey;
+    VirtualTimer ITmr;
     KeyStatus_t Status[KEYS_CNT];
     void Init();
     void RegisterEvt(EventListener *PEvtLstnr, uint8_t EvtMask) { chEvtRegisterMask(&EvtSrcKey, PEvtLstnr, EvtMask); }
@@ -56,14 +57,14 @@ public:
 
 extern Keys_t Keys;
 
-#define KEY_A   Keys.Status[0]
-#define KEY_B   Keys.Status[1]
-#define KEY_C   Keys.Status[2]
-#define KEY_X   Keys.Status[3]
-#define KEY_Y   Keys.Status[4]
-#define KEY_Z   Keys.Status[5]
-#define KEY_L   Keys.Status[6]
-#define KEY_E   Keys.Status[7]
-#define KEY_R   Keys.Status[8]
+//#define KEY_A   Keys.Status[0]
+//#define KEY_B   Keys.Status[1]
+//#define KEY_C   Keys.Status[2]
+//#define KEY_X   Keys.Status[3]
+//#define KEY_Y   Keys.Status[4]
+//#define KEY_Z   Keys.Status[5]
+//#define KEY_L   Keys.Status[6]
+//#define KEY_E   Keys.Status[7]
+//#define KEY_R   Keys.Status[8]
 
 #endif /* KEYS_H_ */

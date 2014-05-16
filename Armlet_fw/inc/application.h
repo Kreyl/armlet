@@ -25,6 +25,10 @@ public:
     void Task();
     void StopEverything();
     int on_run;
+
+    bool IsPlay;
+    uint8_t Loudness;
+
 };
 
 extern App_t App;
