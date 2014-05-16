@@ -23,7 +23,6 @@
 #include "sound.h"
 #include "ff.h"
 #include "../MusicProcessor/intention.h"
-#include "SensorTable.h"
 
 App_t App;
 
@@ -342,44 +341,10 @@ void App_t::Task() {
     }
     if(EvtMsk & EVTMASK_PLAY_ENDS) {
         Uart.Printf("App PlayEnd\r");
-        //играть музыку по текущей эмоции
         PlayNewEmo(SICD.last_played_emo,1);
     }
 #if 1 //EVTMASK_RADIO on/off
     if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
-        Uart.Printf("App TabGet, s=%u, t=%u\r", SnsTable.PTable->Size, chTimeNow());
-
-        // FIXME: Lcd Clear before next ID print
-        for(uint8_t i=0; i<5; i++) {
-            Lcd.Printf(11, 31+(i*10), clRed, clBlack,"               ");
-        }
-
-        for(uint32_t i=0; i<SnsTable.PTable->Size; i++) {
-            Uart.Printf(" ID=%u; Pwr=%u\r", SnsTable.PTable->Row[i].ID, SnsTable.PTable->Row[i].Level);
-            Lcd.Printf(11, 31+(i*10), clRed, clBlack,"ID=%u; Pwr=%u", SnsTable.PTable->Row[i].ID, SnsTable.PTable->Row[i].Level);
-        }
-        int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
-        CurrentIntentionArraySize = val1;
-        int j=0;
-        for(int i=0; i<val1; i++) {
-            if(SnsTable.PTable->Row[i].ID >= reasons_number || (SnsTable.PTable->Row[i].ID < 0) || (SnsTable.PTable->Row[i].Level < 70) ) {
-                CurrentIntentionArraySize--;
-                continue;
-            }
-            ArrayOfIncomingIntentions[j].power256 = SnsTable.PTable->Row[i].Level-70;
-            ArrayOfIncomingIntentions[j].reason_indx = SnsTable.PTable->Row[i].ID;
-            j++;
-        }
-        int reason_id=MainCalculateReasons();
-
-        if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3) {
-            Uart.Printf("ID to play=%d\r",reason_id);
-            if(reasons[reason_id].eID != SICD.last_played_emo)
-            PlayNewEmo(reasons[reason_id].eID,3);
-        }
-        if(reason_id==-3) {
-            PlayNewEmo(0,4);
-        }
     }
 #endif
 
@@ -406,7 +371,6 @@ void App_t::Task() {
 void App_t::Init() {
     State = asIdle;
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
-    SnsTable.RegisterAppThd(PThd);
     Sound.RegisterAppThd(PThd);
     on_run=0;
 

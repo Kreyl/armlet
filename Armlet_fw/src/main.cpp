@@ -20,9 +20,6 @@
 #include "power.h"
 #include "pill.h"
 
-#include "radio_lvl1.h"
-#include "mesh_lvl.h"
-
 #include "ff.h"
 
 #include "application.h"
@@ -52,25 +49,18 @@ int main() {
 
     while(TRUE) {
         chThdSleepMilliseconds(999);
-        Lcd.Printf(11, 21, clWhite, clBlack, "%ums   ", Mesh.GetAbsTimeMS());
     }
 }
 
 void Init() {
     Uart.Init(256000);
-    Uart.Printf("Atlantis Armlet\r");
+    Uart.Printf("Armlet Player\r");
 
     SD.Init();
     // Read config
-    uint32_t ID=0;
-    iniReadUint32("Radio", "ID", "settings.ini", &ID);
-    Uart.Printf("ID=%u\r", ID);
 
     Lcd.Init();
-    Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
-
- //   Init_emotionTreeMusicNodeFiles_FromFile(filename);
- //   Print_emotionTreeMusicNodeFiles_ToUART();
+    Lcd.Printf(11, 11, clGreen, clBlack, "Armlet Player");
 
 //    Keys.Init();
     Beeper.Init();
@@ -81,14 +71,9 @@ void Init() {
 //    Power.Init();
 //    PillInit();
 
-    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
-
     Sound.Init();
     Sound.SetVolume(254);
 //    Sound.Play("alive.wav");
 
     App.Init();
-
-    rLevel1.Init(ID);
-    Mesh.Init(ID);
 }

@@ -7,11 +7,9 @@
 
 #include "radio_lvl1.h"
 #include "cc1101.h"
-#include "SensorTable.h"
 #include "evt_mask.h"
 
 #include "lcd2630.h"
-#include "mesh_lvl.h"
 
 //#define DBG_PINS
 
@@ -49,37 +47,37 @@ void rLevel1_t::ITask() {
 #endif
 
 #if 1 // ==== Mesh v.2 ====
-        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-        PktTx.TimeAge++;
-        if(EvtMsk & EVTMSK_MESH_TX) {
-            PktTx.CycleN = Mesh.GetAbsTime();
-//            Uart.Printf("RadioTx\r");
-            if(PktTx.TimeAge > TIME_AGE_THRESHOLD) { ResetTimeAge(PktTx.ID); }
-            CC.TransmitSync(&PktTx);
-        }
-        if(EvtMsk & EVTMSK_MESH_RX) {
-            int8_t RSSI = 0;
-            RxTmt = CYCLE_TIME;
-//            RxStartTime = chTimeNow();
-            IMeshRx = true;
-            Counter++;
-            // Init VirtualTimer
-            chVTSet(&MeshRxVT, MS2ST(CYCLE_TIME), RxEnd, nullptr);
-            Uart.Printf("RxStart=%u, t=%u\r", Counter, chTimeNow());
-            do {
-                Time = chTimeNow();
-//                Uart.Printf("Rx for t=%u\r", RxTmt);
-                uint8_t RxRslt = CC.ReceiveSync(RxTmt, &PktRx, &RSSI);
-                if(RxRslt == OK) { // Pkt received correctly
-                    Uart.Printf("Rx ID=%u:%u, %d\r", PktRx.ID, PktRx.CycleN, RSSI);
-                    Mesh.MsgBox.Post({chTimeNow(), PktRx, RSSI}); /* SendMsg to MeshThd with PktRx structure */
-                } // Pkt Ok
-                RxTmt = ((chTimeNow() - Time) > 0)? RxTmt - (chTimeNow() - Time) : 0;
-            } while(IMeshRx);
-            Uart.Printf("RxEnd, t=%u\r\r", chTimeNow());
-            chEvtSignal(Mesh.IPThread, EVTMSK_UPDATE_CYCLE);
+//        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+//        PktTx.TimeAge++;
+//        if(EvtMsk & EVTMSK_MESH_TX) {
+//            PktTx.CycleN = Mesh.GetAbsTime();
+////            Uart.Printf("RadioTx\r");
+//            if(PktTx.TimeAge > TIME_AGE_THRESHOLD) { ResetTimeAge(PktTx.ID); }
+//            CC.TransmitSync(&PktTx);
+//        }
+//        if(EvtMsk & EVTMSK_MESH_RX) {
+//            int8_t RSSI = 0;
+//            RxTmt = CYCLE_TIME;
+////            RxStartTime = chTimeNow();
+//            IMeshRx = true;
+//            Counter++;
+//            // Init VirtualTimer
+//            chVTSet(&MeshRxVT, MS2ST(CYCLE_TIME), RxEnd, nullptr);
+//            Uart.Printf("RxStart=%u, t=%u\r", Counter, chTimeNow());
+//            do {
+//                Time = chTimeNow();
+////                Uart.Printf("Rx for t=%u\r", RxTmt);
+//                uint8_t RxRslt = CC.ReceiveSync(RxTmt, &PktRx, &RSSI);
+//                if(RxRslt == OK) { // Pkt received correctly
+//                    Uart.Printf("Rx ID=%u:%u, %d\r", PktRx.ID, PktRx.CycleN, RSSI);
+//                    Mesh.MsgBox.Post({chTimeNow(), PktRx, RSSI}); /* SendMsg to MeshThd with PktRx structure */
+//                } // Pkt Ok
+//                RxTmt = ((chTimeNow() - Time) > 0)? RxTmt - (chTimeNow() - Time) : 0;
+//            } while(IMeshRx);
+//            Uart.Printf("RxEnd, t=%u\r\r", chTimeNow());
+//            chEvtSignal(Mesh.IPThread, EVTMSK_UPDATE_CYCLE);
 
-        }
+//        }
 #endif
     } // while true
 }
