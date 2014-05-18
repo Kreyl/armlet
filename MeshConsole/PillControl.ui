@@ -383,9 +383,6 @@
            <pointsize>7</pointsize>
           </font>
          </property>
-         <property name="focusPolicy">
-          <enum>Qt::NoFocus</enum>
-         </property>
          <property name="statusTip">
           <string>Terminal console: &lt; denotes input from device, &gt; output to device, other lines are program status messages and diagnostics</string>
          </property>
@@ -645,6 +642,7 @@
   <tabstop>deviceTypeButton</tabstop>
   <tabstop>uniqueIDButton</tabstop>
   <tabstop>resetButton</tabstop>
+  <tabstop>logTextEdit</tabstop>
   <tabstop>consoleEdit</tabstop>
  </tabstops>
  <resources/>
