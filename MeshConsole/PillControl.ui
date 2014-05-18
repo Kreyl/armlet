@@ -411,9 +411,6 @@
       <layout class="QHBoxLayout" name="controlLayout">
        <item>
         <widget class="PortLabel" name="portLabel">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -448,9 +445,6 @@
        </item>
        <item>
         <widget class="CompactButton" name="resetButton">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>

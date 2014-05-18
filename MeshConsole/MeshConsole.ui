@@ -15,11 +15,29 @@
      <layout class="QHBoxLayout" name="controlLayout">
       <item>
        <widget class="PortLabel" name="portLabel">
+        <property name="minimumSize">
+         <size>
+          <width>65</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="statusTip">
+         <string>Current connected port</string>
+        </property>
         <property name="styleSheet">
-         <string notr="true">font-weight: bold</string>
+         <string notr="true">background: rgb(192,192,192)</string>
         </property>
         <property name="text">
          <string>No COM</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -45,12 +63,9 @@
        </widget>
       </item>
       <item>
-       <widget class="ResetButton" name="resetButton">
-        <property name="toolTip">
-         <string>Reset</string>
-        </property>
+       <widget class="CompactButton" name="resetButton">
         <property name="statusTip">
-         <string>Reset</string>
+         <string>Reset connection</string>
         </property>
         <property name="text">
          <string>Reset</string>
@@ -58,25 +73,21 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
        <widget class="QLabel" name="startDateLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">padding-left: 0.5em</string>
+        </property>
         <property name="text">
          <string>Start date</string>
         </property>
-        <property name="indent">
-         <number>5</number>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -107,9 +118,6 @@
           <weight>75</weight>
           <bold>true</bold>
          </font>
-        </property>
-        <property name="toolTip">
-         <string>Time</string>
         </property>
         <property name="statusTip">
          <string>Time</string>
@@ -193,6 +201,9 @@
             <italic>false</italic>
            </font>
           </property>
+          <property name="statusTip">
+           <string>Terminal console: &amp;lt; denotes input from device, &amp;gt; output to device, other lines are program status messages and diagnostics</string>
+          </property>
           <property name="lineWrapMode">
            <enum>QPlainTextEdit::NoWrap</enum>
           </property>
@@ -203,9 +214,6 @@
         </item>
         <item>
          <widget class="ConsoleEdit" name="consoleEdit">
-          <property name="toolTip">
-           <string>Enter console commands here</string>
-          </property>
           <property name="statusTip">
            <string>Enter console commands here</string>
           </property>
@@ -391,6 +399,9 @@
    <property name="text">
     <string>About</string>
    </property>
+   <property name="statusTip">
+    <string>About</string>
+   </property>
   </action>
  </widget>
  <customwidgets>
@@ -398,11 +409,6 @@
    <class>DevicesTableView</class>
    <extends>QTableView</extends>
    <header>MeshView</header>
-  </customwidget>
-  <customwidget>
-   <class>ResetButton</class>
-   <extends>QPushButton</extends>
-   <header>MeshConsole</header>
   </customwidget>
   <customwidget>
    <class>PortLabel</class>
@@ -426,6 +432,11 @@
   </customwidget>
   <customwidget>
    <class>PauseButton</class>
+   <extends>QPushButton</extends>
+   <header>MeshConsole</header>
+  </customwidget>
+  <customwidget>
+   <class>CompactButton</class>
    <extends>QPushButton</extends>
    <header>MeshConsole</header>
   </customwidget>

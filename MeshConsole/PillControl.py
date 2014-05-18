@@ -24,7 +24,6 @@ from SerialPort import SerialPort, DT, TIMEOUT
 
 # ToDo
 # Fix command buttons jitter on Linux
-# Migrate advancements back to MeshConsole
 
 LONG_DATETIME_FORMAT = 'yyyy.MM.dd hh:mm:ss'
 
@@ -206,7 +205,7 @@ class PillControl(QMainWindow):
         uic.loadUi(MAIN_UI_FILE_NAME, self)
         self.emulated = False
         self.advanced = False
-        (options, _parameters) = getopt(args, 'ae', ('advanced, emulate'))
+        (options, _parameters) = getopt(args, 'ae', ('advanced', 'emulated'))
         for (option, _value) in options:
             if option in ('-a', '--advanced'):
                 self.advanced = True
@@ -279,19 +278,6 @@ class PillControl(QMainWindow):
     def processConnect(self, pong): # pylint: disable=W0613
         self.logger.info("connected device detected")
 
-    def parseCommand(self, data):
-        data = str(data)
-        (tag, args) = Command.decodeCommand(data)
-        if tag == ackResponse.tag:
-            return args[0]
-        if args is not None: # unexpected valid command
-            self.logger.warning("Unexpected command: %s %s", tag, ' '.join(str(arg) for arg in args))
-        elif tag: # unknown command
-            self.logger.warning("Unknown command %s: %s", tag, data.rstrip())
-        else: # not a command
-            self.logger.warning("Unexpected input: %s", data.rstrip())
-        return None # error
-
     def processCommand(self, source, _checked = False):
         error = True
         data = self.port.command(source.command, COMMAND_MARKER, QApplication.processEvents)
@@ -318,7 +304,7 @@ class PillControl(QMainWindow):
 
     def processInput(self, data):
         error = True
-        data = str(data).strip()
+        data = unicode(data).strip()
         (tag, args) = Command.decodeCommand(data)
         if tag == ackResponse.tag:
             prefix = 'Pill ' if self.writingPill else ''
@@ -345,6 +331,7 @@ class PillControl(QMainWindow):
         data = self.consoleEdit.getInput()
         if data:
             self.lastCommandButton = None
+            self.highlightCommandButton()
             self.port.write(data)
 
     def closeEvent(self, _event):
@@ -354,7 +341,8 @@ class PillControl(QMainWindow):
     def reset(self):
         self.logger.info("reset")
         self.port.reset()
-        self.commandButtonWidget.reset()
+        self.lastCommandButton = None
+        self.highlightCommandButton()
 
     def saveSettings(self):
         settings = QSettings()

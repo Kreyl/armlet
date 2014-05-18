@@ -53,8 +53,7 @@ class PortLabel(QLabel):
     setPortStatus = pyqtSignal(str, int)
 
     def configure(self):
-        self.savedStyleSheet = self.styleSheet()
-        fixWidgetSize(self)
+        self.savedStyleSheet = str(self.styleSheet())
         self.setPortStatus.connect(self.setValue)
 
     def setValue(self, portName, portStatus):
@@ -69,7 +68,7 @@ class PauseButton(QPushButton):
     def processClick(self):
         self.callback()
 
-class ResetButton(QPushButton):
+class CompactButton(QPushButton):
     def configure(self, callback):
         fixWidgetSize(self, 1.5)
         self.clicked.connect(callback)
@@ -95,6 +94,7 @@ class DateTimeValueLabel(QLabel):
 
 class ConsoleEdit(QLineEdit):
     def configure(self, callback):
+        self.setStatusTip(self.placeholderText())
         self.returnPressed.connect(callback)
 
     def getInput(self):

@@ -3,9 +3,9 @@
 # Mesh Console
 # Main widget and startup
 #
-from binascii import hexlify
 from collections import deque
 from functools import partial
+from getopt import getopt
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
 from random import randint
 from sys import argv, exit # pylint: disable=W0622
@@ -110,7 +110,11 @@ class MeshConsole(QMainWindow):
     def __init__(self, args):
         QMainWindow.__init__(self)
         uic.loadUi(MAIN_UI_FILE_NAME, self)
-        self.emulated = len(args) > 1 and args[1].lower() in ('-e', '--emulated')
+        self.emulated = False
+        (options, _parameters) = getopt(args, 'e', ('emulated',))
+        for (option, _value) in options:
+            if option in ('-e', '--emulated'):
+                self.emulated = True
 
     def configure(self):
         # Setting window size
@@ -240,9 +244,9 @@ class MeshConsole(QMainWindow):
         if self.cycleLength < 1:
             self.error("Bad cycle length %d" % self.cycleLength)
 
-    def processInput(self, inputLine):
-        inputLine = unicode(inputLine).strip()
-        (tag, args) = Command.decodeCommand(inputLine)
+    def processInput(self, data):
+        data = unicode(data).strip()
+        (tag, args) = Command.decodeCommand(data)
         if tag == meshNodeInfoResponse.tag:
             try:
                 assert 1 <= args[0] <= len(self.devices)
@@ -251,16 +255,18 @@ class MeshConsole(QMainWindow):
                 if self.playing:
                     self.devicesModel.refresh()
             except Exception:
-                self.logger.exception("Error proocessing node info: %s", inputLine)
+                self.logger.exception("Error processing node info: %s", data)
         elif args is not None: # unexpected valid command
-            self.logger.warning("Unexpected command: %s %s", hexlify(tag).upper(), ' '.join(str(arg) for arg in args))
+            self.logger.warning("Unexpected command: %s %s", tag, ' '.join(str(arg) for arg in args))
         elif tag: # unknown command
-            self.logger.warning("Unknown command %s: %s", tag, inputLine)
+            self.logger.warning("Unknown command %s: %s", tag, data.rstrip())
         else: # not a command
-            self.logger.warning("Unexpected input: %s", inputLine)
+            self.logger.warning("Unexpected input: %s", data.rstrip())
 
     def consoleEnter(self):
-        self.port.write(self.consoleEdit.getInput())
+        data = self.consoleEdit.getInput()
+        if data:
+            self.port.write(data)
 
     def closeEvent(self, _event):
         self.saveSettings()
@@ -348,7 +354,7 @@ class MeshConsole(QMainWindow):
 def main():
     try:
         application = QApplication(argv)
-        meshConsole = MeshConsole(argv) # retain reference
+        meshConsole = MeshConsole(argv[1:]) # retain reference
         meshConsole.configure()
         return application.exec_()
     except KeyboardInterrupt:
