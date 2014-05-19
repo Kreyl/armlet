@@ -63,7 +63,8 @@ void Init() {
     Lcd.Printf(124, 118, clYellow, clBlack, ">>>");
     Lcd.Printf(2, 118, clYellow, clBlack, "<<<");
     Lcd.Printf(58, 118, clYellow, clBlack, "PLAY");
-
+    Lcd.Printf(0, 21, clMagenta, clBlack, "Volume");
+    for(uint8_t i=0; i<=(START_VOLUME/2); i+=8) Lcd.PutChar(i, 31, ' ', clBlack, clMagenta);
     Keys.Init();
     Beeper.Init();
 //    Vibro.Init();
@@ -74,7 +75,7 @@ void Init() {
 //    PillInit();
 
     Sound.Init();
-    Sound.SetVolume(180);
+    Sound.SetVolume(START_VOLUME);
 
     uint32_t Len;
     SD.GetFirst("/");
@@ -84,4 +85,5 @@ void Init() {
     } while (strcmp(&SD.Filename[Len-3], "mp3") != 0);
 
     App.Init();
+
 }

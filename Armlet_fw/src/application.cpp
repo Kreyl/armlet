@@ -131,14 +131,20 @@ void Keylock_t::Unlock() {
 static inline void KeyPressedHandler(uint8_t ID) {
     switch (ID) {
         case KEY_A:
-            App.Loudness++;
+            for(uint8_t i=0; i<=(App.Loudness/2); i+=8)  Lcd.PutChar(i, 31, ' ', clBlack, clBlack);
+            App.Loudness += 15;
             if(App.Loudness >= 255) App.Loudness = 255;
             Sound.SetVolume(App.Loudness);
+            Uart.Printf("Volume=%u\r", App.Loudness);
+            for(uint8_t i=0; i<=(App.Loudness/2); i+=8) Lcd.PutChar(i, 31, ' ', clBlack, clMagenta);
             break;
         case KEY_B:
-            App.Loudness--;
+            for(uint8_t i=0; i<=(App.Loudness/2); i+=8)  Lcd.PutChar(i, 31, ' ', clBlack, clBlack);
+            App.Loudness -= 15;
             if(App.Loudness <= 0) App.Loudness = 0;
             Sound.SetVolume(App.Loudness);
+            Uart.Printf("Volume=%u\r", App.Loudness);
+            for(uint8_t i=0; i<=(App.Loudness/2); i+=8) Lcd.PutChar(i, 31, ' ', clBlack, clMagenta);
             break;
         case KEY_C:
             break;
@@ -255,7 +261,7 @@ void App_t::Init() {
     Time.Init();
     Time.Reset();
     IsPlay = false;
-    Loudness = 180;
+    Loudness = START_VOLUME;
     PFileName = (uint8_t*)SD.Filename;
 }
 

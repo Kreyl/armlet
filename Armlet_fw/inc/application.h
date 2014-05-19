@@ -12,6 +12,7 @@ void AppInit();
 */
 #include "kl_lib_f2xx.h"
 
+#define START_VOLUME    180
 
 enum AppState_t {asIdle, asCurrent};
 
@@ -25,7 +26,7 @@ public:
     void StopEverything();
 
     bool IsPlay;
-    uint8_t Loudness;
+    int16_t Loudness;
     uint8_t *PFileName;
     uint32_t FileLen;
 };
