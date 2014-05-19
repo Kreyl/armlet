@@ -75,7 +75,6 @@ void Init() {
 
     Sound.Init();
     Sound.SetVolume(180);
-//    Sound.Play("Beasty Boys - Sabotage.mp3");
 
     uint32_t Len;
     SD.GetFirst("/");

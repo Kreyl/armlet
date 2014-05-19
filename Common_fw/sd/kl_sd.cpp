@@ -53,6 +53,7 @@ FRESULT sd_t::GetFirst(const char* DirPath) {
     if(r != FR_OK) return r;
     FileInfo.lfname = LongFileName;
     FileInfo.lfsize = MAX_NAME_LEN;
+//    Uart.Printf("lfn: %u\r", Directory.lfn_idx);
     while(true) {   // Read everything until file found
         r = f_readdir(&Directory, &FileInfo);
         if(r != FR_OK) return r;
@@ -67,7 +68,7 @@ FRESULT sd_t::GetNext() {
     while(true) {
         FRESULT r = f_readdir(&Directory, &FileInfo);
         if(r != FR_OK) return r;
-//        Uart.Printf("lfn %u\r", Directory.lfn_idx);
+//        Uart.Printf("lfn: %u\r", Directory.lfn_idx);
         Filename = (FileInfo.lfname[0] == 0)? FileInfo.fname : FileInfo.lfname;
         if(Filename[0] == 0) return FR_NO_FILE;
         if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
@@ -75,8 +76,17 @@ FRESULT sd_t::GetNext() {
     return FR_INT_ERR;
 }
 
-//FRESULT sd_t::GetPrevious() {
-
+//uint8_t sd_t::GetPrevious() {
+//    FRESULT r = GetFirst("/");
+//    while(r == FR_OK) {
+//        // Check if name begins with prefix
+//        if(strcmp(Filename, TmpBuf) == 0) {   // Prefix found
+//            return OK;
+//        }
+//        Prev = Filename;
+//        r = GetNext();  // Find next file
+//    }
+//    return FAILURE;
 //}
 
 

@@ -26,6 +26,7 @@ public:
     DIR Directory;
     FRESULT GetFirst(const char* DirPath);  // Put first file info into FileInfo field
     FRESULT GetNext();
+//    uint8_t GetPrevious(const char* AFilename, char *Prev);
     uint8_t GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName);
     bool IsReady;
     FIL File;

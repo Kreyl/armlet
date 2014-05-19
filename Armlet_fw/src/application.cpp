@@ -222,7 +222,14 @@ void App_t::Task() {
     uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
     if(EvtMsk & EVTMASK_KEYS) {
         char Name[20];
-        memcpy(Name, SD.Filename, 19);
+        uint32_t Len = strlen(SD.Filename);
+        if(FileLen > Len - 19) {
+            PFileName = (uint8_t*)SD.Filename;
+            FileLen = 0;
+        }
+        memcpy(Name, PFileName, 19);
+        PFileName += 1;
+        FileLen ++;
         Name[19] = '\0';
         Lcd.Printf(1, 62, clCyan, clBlack, "%S", Name);
         KeysHandler();
@@ -249,6 +256,7 @@ void App_t::Init() {
     Time.Reset();
     IsPlay = false;
     Loudness = 180;
+    PFileName = (uint8_t*)SD.Filename;
 }
 
 

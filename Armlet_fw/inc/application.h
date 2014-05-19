@@ -26,7 +26,8 @@ public:
 
     bool IsPlay;
     uint8_t Loudness;
-
+    uint8_t *PFileName;
+    uint32_t FileLen;
 };
 
 extern App_t App;
