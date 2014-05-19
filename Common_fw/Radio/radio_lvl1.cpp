@@ -22,10 +22,10 @@
 
 rLevel1_t rLevel1;
 
-static void RxEnd(void *p) {
+//static void RxEnd(void *p) {
 //    Uart.Printf("RxTmt, t=%u\r", chTimeNow());
-    rLevel1.IMeshRx = false;
-}
+//    rLevel1.IMeshRx = false;
+//}
 
 // Radiotask
 void rLevel1_t::ITask() {

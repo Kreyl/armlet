@@ -67,12 +67,18 @@ FRESULT sd_t::GetNext() {
     while(true) {
         FRESULT r = f_readdir(&Directory, &FileInfo);
         if(r != FR_OK) return r;
+//        Uart.Printf("lfn %u\r", Directory.lfn_idx);
         Filename = (FileInfo.lfname[0] == 0)? FileInfo.fname : FileInfo.lfname;
         if(Filename[0] == 0) return FR_NO_FILE;
         if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
     }
     return FR_INT_ERR;
 }
+
+//FRESULT sd_t::GetPrevious() {
+
+//}
+
 
 uint8_t sd_t::GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName) {
     uint32_t Len = strlen(Prefix);

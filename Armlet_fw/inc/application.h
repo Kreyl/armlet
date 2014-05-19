@@ -10,7 +10,6 @@
 /*
 void AppInit();
 */
-#include "../MusicProcessor/atlantis_music_tree.h"
 #include "kl_lib_f2xx.h"
 
 
@@ -24,7 +23,6 @@ public:
     void Init();
     void Task();
     void StopEverything();
-    int on_run;
 
     bool IsPlay;
     uint8_t Loudness;

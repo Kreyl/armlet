@@ -153,21 +153,26 @@ static inline void KeyPressedHandler(uint8_t ID) {
         case KEY_E:
             if(App.IsPlay) {
                 App.IsPlay = false;
+                Lcd.Printf(58, 118, clYellow, clBlack, "PLAY");
                 Sound.Stop();
 
             }
             else {
                 App.IsPlay = true;
+                Lcd.Printf(58, 118, clRed, clBlack, "STOP");
                 Sound.Play(SD.Filename);
             }
             break;
         case KEY_R:
-            Sound.Stop();
             uint32_t Len;
+            FRESULT r;
+            Sound.Stop();
             do {
-                SD.GetNext();
+                r = SD.GetNext();
                 Len = strlen(SD.Filename);
+                if(r == FR_NO_FILE) SD.GetFirst("/");
             } while (strcmp(&SD.Filename[Len-3], "mp3") != 0);
+            if(App.IsPlay) Sound.Play(SD.Filename);
             break;
 
         default:
@@ -224,11 +229,14 @@ void App_t::Task() {
     }
     if(EvtMsk & EVTMASK_PLAY_ENDS) {
         uint32_t Len;
+        FRESULT r;
         if(IsPlay) {
             do {
-                SD.GetNext();
+                r = SD.GetNext();
                 Len = strlen(SD.Filename);
+                if(r == FR_NO_FILE) SD.GetFirst("/");
             } while (strcmp(&SD.Filename[Len-3], "mp3") != 0);
+            Sound.Play(SD.Filename);
         }
     }
 }

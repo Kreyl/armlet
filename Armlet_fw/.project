@@ -29,10 +29,5 @@
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Common_fw</locationURI>
 		</link>
-		<link>
-			<name>MusicProcessor</name>
-			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/MusicProcessor</locationURI>
-		</link>
 	</linkedResources>
 </projectDescription>
