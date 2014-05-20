@@ -79,7 +79,7 @@ FRESULT sd_t::GetNext() {
     return FR_INT_ERR;
 }
 
-uint8_t sd_t::GetPrevious() {
+FRESULT sd_t::GetPrevious() {
 //    Uart.Printf("FN %S\r", Filename);
     strcpy(TmpFn, PrevFn);
 //    Uart.Printf("searchFN %S\r", TmpFn);
@@ -88,12 +88,12 @@ uint8_t sd_t::GetPrevious() {
 //        Uart.Printf("currFN %S\r", Filename);
         if(strcmp(Filename, TmpFn) == 0) {
 //            Uart.Printf("1\r");
-            return OK;
+            return r;
         }
 //        else Uart.Printf("2\r");
         r = GetNext();
     }
-    return FAILURE;
+    return r;
 }
 
 

@@ -154,9 +154,14 @@ static inline void KeyPressedHandler(uint8_t ID) {
             break;
         case KEY_L:
             uint32_t Len;
+            FRESULT r;
             Sound.Stop();
             do {
-                if(SD.GetPrevious() != OK) break;
+                r = SD.GetPrevious();
+                if(r == FR_NO_FILE) {
+                    App.IsPlay = false;
+                    break;
+                }
                 Len = strlen(SD.Filename);
             } while (strcmp(&SD.Filename[Len-3], "mp3") != 0);
             if(App.IsPlay) Sound.Play(SD.Filename);
@@ -175,12 +180,11 @@ static inline void KeyPressedHandler(uint8_t ID) {
             }
             break;
         case KEY_R:
-            FRESULT r;
             Sound.Stop();
             do {
                 r = SD.GetNext();
-                Len = strlen(SD.Filename);
                 if(r == FR_NO_FILE) SD.GetFirst("/");
+                Len = strlen(SD.Filename);
             } while (strcmp(&SD.Filename[Len-3], "mp3") != 0);
             if(App.IsPlay) Sound.Play(SD.Filename);
             break;
