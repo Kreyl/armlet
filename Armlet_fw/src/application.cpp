@@ -135,7 +135,6 @@ static inline void KeyPressedHandler(uint8_t ID) {
             App.Loudness += 15;
             if(App.Loudness >= 255) App.Loudness = 255;
             Sound.SetVolume(App.Loudness);
-            Uart.Printf("Volume=%u\r", App.Loudness);
             for(uint8_t i=0; i<=(App.Loudness/2); i+=8) Lcd.PutChar(i, 31, ' ', clBlack, clMagenta);
             break;
         case KEY_B:
@@ -143,7 +142,6 @@ static inline void KeyPressedHandler(uint8_t ID) {
             App.Loudness -= 15;
             if(App.Loudness <= 0) App.Loudness = 0;
             Sound.SetVolume(App.Loudness);
-            Uart.Printf("Volume=%u\r", App.Loudness);
             for(uint8_t i=0; i<=(App.Loudness/2); i+=8) Lcd.PutChar(i, 31, ' ', clBlack, clMagenta);
             break;
         case KEY_C:
@@ -155,6 +153,13 @@ static inline void KeyPressedHandler(uint8_t ID) {
         case KEY_Z:
             break;
         case KEY_L:
+            uint32_t Len;
+            Sound.Stop();
+            do {
+                if(SD.GetPrevious() != OK) break;
+                Len = strlen(SD.Filename);
+            } while (strcmp(&SD.Filename[Len-3], "mp3") != 0);
+            if(App.IsPlay) Sound.Play(SD.Filename);
             break;
         case KEY_E:
             if(App.IsPlay) {
@@ -170,7 +175,6 @@ static inline void KeyPressedHandler(uint8_t ID) {
             }
             break;
         case KEY_R:
-            uint32_t Len;
             FRESULT r;
             Sound.Stop();
             do {
@@ -227,16 +231,16 @@ static void AppThread(void *arg) {
 void App_t::Task() {
     uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
     if(EvtMsk & EVTMASK_KEYS) {
-        char Name[20];
+        char Name[LCD_PRINT_SZ + 1];
         uint32_t Len = strlen(SD.Filename);
-        if(FileLen > Len - 19) {
+        if(FileLen > Len - LCD_PRINT_SZ) {
             PFileName = (uint8_t*)SD.Filename;
             FileLen = 0;
         }
-        memcpy(Name, PFileName, 19);
+        memcpy(Name, PFileName, LCD_PRINT_SZ);
         PFileName += 1;
         FileLen ++;
-        Name[19] = '\0';
+        Name[LCD_PRINT_SZ] = '\0';
         Lcd.Printf(1, 62, clCyan, clBlack, "%S", Name);
         KeysHandler();
     }

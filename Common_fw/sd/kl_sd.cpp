@@ -65,29 +65,36 @@ FRESULT sd_t::GetFirst(const char* DirPath) {
 }
 
 FRESULT sd_t::GetNext() {
+    strcpy(PrevFn, Filename);
     while(true) {
         FRESULT r = f_readdir(&Directory, &FileInfo);
         if(r != FR_OK) return r;
 //        Uart.Printf("lfn: %u\r", Directory.lfn_idx);
         Filename = (FileInfo.lfname[0] == 0)? FileInfo.fname : FileInfo.lfname;
         if(Filename[0] == 0) return FR_NO_FILE;
-        if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
+        if(!(FileInfo.fattrib & AM_DIR)) {
+            return FR_OK;
+        }
     }
     return FR_INT_ERR;
 }
 
-//uint8_t sd_t::GetPrevious() {
-//    FRESULT r = GetFirst("/");
-//    while(r == FR_OK) {
-//        // Check if name begins with prefix
-//        if(strcmp(Filename, TmpBuf) == 0) {   // Prefix found
-//            return OK;
-//        }
-//        Prev = Filename;
-//        r = GetNext();  // Find next file
-//    }
-//    return FAILURE;
-//}
+uint8_t sd_t::GetPrevious() {
+//    Uart.Printf("FN %S\r", Filename);
+    strcpy(TmpFn, PrevFn);
+//    Uart.Printf("searchFN %S\r", TmpFn);
+    FRESULT r = GetFirst("/");
+    while(r == FR_OK) {
+//        Uart.Printf("currFN %S\r", Filename);
+        if(strcmp(Filename, TmpFn) == 0) {
+//            Uart.Printf("1\r");
+            return OK;
+        }
+//        else Uart.Printf("2\r");
+        r = GetNext();
+    }
+    return FAILURE;
+}
 
 
 uint8_t sd_t::GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName) {

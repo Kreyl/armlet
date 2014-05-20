@@ -67,6 +67,10 @@ void Init() {
     for(uint8_t i=0; i<=(START_VOLUME/2); i+=8) Lcd.PutChar(i, 31, ' ', clBlack, clMagenta);
     Keys.Init();
     Beeper.Init();
+
+    if(!SD.IsReady) {
+        Lcd.Printf(43, 62, clRed, clBlack, "! Sd Err"); while(1);
+    }
 //    Vibro.Init();
 
 //    IR.TxInit();

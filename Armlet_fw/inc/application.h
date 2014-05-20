@@ -13,6 +13,7 @@ void AppInit();
 #include "kl_lib_f2xx.h"
 
 #define START_VOLUME    180
+#define LCD_PRINT_SZ    19
 
 enum AppState_t {asIdle, asCurrent};
 
