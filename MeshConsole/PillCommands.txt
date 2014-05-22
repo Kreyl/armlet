@@ -2,7 +2,7 @@
 # Pill Control commands
 #
 # buttonObjectName,description,command
-# 
+#
 
 dontWritePillButton,,#pillRepeatWrite32,0
 
@@ -19,7 +19,8 @@ autoDocButton,60b (1h) / 1s,#pillRepeatWrite32,0,12
 
 empBreakButton,,#pillRepeatWrite32,0,31
 empFixButton,,#pillRepeatWrite32,0,32
-empRechargeButton,,#pillRepeatWrite32,0,33
+chargeButton,,#pillRepeatWrite32,0,34
+powerPlantButton,,#pillRepeatWrite32,0,33
 
 uniqueIDButton,,#pillRepeatWrite32,0,1
 doseTopButton,,#pillRepeatWrite32,0,18,
