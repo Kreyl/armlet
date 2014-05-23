@@ -5,17 +5,13 @@
 #include "core_cmInstr.h"
 
 #include "lcdFont8x8.h"
+#include <string.h>
 
-//#define LCD_16BIT
-//#define LCD_18BIT
-#if !defined LCD_16BIT && !defined LCD_18BIT
-#define LCD_12BIT
-#endif
 // Variables
 Lcd_t Lcd;
 
 // Pin driving functions
-#define LCD_DELAY()   DelayLoop(18)
+#define LCD_DELAY()   //DelayLoop(7)
 static inline void XRES_Hi() { PinSet  (LCD_GPIO, LCD_XRES); LCD_DELAY(); }
 static inline void XRES_Lo() { PinClear(LCD_GPIO, LCD_XRES); LCD_DELAY(); }
 static inline void XCS_Hi () { PinSet  (LCD_GPIO, LCD_XCS);  LCD_DELAY(); }
@@ -28,8 +24,6 @@ static inline void RD_Hi()   { PinSet  (LCD_GPIO, LCD_RD);   LCD_DELAY(); }
 
 void Lcd_t::Init() {
     // Init pins if not setup
-    PWCharBuf = CharBuf;
-    PRCharBuf = CharBuf;
     if(Brightness == 0) {
         BckLt.Init(LCD_BCKLT_GPIO, LCD_BCKLT_PIN, LCD_BCKLT_TMR, LCD_BCKLT_CHNL, LCD_TOP_BRIGHTNESS);
         PinSetupOut(LCD_GPIO, LCD_DC,   omPushPull, pudNone, ps100MHz);
@@ -45,6 +39,7 @@ void Lcd_t::Init() {
     XCS_Hi();
     XRES_Lo();  // }
     XRES_Hi();  // } Reset display
+    chThdSleepMilliseconds(4);
     DC_Lo();    // Command mode by default
     WR_Hi();    // Default hi
     RD_Hi();    // Default hi
@@ -52,15 +47,11 @@ void Lcd_t::Init() {
 
     WriteCmd(0x11);         // Sleep out
     WriteCmd(0x13);         // Normal Display Mode ON
-
-#ifdef LCD_18BIT
-    WriteCmd(0x3A, 0x06);    // Pixel format: VIPF=0(undef), IFPF=18 bit per pixel
-#elif defined LCD_16BIT
-    WriteCmd(0x3A, 0x05);    // Pixel format: VIPF=0(undef), IFPF=16 bit per pixel
-#else
+#ifdef LCD_12BIT
     WriteCmd(0x3A, 0x03);   // Pixel format: VIPF=0(undef), IFPF=12 bit per pixel
+#else
+    WriteCmd(0x3A, 0x05);   // Pixel format: VIPF=0(undef), IFPF=16 bit per pixel
 #endif
-
     WriteCmd(0x29);         // Display on
     WriteCmd(0x20);         // Inv off
     WriteCmd(0x13);         // Normal Display Mode ON
@@ -68,13 +59,6 @@ void Lcd_t::Init() {
 
     Cls(clBlack);
     SetBrightness(Brightness);
-
-    //PutBitmap(45, 45, 27, 36, (uint16_t*)0x08000000);
-//
-//    uint16_t Buf[120];
-//    GetBitmap(45, 45, 10, 10, Buf);
-//    for(uint8_t i=0; i<100; i++) Uart.Printf("%04X ", Buf[i]);
-//    Uart.Printf("\r");
 }
 
 void Lcd_t::Shutdown(void) {
@@ -83,7 +67,7 @@ void Lcd_t::Shutdown(void) {
     BckLt.Off();
 }
 
-// =============================== Local use ===================================
+#if 1 // ============================ Local use ================================
 __attribute__ ((always_inline)) static inline void ModeWrite() {
     LCD_GPIO->MODER |= LCD_MODE_WRITE;
 }
@@ -117,6 +101,7 @@ void Lcd_t::WriteCmd(uint8_t ACmd, uint8_t AData) {
     WriteByte(AData);
     DC_Lo();
 }
+#endif
 
 // ================================= Printf ====================================
 __attribute__ ((always_inline)) static inline void SetBounds(uint8_t Left, uint8_t Width, uint8_t Top, uint8_t Height) {
@@ -138,31 +123,31 @@ __attribute__ ((always_inline)) static inline void SetBounds(uint8_t Left, uint8
     DC_Lo();
 }
 
-#if LCD_PRINTF
-uint16_t Lcd_t::PutChar(uint8_t x, uint8_t y, char c, Color_t ForeClr, Color_t BckClr) {
+void Lcd_t::PutChar(char c) {
     char *PFont = (char*)Font8x8;  // Font to use
     // Read font params
     uint8_t nCols = PFont[0];
     uint8_t nRows = PFont[1];
     uint16_t nBytes = PFont[2];
-    SetBounds(x, nCols, y, nRows);
+    SetBounds(IX, nCols, IY, nRows);
     // Get pointer to the first byte of the desired character
-    const uint8_t *PChar = Font8x8 + (nBytes * (c - 0x1F));
+    const char *PChar = Font8x8 + (nBytes * (c - 0x1F));
     // Write RAM
     WriteByte(0x2C);    // Memory write
     DC_Hi();
     // Iterate rows of the char
     uint8_t row, col;
     for(row = 0; row < nRows; row++) {
-        if((y+row) >= LCD_H) break;
+        if((IY+row) >= LCD_H) break;
         uint8_t PixelRow = *PChar++;
-        // loop on each pixel in the row (left to right)
+        // Loop on each pixel in the row (left to right)
+#ifdef LCD_12BIT
         for(col=0; col < nCols; col+=2) {
-            if((x+col) >= LCD_W) break;
+            if((IX+col) >= LCD_W) break;
             // Two pixels at one time
-            uint16_t Clr1 = (PixelRow & 0x80)? ForeClr : BckClr;
+            uint16_t Clr1 = (PixelRow & 0x80)? IForeClr : IBckClr;
             PixelRow <<= 1;
-            uint16_t Clr2 = (PixelRow & 0x80)? ForeClr : BckClr;
+            uint16_t Clr2 = (PixelRow & 0x80)? IForeClr : IBckClr;
             PixelRow <<= 1;
             uint8_t b1 = (uint8_t)(Clr1 >> 4);       // RRRR-GGGG
             uint8_t b2 = (uint8_t)(((Clr1 & 0x00F) << 4) | (Clr2 >> 8));  // BBBB-RRRR
@@ -171,53 +156,39 @@ uint16_t Lcd_t::PutChar(uint8_t x, uint8_t y, char c, Color_t ForeClr, Color_t B
             WriteByte(b2);
             WriteByte(b3);
         } // col
+#else
+        for(col=0; col < nCols; col++) {
+            if((IX+col) >= LCD_W) break;
+            uint16_t Clr = (PixelRow & 0x80)? IForeClr : IBckClr;
+            PixelRow <<= 1;
+            WriteByte(Clr >> 8);    // RRRRR-GGG
+            WriteByte(Clr & 0xFF);  // GGG-BBBBB
+        } // col
+#endif
     } // row
     DC_Lo();
-    // Return next pixel to right
-    return x+nCols;
+    IX += nCols;
 }
 
-static inline void FLcdPutChar(char c) { Lcd.WriteBuf(c); }
+static inline void FLcdPutChar(char c) { Lcd.PutChar(c); }
 
 void Lcd_t::Printf(uint8_t x, uint8_t y, const Color_t ForeClr, const Color_t BckClr, const char *S, ...) {
-    // Printf to buffer
+    IX = x;
+    IY = y;
+    IForeClr = ForeClr;
+    IBckClr = BckClr;
     va_list args;
     va_start(args, S);
-    uint32_t Cnt = kl_vsprintf(FLcdPutChar, LCD_CHARBUF_SZ, S, args);
+    kl_vsprintf(FLcdPutChar, 20, S, args);
     va_end(args);
-    // Draw what printed
-    char Byte;
-    for(uint32_t i=0; i<Cnt; i++) {
-        Byte = ReadBuf();
-        x = PutChar(x, y, Byte, ForeClr, BckClr);
-        if(x>160) break;
-    }
 }
-#endif
 
-// ================================ Graphics ===================================
+#if 1 // ============================= Graphics ================================
 void Lcd_t::Cls(Color_t Color) {
     SetBounds(0, LCD_W, 0, LCD_H);
     // Prepare variables
     uint16_t Clr = (uint16_t)Color;
-#ifdef LCD_18BIT
-
-#elif defined LCD_16BIT
-    uint32_t Cnt = LCD_W * LCD_H;
-    uint16_t R = (Clr >> 8) & 0x000F;
-    uint16_t G = (Clr >> 4) & 0x000F;
-    uint16_t B = (Clr     ) & 0x000F;
-    R = (R << 4) | (G >> 1);
-    G = (G << 7) | (B << 1);
-    // Write RAM
-    WriteByte(0x2C);    // Memory write
-    DC_Hi();
-    for(uint32_t i=0; i<Cnt; i++) {
-        WriteByte(R);
-        WriteByte(G);
-    }
-    DC_Lo();
-#else
+#ifdef LCD_12BIT
     uint32_t Cnt = LCD_W * LCD_H / 2;       // Two pixels at one time
     uint8_t b1 = (uint8_t)(Clr >> 4);       // RRRR-GGGG
     uint8_t b2 = (uint8_t)(((Clr & 0x00F) << 4) | (Clr >> 8));  // BBBB-RRRR
@@ -229,6 +200,18 @@ void Lcd_t::Cls(Color_t Color) {
         WriteByte(b1);
         WriteByte(b2);
         WriteByte(b3);
+    }
+    DC_Lo();
+#else
+    uint32_t Cnt = LCD_W * LCD_H;
+    uint8_t b1 = (Clr >> 8) & 0x00FF;
+    uint8_t b2 =  Clr       & 0x00FF;
+    // Write RAM
+    WriteByte(0x2C);    // Memory write
+    DC_Hi();
+    for(uint32_t i=0; i<Cnt; i++) {
+        WriteByte(b1);
+        WriteByte(b2);
     }
     DC_Lo();
 #endif
@@ -294,44 +277,7 @@ void Lcd_t::PutBitmap(uint8_t x0, uint8_t y0, uint8_t Width, uint8_t Height, uin
     DC_Lo();
 #endif
 }
-
-void Lcd_t::PutPixel (uint8_t x0, uint8_t y0, uint16_t Clr) {
-    // Set column bounds
-    WriteByte(0x2A);
-    DC_Hi();
-    WriteByte(0x00);        // }
-    WriteByte(LCD_X_0+x0);  // } Col addr start
-    WriteByte(0x00);        // }
-    WriteByte(LCD_X_0+x0);  // } Col addr end
-    DC_Lo();
-    // Set row bounds
-    WriteByte(0x2B);
-    DC_Hi();
-    WriteByte(0x00);          // }
-    WriteByte(LCD_Y_0+y0);    // } Row addr start = 0
-    WriteByte(0x00);          // }
-    WriteByte(LCD_Y_0+y0);    // } Row addr end
-    DC_Lo();
-    // Write RAM
-    WriteByte(0x2C);    // Memory write
-    DC_Hi();
-#ifdef LCD_18BIT
-    WriteByte((Clr >> 4) & 0x00F0);
-    WriteByte((Clr     ) & 0x00F0);
-    WriteByte((Clr << 4) & 0x00F0);
-#elif defined LCD_16BIT
-    uint16_t R = (Clr >> 8) & 0x000F;
-    uint16_t G = (Clr >> 4) & 0x000F;
-    uint16_t B = (Clr     ) & 0x000F;
-    R = (R << 4) | (G >> 1);
-    G = (G << 7) | (B << 1);
-    Uart.Printf("%X %X %X\r", Clr, R, G);
-    WriteByte(R & 0x0F);   // RRRR0-GGG
-    WriteByte(G & 0x0F);   // G00-BBBB0
 #endif
-    DC_Lo();
-}
-
 
 #if 1 // ============================= BMP =====================================
 struct BmpHeader_t {
@@ -430,4 +376,3 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
     Uart.Printf("Done\r");
 }
 #endif
-
