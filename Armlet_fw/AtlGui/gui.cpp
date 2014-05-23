@@ -10,12 +10,18 @@ Screen_t screens[] = {
         NO_BUTTON,
         NO_BUTTON,
         NO_BUTTON,
-        {"lock", 0, 4, 0, buttonIsPressable, buttonGetState, buttonPress},
-        {"\xfd\xea\xf0\xe0\xed", 0, 59, 0, buttonIsPressable, buttonGetState, buttonPress},
+//        {"lock", 0, 4, 0, buttonIsPressable, buttonGetState, buttonPress},
+//        {"\xfd\xea\xf0\xe0\xed", 0, 59, 0, buttonIsPressable, buttonGetState, buttonPress},
+//        NO_BUTTON,
+//        {"\xec\xf3\xe7\xfb\xea\xe0", 0, 130, 68, buttonIsPressable, buttonGetState, buttonPress},
+//        {"^^", 0, 130, 33, buttonIsPressable, bSoundUpCheck, bSoundUpChange},
+//        {"vv", 0, 130, 0, buttonIsPressable, bSoundDownCheck, bSoundDownChange}
+        {"lock", 0, 0, 114, buttonIsPressable, buttonGetState, buttonPress},
+        {"\xfd\xea\xf0\xe0\xed", 0, 0, 114, buttonIsPressable, buttonGetState, buttonPress},
         NO_BUTTON,
-        {"\xec\xf3\xe7\xfb\xea\xe0", 0, 130, 68, buttonIsPressable, buttonGetState, buttonPress},
-        {"^^", 0, 130, 33, buttonIsPressable, bSoundUpCheck, bSoundUpChange},
-        {"vv", 0, 130, 0, buttonIsPressable, bSoundDownCheck, bSoundDownChange}
+        {"\xec\xf3\xe7\xfb\xea\xe0", 0, 95, 20, buttonIsPressable, buttonGetState, buttonPress},
+        {"^^", 0, 95, 58, buttonIsPressable, bSoundUpCheck, bSoundUpChange},
+        {"vv", 0, 95, 96, buttonIsPressable, bSoundDownCheck, bSoundDownChange}
     }},
     {"intentions",
      {-1,-1,-1,-1,-1,-1,-1,0,-1},

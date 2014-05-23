@@ -73,7 +73,7 @@ void Init() {
 #ifndef CLEAR_SCREEN_FOR_DEBUG
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
 #endif
-    Lcd.DrawBmpFile(0, 0, "splash.bmp");
+  // Lcd.DrawBmpFile(0, 0, "splash.bmp");
     //Lcd.DrawBmpFile(0, 0, "TestHorizontal.png");
    // Lcd.PutBitmap(0,0,160,128,PBuf)
 
@@ -89,14 +89,14 @@ void Init() {
 //    Power.Init();
 //    PillInit();
 
- //   Init_emotionTreeMusicNodeFiles_FromFileIterrator();
+    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
 
     Sound.Init();
     Sound.SetVolume(254);
-//    Sound.Play("alive.wav");
+    //Sound.Play("fon-WhiteTower.mp3");//"alive.wav");
 
-  //  App.Init();
-  //  AtlGui.Init();
+    App.Init();
+    AtlGui.Init();
 
     rLevel1.Init(ID);
     Mesh.Init(ID);

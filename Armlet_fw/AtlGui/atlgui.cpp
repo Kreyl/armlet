@@ -11,6 +11,11 @@
 #include "lcd2630.h"
 #include "gui.h"
 AtlGui_t AtlGui;
+#define PATH_FOLDER_STR "\\"
+#define PATH_TO_GUI "\\GUI\\"
+#define GUI_PATH_EXT ".bmp"
+char bmp_filename[128];
+//#define TEXT_OR_BMP_SCREEN
 //gui_state gui_states[]={
 //        {
 //                {-1,-1,-1,-1,-1,-1,-1,1,-1},
@@ -41,7 +46,11 @@ void AtlGui_t::ShowSplashscreen()
 {
 
     is_splash_screen_onrun=1;
+#ifdef TEXT_OR_BMP_SCREEN
     Lcd.Printf(11, 11, clGreen, clBlack, "SPLASH SCREEN");
+#else
+   Lcd.DrawBmpFile(0,0,"splash.bmp");
+#endif
 }
 void AtlGui_t::CallStateScreen(int screen_id)
 {
@@ -61,8 +70,23 @@ void AtlGui_t::CallStateScreen(int screen_id)
 void AtlGui_t::RenderFullScreen(int screen_id)
 {
     //get filename
+    strcpy(bmp_filename,PATH_TO_GUI);
+    strcat(bmp_filename,screens[screen_id].name);
+    strcat(bmp_filename,PATH_FOLDER_STR);
+    strcat(bmp_filename,"back");
+    strcat(bmp_filename,GUI_PATH_EXT);
+    Uart.Printf("RenderFullScreen %s\r",bmp_filename);
     // render it
-
+    Lcd.DrawBmpFile(0,0,bmp_filename);
+    //and all buttons
+    for(int i=0;i<9;i++)
+    {
+        if(screens[screen_id].buttons[i].isPressable!=nullptr)
+        {
+            int state1=screens[screen_id].buttons[i].isPressable(screen_id,i);
+            RenderSingleButton(screen_id,i,state1);
+        }//не рисовать кнопки, которых нет
+    }
 }
 void AtlGui_t::ButtonIsReleased(int button_id)
 {
@@ -167,5 +191,78 @@ void AtlGui_t::ButtonIsClicked(int button_id)
 }
 void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
 {
-    Lcd.Printf(11, 41, clGreen, clBlack, "RB sc %d b %d st %d", screen_id,button_id,button_state);
+    //getfilename
+    //get filename
+    //absent 4
+    //disabled
+    //enabled
+    //normal 1
+    //not
+    //pressed
+
+//#define BUTTON_NOT_INITED 0
+//#define BUTTON_NORMAL 1
+//#define BUTTON_ENABLED 2
+//#define BUTTON_DISABLED 3
+//#define BUTTON_ABSENT 4
+//#define BUTTON_PRESSED 5
+//#define BUTTON_ERROR 6
+        strcpy(bmp_filename,PATH_TO_GUI);
+        strcat(bmp_filename,screens[screen_id].name);
+        strcat(bmp_filename,PATH_FOLDER_STR);
+        //strcat(bmp_filename,"back");
+        //state switcher, takes data from defines
+        if(button_state==BUTTON_ABSENT)
+            strcat(bmp_filename,"absent");
+        else if(button_state==BUTTON_DISABLED)
+            strcat(bmp_filename,"disabled");
+        else if(button_state==BUTTON_ENABLED)
+            strcat(bmp_filename,"enabled");
+        else if(button_state==BUTTON_NORMAL)
+            strcat(bmp_filename,"normal");
+        else if(button_state==BUTTON_NOT_INITED)
+            strcat(bmp_filename,"not");
+        else if(button_state==BUTTON_PRESSED)
+            strcat(bmp_filename,"pressed");
+
+        strcat(bmp_filename,PATH_FOLDER_STR);
+       // strcat(bmp_filename,buttons_arr.[button_id]);
+        //говнокод!
+       // char bstr[sizeof(BUTTONS)];
+        //char bstr1[1];
+        //memcpy(bstr,BUTTONS,sizeof(BUTTONS));
+        //memcpy(bstr1,&bstr+button_id,1);
+        //говнокод конец
+        //strcat(bmp_filename,bstr1);
+
+        //кривокот
+        //#define BUTTONS "ABCLERXYZ"
+        if(button_id==0)
+            strcat(bmp_filename,"A");
+        else if(button_id==1)
+            strcat(bmp_filename,"B");
+        else if(button_id==2)
+            strcat(bmp_filename,"C");
+        else if(button_id==3)
+            strcat(bmp_filename,"L");
+        else if(button_id==4)
+            strcat(bmp_filename,"E");
+        else if(button_id==5)
+            strcat(bmp_filename,"R");
+        else if(button_id==6)
+            strcat(bmp_filename,"X");
+        else if(button_id==7)
+            strcat(bmp_filename,"Y");
+        else if(button_id==8)
+            strcat(bmp_filename,"Z");
+        //кривокод конец
+
+      // strchr(BUTTONS,'B');
+        strcat(bmp_filename,GUI_PATH_EXT);
+        Uart.Printf("RenderSingleButton %s left %d Bot %d \r",bmp_filename,screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom);
+        // render it
+        Lcd.DrawBmpFile(screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom,bmp_filename);
+       // Lcd.DrawBmpFile(30,10,bmp_filename);
+    //render it inaproppriate place
+  //  Lcd.Printf(11, 41, clGreen, clBlack, "RB sc %d b %d st %d", screen_id,button_id,button_state);
 }
