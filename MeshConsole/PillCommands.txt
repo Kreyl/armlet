@@ -6,12 +6,12 @@
 
 dontWritePillButton,,#pillRepeatWrite32,0
 
-cureOneButton,21600b (6h),#pillRepeatWrite32,0,9,0,1,21600
-drugOneButton,144000b (40h) : 20m,#pillRepeatWrite32,0,10,0,1,144000,1200
+cureOneButton,21600b (6h),#pillRepeatWrite32,0,9,0,1,-21600
+drugOneButton,144000b (40h) : 20m,#pillRepeatWrite32,0,10,0,1,-144000,1200
 
-cureInfButton,21600b (6h),#pillRepeatWrite32,0,9,0,999999999,21600
-damageLightButton,7200b (2h),#pillRepeatWrite32,0,9,0,999999999,-7200
-damageSeriousButton,43200b (12h),#pillRepeatWrite32,0,9,0,999999999,-43200
+cureInfButton,21600b (6h),#pillRepeatWrite32,0,9,0,999999999,-21600
+damageLightButton,7200b (2h),#pillRepeatWrite32,0,9,0,999999999,7200
+damageSeriousButton,43200b (12h),#pillRepeatWrite32,0,9,0,999999999,43200
 
 panaceaButton,,#pillRepeatWrite32,0,11
 diagnosticsButton,,#pillRepeatWrite32,0,27
@@ -19,7 +19,6 @@ autoDocButton,60b (1h) / 1s,#pillRepeatWrite32,0,12
 
 empBreakButton,,#pillRepeatWrite32,0,31
 empFixButton,,#pillRepeatWrite32,0,32
-chargeButton,,#pillRepeatWrite32,0,34
 powerPlantButton,,#pillRepeatWrite32,0,33
 
 uniqueIDButton,,#pillRepeatWrite32,0,1

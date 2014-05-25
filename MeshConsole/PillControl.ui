@@ -214,13 +214,6 @@
            </widget>
           </item>
           <item>
-           <widget class="CommandButton" name="chargeButton">
-            <property name="text">
-             <string>Charge</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="CommandButton" name="powerPlantButton">
             <property name="text">
              <string>Power Plant</string>
@@ -641,7 +634,6 @@
   <tabstop>diagnosticsButton</tabstop>
   <tabstop>empBreakButton</tabstop>
   <tabstop>empFixButton</tabstop>
-  <tabstop>chargeButton</tabstop>
   <tabstop>powerPlantButton</tabstop>
   <tabstop>doseTopDefaultButton</tabstop>
   <tabstop>doseTopEdit</tabstop>
