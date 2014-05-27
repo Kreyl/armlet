@@ -7,6 +7,7 @@ from collections import deque
 from functools import partial
 from getopt import getopt
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
+from math import ceil
 from random import randint
 from sys import argv, exit # pylint: disable=W0622
 from time import sleep, time
@@ -24,12 +25,14 @@ from MeshWidgets import * # pylint: disable=W0401
 from MeshView import DevicesModel, Column, ColumnAction
 from UARTTextCommands import Command, meshNodeInfoResponse
 from UARTTextCommands import meshGetSettingsCommand, meshGetSettingsResponse
-from UARTTextCommands import meshSetTimeCommand, meshSetTimeResponse
+from UARTTextCommands import meshSetCycleCommand, meshSetCycleResponse
 from SerialPort import SerialPort, DT, TIMEOUT
 
 # ToDo
 # Avoid extra bold in table heading popups
 # Get devices number from device OR make devices list dynamic, start with empty table
+#
+# ToDo LocalTimeD must tick offline
 
 def timeDeltaStr(seconds):
     negative = seconds < 0
@@ -95,8 +98,8 @@ class EmulatedSerial(object):
         (tag, _args) = Command.decodeCommand(data)
         if tag == meshGetSettingsCommand.tag:
             self.buffer.append(meshGetSettingsResponse.encode(len(Device.devices), 400))
-        elif tag == meshSetTimeCommand.tag:
-            self.buffer.append(meshSetTimeResponse.encode(randint(-10, 10)))
+        elif tag == meshSetCycleCommand.tag:
+            self.buffer.append(meshSetCycleResponse.encode(randint(-10, 10)))
         self.ready = True
         return len(data)
 
@@ -151,6 +154,7 @@ class MeshConsole(QMainWindow):
         self.currentCycle = None
         self.previousTimeSet = None
         self.cycleLength = CYCLE_LENGTH
+        self.timeSetInterval = TIME_SET_INTERVAL * 1000
         Device.configure(self)
         self.devices = Device.devices
         self.columns = tuple(Column(nColumn, *args) for (nColumn, args) in enumerate(getColumnsData(self)))
@@ -224,14 +228,16 @@ class MeshConsole(QMainWindow):
             self.error("Cycle number overflow, aborting")
         if self.playing:
             self.dateTimeValueLabel.setValue(now, self.currentCycle)
-        if self.startTime and self.port.ready and (not self.previousTimeSet or self.previousTimeSet.secsTo(now) >= TIME_SET_INTERVAL):
+        if self.startTime and self.port.ready and (not self.previousTimeSet or self.previousTimeSet.msecsTo(now) >= self.timeSetInterval):
             self.previousTimeSet = now
             self.logger.info("Setting mesh time to %d", self.currentCycle)
-            data = self.port.command(meshSetTimeCommand.encode(self.currentCycle), meshSetTimeResponse.prefix, QApplication.processEvents)
+            data = self.port.command(meshSetCycleCommand.encode(self.currentCycle), meshSetCycleResponse.prefix, QApplication.processEvents)
             if data:
-                self.logger.info("Time adjusted %+d", meshSetTimeResponse.decode(data)[0])
+                dt = meshSetCycleResponse.decode(data)[0]
+                self.logger.info(("Time adjusted %+d" % dt) if dt else "Time matched")
             else:
                 self.logger.warning("Time set failed")
+        self.devicesModel.refresh()
         dt = QDateTime.currentDateTime().msecsTo(now.addMSecs(TIME_UPDATE_INTERVAL))
         QTimer.singleShot(max(0, dt), self.updateTime)
 
@@ -243,6 +249,8 @@ class MeshConsole(QMainWindow):
             self.error("Number of devices mismatch, got %d, expected %d" % (numDevices, len(self.devices)))
         if self.cycleLength < 1:
             self.error("Bad cycle length %d" % self.cycleLength)
+        self.timeSetInterval = int(ceil(float(TIME_SET_INTERVAL * 1000) / self.cycleLength)) * self.cycleLength()
+        self.logger.info("Time set interval set to %dms" % self.timeSetInterval)
 
     def processInput(self, data):
         data = unicode(data).strip()
@@ -260,8 +268,6 @@ class MeshConsole(QMainWindow):
             self.logger.warning("Unexpected command: %s %s", tag, ' '.join(str(arg) for arg in args))
         elif tag: # unknown command
             self.logger.warning("Unknown command %s: %s", tag, data.rstrip())
-        else: # not a command
-            self.logger.warning("Unexpected input: %s", data.rstrip())
 
     def consoleEnter(self):
         data = self.consoleEdit.getInput()

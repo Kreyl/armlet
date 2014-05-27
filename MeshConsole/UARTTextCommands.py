@@ -47,11 +47,11 @@ UART_SET_DOSE_TOP = 'setDoseTop'
 UART_GET_DOSE_TOP = 'getDoseTop'
 UART_RET_DOSE_TOP = 'doseTop'
 
-UART_MESH_GET_SETTINGS = 'getSettings'
-UART_MESH_SETTINGS = 'settings'
+UART_MESH_GET_SETTINGS = 'getMeshInfo'
+UART_MESH_SETTINGS = 'meshInfo'
 
-UART_MESH_SET_TIME = 'setTime'
-UART_MESH_TIME_SET = 'time'
+UART_MESH_SET_CYCLE = 'setMeshCycle'
+UART_MESH_CYCLE_SET = 'meshCycle'
 
 UART_MESH_NODE_INFO = 'node'
 
@@ -81,8 +81,8 @@ setDoseTopCommand = Command(UART_SET_DOSE_TOP, 'd')
 meshGetSettingsCommand = Command(UART_MESH_GET_SETTINGS, '', UART_MESH_SETTINGS)
 meshGetSettingsResponse = Command(UART_MESH_SETTINGS, 'dd')
 
-meshSetTimeCommand = Command(UART_MESH_SET_TIME, 'd', UART_MESH_TIME_SET)
-meshSetTimeResponse = Command(UART_MESH_TIME_SET, 'd')
+meshSetCycleCommand = Command(UART_MESH_SET_CYCLE, 'd', UART_MESH_CYCLE_SET)
+meshSetCycleResponse = Command(UART_MESH_CYCLE_SET, 'd')
 
 meshNodeInfoResponse = Command(UART_MESH_NODE_INFO, 'ddddddd')
 

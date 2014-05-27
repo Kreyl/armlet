@@ -46,16 +46,16 @@ STATE_PILL_ERROR = 3
 
 DEVICE_TYPES = (
     ('player', 1),
-    ('radClear', 10),
-    ('radLight', 11),
-    ('radHeavy', 12),
-    ('radDeath', 13),
-    ('mobDetector', 21),
-    ('statDetector', 22),
-    ('empMech', 31),
-    ('empGrenade', 32),
-    ('finder', 41),
-    ('pillControl', 51)
+    ('radClear', 2),
+    ('radLight', 3),
+    ('radHeavy', 4),
+    ('radDeath', 5),
+    ('mobDetector', 6),
+    ('statDetector', 7),
+    ('empMech', 8),
+    ('empGrenade', 9),
+    ('finder', 10),
+    ('pillControl', 11)
 )
 
 DEVICE_INDEXES = dict((i, v) for (i, (k, v)) in enumerate(DEVICE_TYPES))
