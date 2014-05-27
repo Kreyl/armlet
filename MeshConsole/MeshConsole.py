@@ -31,8 +31,6 @@ from SerialPort import SerialPort, DT, TIMEOUT
 # ToDo
 # Avoid extra bold in table heading popups
 # Get devices number from device OR make devices list dynamic, start with empty table
-#
-# ToDo LocalTimeD must tick offline
 
 def timeDeltaStr(seconds):
     negative = seconds < 0
