@@ -247,7 +247,7 @@ class MeshConsole(QMainWindow):
             self.error("Number of devices mismatch, got %d, expected %d" % (numDevices, len(self.devices)))
         if self.cycleLength < 1:
             self.error("Bad cycle length %d" % self.cycleLength)
-        self.timeSetInterval = int(ceil(float(TIME_SET_INTERVAL * 1000) / self.cycleLength)) * self.cycleLength()
+        self.timeSetInterval = int(ceil(float(TIME_SET_INTERVAL * 1000) / self.cycleLength)) * self.cycleLength
         self.logger.info("Time set interval set to %dms" % self.timeSetInterval)
 
     def processInput(self, data):
