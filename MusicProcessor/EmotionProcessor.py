@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Emotions Processor for Ticket to Atlantis LARP.
 #
@@ -67,7 +68,7 @@ def width(array):
     return len(str((len(array) or 1) - 1))
 
 def convert(s):
-    return translify(s.decode('utf-8'))
+    return translify(s.replace(u'ё', u'е').replace(u'Ё', u'Е'))
 
 def convertTitle(s):
     return convert(s.strip())
@@ -90,7 +91,7 @@ def processEmotions(fileName = EMOTIONS_CSV):
     emotionsIndexes = {}
     emotionsTree = []
     for (eid, row) in enumerate(readCSV(getFileName(fileName))):
-        emotion = convertEmotion(row[-1])
+        emotion = convertEmotion(row[-1].decode('utf-8'))
         level = len(row) - 1
         if level > len(parents):
             assert level == len(parents) + 1
