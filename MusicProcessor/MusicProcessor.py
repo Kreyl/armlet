@@ -18,6 +18,7 @@
 # - If source directory is not specified, current directory is used.
 # - If target directory is not specified, source/processed subdirectory is used.
 #
+from itertools import count
 from os import chdir, getcwd, makedirs, walk
 from os.path import basename, getsize, isdir, isfile, join
 from re import compile as reCompile
@@ -32,11 +33,11 @@ from EmotionProcessor import convert, convertEmotion, convertTitle, processEmoti
 
 CHARACTER_CSV = 'Character.csv'
 
-EXTENSIONS = ('mp3', 'wav', 'wma', 'm4a', 'mpeg', 'ogg')
+EXTENSIONS = ('mp3', 'wav', 'wma', 'm4a', 'mpeg', 'ogg', 'flac')
 
 EXTENSIONS_RE = r'\.(%s)$' % '|'.join(EXTENSIONS)
 
-FILE_PATTERN = reCompile('(?i).*' + EXTENSIONS_RE)
+FILE_PATTERN = reCompile(r'(?i).*' + EXTENSIONS_RE)
 
 EMOTION = 'emotion'
 ARTIST = 'artist'
@@ -45,7 +46,7 @@ TAIL = 'tail'
 
 SEPARATOR = '-'
 
-CHECK_PATTERN = reCompile('(?i)^(?P<%s>[^%s]+)%s(?P<%s>[^%s]+)(%s(?P<%s>[^%s]*)(%s(?P<%s>.*))?)?%s' % (EMOTION, SEPARATOR, SEPARATOR, ARTIST, SEPARATOR, SEPARATOR, TITLE, SEPARATOR, SEPARATOR, TAIL, EXTENSIONS_RE))
+CHECK_PATTERN = reCompile(r'(?i)^(?P<%s>[^%s\s\d]+)\s*\d*\s*%s\s*(?P<%s>[^%s]+?)(?:\s*%s\s*(?P<%s>[^%s]*?)(?:\s*%s\s*(?P<%s>.*))?)?%s' % (EMOTION, SEPARATOR, SEPARATOR, ARTIST, SEPARATOR, SEPARATOR, TITLE, SEPARATOR, SEPARATOR, TAIL, EXTENSIONS_RE))
 
 NEW_FORMAT = 'mp3'
 
@@ -61,6 +62,12 @@ TAGS = {
     'encoder': 'Pydub/FFMPEG'
 }
 
+errors = []
+
+def error(s):
+    print "ERROR: %s" % s
+    errors.append(s)
+
 def findFiles(directory, pattern, excludes = ()):
     for (root, _dirNames, fileNames) in walk(unicode(directory)):
         if root not in excludes:
@@ -71,19 +78,18 @@ def findFiles(directory, pattern, excludes = ()):
 def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion, artist, title, tail):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
-        if sourceAudio.duration_seconds < 60:
-            print "ERROR: Audio too short: %d seconds" % sourceAudio.duration_seconds
-            return False
+        if sourceAudio.duration_seconds < 50:
+            return error("Audio too short: %d seconds: %s" % (sourceAudio.duration_seconds, fullName))
         processedAudio = sourceAudio.normalize() # pylint: disable=E1103
         if processedAudio.duration_seconds != sourceAudio.duration_seconds:
-            print "ERROR: Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
-            return False
+            return error("Normalized audio duration mismatch: %d seconds, expected %d seconds: %s" % (processedAudio.duration_seconds, sourceAudio.duration_seconds, fullName))
         TAGS.update({'disc': playerID, 'album': albumName, 'track': trackNumber, 'artist': artist, 'title': title, 'genre': emotion, 'comment': tail, 'comments': tail})
         processedAudio.export(newFullName, format = NEW_FORMAT, bitrate= '256k', tags = TAGS)
-        return isfile(newFullName) and getsize(newFullName) > 0.5 * getsize(fullName)
+        if not isfile(newFullName) or getsize(newFullName) < 0.2 * getsize(fullName):
+            return error("Processed file is too small: %d bytes, while original file was %d bytes: %s" % (getsize(newFullName), getsize(fullName), fullName))
+        return True
     except EOFError:
-        print "ERROR: Error processing!"
-        return False
+        return error("Error processing: %s" % fullName)
 
 def main(sourceDir = None, targetDir = None):
     if sourceDir:
@@ -97,15 +103,13 @@ def main(sourceDir = None, targetDir = None):
     targetDir = targetDir or join('.', DEFAULT_TARGET_DIR)
     if not isdir(targetDir):
         makedirs(targetDir)
-    error = False
     newFileNameSet = set()
     files = tuple(findFiles('.', FILE_PATTERN, (targetDir,)))
     for (trackNumber, (dirName, fileName)) in enumerate(files, 1):
         fullName = join(dirName, fileName)
         match = CHECK_PATTERN.match(fileName)
         if not match:
-            print "ERROR: Bad file name: " + fullName
-            error = True
+            error("Bad file name: " + fileName)
             continue
         groups = match.groupdict()
         emotion = convertEmotion(groups[EMOTION])
@@ -116,30 +120,27 @@ def main(sourceDir = None, targetDir = None):
             title = artist
             artist = ''
         if emotion not in emotionsIndexes:
-            print "ERROR: Unknown emotion: " + fullName
-            error = True
+            error("Unknown emotion: " + fileName)
             continue
-        newFileName = emotion
+        newFileNamePrefix = emotion
         for s in (artist, title, tail):
             if s:
-                newFileName += SEPARATOR + s
-        newFileName = newFileName[:MAX_FILE_NAME] + NEW_EXTENSION
-        if newFileName in newFileNameSet:
-            print "ERROR: Duplicate processed file name: " + newFileName
-            error = True
-            continue
+                newFileNamePrefix += SEPARATOR + s
+        newFileNamePrefix = newFileNamePrefix[:MAX_FILE_NAME]
+        for i in count():
+            newFileName = '%s%s%s' % (newFileNamePrefix, i or '', NEW_EXTENSION)
+            if newFileName not in newFileNameSet:
+                break
         newFileNameSet.add(newFileName)
         newFullName = join(targetDir, newFileName)
-        print "Processing: " + fullName
-        # print "Emotion: " + emotion
-        # print "Artist: " + artist
-        # print "Title: " + title
-        # print "Tail: " + tail
-        # print "Processed name: " + newFullName
-        if not processFile(fullName, newFullName, playerID, albumName, '%d/%d' % (trackNumber, len(files)), emotion, artist, title, tail):
-            error = True
-            continue
-    print "\n!!! ERRORS !!!" if error else "\nOK"
+        print "%s -> %s" % (fileName, newFileName)
+        processFile(fullName, newFullName, playerID, albumName, '%d/%d' % (trackNumber, len(files)), emotion, artist, title, tail)
+    if errors:
+        print "\nERRORS:"
+        for e in errors:
+            print e
+    else:
+        print "OK"
 
 if __name__ == '__main__':
     main(*argv[1:])
