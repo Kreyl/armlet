@@ -43,14 +43,14 @@ def verifyCharacters(characters):
 def readCharacters(fileName = CHARACTERS_CSV):
     if not isfile(fileName):
         return {}
-    ret = dict((name, int(number)) for (name, number) in readCSV(fileName))
+    ret = dict((name, int(number)) for (number, name) in readCSV(fileName))
     verifyCharacters(ret)
     return ret
 
 def writeCharacters(characters, fileName = CHARACTERS_CSV, header = CHARACTERS_CSV_HEADER):
     with open(fileName, 'wb') as f:
-        f.writelines(s + '\n' for s in header.splitlines())
-        CSVWriter(f).writerows(sorted(characters.iteritems(), key = lambda (name, number): number))
+        f.writelines((s + '\r\n') for s in header.splitlines())
+        CSVWriter(f).writerows((number, name) for (name, number) in sorted(characters.iteritems(), key = lambda (name, number): number))
 
 def loadCharacters():
     print "Fetching data from allrpg.info..."
