@@ -9,6 +9,7 @@
 #define EMOTIONS_H
 
 #define ROOT -1
+#define CHARACTER_ID_START 101
 
 #ifndef countof
 #define countof(a) (sizeof(a) / sizeof(a[0]))

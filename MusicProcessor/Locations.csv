@@ -5,8 +5,8 @@
 #
 # Is processed by EmotionProcessor.py and integrated into ArmLet firmware.
 #
-uliza1,1,fon
-uliza2,1,fon
-tuman,10,strah
+hub,9,fon
+uliza,1,fon
+tuman,9,strah
 church,2,pozitiv
 kabak,2,negativ

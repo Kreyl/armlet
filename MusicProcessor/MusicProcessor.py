@@ -28,7 +28,7 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pydub v0.9.2 or later: https://pypi.python.org/pypi/pydub\n" % (ex.__class__.__name__, ex))
 
-from EmotionProcessor import convert, convertEmotion, convertTitle, processEmotions, processReasons
+from EmotionProcessor import convert, convertEmotion, convertTitle, processEmotions, verifyCharacter
 
 CHARACTER_CSV = 'Character.csv'
 
@@ -98,7 +98,7 @@ def main(sourceDir = None, targetDir = None):
     (emotionsIndexes, _emotionsTree) = processEmotions()
     if isfile(CHARACTER_CSV):
         print "%s found, verifying" % CHARACTER_CSV
-        processReasons(emotionsIndexes, CHARACTER_CSV)
+        verifyCharacter(emotionsIndexes, CHARACTER_CSV)
     targetDir = targetDir or join('.', DEFAULT_TARGET_DIR)
     if not isdir(targetDir):
         makedirs(targetDir)

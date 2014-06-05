@@ -9,11 +9,6 @@ from csv import reader as CSVReader, writer as CSVWriter
 from os.path import isfile
 from urllib import urlopen
 
-# Import allrpg access module
-print "Accessing allrpg.info library..."
-ALLRPG_MODULE_PATH = 'https://raw.githubusercontent.com/aestetique/ALLRPG/master/tools/excel-functions.py'
-exec urlopen(ALLRPG_MODULE_PATH).read() in globals() # Importing getAllRoles function # pylint: disable=W0122
-
 GAME_ID = 584
 
 NAME_COLUMN = 29
@@ -57,6 +52,9 @@ def writeCharacters(characters, fileName = CHARACTERS_CSV, header = CHARACTERS_C
         CSVWriter(f).writerows((number, name) for (name, number) in sorted(characters.iteritems(), key = lambda (name, number): number))
 
 def loadCharacters():
+    print "Accessing allrpg.info library..."
+    ALLRPG_MODULE_PATH = 'https://raw.githubusercontent.com/aestetique/ALLRPG/master/tools/excel-functions.py'
+    exec urlopen(ALLRPG_MODULE_PATH).read() in locals() # Importing getAllRoles function # pylint: disable=W0122
     print "Fetching data from allrpg.info..."
     allRoles = getAllRoles(GAME_ID) # pylint: disable=E0602
     print "Done"

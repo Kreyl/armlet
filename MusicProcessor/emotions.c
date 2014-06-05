@@ -3,7 +3,7 @@
  *
  * Part of "Ticket to Atlantis" LARP music engine.
  *
- * Generated automatically by EmotionProcessor.py from Emotions.csv and Reasons.csv
+ * Generated automatically by EmotionProcessor.py from Emotions.csv, Locations.csv and Characters.csv
  *
  * !!! DO NOT EDIT !!!
  */
@@ -84,11 +84,113 @@ const int emotions_number = countof(emotions);
 
 // RIDs are indexes in this array.
 Reason_t reasons[] = {
- /* 0 */ { "uliza1", 1, 0 }, 	/* fon */
- /* 1 */ { "uliza2", 1, 0 }, 	/* fon */
- /* 2 */ { "tuman", 10, 19 }, 	/* strah */
- /* 3 */ { "church", 2, 32 }, 	/* pozitiv */
- /* 4 */ { "kabak", 2, 1 }, 	/* negativ */
+	// Locations
+ /*   0 */ { "reserve", 0, 0 },
+ /*   1 */ { "hub", 9, 0 },	/* fon */
+ /*   2 */ { "uliza", 1, 0 },	/* fon */
+ /*   3 */ { "tuman", 9, 19 },	/* strah */
+ /*   4 */ { "church", 2, 32 },	/* pozitiv */
+ /*   5 */ { "kabak", 2, 1 },	/* negativ */
+ /*   6 */ { "reserve", 0, 0 },
+ /*   7 */ { "reserve", 0, 0 },
+ /*   8 */ { "reserve", 0, 0 },
+ /*   9 */ { "reserve", 0, 0 },
+ /*  10 */ { "reserve", 0, 0 },
+ /*  11 */ { "reserve", 0, 0 },
+ /*  12 */ { "reserve", 0, 0 },
+ /*  13 */ { "reserve", 0, 0 },
+ /*  14 */ { "reserve", 0, 0 },
+ /*  15 */ { "reserve", 0, 0 },
+ /*  16 */ { "reserve", 0, 0 },
+ /*  17 */ { "reserve", 0, 0 },
+ /*  18 */ { "reserve", 0, 0 },
+ /*  19 */ { "reserve", 0, 0 },
+ /*  20 */ { "reserve", 0, 0 },
+ /*  21 */ { "reserve", 0, 0 },
+ /*  22 */ { "reserve", 0, 0 },
+ /*  23 */ { "reserve", 0, 0 },
+ /*  24 */ { "reserve", 0, 0 },
+ /*  25 */ { "reserve", 0, 0 },
+ /*  26 */ { "reserve", 0, 0 },
+ /*  27 */ { "reserve", 0, 0 },
+ /*  28 */ { "reserve", 0, 0 },
+ /*  29 */ { "reserve", 0, 0 },
+ /*  30 */ { "reserve", 0, 0 },
+ /*  31 */ { "reserve", 0, 0 },
+ /*  32 */ { "reserve", 0, 0 },
+ /*  33 */ { "reserve", 0, 0 },
+ /*  34 */ { "reserve", 0, 0 },
+ /*  35 */ { "reserve", 0, 0 },
+ /*  36 */ { "reserve", 0, 0 },
+ /*  37 */ { "reserve", 0, 0 },
+ /*  38 */ { "reserve", 0, 0 },
+ /*  39 */ { "reserve", 0, 0 },
+ /*  40 */ { "reserve", 0, 0 },
+ /*  41 */ { "reserve", 0, 0 },
+ /*  42 */ { "reserve", 0, 0 },
+ /*  43 */ { "reserve", 0, 0 },
+ /*  44 */ { "reserve", 0, 0 },
+ /*  45 */ { "reserve", 0, 0 },
+ /*  46 */ { "reserve", 0, 0 },
+ /*  47 */ { "reserve", 0, 0 },
+ /*  48 */ { "reserve", 0, 0 },
+ /*  49 */ { "reserve", 0, 0 },
+ /*  50 */ { "reserve", 0, 0 },
+ /*  51 */ { "reserve", 0, 0 },
+ /*  52 */ { "reserve", 0, 0 },
+ /*  53 */ { "reserve", 0, 0 },
+ /*  54 */ { "reserve", 0, 0 },
+ /*  55 */ { "reserve", 0, 0 },
+ /*  56 */ { "reserve", 0, 0 },
+ /*  57 */ { "reserve", 0, 0 },
+ /*  58 */ { "reserve", 0, 0 },
+ /*  59 */ { "reserve", 0, 0 },
+ /*  60 */ { "reserve", 0, 0 },
+ /*  61 */ { "reserve", 0, 0 },
+ /*  62 */ { "reserve", 0, 0 },
+ /*  63 */ { "reserve", 0, 0 },
+ /*  64 */ { "reserve", 0, 0 },
+ /*  65 */ { "reserve", 0, 0 },
+ /*  66 */ { "reserve", 0, 0 },
+ /*  67 */ { "reserve", 0, 0 },
+ /*  68 */ { "reserve", 0, 0 },
+ /*  69 */ { "reserve", 0, 0 },
+ /*  70 */ { "reserve", 0, 0 },
+ /*  71 */ { "reserve", 0, 0 },
+ /*  72 */ { "reserve", 0, 0 },
+ /*  73 */ { "reserve", 0, 0 },
+ /*  74 */ { "reserve", 0, 0 },
+ /*  75 */ { "reserve", 0, 0 },
+ /*  76 */ { "reserve", 0, 0 },
+ /*  77 */ { "reserve", 0, 0 },
+ /*  78 */ { "reserve", 0, 0 },
+ /*  79 */ { "reserve", 0, 0 },
+ /*  80 */ { "reserve", 0, 0 },
+ /*  81 */ { "reserve", 0, 0 },
+ /*  82 */ { "reserve", 0, 0 },
+ /*  83 */ { "reserve", 0, 0 },
+ /*  84 */ { "reserve", 0, 0 },
+ /*  85 */ { "reserve", 0, 0 },
+ /*  86 */ { "reserve", 0, 0 },
+ /*  87 */ { "reserve", 0, 0 },
+ /*  88 */ { "reserve", 0, 0 },
+ /*  89 */ { "reserve", 0, 0 },
+ /*  90 */ { "reserve", 0, 0 },
+ /*  91 */ { "reserve", 0, 0 },
+ /*  92 */ { "reserve", 0, 0 },
+ /*  93 */ { "reserve", 0, 0 },
+ /*  94 */ { "reserve", 0, 0 },
+ /*  95 */ { "reserve", 0, 0 },
+ /*  96 */ { "reserve", 0, 0 },
+ /*  97 */ { "reserve", 0, 0 },
+ /*  98 */ { "reserve", 0, 0 },
+ /*  99 */ { "reserve", 0, 0 },
+ /* 100 */ { "reserve", 0, 0 },
+	// Characters
+ /* 101 */ { "Parcs", 0, 0 },
+ /* 102 */ { "Dawson", 0, 0 },
+ /* 103 */ { "Huxley", 0, 0 },
+ /* 104 */ { "Graywood", 0, 0 },
 };
 
 const int reasons_number = countof(reasons);
