@@ -93,6 +93,7 @@ void Init() {
 
     Sound.Init();
     Sound.SetVolume(254);
+
     //Sound.Play("fon-WhiteTower.mp3");//"alive.wav");
 
     App.Init();

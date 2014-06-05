@@ -27,6 +27,7 @@
 #include "..\AtlGui\atlgui.h"
 App_t App;
 static EventListener EvtListenerKeys;
+
 #if 1 // ================================ Time =================================
 static void TimeTmrCallback(void *p);
 

@@ -41,6 +41,11 @@ void AtlGui_t::Init()
     on_run=0;
     current_state=-1;
     is_gui_shown=false;
+    is_locked=false;
+}
+void AtlGui_t::ReactLockedPress()
+{
+    Uart.Printf("CALL ON LOCKED SCREEN \r");
 }
 void AtlGui_t::ShowSplashscreen()
 {
@@ -75,6 +80,7 @@ void AtlGui_t::RenderFullScreen(int screen_id)
     strcat(bmp_filename,PATH_FOLDER_STR);
     strcat(bmp_filename,"back");
     strcat(bmp_filename,GUI_PATH_EXT);
+    //strcpy(bmp_filename,"TestHorizontal.png");
     Uart.Printf("RenderFullScreen %s\r",bmp_filename);
     // render it
     Lcd.DrawBmpFile(0,0,bmp_filename);
@@ -90,6 +96,8 @@ void AtlGui_t::RenderFullScreen(int screen_id)
 }
 void AtlGui_t::ButtonIsReleased(int button_id)
 {
+    if(is_locked)
+        return;
     if(current_state>=0 && current_state<screens_number)
     {
         if( screens[current_state].buttons[button_id].isPressable!= nullptr)
@@ -98,9 +106,18 @@ void AtlGui_t::ButtonIsReleased(int button_id)
             Uart.Printf("button_state_val %d\r",button_state_val);
             if(button_state_val==BUTTON_PRESSABLE)
             {
-
-
-        //вызываем смену крана,если есть
+                //вызываем функцию кнопки, если есть
+                //если геттер успешен,и можем что-то сделать,вызываем сеттер кнопки
+                if( screens[current_state].buttons[button_id].press!= nullptr)
+                {
+                   int new_b_state= screens[current_state].buttons[button_id].press(current_state,button_id);
+                   RenderSingleButton(current_state,button_id,new_b_state);
+                }
+                else
+                {
+                    Uart.Printf("ButtonIsClicked render func absent\r");
+                }
+                //вызываем смену крана,если есть
                 Uart.Printf("CallStateScreen %d \r",screens[current_state].screen_switch[button_id]);
                   if( screens[current_state].screen_switch[button_id]>=0  )
                   {
@@ -110,16 +127,17 @@ void AtlGui_t::ButtonIsReleased(int button_id)
                       //вызываем фуркцию логики смены крана
                       if(screens[current_state].fptr_gui_state_array_switch_functions[button_id]!= NULL)
                           screens[current_state].fptr_gui_state_array_switch_functions[button_id]();
-
                   }
+
             }
         }
         else return;// нельзя вызвать смену крана кнопкой, которой нет! хотя логика позволяет
      }
-
 }
 void AtlGui_t::ButtonIsClicked(int button_id)
 {
+    if(is_locked)
+        return;
     //вызываем геттер кнопки
     Uart.Printf("current_state %d screens_number %d button id %d \r",current_state,screens_number,button_id);
     if(current_state>=0 && current_state<screens_number)
@@ -131,18 +149,11 @@ void AtlGui_t::ButtonIsClicked(int button_id)
            if(button_state_val==BUTTON_PRESSABLE)
            {
                Uart.Printf("button%d on screen %d is pressable %d\r",button_id,current_state );
+               RenderSingleButton(current_state,button_id,BUTTON_PRESSED);
                //on red andgreenchange state
-               //если геттер успешен,и можем что-то сделать,вызываем сеттер кнопки
-               if( screens[current_state].buttons[button_id].press!= nullptr)
-               {
-                  int new_b_state= screens[current_state].buttons[button_id].press(current_state,button_id);
-                  RenderSingleButton(current_state,button_id,new_b_state);
-               }
-               else
-               {
-                   Uart.Printf("ButtonIsClicked render func absent\r");
-               }
            }
+           else
+               RenderSingleButton(current_state,button_id,BUTTON_DISABLED);
         }
         else return;
       // else return; // если нет действия на кнопке - ничего не делаем
@@ -244,17 +255,17 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
         else if(button_id==2)
             strcat(bmp_filename,"C");
         else if(button_id==3)
-            strcat(bmp_filename,"L");
-        else if(button_id==4)
-            strcat(bmp_filename,"E");
-        else if(button_id==5)
-            strcat(bmp_filename,"R");
-        else if(button_id==6)
             strcat(bmp_filename,"X");
-        else if(button_id==7)
+        else if(button_id==4)
             strcat(bmp_filename,"Y");
-        else if(button_id==8)
+        else if(button_id==5)
             strcat(bmp_filename,"Z");
+        else if(button_id==6)
+            strcat(bmp_filename,"L");
+        else if(button_id==7)
+            strcat(bmp_filename,"E");
+        else if(button_id==8)
+            strcat(bmp_filename,"R");
         //кривокод конец
 
       // strchr(BUTTONS,'B');

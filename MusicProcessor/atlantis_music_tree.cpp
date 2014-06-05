@@ -132,7 +132,22 @@ int GetRandomEmoToPlay()
 	}
 	return 0;
 }
-
+int GetFileNumerForEmoToPlay(int emo_id)
+{
+    if(emo_id<0 || emo_id>emotions_number)
+    {
+        Uart.Printf("GetFileNumerForEmoToPlay emo_id out of range\r");
+        return -1;
+    }
+    //if no file available for this emo, play from top emo
+    if(emotions[emo_id].numTracks==0)
+    {
+        Uart.Printf("no files for emo %s \r", emotions[emo_id]);
+        return GetFileNumerForEmoToPlay(emotions[emo_id].parent);
+    }
+    else
+        return emotions[emo_id].numTracks;
+}
 char * GetFileNameToPlayFromEmoId(int emo_id)
 {
 	//TODO error to log here!

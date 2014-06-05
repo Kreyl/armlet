@@ -29,6 +29,7 @@
 #define BUTTON_PRESSABLE 1
 #define BUTTON_LOCKED 2
 #define BUTTONS "ABCLERXYZ"
+//abcxyzler
 //char * buttons_arr[9] {"A","B","C","L","E","R","X","Y","Z"};
 #define NO_BUTTON {nullptr, 0, 0, 0, nullptr, nullptr, nullptr}
 

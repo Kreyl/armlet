@@ -79,6 +79,9 @@ public:
     int is_splash_screen_onrun;//0 - not showed, 1- on show now, 2 - show finished
     int current_state;
     bool is_gui_shown;
+    bool is_locked;
+    //TODO fill reactpress func
+    void ReactLockedPress();
 };
 
 extern AtlGui_t AtlGui;

@@ -288,8 +288,8 @@ struct BmpHeader_t {
 } __packed;
 
 struct BmpInfo_t {  // Length is absent as read first
-    uint32_t Width;
-    uint32_t Height;
+    int32_t Width;
+    int32_t Height;
     uint16_t Planes;
     uint16_t BitCnt;
     uint32_t Compression;
@@ -336,6 +336,7 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
         if((rslt = f_read(&IFile, (uint8_t*)&Info, Sz-4, &RCnt)) != 0) {
             f_close(&IFile); return;
         }
+        if(Info.Height < 0) Info.Height = -Info.Height;
         Uart.Printf("W=%u; H=%u; BitCnt=%u; Cmp=%u; Sz=%u;  MskR=%X; MskG=%X; MskB=%X; MskA=%X\r",
                 Info.Width, Info.Height, Info.BitCnt, Info.Compression,
                 Info.SzImage, Info.RedMsk, Info.GreenMsk, Info.BlueMsk, Info.AlphaMsk);
@@ -345,7 +346,7 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
             f_close(&IFile); return;
         }
 
-        SetBounds(x0, x0+Info.Width, y0, y0+Info.Height);
+        SetBounds(x0, Info.Width, y0, Info.Height);
         // Write RAM
         WriteByte(0x2C);    // Memory write
         DC_Hi();
