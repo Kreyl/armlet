@@ -15,12 +15,12 @@ damageSeriousButton,43200b (12h),#pillRepeatWrite32,0,9,0,999999999,43200
 
 panaceaButton,,#pillRepeatWrite32,0,11
 diagnosticsButton,,#pillRepeatWrite32,0,27
-autoDocButton,60b (1h) / 1s,#pillRepeatWrite32,0,12
+autoDocButton,60b (1h) / 1s,#pillRepeatWrite32,0,12,0,2400,-180
 
 empBreakButton,,#pillRepeatWrite32,0,31
-empFixButton,,#pillRepeatWrite32,0,32
-powerPlantButton,,#pillRepeatWrite32,0,33
+empFixButton,,#pillRepeatWrite32,0,32,0,1800
+powerPlantButton,,#pillRepeatWrite32,0,33,0,7200
 
 uniqueIDButton,,#pillRepeatWrite32,0,1
-doseTopButton,,#pillRepeatWrite32,0,18,
+doseTopButton,,#pillRepeatWrite32,0,18,0,216000
 deviceTypeButton,,#pillRepeatWrite32,0,99,
