@@ -20,6 +20,9 @@ REASONS = tuple(row[0] for row in CSVReader(open(REASONS_CSV)) if row and not ro
 LONGEST_EMOTION = max((len(emotion), n) for (n, emotion) in enumerate(EMOTIONS))[1]
 LONGEST_REASON = max((len(reason), n) for (n, reason) in enumerate(REASONS))[1]
 
+def signedNumber(n):
+    return ('%+d' % n) if n else '0'
+
 def getItem(what, index):
     try:
         return what[index].lower()
@@ -36,8 +39,8 @@ def getColumnsData(processor):
         (True, PROC, False, True, 'AgeC', 'Age of information in cycles', 'time', 9999, processor.cycleAge),
         (True, PROC, False, True, 'AgeS', 'Age of information in seconds', 'time', 9999, processor.cycleAgeSeconds),
         (True, PROC, False, True, 'AgeT', 'Age of information as time', 'time', 0, processor.cycleAgeTimeStr),
-        (True, RAW, True, True, 'TimeDiffC', 'Time difference in cycles', 'td', 9999, None, '%+d'),
-        (True, RAW, True, True, 'TimeDiffS', 'Time difference in seconds', 'td', 9999, processor.cycleSeconds, '%+d'),
+        (True, RAW, True, True, 'TimeDiffC', 'Time difference in cycles', 'td', 9999, signedNumber),
+        (True, RAW, True, True, 'TimeDiffS', 'Time difference in seconds', 'td', 9999, lambda x: signedNumber(processor.cycleSeconds(x))),
         (True, RAW, True, True, 'TimeDiffT', 'Time difference as time', 'td', 0, processor.cycleTimeStr),
         (True, PROC, False, True, 'LocalTimeC', 'Device local time in cycles', 'td', 9999, processor.tdTime),
         (True, PROC, False, True, 'LocalTimeD', 'Device local date', 'td', 0, processor.tdDateStr),
