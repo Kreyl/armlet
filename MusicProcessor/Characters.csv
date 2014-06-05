@@ -1,0 +1,13 @@
+#
+# Characters.csv
+#
+# Character name -> RID table for ArmLet initialization.
+#
+# Generated, updated and used by CharacterProcessor.py to track persistent and unique character ArmLet IDs.
+#
+# !!! DO NOT EDIT !!!
+#
+Parcs,101
+Dawson,102
+Huxley,103
+Graywood,104
