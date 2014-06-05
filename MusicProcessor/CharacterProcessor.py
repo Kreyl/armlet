@@ -7,8 +7,12 @@
 #
 from csv import reader as CSVReader, writer as CSVWriter
 from os.path import isfile
+from urllib import urlopen
 
-from allrpg import getAllRoles
+# Import allrpg access module
+print "Accessing allrpg.info library..."
+ALLRPG_MODULE_PATH = 'https://raw.githubusercontent.com/aestetique/ALLRPG/master/tools/excel-functions.py'
+exec urlopen(ALLRPG_MODULE_PATH).read() in globals() # Importing getAllRoles function # pylint: disable=W0122
 
 GAME_ID = 584
 
@@ -54,7 +58,7 @@ def writeCharacters(characters, fileName = CHARACTERS_CSV, header = CHARACTERS_C
 
 def loadCharacters():
     print "Fetching data from allrpg.info..."
-    allRoles = getAllRoles(GAME_ID)
+    allRoles = getAllRoles(GAME_ID) # pylint: disable=E0602
     print "Done"
     # ToDo: Employ some sorting? By creation date?
     return tuple(str(name) for name in (allRoles[row][NAME_COLUMN] for row in xrange(1, len(allRoles))) if name)
