@@ -49,7 +49,7 @@ def readCharacters(fileName = CHARACTERS_CSV):
 
 def writeCharacters(characters, fileName = CHARACTERS_CSV, header = CHARACTERS_CSV_HEADER):
     with open(fileName, 'wb') as f:
-        f.writelines((s + '\r\n') for s in header.splitlines())
+        f.writelines(s + '\r\n' for s in header.splitlines())
         CSVWriter(f).writerows((number, name) for (name, number) in sorted(characters.iteritems(), key = lambda (name, number): number))
 
 def loadCharacters():
