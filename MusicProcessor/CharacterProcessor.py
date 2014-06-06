@@ -66,6 +66,7 @@ def loadCharacters():
     return tuple(str(name) for name in (allRoles[row][NAME_COLUMN] for row in xrange(1, len(allRoles))) if name)
 
 def updateCharacters():
+    print "Processing characters..."
     characters = readCharacters()
     for name in loadCharacters():
         if name not in characters:

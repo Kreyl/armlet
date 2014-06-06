@@ -199,6 +199,7 @@ def writeC(emotions, locations, characters):
 
 def updateEmotions():
     charactersList = updateCharacters()
+    print "Processing emotions..."
     (emotionsIndexes, emotionsTree) = processEmotions()
     (locations, characters) = processReasons(emotionsIndexes)
     writeC(emotionsTree, locations, characters)
