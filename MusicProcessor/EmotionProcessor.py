@@ -16,17 +16,15 @@
 #
 from csv import reader as CSVReader
 from itertools import chain
-from os.path import dirname, join, realpath
 from platform import system
 from subprocess import Popen, PIPE, STDOUT
-from sys import argv
 
 try:
     from pytils.translit import translify
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pytils v0.2.3 or later: https://pypi.python.org/pypi/pytils\n" % (ex.__class__.__name__, ex))
 
-from CharacterProcessor import CHARACTERS_CSV, CHARACTER_ID_START, updateCharacters
+from CharacterProcessor import CHARACTERS_CSV, CHARACTER_ID_START, getFileName, updateCharacters
 
 isWindows = system().lower().startswith('win')
 
@@ -96,9 +94,6 @@ def convertTitle(s):
 
 def convertEmotion(s):
     return convertTitle(s).lower()
-
-def getFileName(name):
-    return join(dirname(realpath(argv[0])), name)
 
 def readCSV(csv): # generator
     with open(csv) as f:
@@ -202,8 +197,8 @@ def writeC(emotions, locations, characters):
                              '\n'.join(cReason(ridWidth, *location) for location in locations),
                              '\n'.join(cReason(ridWidth, *character) for character in characters)))
 
-def main():
-    updateCharacters()
+def updateEmotions():
+    charactersList = updateCharacters()
     (emotionsIndexes, emotionsTree) = processEmotions()
     (locations, characters) = processReasons(emotionsIndexes)
     writeC(emotionsTree, locations, characters)
@@ -212,6 +207,10 @@ def main():
         subprocess = Popen(TEST_COMMAND, shell = True, stdout = PIPE, stderr = STDOUT)
         output = subprocess.communicate()[0]
         print "Done (%s): %s" % (subprocess.returncode, output),
+    return (emotionsIndexes, charactersList)
+
+def main():
+    updateEmotions()
 
 if __name__ == '__main__':
     main()

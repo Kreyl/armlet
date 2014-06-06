@@ -6,12 +6,13 @@
 # -
 #
 from csv import reader as CSVReader, writer as CSVWriter
-from os.path import isfile
+from os.path import dirname, isfile, join, realpath
 from urllib import urlopen
+from sys import argv
 
 GAME_ID = 584
 
-NAME_COLUMN = 29
+NAME_COLUMN = 30
 
 CHARACTER_ID_START = 101
 
@@ -29,6 +30,9 @@ CHARACTERS_CSV_HEADER = '''\
 #
 '''
 
+def getFileName(name):
+    return join(dirname(realpath(argv[0])), name)
+
 def readCSV(csv): # generator
     with open(csv) as f:
         for row in CSVReader(f):
@@ -39,14 +43,14 @@ def readCSV(csv): # generator
 def verifyCharacters(characters):
     assert tuple(sorted(characters.itervalues())) == tuple(xrange(CHARACTER_ID_START, CHARACTER_ID_START + len(characters))), "Damaged %s file" % CHARACTERS_CSV
 
-def readCharacters(fileName = CHARACTERS_CSV):
+def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
     if not isfile(fileName):
         return {}
     ret = dict((name, int(number)) for (number, name) in readCSV(fileName))
     verifyCharacters(ret)
     return ret
 
-def writeCharacters(characters, fileName = CHARACTERS_CSV, header = CHARACTERS_CSV_HEADER):
+def writeCharacters(characters, fileName = getFileName(CHARACTERS_CSV), header = CHARACTERS_CSV_HEADER):
     with open(fileName, 'wb') as f:
         f.writelines(s + '\r\n' for s in header.splitlines())
         CSVWriter(f).writerows((number, name) for (name, number) in sorted(characters.iteritems(), key = lambda (name, number): number))
@@ -68,6 +72,7 @@ def updateCharacters():
             characters[name] = len(characters) + CHARACTER_ID_START
     verifyCharacters(characters)
     writeCharacters(characters)
+    return characters
 
 def main():
     updateCharacters()
