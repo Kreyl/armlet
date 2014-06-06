@@ -69,7 +69,7 @@ TAGS = {
 
 MUSIC_MARK = 'music_here'
 
-RESULT_MARKS = { True: 'music_ok', False: 'music_errors' }
+RESULT_MARKS = { True: 'music_errors', False: 'music_ok' }
 
 def silentRemove(filename):
     try:
@@ -102,8 +102,8 @@ def resultMark(targetDir, result):
             pass
 
 def checkResultMark(targetDir):
-    okMark = join(targetDir, RESULT_MARKS[True])
-    errorMark = join(targetDir, RESULT_MARKS[False])
+    okMark = join(targetDir, RESULT_MARKS[False])
+    errorMark = join(targetDir, RESULT_MARKS[True])
     if isfile(okMark):
         if isfile(errorMark):
             remove(okMark)
@@ -121,11 +121,12 @@ def processCharacter(name, number, emotions, baseDir = '.'):
     errors = []
     print "\nProcessing character: %s (%d)" % (name, number)
     baseDir = join(unicode(baseDir), name)
+    sourceDir = join(baseDir, SOURCE_DIR)
     armletDir = join(baseDir, ARMLET_DIR)
     musicDir = join(armletDir, MUSIC_DIR)
     if not isdir(musicDir):
         makedirs(musicDir)
-    sourceDir = join(baseDir, SOURCE_DIR)
+    musicFiles = tuple(join(musicDir, f) for f in listdir(musicDir))
     if number > 0:
         with open(join(armletDir, INI_FILE), 'w') as f:
             f.write(INI_ID_LINE % number)
@@ -134,15 +135,13 @@ def processCharacter(name, number, emotions, baseDir = '.'):
         print "Character file found, verifying"
         verifyCharacter(emotions, characterFile)
     okDate = checkResultMark(baseDir)
-    if okDate:
-        musicFiles = listdir(musicDir)
-        if musicFiles and any(getmtime(f) > okDate for f in musicFiles):
-            print "OK mark obsolete, newer source files exist"
-            resultMark(baseDir, None)
-            okDate = None
+    if okDate and any(date > okDate for date in (getmtime(f) for f in musicFiles)):
+        print "OK mark obsolete, newer source files exist, reprocessing"
+        resultMark(baseDir, None)
+        okDate = None
     if okDate:
         hasMusic = True
-        print "Already OK"
+        print "Music OK, %d files found" % len(musicFiles)
     elif not isdir(sourceDir):
         print sourceDir
         hasMusic = False
@@ -150,7 +149,7 @@ def processCharacter(name, number, emotions, baseDir = '.'):
     else:
         files = listdir(sourceDir)
         hasMusic = bool(files)
-        print "Music files found: %d" % len(files)
+        print "Source music files found: %d" % len(files)
         newFileNameSet = set()
         for (trackNumber, fileName) in enumerate(files, 1):
             match = CHECK_PATTERN.match(fileName)
@@ -212,6 +211,7 @@ def updateMusic(sourceDir = '.'):
         print "No character directories found in music directory: %s" % sourceDir
         return
     (emotions, characters) = updateEmotions()
+    okCharacters = []
     unknownCharacters = tuple(sorted(d for d in characterDirs if d not in characters))
     noMusicCharacters = [name for name in characters if name not in characterDirs]
     print
@@ -221,10 +221,15 @@ def updateMusic(sourceDir = '.'):
     errorCharacters = []
     for d in characterDirs:
         (hasMusic, hasErrors) = processCharacter(d, characters.get(d, -1), emotions, sourceDir)
-        if not hasMusic:
+        if hasMusic:
+            if not hasErrors:
+                okCharacters.append(d)
+        else:
             noMusicCharacters.append(d)
         if hasErrors:
             errorCharacters.append(d)
+    if okCharacters:
+        print "\nOK character directories found (%d): %s" % (len(okCharacters), ', '.join(okCharacters))
     if unknownCharacters:
         print "\nUnknown character directories found (%d): %s" % (len(unknownCharacters), ', '.join(unknownCharacters))
     if noMusicCharacters:
