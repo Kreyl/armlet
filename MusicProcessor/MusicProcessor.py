@@ -38,6 +38,7 @@ except ImportError, ex:
 try: # Filesystem symbolic links configuration
     from os import symlink # UNIX # pylint: disable=E0611
     from os.path import islink # UNIX # pylint: disable=E0611
+    rmlink = remove
 except ImportError:
     global symlink # pylint: disable=W0604
     try:
@@ -46,15 +47,19 @@ except ImportError:
         INVALID_FILE_ATTRIBUTES = -1
         dll = ctypes.windll.LoadLibrary('kernel32.dll')
         def symlink(source, linkName):
-            if not dll.CreateSymbolicLinkW(linkName, source, 0):
+            if not dll.CreateSymbolicLinkW(linkName, source, int(isdir(source))):
                 raise OSError("code %d" % dll.GetLastError())
         def islink(path):
             ret = dll.GetFileAttributesW(path)
             if ret == INVALID_FILE_ATTRIBUTES:
                 raise OSError("code %d" % dll.GetLastError())
             return bool(ret & FILE_ATTRIBUTE_REPARSE_POINT)
+        def rmlink(path):
+            print path
+            if not (dll.RemoveDirectoryW(path) if isdir(path) else dll.DeleteFileW(path)):
+                raise OSError("code %d" % dll.GetLastError())
     except Exception, ex:
-        symlink = None
+        symlink = islink = None
         print "%s: %s\nWARNING: Filesystem links will not be available.\nPlease run on UNIX or Windows Vista or later.\n" % (ex.__class__.__name__, ex)
 
 from EmotionProcessor import convert, convertEmotion, convertTitle, updateEmotions, verifyCharacter
@@ -161,10 +166,9 @@ def processCharacter(name, number, emotions, baseDir = '.'):
             f.write(INI_ID_LINE % number)
     if symlink:
         for fileName in (f for f in (join(armletDir, f) for f in listdir(armletDir)) if islink(f)):
-            remove(fileName)
+            rmlink(fileName)
         for fileName in listdir(sdDir):
-            print join(sdDir, fileName), join(armletDir, fileName)
-            symlink(join(sdDir, fileName), join(armletDir, fileName))
+            symlink(join(sdDir, fileName), join(armletDir, fileName.lower()))
     characterFile = join(armletDir, CHARACTER_CSV)
     if isfile(characterFile):
         print "Character file found, verifying"

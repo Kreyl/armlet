@@ -192,7 +192,7 @@ def writeC(emotions, locations, characters):
     emotions = tuple(emotions)
     eidWidth = width(emotions)
     ridWidth = len(str(max(r[0] for r in chain(locations, characters))))
-    with open(getFileName(C_TARGET), 'wb') as f:
+    with open(getFileName(C_TARGET), 'w') as f:
         f.write(C_CONTENT % ('\n'.join(cEmotion(eidWidth, *emotion) for emotion in emotions),
                              '\n'.join(cReason(ridWidth, *location) for location in locations),
                              '\n'.join(cReason(ridWidth, *character) for character in characters)))

@@ -56,7 +56,7 @@ def writeCharacters(characters, fileName = getFileName(CHARACTERS_CSV), header =
         CSVWriter(f).writerows((number, name) for (name, number) in sorted(characters.iteritems(), key = lambda (name, number): number))
 
 def loadCharacters():
-    print "Accessing allrpg.info library..."
+    print "Fetching allrpg.info library..."
     ALLRPG_MODULE_PATH = 'https://raw.githubusercontent.com/aestetique/ALLRPG/master/tools/excel-functions.py'
     exec urlopen(ALLRPG_MODULE_PATH).read() in locals() # Importing getAllRoles function # pylint: disable=W0122
     print "Fetching data from allrpg.info..."
