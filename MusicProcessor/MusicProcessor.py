@@ -71,7 +71,7 @@ ARMLET_DIR = 'armlet'
 MUSIC_DIR = 'music'
 ERROR_DIR = 'errors'
 
-SD_DIR = 'SD'
+SD_DIR = '_SD'
 EXCLUDE_DIRS = (SD_DIR,)
 
 INI_FILE = 'settings.ini'
