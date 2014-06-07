@@ -192,18 +192,20 @@ def writeC(emotions, locations, characters):
     emotions = tuple(emotions)
     eidWidth = width(emotions)
     ridWidth = len(str(max(r[0] for r in chain(locations, characters))))
-    with open(getFileName(C_TARGET), 'w') as f:
+    with open(getFileName(C_TARGET), 'wb') as f:
         f.write(C_CONTENT % ('\n'.join(cEmotion(eidWidth, *emotion) for emotion in emotions),
                              '\n'.join(cReason(ridWidth, *location) for location in locations),
                              '\n'.join(cReason(ridWidth, *character) for character in characters)))
 
 def updateEmotions():
     charactersList = updateCharacters()
-    print "Processing emotions..."
+    print "\nProcessing emotions..."
     (emotionsIndexes, emotionsTree) = processEmotions()
     (locations, characters) = processReasons(emotionsIndexes)
     writeC(emotionsTree, locations, characters)
-    if not isWindows:
+    if isWindows:
+        print "Done"
+    else:
         print "Running test: %s" % TEST_COMMAND
         subprocess = Popen(TEST_COMMAND, shell = True, stdout = PIPE, stderr = STDOUT)
         output = subprocess.communicate()[0]

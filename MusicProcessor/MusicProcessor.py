@@ -22,12 +22,35 @@ from itertools import count
 from os import getenv, listdir, makedirs, remove
 from os.path import getmtime, getsize, isdir, isfile, join
 from re import compile as reCompile
+from shutil import move
 from sys import argv, stdout
 
 try:
     from pydub import AudioSegment
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pydub v0.9.2 or later: https://pypi.python.org/pypi/pydub\n" % (ex.__class__.__name__, ex))
+
+try: # Filesystem symbolic links configuration
+    from os import symlink # UNIX # pylint: disable=E0611
+    from os.path import islink # UNIX # pylint: disable=E0611
+except ImportError:
+    global symlink # pylint: disable=W0604
+    try:
+        import ctypes
+        FILE_ATTRIBUTE_REPARSE_POINT = 1024
+        INVALID_FILE_ATTRIBUTES = -1
+        dll = ctypes.windll.LoadLibrary('kernel32.dll')
+        def symlink(source, linkName):
+            if not dll.CreateSymbolicLinkW(linkName, source, 0):
+                raise OSError("code %d" % dll.GetLastError())
+        def islink(path):
+            ret = dll.GetFileAttributesW(path)
+            if ret == INVALID_FILE_ATTRIBUTES:
+                raise OSError("code %d" % dll.GetLastError())
+            return bool(ret & FILE_ATTRIBUTE_REPARSE_POINT)
+    except Exception, ex:
+        symlink = None
+        print "%s: %s\nWARNING: Filesystem links will not be available.\nPlease run on UNIX or Windows Vista or later.\n" % (ex.__class__.__name__, ex)
 
 from EmotionProcessor import convert, convertEmotion, convertTitle, updateEmotions, verifyCharacter
 
@@ -36,6 +59,10 @@ MUSIC_LOCATION_VARIABLE = 'ATLANTIS_MUSIC'
 SOURCE_DIR = 'src'
 ARMLET_DIR = 'armlet'
 MUSIC_DIR = 'music'
+ERROR_DIR = 'errors'
+
+SD_DIR = 'SD'
+EXCLUDE_DIRS = (SD_DIR,)
 
 INI_FILE = 'settings.ini'
 INI_ID_LINE = 'id=%d\n'
@@ -98,38 +125,41 @@ def resultMark(targetDir, result):
     for markName in RESULT_MARKS.itervalues():
         silentRemove(join(targetDir, markName))
     if result is not None:
-        with open(join(targetDir, RESULT_MARKS[bool(result)]), 'w'):
+        with open(join(targetDir, RESULT_MARKS[bool(result)]), 'wb'):
             pass
 
 def checkResultMark(targetDir):
     okMark = join(targetDir, RESULT_MARKS[False])
     errorMark = join(targetDir, RESULT_MARKS[True])
-    if isfile(okMark):
-        if isfile(errorMark):
-            remove(okMark)
-            remove(errorMark)
-        else:
-            return getmtime(okMark)
-    elif isfile(errorMark):
-        return False
-    return None
+    return max(getmtime(okMark) if isfile(okMark) else 0, getmtime(errorMark) if isfile(errorMark) else 0)
 
 def processCharacter(name, number, emotions, baseDir = '.'):
-    def error(s):
-        print "\nERROR: %s" % s
+    def error(fullName, s):
+        if fullName:
+            if not isdir(errorDir):
+                makedirs(errorDir)
+            move(fullName, errorDir)
         errors.append(s)
     errors = []
     print "\nProcessing character: %s (%d)" % (name, number)
+    sdDir = join(unicode(baseDir), SD_DIR)
     baseDir = join(unicode(baseDir), name)
     sourceDir = join(baseDir, SOURCE_DIR)
+    errorDir = join(baseDir, ERROR_DIR)
     armletDir = join(baseDir, ARMLET_DIR)
     musicDir = join(armletDir, MUSIC_DIR)
     if not isdir(musicDir):
         makedirs(musicDir)
     musicFiles = tuple(join(musicDir, f) for f in listdir(musicDir))
     if number > 0:
-        with open(join(armletDir, INI_FILE), 'w') as f:
+        with open(join(armletDir, INI_FILE), 'wb') as f:
             f.write(INI_ID_LINE % number)
+    if symlink:
+        for fileName in (f for f in (join(armletDir, f) for f in listdir(armletDir)) if islink(f)):
+            remove(fileName)
+        for fileName in listdir(sdDir):
+            print join(sdDir, fileName), join(armletDir, fileName)
+            symlink(join(sdDir, fileName), join(armletDir, fileName))
     characterFile = join(armletDir, CHARACTER_CSV)
     if isfile(characterFile):
         print "Character file found, verifying"
@@ -143,18 +173,18 @@ def processCharacter(name, number, emotions, baseDir = '.'):
         hasMusic = True
         print "Music OK, %d files found" % len(musicFiles)
     elif not isdir(sourceDir):
-        print sourceDir
         hasMusic = False
-        print "No music source found"
+        print "No music source directory found: %s" % sourceDir
     else:
         files = listdir(sourceDir)
         hasMusic = bool(files)
         print "Source music files found: %d" % len(files)
         newFileNameSet = set()
         for (trackNumber, fileName) in enumerate(files, 1):
+            fullName = join(sourceDir, fileName)
             match = CHECK_PATTERN.match(fileName)
             if not match:
-                error("Bad file name: " + fileName)
+                error(fullName, "Bad file name: " + fileName)
                 continue
             groups = match.groupdict()
             emotion = convertEmotion(groups[EMOTION])
@@ -165,7 +195,7 @@ def processCharacter(name, number, emotions, baseDir = '.'):
                 title = artist
                 artist = ''
             if emotion not in emotions:
-                error("Unknown emotion: " + fileName)
+                error(fullName, "Unknown emotion: " + fileName)
                 continue
             newFileNamePrefix = SEPARATOR.join((emotion, name))
             for s in (artist, title, tail):
@@ -176,18 +206,17 @@ def processCharacter(name, number, emotions, baseDir = '.'):
                 newFileName = '%s%s%s' % (newFileNamePrefix, i or '', NEW_EXTENSION)
                 if newFileName not in newFileNameSet:
                     break
-            fullName = join(sourceDir, fileName)
             newFileNameSet.add(newFileName)
             newFullName = join(musicDir, newFileName)
             stdout.write('.') # "%s -> %s" % (fileName, newFileName)
             stdout.flush()
-            e = processFile(fullName, newFullName, number, name, '%d/%d' % (trackNumber, len(files)), emotion, artist, title, tail)
+            e = None # processFile(fullName, newFullName, number, name, '%d/%d' % (trackNumber, len(files)), emotion, artist, title, tail)
             if e:
-                error("Error processing: %s: %s" % (e, fullName))
+                error(fullName, "Error processing: %s: %s" % (e, fullName))
         print
         obsoleteFiles = tuple(f for f in listdir(unicode(musicDir)) if f not in newFileNameSet)
         if obsoleteFiles:
-            error("Obsolete files found (%d), removing" % len(obsoleteFiles))
+            error(None, "Obsolete files found (%d), removing" % len(obsoleteFiles))
             for fileName in obsoleteFiles:
                 remove(join(musicDir, fileName))
         resultMark(baseDir, errors)
@@ -206,7 +235,7 @@ def updateMusic(sourceDir = '.'):
     if not isfile(join(sourceDir, MUSIC_MARK)):
         print "Not a music directory: %s" % sourceDir
         return
-    characterDirs = tuple(sorted(str(d) for d in listdir(unicode(sourceDir)) if isdir(join(sourceDir, d))))
+    characterDirs = tuple(sorted(str(d) for d in listdir(unicode(sourceDir)) if d not in EXCLUDE_DIRS and isdir(join(sourceDir, d))))
     if not characterDirs:
         print "No character directories found in music directory: %s" % sourceDir
         return

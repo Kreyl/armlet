@@ -61,9 +61,11 @@ def loadCharacters():
     exec urlopen(ALLRPG_MODULE_PATH).read() in locals() # Importing getAllRoles function # pylint: disable=W0122
     print "Fetching data from allrpg.info..."
     allRoles = getAllRoles(GAME_ID) # pylint: disable=E0602
-    print "Done"
+    print "Processing data..."
     # ToDo: Employ some sorting? By creation date?
-    return tuple(str(name) for name in (allRoles[row][NAME_COLUMN] for row in xrange(1, len(allRoles))) if name)
+    ret = tuple(str(name) for name in (allRoles[row][NAME_COLUMN] for row in xrange(1, len(allRoles))) if name)
+    print "Done"
+    return ret
 
 def updateCharacters():
     print "Processing characters..."
