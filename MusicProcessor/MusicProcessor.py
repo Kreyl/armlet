@@ -25,6 +25,11 @@ from re import compile as reCompile
 from shutil import move
 from sys import argv, stdout
 
+# ToDo:
+# Add common silence, master, and wrong emotions
+# Add specific directory for master's music or copy to player's
+# Find a way to notify about existing 'error' music
+
 try:
     from pydub import AudioSegment
 except ImportError, ex:
@@ -210,7 +215,7 @@ def processCharacter(name, number, emotions, baseDir = '.'):
             newFullName = join(musicDir, newFileName)
             stdout.write('.') # "%s -> %s" % (fileName, newFileName)
             stdout.flush()
-            e = None # processFile(fullName, newFullName, number, name, '%d/%d' % (trackNumber, len(files)), emotion, artist, title, tail)
+            e = processFile(fullName, newFullName, number, name, '%d/%d' % (trackNumber, len(files)), emotion, artist, title, tail)
             if e:
                 error(fullName, "Error processing: %s: %s" % (e, fullName))
         print
