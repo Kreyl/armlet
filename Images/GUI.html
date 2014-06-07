@@ -1,0 +1,202 @@
+<!DOCTYPE HTML>
+<html lang="ru">
+<head>
+<meta charset="Windows-1251">
+<meta name="Author" content="Vasily Zakharov <vmzakhar@gmail.com>">
+<title>Armlet GUI Test</title>
+<style type="Text/CSS">
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+pre {
+  margin: 0;
+  padding: 1px 2px;
+}
+
+#gui {
+  width: 160px;
+  height: 128px;
+  position: relative;
+  border: 1px solid black;
+  margin: 1em;
+  padding: 0;
+}
+
+.screen {
+  width: 100%;
+  height: 100%;
+  font-family: Courier New, monospace;
+  font-weight: bold;
+  font-size: 14px;
+  color: white;
+  margin: 0;
+  padding: 0;
+  display: none;
+}
+
+.button {
+  position: absolute;
+}
+
+#lock {
+  position: absolute;
+  display: none;
+}
+</style>
+<script type="Text/JavaScript">
+var IMAGES = '../SD/GUI/';
+
+var A = 'A';
+var B = 'B';
+var C = 'C';
+var L = 'L';
+var E = 'E';
+var R = 'R';
+var X = 'X';
+var Y = 'Y';
+var Z = 'Z';
+
+var ABSENT = 0;
+var NORMAL = 1;
+var PRESSED = 2;
+var NOT = 3;
+var ENABLED = 4;
+var DISABLED = 5;
+
+var STATES = ['absent', 'normal', 'pressed', 'not', 'enabled', 'disabled'];
+
+var TITLE = 'CharName   23:59 BB';
+
+var currentScreen = null;
+
+var locked = false;
+
+function setState(button, state) {
+    button.state = state;
+    button.src = button.states[state];
+}
+
+function mouseDown() {
+    var newState = null;
+    switch (this.key) {
+    case B:
+    case C:
+    case E:
+    case X:
+    case Y:
+    case Z:
+        if (locked) {
+            break;
+        }
+    case L:
+        newState = PRESSED;
+        break;
+    }
+    if (newState != null) {
+        setState(this, newState);
+    }
+}
+
+function mouseUp() {
+    if (this.state == NOT) {
+        setState(this, NORMAL);
+    }
+    if (this.state != PRESSED) {
+        return;
+    }
+    var newScreen = currentScreen;
+    switch (this.key) {
+    case L:
+        newScreen = 0;
+        locked = !locked;
+        break;
+    case E:
+        newScreen = (currentScreen + 1) % screens.length;
+        break;
+    case B:
+    case C:
+    case X:
+    case Y:
+    case Z:
+        if (currentScreen != 0) {
+            this.enabled = !this.enabled;
+            setState(this, this.enabled ? ENABLED : NORMAL);
+        }
+        break;
+    }
+    var buttons = screens[newScreen].buttons;
+    for (var i = 0, button; button = buttons[i++];) {
+        if (button.state == PRESSED || button.state == NOT) {
+            setState(button, NORMAL);
+        }
+    }
+    if (newScreen != currentScreen) {
+        screens[currentScreen].style.display = 'none';
+        currentScreen = newScreen;
+        screens[currentScreen].style.display = 'block';
+    }
+    lock.style.display = locked ? 'block' : 'none';
+}
+
+function mouseOut() {
+    if (this.state == PRESSED || this.state == NOT) {
+        setState(this, NORMAL);
+    }
+}
+
+function main() {
+    screens = document.getElementsByClassName('screen');
+    for (var i = 0, screen; screen = screens[i++];) {
+        var pre = document.createElement('pre');
+        pre.appendChild(document.createTextNode(TITLE));
+        screen.insertBefore(pre, screen.firstChild);
+        screen.style.background = 'url(' + IMAGES + screen.id + '/back.bmp)';
+        if (i == 1) {
+            screen.style.display = 'block';
+            currentScreen = i - 1;
+        }
+        screen.buttons = screen.getElementsByClassName('button');
+        for (var j = 0, button; button = screen.buttons[j++];) {
+            button.key = button.getAttribute('key');
+            button.enabled = false;
+            var prefix = IMAGES + screen.id + '/';
+            var suffix = '/' + button.key + '.bmp';
+            button.states = [];
+            for (var k = 0; k < STATES.length; k++) {
+              button.states[k] = prefix + STATES[k] + suffix;
+            }
+            button.onmousedown = mouseDown;
+            button.onmouseup = mouseUp;
+            button.onmouseout = mouseOut;
+            setState(button, NORMAL);
+        }
+    }
+    lock = document.getElementById('lock');
+    lock.src = IMAGES + 'lock.bmp';
+}
+</script>
+</head>
+<body onload="main()">
+  <div id="gui">
+    <div id="main" class="screen">
+      <img class="button" key="L" alt="lock" style="bottom: 0; left: 4px">
+      <img class="button" key="E" alt="экран" style="bottom: 0; left: 59px">
+      <img class="button" key="X" alt="музыка" style="bottom: 68px; left: 130px">
+      <img class="button" key="Y" alt="^^" style="bottom: 33px; left: 130px">
+      <img class="button" key="Z" alt="vv" style="bottom: 0; left: 130px">
+    </div>
+    <div id="intentions" class="screen">
+      <img class="button" key="B" alt="Убийство" style="bottom: 56px">
+      <img class="button" key="C" alt="Созидание" style="bottom: 17px">
+      <img class="button" key="L" alt="lock" style="bottom: 0; left: 4px">
+      <img class="button" key="E" alt="экран" style="bottom: 0; left: 59px">
+      <img class="button" key="X" alt="Что-то" style="bottom: 74px; left: 109px">
+      <img class="button" key="Y" alt="Ещё" style="bottom: 35px; left: 125px">
+      <img class="button" key="Z" alt="Разрушение" style="bottom: 1px; left: 103px">
+    </div>
+    <img id="lock" style="bottom: 44px; left: 63px">
+  </div>
+</body>
+</html>

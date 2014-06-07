@@ -62,10 +62,10 @@ void rLevel1_t::ITask() {
             RxTmt = CYCLE_TIME;
 //            RxStartTime = chTimeNow();
             IMeshRx = true;
-            Counter++;
+          //  Counter++;
             // Init VirtualTimer
             chVTSet(&MeshRxVT, MS2ST(CYCLE_TIME), RxEnd, nullptr);
-            Uart.Printf("RxStart=%u, t=%u\r", Counter, chTimeNow());
+          //  Uart.Printf("RxStart=%u, t=%u\r", Counter, chTimeNow());
             do {
                 Time = chTimeNow();
 //                Uart.Printf("Rx for t=%u\r", RxTmt);
@@ -76,7 +76,9 @@ void rLevel1_t::ITask() {
                 } // Pkt Ok
                 RxTmt = ((chTimeNow() - Time) > 0)? RxTmt - (chTimeNow() - Time) : 0;
             } while(IMeshRx);
+#ifdef       UART_MESH_DEBUG
             Uart.Printf("RxEnd, t=%u\r\r", chTimeNow());
+#endif
             chEvtSignal(Mesh.IPThread, EVTMSK_UPDATE_CYCLE);
 
         }

@@ -55,6 +55,7 @@ void CreateFileWithString(char* filename, char * filestring,int string_size, BYT
 void CreateFileWithStringArray(char* filename, int string_size, BYTE open_mode );
 int PrintFileToUART(char* filename);
 int GetRandomEmoToPlay();
+int GetFileNumerForEmoToPlay(int emo_id);
 char * GetFileNameToPlayFromEmoId(int emo_id);
 void RebuildReasons();
 void PlayNewEmo(int emo_id,int err_id);

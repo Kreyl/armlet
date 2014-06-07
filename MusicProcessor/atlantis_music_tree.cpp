@@ -17,6 +17,11 @@
 #define MAX_EMO_NAME_CHAR 20
 #define MAX_MUSIC_FILE_NAME_CHAR 128
 
+
+
+//#define UART_EMOTREE_DEBUG
+
+
 //emotionMusicNodeFiles emotionTreeMusicNodeFiles[music_array_size];
 //#define INI_BUF_SIZE    512
 //static char IBuf2[512];
@@ -127,7 +132,22 @@ int GetRandomEmoToPlay()
 	}
 	return 0;
 }
-
+int GetFileNumerForEmoToPlay(int emo_id)
+{
+    if(emo_id<0 || emo_id>emotions_number)
+    {
+        Uart.Printf("GetFileNumerForEmoToPlay emo_id out of range\r");
+        return -1;
+    }
+    //if no file available for this emo, play from top emo
+    if(emotions[emo_id].numTracks==0)
+    {
+        Uart.Printf("no files for emo %s \r", emotions[emo_id]);
+        return GetFileNumerForEmoToPlay(emotions[emo_id].parent);
+    }
+    else
+        return emotions[emo_id].numTracks;
+}
 char * GetFileNameToPlayFromEmoId(int emo_id)
 {
 	//TODO error to log here!
@@ -146,11 +166,15 @@ char * GetFileNameToPlayFromEmoId(int emo_id)
 	//if 1 file, always use it.
 	if(emotions[emo_id].numTracks ==1)
 	{
+#ifdef UART_EMOTREE_DEBUG
 		Uart.Printf("GetFileNameToPlayFromEmoId only one file for emo %s \r", emotions[emo_id]);
+#endif
 		return GetMusicFileNameFromList(emo_id,0);//"TODO get full filename";// emotionTreeMusicNodeFiles[emo_id].music_files[0].full_filename;
 	}
+#ifdef UART_EMOTREE_DEBUG
 	else
-		Uart.Printf("GetFileNameToPlayFromEmoId found %d files for for emo %s \r",emotions[emo_id].numTracks, emotions[emo_id]);
+		Uart.Printf("GetFileNameToPlayFromEmoId found %d files for emo %s \r",emotions[emo_id].numTracks, emotions[emo_id]);
+#endif
 	// если треков 2 и более
 	int rand_val=Random(emotions[emo_id].numTracks-2)+1; //рандомное число от максимум треков +1
 	if(emotions[emo_id].numTracks==0) Uart.Printf("GetFileNameToPlayFromEmoId smth wrong\r");
@@ -248,10 +272,14 @@ int Init_emotionTreeMusicNodeFiles_FromFileIterrator()
         if(emo_id>=0)
                  {  //собственно инициализация
                      //увеличиваем счетчик файлов
-//                    Uart.Printf("emo id found2: %d \r",emo_id);
+#ifdef UART_EMOTREE_DEBUG
+                    Uart.Printf("emo id found2: %d \r",emo_id);
+#endif
                      emotions[emo_id].numTracks++;
                  }
-//                 else Uart.Printf("cannot find emotion for file1 %s \r",SD.Filename);//MusicFileNamebuffer);
+#ifdef UART_EMOTREE_DEBUG
+        else Uart.Printf("cannot find emotion for file1 %s \r",SD.Filename);//MusicFileNamebuffer);
+#endif
     }
 
     while(SD.GetNext()==FR_OK)
@@ -261,10 +289,14 @@ int Init_emotionTreeMusicNodeFiles_FromFileIterrator()
         if(emo_id>=0)
         {  //собственно инициализация
             //увеличиваем счетчик файлов
-//            Uart.Printf("emo id found3: %d, filename %s \r",emo_id,SD.Filename);
+#ifdef UART_EMOTREE_DEBUG
+            Uart.Printf("emo id found3: %d, filename %s \r",emo_id,SD.Filename);
+#endif
             emotions[emo_id].numTracks++;
         }
-//        else Uart.Printf("cannot find emotion for file2 %s \r",SD.Filename);//MusicFileNamebuffer);
+#ifdef UART_EMOTREE_DEBUG
+        else Uart.Printf("cannot find emotion for file2 %s \r",SD.Filename);//MusicFileNamebuffer);
+#endif
     }
     //TODO critical error, stop working
 
@@ -313,28 +345,28 @@ void CreateFileWithString(char* filename, char * filestring,int string_size, BYT
 	 }
 	 f_close(&file);
 }
-char filedata[4][512]={"fon_1_music1.mp3","fon_2_music2.mp3","ravnodushie_1_music_3.mp3","zlost_1_music_4.mp3'"};
-void CreateFileWithStringArray(char* filename,int string_size, BYTE open_mode )
-{
-	 FIL file;
-	 int open_code= f_open (
-		&file,
-	   	filename,
-	   	FA_CREATE_ALWAYS | FA_WRITE// 	open_mode
-	 );
-	 if(open_code!=0)
-	 {
-//		 Uart.Printf("CreateFileWithStringArray error on filename %s , code from f_open  %d  \r",filename,open_code);
-		 return;
-	 }
-	 for(int i=0;i<string_size;i++)
-	 {
-		 int string_size=strlen(filedata[i]);
-		 UINT bw;
-		 f_write(&file, filedata[i], string_size, &bw);
-	 }
-	 f_close(&file);
-}
+//char filedata[4][512]={"fon_1_music1.mp3","fon_2_music2.mp3","ravnodushie_1_music_3.mp3","zlost_1_music_4.mp3'"};
+//void CreateFileWithStringArray(char* filename,int string_size, BYTE open_mode )
+//{
+//	 FIL file;
+//	 int open_code= f_open (
+//		&file,
+//	   	filename,
+//	   	FA_CREATE_ALWAYS | FA_WRITE// 	open_mode
+//	 );
+//	 if(open_code!=0)
+//	 {
+////		 Uart.Printf("CreateFileWithStringArray error on filename %s , code from f_open  %d  \r",filename,open_code);
+//		 return;
+//	 }
+//	 for(int i=0;i<string_size;i++)
+//	 {
+//		 int string_size=strlen(filedata[i]);
+//		 UINT bw;
+//		 f_write(&file, filedata[i], string_size, &bw);
+//	 }
+//	 f_close(&file);
+//}
 
 
 int PrintFileToUART(char* filename)

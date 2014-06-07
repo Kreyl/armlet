@@ -27,9 +27,11 @@
 
 #include "application.h"
 #include "atlantis_music_tree.h"
-
+#include "..\AtlGui\atlgui.h"
 static inline void Init();
-
+#define CLEAR_SCREEN_FOR_DEBUG
+//#define UART_MESH_DEBUG
+#define UART_EMOTREE_DEBUG
 int main() {
     // ==== Setup clock ====
     uint8_t ClkResult = 1;
@@ -49,11 +51,12 @@ int main() {
     Init();
     // Report problem with clock if any
     if(ClkResult) Uart.Printf("Clock failure\r");
-
+#ifndef CLEAR_SCREEN_FOR_DEBUG
     while(TRUE) {
         chThdSleepMilliseconds(999);
         Lcd.Printf(11, 21, clWhite, clBlack, "%ums   ", Mesh.GetAbsTimeMS());
     }
+#endif
 }
 
 void Init() {
@@ -67,12 +70,17 @@ void Init() {
     Uart.Printf("ID=%u\r", ID);
 
     Lcd.Init();
+#ifndef CLEAR_SCREEN_FOR_DEBUG
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
+#endif
+  // Lcd.DrawBmpFile(0, 0, "splash.bmp");
+    //Lcd.DrawBmpFile(0, 0, "TestHorizontal.png");
+   // Lcd.PutBitmap(0,0,160,128,PBuf)
 
  //   Init_emotionTreeMusicNodeFiles_FromFile(filename);
  //   Print_emotionTreeMusicNodeFiles_ToUART();
 
-//    Keys.Init();
+    Keys.Init();
     Beeper.Init();
 //    Vibro.Init();
 
@@ -85,9 +93,11 @@ void Init() {
 
     Sound.Init();
     Sound.SetVolume(254);
-//    Sound.Play("alive.wav");
+
+    //Sound.Play("fon-WhiteTower.mp3");//"alive.wav");
 
     App.Init();
+    AtlGui.Init();
 
     rLevel1.Init(ID);
     Mesh.Init(ID);

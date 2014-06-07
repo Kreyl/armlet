@@ -230,6 +230,18 @@ public:
     void Off() { *PCCR = 0; }
 };
 
+class PwmPin_t_LCD {
+private:
+    uint32_t *PClk;
+    TIM_TypeDef* Tim;
+public:
+    __IO uint32_t *PCCR;    // Made public to allow DMA
+    void SetFreqHz(uint32_t FreqHz);
+    void Init(GPIO_TypeDef *GPIO, uint16_t N, uint8_t TimN, uint8_t Chnl, uint16_t TopValue, bool Inverted=false);
+    void On(uint16_t Brightness) { *PCCR = Brightness; }
+    void Off() { *PCCR = 0; }
+};
+
 #if 1 // ==== External IRQ ====
 enum ExtiTrigType_t {ttRising, ttFalling, ttRisingFalling};
 class IrqPin_t {
