@@ -1,9 +1,9 @@
 #
-# Reasons.csv
+# Locations.csv
 #
-# RID->EID table for generic character.
+# RID->EID table for a generic character.
 #
-# Is processed by EmotionProcessor.py and integrated into ArmLet firmware.
+# Processed by EmotionProcessor.py and integrated into ArmLet firmware.
 #
 hub,9,fon
 uliza,1,fon
