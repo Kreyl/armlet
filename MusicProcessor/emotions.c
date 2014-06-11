@@ -191,6 +191,7 @@ Reason_t reasons[] = {
  /* 102 */ { "Dawson", 0, 0 },
  /* 103 */ { "Huxley", 0, 0 },
  /* 104 */ { "Graywood", 0, 0 },
+ /* 105 */ { "Hill", 0, 0 },
 };
 
 const int reasons_number = countof(reasons);
