@@ -131,7 +131,7 @@ def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion
         if processedAudio.duration_seconds != sourceAudio.duration_seconds:
             return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
         TAGS.update({'disc': playerID, 'album': albumName, 'track': trackNumber, 'artist': artist, 'title': title, 'genre': emotion, 'comment': tail, 'comments': tail})
-        processedAudio.export(newFullName, format = NEW_FORMAT, bitrate= '256k', tags = TAGS)
+        processedAudio.export(newFullName, format = NEW_FORMAT, bitrate = '256k', tags = TAGS)
         if not isfile(newFullName) or getsize(newFullName) < 0.2 * getsize(fullName):
             return "Processed file is too small: %d bytes, while original file was %d bytes" % (getsize(newFullName), getsize(fullName))
         return None
@@ -166,6 +166,8 @@ def checkResultMark(targetDir):
 def processCharacter(name, number, emotions, baseDir = '.'):
     def log(error, fileName, message):
         s = '%s%s' % (('%s: ' % fileName) if fileName else '', message)
+        if fileName:
+            print
         print s
         messages.append('%s\r\n' % s)
         hasErrors[0] = hasErrors[0] or error # pylint: disable=E0601
@@ -243,7 +245,7 @@ def processCharacter(name, number, emotions, baseDir = '.'):
                         title = artist
                         artist = ''
                     if emotion not in emotions:
-                        log(True, fileName, "Unknown emotion: " + fileName)
+                        log(True, fileName, "Unknown emotion")
                         dumpToErrors = True
                     newFileNamePrefix = SEPARATOR.join((emotion, name))
                     for s in (artist, title, tail):
@@ -265,7 +267,6 @@ def processCharacter(name, number, emotions, baseDir = '.'):
                     newFullName = join(errorDir, newFileName)
                 e = processFile(fullName, newFullName, number, name, '%d/%d' % (trackNumber, len(files)), emotion, artist, title, tail)
                 if e:
-                    print
                     log(True, fileName, "Error processing: %s" % e)
                     createDir(errorDir)
                     copy(fullName, errorDir)
