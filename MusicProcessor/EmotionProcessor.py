@@ -97,6 +97,10 @@ RESERVED_REASON = 'r%03d'
 
 TEST_COMMAND = 'gcc -o test %s test.c && ./test && rm test' % C_TARGET
 
+EMOTION_PATCHES = {
+    'somneniya': 'somnenie'
+}
+
 def width(array):
     return len(str((len(array) or 1) - 1))
 
@@ -107,7 +111,8 @@ def convertTitle(s):
     return convert(s.strip())
 
 def convertEmotion(s):
-    return convertTitle(s).lower()
+    e = convertTitle(s).lower()
+    return EMOTION_PATCHES.get(e, e)
 
 def readCSV(csv): # generator
     with open(csv) as f:

@@ -9,16 +9,11 @@
 # - In Choose XSL File, locate mm2csv.xsl template in FreeMind/accessories directory.
 # - In Choose ExportFile, specify Emotions.csv located in the same directory as this script.
 # - Perform Export.
-# - Run this script: python MusicProcessor.py [sourceDirectory [targetDirectory]]
-# - The script would:
-# -- Verify all the files in source directory (recursive) for the correct file name format.
-# -- Convert all the files to the format suitable for ArmLet3 to use.
-# -- Put the converted files to target directory.
-# - If source directory is not specified, current directory is used.
-# - If target directory is not specified, source/processed subdirectory is used.
+# - Run this script: python MusicProcessor.py [-v|--verify] [musicDirectory]
 #
 from codecs import open as codecsOpen
 from errno import ENOENT
+from getopt import getopt
 from itertools import chain, count
 from os import getenv, listdir, makedirs, remove, rmdir
 from os.path import expanduser, getmtime, getsize, isdir, isfile, join
@@ -28,8 +23,6 @@ from sys import argv, stdout
 
 # ToDo:
 # Add common silence, master, and wrong emotions
-# Add specific directory for master's music or copy to player's
-# Find a way to notify about existing 'error' music
 
 try:
     from pydub import AudioSegment
@@ -138,12 +131,25 @@ def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion
     except Exception, e:
         return e
 
-def resultMark(targetDir, result, okText = '', errorText = ''):
+def verifyFile(fullName):
+    try:
+        sourceAudio = AudioSegment.from_file(fullName)
+        if sourceAudio.duration_seconds < 50:
+            return "Audio too short: %d seconds" % sourceAudio.duration_seconds
+        processedAudio = sourceAudio.normalize() # pylint: disable=E1103
+        if processedAudio.duration_seconds != sourceAudio.duration_seconds:
+            return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
+        processedAudio.export(format = 'null')
+        return None
+    except Exception, e:
+        return e
+
+def resultMark(targetDir, result, okNum = None, okSize = None, errorText = None):
     for markName in RESULT_MARKS.itervalues():
         silentRemove(join(targetDir, markName))
-    if okText:
-        with codecsOpen(join(targetDir, RESULT_MARKS[False]), 'wb', 'utf-8') as f:
-            f.write(okText)
+    if okNum is not None:
+        with open(join(targetDir, RESULT_MARKS[False]), 'wb') as f:
+            f.write('%d,%d\r\n' % (okNum, okSize))
     if result:
         with codecsOpen(join(targetDir, RESULT_MARKS[True]), 'wb', 'utf-8') as f:
             f.write(errorText)
@@ -153,17 +159,23 @@ def checkResultMark(targetDir):
     okDate = getmtime(okMark) if isfile(okMark) else 0
     okText = ''
     if okDate:
-        with codecsOpen(okMark, 'r', 'utf-8') as f:
-            okText = f.read()
+        with open(okMark) as f:
+            okText = tuple(int(i) for i in f.read().split(','))
+            okNum = okText[0]
+            okSize = okText[1] if len(okText) > 1 else 0
+    else:
+        okNum = okSize = None
     errorMark = join(targetDir, RESULT_MARKS[True])
     errorDate = getmtime(errorMark) if isfile(errorMark) else 0
     errorText = ''
     if errorDate:
         with codecsOpen(errorMark, 'r', 'utf-8') as f:
             errorText = f.read()
-    return (bool(errorDate), max(okDate, errorDate), okText, errorText)
+    return (bool(errorDate), max(okDate, errorDate), okNum, okSize, errorText)
 
-def processCharacter(name, number, emotions, baseDir = '.'):
+def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False):
+    class ProcessException(Exception):
+        pass
     def log(error, fileName, message):
         s = '%s%s' % (('%s: ' % fileName) if fileName else '', message)
         if fileName:
@@ -199,21 +211,48 @@ def processCharacter(name, number, emotions, baseDir = '.'):
     if isfile(characterFile):
         print "Character file found, verifying"
         verifyCharacter(emotions, characterFile)
-    (withErrors, markDate, okText, errorText) = checkResultMark(baseDir)
+    (withErrors, markDate, okNum, okSize, errorText) = checkResultMark(baseDir)
     if markDate:
-        if any(date > markDate for date in (getmtime(f) for f in chain(sourceFiles, musicFiles, errorFiles))):
-            print "Status mark obsolete, newer music files exist, reprocessing"
-            resultMark(baseDir, None)
-            markDate = None
-        elif int(okText) != len(musicFiles):
-            print "Existing record contains %s files, but %d is actually found, reprocessing" % (okText, len(musicFiles))
+        try:
+            if any(date > markDate for date in (getmtime(f) for f in chain(sourceFiles, musicFiles, errorFiles))):
+                raise ProcessException("Status mark obsolete, newer music files exist")
+            if okNum is None:
+                raise ProcessException("No music files found")
+            if okNum != len(musicFiles):
+                raise ProcessException("Existing record mentions %s files, but %d is actually found" % (okNum, len(musicFiles)))
+            if okSize != sum(getsize(f) for f in musicFiles):
+                raise ProcessException("Existing record mentions total file size %d bytes, while actual total size is %d bytes" % (okSize, sum(getsize(f) for f in musicFiles)))
+            if verifyFiles:
+                print "Veryfying files",
+                for fileName in listdir(musicDir):
+                    stdout.write('.')
+                    stdout.flush()
+                    fullName = join(musicDir, fileName)
+                    dumpToErrors = False
+                    match = CHECK_PATTERN.match(fileName)
+                    if match:
+                        groups = match.groupdict()
+                        emotion = convertEmotion(groups[EMOTION])
+                        artist = convertTitle(groups[ARTIST])
+                        title = convertTitle(groups[TITLE] or '')
+                        tail = convert(groups[TAIL] or '')
+                        if emotion not in emotions:
+                            raise ProcessException("\nUnknown emotion: %d" % emotion)
+                    else:
+                        raise ProcessException("\nBad file name: %s" % fileName)
+                    e = verifyFile(join(musicDir, fileName))
+                    if e:
+                        raise ProcessException("\nError processing: %s" % e)
+                print
+        except ProcessException, e:
+            print "%s, reprocessing" % e
             resultMark(baseDir, None)
             markDate = None
     if markDate:
         hasMusic = True
-        print "Music already processed %s, %s files found" % ('OK' if not withErrors else 'with ERRORS', okText)
+        print "Music already processed %s, %s files found (%d total size)" % ('OK' if not withErrors else 'with ERRORS', okNum, okSize)
         if errorText:
-            print errorText
+            print errorText.strip()
     elif not isdir(sourceDir):
         hasMusic = False
         log(True, None, "No music source directory found: %s" % sourceDir)
@@ -276,13 +315,15 @@ def processCharacter(name, number, emotions, baseDir = '.'):
                 print "Obsolete files found (%d), removing" % len(obsoleteFiles)
                 for fileName in obsoleteFiles:
                     remove(join(musicDir, fileName))
-            numProcessed = len(getFiles(musicDir))
-            resultMark(baseDir, hasErrors[0], str(numProcessed) if hasMusic else '', ''.join(messages))
+            processedFiles = getFiles(musicDir)
+            numProcessed = len(processedFiles)
+            processedSize = sum(getsize(f) for f in processedFiles)
+            resultMark(baseDir, hasErrors[0], numProcessed if hasMusic else None, processedSize if hasMusic else None, ''.join(messages))
             if numProcessed:
-                print "Files OK: %d" % numProcessed
+                print "Files OK: %d (%d total size)" % (numProcessed, processedSize)
     return (hasMusic, hasErrors[0])
 
-def updateMusic(sourceDir = '.'):
+def updateMusic(sourceDir = '.', verifyFiles = False):
     sourceDir = expanduser(sourceDir)
     if not isdir(sourceDir):
         print "Music directory not found: %s" % sourceDir
@@ -304,7 +345,7 @@ def updateMusic(sourceDir = '.'):
     print "Character directories found: %d%s" % (len(characterDirs), (' (%d unknown)' % len(unknownCharacters)) if unknownCharacters else '')
     errorCharacters = []
     for d in characterDirs:
-        (hasMusic, hasErrors) = processCharacter(d, characters.get(d, -1), emotions, sourceDir)
+        (hasMusic, hasErrors) = processCharacter(d, characters.get(d, -1), emotions, sourceDir, verifyFiles)
         if hasMusic:
             if not hasErrors:
                 okCharacters.append(d)
@@ -320,10 +361,14 @@ def updateMusic(sourceDir = '.'):
         print "\nNo music found for characters (%d): %s" % (len(noMusicCharacters), ', '.join(sorted(noMusicCharacters)))
     if errorCharacters:
         print "\nErrors detected with music for characters (%d): %s" % (len(errorCharacters), ', '.join(sorted(errorCharacters)))
-    print
 
-def main(sourceDir = None):
-    updateMusic(sourceDir or getenv(MUSIC_LOCATION_VARIABLE, '.'))
+def main(*args):
+    verifyFiles = False
+    (options, parameters) = getopt(args, 'v', ('verify',))
+    for (option, _value) in options:
+        if option in ('-v', '--verify'):
+            verifyFiles = True
+    updateMusic(parameters[0] if parameters else getenv(MUSIC_LOCATION_VARIABLE, '.'), verifyFiles)
 
 if __name__ == '__main__':
     main(*argv[1:])

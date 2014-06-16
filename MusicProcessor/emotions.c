@@ -28,7 +28,7 @@ Emotion_t emotions[] = {
  /* 14 */             { "ozabochennost'", 1, 13, -1, -1 },
  /* 15 */                 { "napryazhennost'", 1, 14, -1, -1 },
  /* 16 */                     { "isterika", 1, 15, -1, -1 },
- /* 17 */             { "somneniya", 1, 13, -1, -1 },
+ /* 17 */             { "somnenie", 1, 13, -1, -1 },
  /* 18 */         { "trevozhnost'", 1, 1, -1, -1 },
  /* 19 */             { "strah", 1, 18, -1, -1 },
  /* 20 */                 { "uzhas", 1, 19, -1, -1 },
@@ -192,6 +192,7 @@ Reason_t reasons[] = {
  /* 103 */ { "Huxley", 0, 0 },
  /* 104 */ { "Graywood", 0, 0 },
  /* 105 */ { "Hill", 0, 0 },
+ /* 106 */ { "Malone", 0, 0 },
 };
 
 const int reasons_number = countof(reasons);

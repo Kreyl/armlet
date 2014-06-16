@@ -25,7 +25,7 @@
 						<node TEXT="Истерика"/>
 					</node>
 				</node>
-				<node TEXT="Сомнения"/>
+				<node TEXT="Сомнение"/>
 			</node>
 			<node TEXT="Тревожность">
 				<node TEXT="Страх">
