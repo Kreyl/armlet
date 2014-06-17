@@ -3,9 +3,12 @@
 #
 # Character name -> RID table for ArmLet initialization.
 #
-# Generated, updated and used by CharacterProcessor.py to track persistent and unique character ArmLet IDs.
+# Generated, updated and used by CharacterProcessor.py
+# to track persistent unique character ArmLet IDs.
 #
 # !!! DO NOT EDIT !!!
+#
+# Generated at 2014-06-17 21:07:36
 #
 101,Parcs
 102,Dawson

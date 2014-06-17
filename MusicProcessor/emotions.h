@@ -3,7 +3,8 @@
  *
  * Part of "Ticket to Atlantis" LARP music engine.
  *
- * Must be compatible with emotions.c that is generated automatically by EmotionProcessor.py
+ * Must be compatible with emotions.c
+ * that is generated automatically by EmotionProcessor.py
  */
 #ifndef EMOTIONS_H
 #define EMOTIONS_H

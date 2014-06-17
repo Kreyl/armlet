@@ -3,9 +3,12 @@
  *
  * Part of "Ticket to Atlantis" LARP music engine.
  *
- * Generated automatically by EmotionProcessor.py from Emotions.csv, Locations.csv and Characters.csv
+ * Generated automatically by EmotionProcessor.py
+ * from Emotions.csv, Locations.csv and Characters.csv
  *
  * !!! DO NOT EDIT !!!
+ *
+ * Generated at 2014-06-17 21:07:36
  */
 #include "emotions.h"
 

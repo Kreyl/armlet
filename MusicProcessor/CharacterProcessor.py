@@ -2,10 +2,15 @@
 #
 # Character Processor for Ticket to Atlantis LARP.
 #
-# Usage:
-# -
+# - Downloads allrpg.py library from allrpg.info source code repository
+# - Uses to download Excel table with all roles for a game
+# - Extracts character names from Excel table
+# - Loads, verifies and updates Characters.csv file
+#
+# Usage: python CharacterProcessor.py
 #
 from csv import reader as CSVReader, writer as CSVWriter
+from datetime import datetime
 from os.path import dirname, isfile, join, realpath
 from urllib import urlopen
 from sys import argv
@@ -24,11 +29,17 @@ CHARACTERS_CSV_HEADER = '''\
 #
 # Character name -> RID table for ArmLet initialization.
 #
-# Generated, updated and used by CharacterProcessor.py to track persistent and unique character ArmLet IDs.
+# Generated, updated and used by CharacterProcessor.py
+# to track persistent unique character ArmLet IDs.
 #
 # !!! DO NOT EDIT !!!
 #
+# Generated at %s
+#
 '''
+
+def currentTime():
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 def getFileName(name):
     return join(dirname(realpath(argv[0])), name)
@@ -52,7 +63,7 @@ def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
 
 def writeCharacters(characters, fileName = getFileName(CHARACTERS_CSV), header = CHARACTERS_CSV_HEADER):
     with open(fileName, 'wb') as f:
-        f.writelines(s + '\r\n' for s in header.splitlines())
+        f.writelines(s + '\r\n' for s in (header % currentTime()).splitlines())
         CSVWriter(f).writerows((number, name) for (name, number) in sorted(characters.iteritems(), key = lambda (name, number): number))
 
 def loadCharacters():
@@ -72,7 +83,6 @@ def loadCharacters():
         allRoles = sorted(getAllRoles(GAME_ID)[1:])
         print "Processing data..."
         ret = tuple(str(name) for name in (row[NAME_COLUMN] for row in allRoles) if name)
-        print ret
         print "Done"
         return ret
     except Exception, e:

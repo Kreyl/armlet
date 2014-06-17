@@ -2,14 +2,16 @@
 #
 # Music Processor for Ticket to Atlantis LARP.
 #
+# - Uses CharacterProcessor.py to update character information.
+# - Uses EmotionProcessor.py to update emotions information.
+# - Updates and verifies information in Atlantis Music Directory
+#   specified with ATLANTIS_MUSIC environment variable, with a parameter
+#   or in current directory.
+# - Atlantis Music directory must contain music_here file.
+# - If -v|--verify option is used, actual processed files are verified for consistency.
+#
 # Usage:
-# - Export emotions mind map to FreeMind format (Emotions.mm).
-# - Open Emotions.mm in FreeMind.
-# - Click File - Export - Using XSLT...
-# - In Choose XSL File, locate mm2csv.xsl template in FreeMind/accessories directory.
-# - In Choose ExportFile, specify Emotions.csv located in the same directory as this script.
-# - Perform Export.
-# - Run this script: python MusicProcessor.py [-v|--verify] [musicDirectory]
+# - python MusicProcessor.py [-v|--verify] [musicDirectory]
 #
 from codecs import open as codecsOpen
 from errno import ENOENT
