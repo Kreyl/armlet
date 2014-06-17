@@ -68,10 +68,11 @@ def loadCharacters():
         assert getAllRoles
     print "Fetching data from allrpg.info..."
     try:
-        allRoles = getAllRoles(GAME_ID)
+        # ToDo: Employ sorting by creation date when available
+        allRoles = sorted(getAllRoles(GAME_ID)[1:])
         print "Processing data..."
-        # ToDo: Employ some sorting? By creation date?
-        ret = tuple(str(name) for name in (allRoles[row][NAME_COLUMN] for row in xrange(1, len(allRoles))) if name)
+        ret = tuple(str(name) for name in (row[NAME_COLUMN] for row in allRoles) if name)
+        print ret
         print "Done"
         return ret
     except Exception, e:
