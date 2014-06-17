@@ -91,7 +91,7 @@ NO_PARENT = 'ROOT'
 
 MAX_ID = 254
 
-MAX_WEIGHT = 9
+MAX_WEIGHT = 99
 
 RESERVED_REASON = 'r%03d'
 
@@ -100,6 +100,12 @@ TEST_COMMAND = 'gcc -o test %s test.c && ./test && rm test' % C_TARGET
 EMOTION_PATCHES = {
     'somneniya': 'somnenie'
 }
+
+WRONG = 'wrong'
+MASTER = 'master'
+SILENCE = 'silence'
+TUMAN = 'tuman'
+ADDITIONAL_EMOTIONS = (WRONG, MASTER, SILENCE, TUMAN)
 
 def width(array):
     return len(str((len(array) or 1) - 1))
@@ -131,9 +137,6 @@ def getWeight(weight):
     assert ret in xrange(MAX_WEIGHT + 1), "Incorrect weight: %d" % ret
     return ret
 
-def reserveReason(rid):
-    return (rid, RESERVED_REASON % rid, 0, 0, '')
-
 def addReason(reasons, rid, reason, weight, eid, emotion):
     assert rid == int(rid) and rid >= 0 and rid < MAX_ID, "Bad ReasonID: %s" % rid
     assert reason.lower() not in (r[1].lower() for r in reasons), "Duplicate reason: %s" % reason
@@ -143,7 +146,8 @@ def processEmotions(fileName = getFileName(EMOTIONS_CSV)):
     parents = []
     emotionsIndexes = {}
     emotionsTree = []
-    for (eid, row) in enumerate(readCSV(fileName)):
+    rows = tuple(readCSV(fileName))
+    for (eid, row) in enumerate(chain(rows[0:1], (('', e) for e in ADDITIONAL_EMOTIONS), rows[1:])):
         emotion = convertEmotion(row[-1].decode('utf-8'))
         level = len(row) - 1
         if level > len(parents):
@@ -174,6 +178,8 @@ def processCharacters(fileName = getFileName(CHARACTERS_CSV)):
     return tuple(reasons)
 
 def processReasons(emotions):
+    def reserveReason(rid):
+        return (rid, RESERVED_REASON % rid, MAX_WEIGHT, emotions[WRONG], WRONG) # ToDo: Default reserve to fon?
     locations = (reserveReason(0),) + processLocations(emotions)
     locationReasons = set(r[1].lower() for r in locations)
     characters = processCharacters()

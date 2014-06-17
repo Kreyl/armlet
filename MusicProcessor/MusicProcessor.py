@@ -21,9 +21,6 @@ from re import compile as reCompile
 from shutil import copy
 from sys import argv, stdout
 
-# ToDo:
-# Add common silence, master, and wrong emotions
-
 try:
     from pydub import AudioSegment
 except ImportError, ex:
