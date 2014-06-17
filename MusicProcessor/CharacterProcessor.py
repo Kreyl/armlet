@@ -58,15 +58,17 @@ def writeCharacters(characters, fileName = getFileName(CHARACTERS_CSV), header =
 def loadCharacters():
     print "Fetching allrpg.info library..."
     ALLRPG_MODULE_PATH = 'https://raw.githubusercontent.com/aestetique/ALLRPG/master/tools/excel-functions.py'
+    global getAllRoles # pylint: disable=W0602
     try:
-        exec urlopen(ALLRPG_MODULE_PATH).read() in locals() # Importing getAllRoles function # pylint: disable=W0122
-        assert getAllRoles # pylint: disable=E0602
+        exec urlopen(ALLRPG_MODULE_PATH).read() in globals() # Importing getAllRoles function from remote allrpg module # pylint: disable=W0122
+        assert getAllRoles
     except Exception, e:
-        print "ERROR fetching library, using local version: %s" % e
-        exec 'from allrpg import getAllRoles' in locals() # For some reason conventional import doesn't work # pylint: disable=W0122
+        print "ERROR fetching library: %s, using local version" % e
+        from allrpg import getAllRoles # Importing getAllRoles function from local allrpg module
+        assert getAllRoles
     print "Fetching data from allrpg.info..."
     try:
-        allRoles = getAllRoles(GAME_ID) # pylint: disable=E0602
+        allRoles = getAllRoles(GAME_ID)
         print "Processing data..."
         # ToDo: Employ some sorting? By creation date?
         ret = tuple(str(name) for name in (allRoles[row][NAME_COLUMN] for row in xrange(1, len(allRoles))) if name)
