@@ -17,6 +17,7 @@
 			<node TEXT="Грусть">
 				<node TEXT="Тоска">
 					<node TEXT="Обреченность"/>
+					<node TEXT="Отчаяние"/>
 				</node>
 			</node>
 			<node TEXT="Неуверенность">
@@ -43,6 +44,9 @@
 				<node TEXT="Презрение"/>
 			</node>
 			<node TEXT="Неудовлетворенность"/>
+			<node TEXT="Сожаление">
+				<node TEXT="Стыд"/>
+			</node>
 		</node>
 		<node TEXT="Разрушение"/>
 		<node TEXT="Драка"/>
@@ -63,6 +67,8 @@
 					<node TEXT="Азарт"/>
 					<node TEXT="Воодушевление">
 						<node TEXT="Целеустремленность"/>
+						<node TEXT="Отвага"/>
+						<node TEXT="Решимость"/>
 					</node>
 					<node TEXT="Вдохновение"/>
 				</node>
@@ -84,6 +90,10 @@
 			</node>
 			<node TEXT="Покой">
 				<node TEXT="Умиротворение"/>
+				<node TEXT="Ностальгия"/>
+			</node>
+			<node TEXT="Сопереживание">
+				<node TEXT="Сострадание"/>
 			</node>
 		</node>
 		<node TEXT="Созидание"/>
@@ -99,5 +109,11 @@
 			<node TEXT="Заинтересованность"/>
 		</node>
 		<node TEXT="Зависимость"/>
+		<node TEXT="Духовное">
+			<node TEXT="Транс"/>
+			<node TEXT="Медитация"/>
+			<node TEXT="Экзальтация"/>
+			<node TEXT="Просветление"/>
+		</node>
 	</node>
 </map>

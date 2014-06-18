@@ -7,8 +7,8 @@
 <title text="Фон"/>
 <style key="Emotions"/>
 <auto-numbering style="disabled"/>
-<scrollstate zoom="70" x="-557" y="-385"/>
-<selection id="17"/>
+<scrollstate zoom="70" x="-543" y="-519"/>
+<selection id="49"/>
 <main-centraltheme id="0"/>
 </meta>
 <topics>
@@ -16,11 +16,11 @@
 <fillcolor r="141" g="81" b="7"/>
 <strokecolor r="72" g="42" b="4"/>
 </topic>
-<topic id="1" parent="0" x="111.50" y="152.49" colorinfo="-1" fillcolor="32768" strokecolor="16384" text="Негатив">
+<topic id="1" parent="0" x="110.07" y="58.20" colorinfo="-1" fillcolor="32768" strokecolor="16384" text="Негатив">
 <fillcolor r="0" g="128" b="0"/>
 <strokecolor r="0" g="64" b="0"/>
 </topic>
-<topic id="2" parent="1" x="245.77" y="48.37" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Равнодушие">
+<topic id="2" parent="1" x="244.34" y="8.37" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Равнодушие">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
@@ -36,7 +36,7 @@
 <fillcolor r="208" g="147" b="55"/>
 <strokecolor r="108" g="75" b="25"/>
 </topic>
-<topic id="6" parent="1" x="238.50" y="-66.61" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Злость">
+<topic id="6" parent="1" x="221.36" y="-72.32" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Злость">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
@@ -52,233 +52,285 @@
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="10" parent="1" x="182.58" y="258.26" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Грусть">
+<topic id="10" parent="1" x="286.87" y="423.97" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Грусть">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="11" parent="10" x="234.28" y="320.00" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Тоска">
+<topic id="11" parent="10" x="382.85" y="455.71" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Тоска">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="12" parent="11" x="292.77" y="432.45" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Обреченность">
+<topic id="12" parent="11" x="447.05" y="622.45" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Обреченность">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="13" parent="1" x="315.81" y="232.52" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Неуверенность">
+<topic id="13" parent="11" x="373.62" y="681.74" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Отчаяние">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
+</topic>
+<topic id="14" parent="1" x="314.38" y="188.23" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Неуверенность">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="14" parent="13" x="538.59" y="272.52" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Озабоченность">
+<topic id="15" parent="14" x="538.59" y="272.52" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Озабоченность">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="15" parent="14" x="643.45" y="173.74" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Напряженность">
+<topic id="16" parent="15" x="643.45" y="173.74" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Напряженность">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="16" parent="15" x="786.75" y="71.83" colorinfo="-1" fillcolor="3642320" strokecolor="1657708" text="Истерика">
+<topic id="17" parent="16" x="786.75" y="71.83" colorinfo="-1" fillcolor="3642320" strokecolor="1657708" text="Истерика">
 <fillcolor r="208" g="147" b="55"/>
 <strokecolor r="108" g="75" b="25"/>
 </topic>
-<topic id="17" parent="13" x="466.52" y="192.11" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Сомнение">
+<topic id="18" parent="14" x="466.52" y="192.11" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Сомнение">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="18" parent="1" x="382.12" y="341.95" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Тревожность">
+<topic id="19" parent="1" x="373.55" y="291.95" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Тревожность">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="19" parent="18" x="447.41" y="400.29" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Страх">
+<topic id="20" parent="19" x="465.98" y="368.86" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Страх">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="20" parent="19" x="431.44" y="491.92" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Ужас">
+<topic id="21" parent="20" x="444.30" y="467.63" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Ужас">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="21" parent="20" x="484.92" y="601.61" colorinfo="-1" fillcolor="3642320" strokecolor="1657708" text="Паника">
+<topic id="22" parent="21" x="514.92" y="524.47" colorinfo="-1" fillcolor="3642320" strokecolor="1657708" text="Паника">
 <fillcolor r="208" g="147" b="55"/>
 <strokecolor r="108" g="75" b="25"/>
 </topic>
-<topic id="22" parent="21" x="201.76" y="721.08" colorinfo="-1" fillcolor="3041212" strokecolor="1520991" text="Фобия">
+<topic id="23" parent="22" x="561.76" y="588.22" colorinfo="-1" fillcolor="3041212" strokecolor="1520991" text="Фобия">
 <fillcolor r="188" g="103" b="46"/>
 <strokecolor r="95" g="53" b="23"/>
 </topic>
-<topic id="23" parent="21" x="575.02" y="387.52" colorinfo="-1" fillcolor="3041212" strokecolor="1520991" text="Паранойя">
+<topic id="24" parent="22" x="575.02" y="387.52" colorinfo="-1" fillcolor="3041212" strokecolor="1520991" text="Паранойя">
 <fillcolor r="188" g="103" b="46"/>
 <strokecolor r="95" g="53" b="23"/>
 </topic>
-<topic id="24" parent="1" x="432.15" y="60.38" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Неприязнь">
+<topic id="25" parent="1" x="415.01" y="58.95" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Неприязнь">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="25" parent="24" x="768.98" y="-62.57" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Ненависть">
+<topic id="26" parent="25" x="768.98" y="-62.57" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Ненависть">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="26" parent="24" x="753.44" y="-205.90" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Отвращение">
+<topic id="27" parent="25" x="753.44" y="-205.90" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Отвращение">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="27" parent="24" x="614.07" y="72.85" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Презрение">
+<topic id="28" parent="25" x="614.07" y="72.85" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Презрение">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="28" parent="1" x="188.08" y="556.53" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Неудовлетворенность">
+<topic id="29" parent="1" x="326.65" y="360.82" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Неудовлетворенность">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="29" parent="0" x="71.75" y="290.93" colorinfo="-1" fillcolor="6710963" strokecolor="3026783" text="Разрушение">
+<topic id="30" parent="1" x="304.02" y="108.28" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Сожаление">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
+</topic>
+<topic id="31" parent="30" x="511.28" y="129.62" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Стыд">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
+</topic>
+<topic id="32" parent="0" x="93.18" y="203.79" colorinfo="-1" fillcolor="6710963" strokecolor="3026783" text="Разрушение">
 <fillcolor r="179" g="102" b="102"/>
 <strokecolor r="95" g="47" b="46"/>
 </topic>
-<topic id="30" parent="0" x="117.41" y="-186.10" colorinfo="-1" fillcolor="6710963" strokecolor="3026783" text="Драка">
+<topic id="33" parent="0" x="117.41" y="-186.10" colorinfo="-1" fillcolor="6710963" strokecolor="3026783" text="Драка">
 <fillcolor r="179" g="102" b="102"/>
 <strokecolor r="95" g="47" b="46"/>
 </topic>
-<topic id="31" parent="0" x="206.42" y="-266.47" colorinfo="-1" fillcolor="6710963" strokecolor="3026783" text="Убийство">
+<topic id="34" parent="0" x="206.42" y="-266.47" colorinfo="-1" fillcolor="6710963" strokecolor="3026783" text="Убийство">
 <fillcolor r="179" g="102" b="102"/>
 <strokecolor r="95" g="47" b="46"/>
 </topic>
-<topic id="32" parent="0" x="-130.89" y="85.99" colorinfo="-1" fillcolor="32768" strokecolor="16384" text="Позитив">
+<topic id="35" parent="0" x="-130.89" y="85.99" colorinfo="-1" fillcolor="32768" strokecolor="16384" text="Позитив">
 <fillcolor r="0" g="128" b="0"/>
 <strokecolor r="0" g="64" b="0"/>
 </topic>
-<topic id="33" parent="32" x="-277.14" y="-22.25" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Веселье">
+<topic id="36" parent="35" x="-277.14" y="-22.25" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Веселье">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="34" parent="33" x="-357.14" y="-85.10" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Радость">
+<topic id="37" parent="36" x="-357.14" y="-85.10" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Радость">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="35" parent="34" x="-417.43" y="-157.38" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Восторг">
+<topic id="38" parent="37" x="-417.43" y="-157.38" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Восторг">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="36" parent="32" x="-322.93" y="144.77" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Довольство">
+<topic id="39" parent="35" x="-405.79" y="110.48" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Довольство">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="37" parent="36" x="-637.45" y="298.82" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Гордость">
+<topic id="40" parent="39" x="-637.45" y="298.82" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Гордость">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="38" parent="36" x="-704.13" y="174.15" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Удовлетворение">
+<topic id="41" parent="39" x="-704.13" y="174.15" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Удовлетворение">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="39" parent="32" x="-234.95" y="-114.96" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Любопытство">
+<topic id="42" parent="35" x="-234.95" y="-114.96" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Любопытство">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="40" parent="39" x="-431.35" y="-270.04" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Интерес">
+<topic id="43" parent="42" x="-431.35" y="-270.04" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Интерес">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="41" parent="39" x="-246.97" y="-269.07" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Увлеченность">
+<topic id="44" parent="42" x="-246.97" y="-269.07" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Увлеченность">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="42" parent="41" x="-424.92" y="-410.56" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Азарт">
+<topic id="45" parent="44" x="-424.92" y="-410.56" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Азарт">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="43" parent="41" x="-184.89" y="-395.26" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Воодушевление">
+<topic id="46" parent="44" x="-184.89" y="-395.26" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Воодушевление">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="44" parent="43" x="-137.27" y="-536.56" colorinfo="-1" fillcolor="3642320" strokecolor="1657708" text="Целеустремленность">
+<topic id="47" parent="46" x="-238.70" y="-487.99" colorinfo="-1" fillcolor="3642320" strokecolor="1657708" text="Целеустремленность">
 <fillcolor r="208" g="147" b="55"/>
 <strokecolor r="108" g="75" b="25"/>
 </topic>
-<topic id="45" parent="41" x="58.49" y="-387.02" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Вдохновение">
+<topic id="48" parent="46" x="-101.72" y="-569.04" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Отвага">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
+</topic>
+<topic id="49" parent="46" x="-40.55" y="-464.26" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Решимость">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
+</topic>
+<topic id="50" parent="44" x="58.49" y="-387.02" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Вдохновение">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="46" parent="32" x="-208.16" y="203.13" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Приязнь">
+<topic id="51" parent="35" x="-208.16" y="203.13" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Приязнь">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="47" parent="46" x="-226.23" y="330.03" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Симпатия">
+<topic id="52" parent="51" x="-226.23" y="330.03" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Симпатия">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="48" parent="47" x="-384.43" y="487.19" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Привязанность">
+<topic id="53" parent="52" x="-384.43" y="487.19" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Привязанность">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="49" parent="48" x="-220.91" y="552.29" colorinfo="-1" fillcolor="3642320" strokecolor="1657708" text="Любовь">
+<topic id="54" parent="53" x="-220.91" y="552.29" colorinfo="-1" fillcolor="3642320" strokecolor="1657708" text="Любовь">
 <fillcolor r="208" g="147" b="55"/>
 <strokecolor r="108" g="75" b="25"/>
 </topic>
-<topic id="50" parent="47" x="-186.76" y="424.20" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Вожделение">
+<topic id="55" parent="52" x="-186.76" y="424.20" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Вожделение">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="51" parent="46" x="-546.15" y="419.14" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Умиление">
+<topic id="56" parent="51" x="-546.15" y="419.14" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Умиление">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="52" parent="32" x="-384.28" y="29.55" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Надежда">
+<topic id="57" parent="35" x="-384.28" y="29.55" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Надежда">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="53" parent="52" x="-506.66" y="-18.17" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Предвкушение">
+<topic id="58" parent="57" x="-506.66" y="-18.17" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Предвкушение">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="54" parent="53" x="-527.54" y="-121.78" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Вера">
+<topic id="59" parent="58" x="-527.54" y="-121.78" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Вера">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="55" parent="53" x="-632.23" y="72.28" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Уверенность">
+<topic id="60" parent="58" x="-632.23" y="72.28" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Уверенность">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="56" parent="32" x="-113.47" y="-88.51" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Покой">
+<topic id="61" parent="35" x="-123.47" y="-88.51" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Покой">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="57" parent="56" x="12.56" y="-260.45" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Умиротворение">
+<topic id="62" parent="61" x="-146.02" y="-224.74" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Умиротворение">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="58" parent="0" x="-38.57" y="-22.77" colorinfo="-1" fillcolor="6710963" strokecolor="3026783" text="Созидание">
+<topic id="63" parent="61" x="-31.95" y="-186.75" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Ностальгия">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
+</topic>
+<topic id="64" parent="35" x="-330.62" y="184.44" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Сопереживание">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
+</topic>
+<topic id="65" parent="64" x="-468.36" y="296.67" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Сострадание">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
+</topic>
+<topic id="66" parent="0" x="-38.57" y="-22.77" colorinfo="-1" fillcolor="6710963" strokecolor="3026783" text="Созидание">
 <fillcolor r="179" g="102" b="102"/>
 <strokecolor r="95" g="47" b="46"/>
 </topic>
-<topic id="59" parent="0" x="-69.09" y="159.43" colorinfo="-1" fillcolor="6710963" strokecolor="3026783" text="Секс">
+<topic id="67" parent="0" x="-87.66" y="153.72" colorinfo="-1" fillcolor="6710963" strokecolor="3026783" text="Секс">
 <fillcolor r="179" g="102" b="102"/>
 <strokecolor r="95" g="47" b="46"/>
 </topic>
-<topic id="60" parent="0" x="-19.42" y="241.38" colorinfo="-1" fillcolor="32768" strokecolor="16384" text="Желание">
+<topic id="68" parent="0" x="-52.28" y="241.38" colorinfo="-1" fillcolor="32768" strokecolor="16384" text="Желание">
 <fillcolor r="0" g="128" b="0"/>
 <strokecolor r="0" g="64" b="0"/>
 </topic>
-<topic id="61" parent="60" x="-50.23" y="330.14" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Влечение">
+<topic id="69" parent="68" x="-130.23" y="323.00" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Влечение">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="62" parent="61" x="-131.66" y="508.01" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Страсть">
+<topic id="70" parent="69" x="-131.66" y="508.01" colorinfo="-1" fillcolor="2354603" strokecolor="687962" text="Страсть">
 <fillcolor r="171" g="237" b="35"/>
 <strokecolor r="90" g="127" b="10"/>
 </topic>
-<topic id="63" parent="62" x="2.03" y="510.86" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Одержимость">
+<topic id="71" parent="70" x="-22.26" y="512.29" colorinfo="-1" fillcolor="5234928" strokecolor="820884" text="Одержимость">
 <fillcolor r="240" g="224" b="79"/>
 <strokecolor r="148" g="134" b="12"/>
 </topic>
-<topic id="64" parent="63" x="-11.34" y="619.68" colorinfo="-1" fillcolor="3642320" strokecolor="1657708" text="Мания">
+<topic id="72" parent="71" x="-61.34" y="608.25" colorinfo="-1" fillcolor="3642320" strokecolor="1657708" text="Мания">
 <fillcolor r="208" g="147" b="55"/>
 <strokecolor r="108" g="75" b="25"/>
 </topic>
-<topic id="65" parent="60" x="28.23" y="432.02" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Заинтересованность">
+<topic id="73" parent="68" x="-46.06" y="417.73" colorinfo="-1" fillcolor="3120977" strokecolor="1593129" text="Заинтересованность">
 <fillcolor r="81" g="159" b="47"/>
 <strokecolor r="41" g="79" b="24"/>
 </topic>
-<topic id="66" parent="0" x="20.55" y="-99.41" colorinfo="-1" fillcolor="6710963" strokecolor="3026783" text="Зависимость">
+<topic id="74" parent="0" x="20.55" y="-99.41" colorinfo="-1" fillcolor="6710963" strokecolor="3026783" text="Зависимость">
 <fillcolor r="179" g="102" b="102"/>
 <strokecolor r="95" g="47" b="46"/>
+</topic>
+<topic id="75" parent="0" x="32.27" y="345.73" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Духовное">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
+</topic>
+<topic id="76" parent="75" x="62.31" y="577.05" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Транс">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
+</topic>
+<topic id="77" parent="75" x="138.89" y="664.67" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Медитация">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
+</topic>
+<topic id="78" parent="75" x="277.42" y="587.26" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Экзальтация">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
+</topic>
+<topic id="79" parent="75" x="250.82" y="761.16" colorinfo="-1" fillcolor="16777088" strokecolor="12632320" text="Просветление">
+<fillcolor r="128" g="255" b="255"/>
+<strokecolor r="0" g="193" b="192"/>
 </topic>
 </topics>
 <relations/>
