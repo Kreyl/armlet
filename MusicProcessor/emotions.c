@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-06-18 04:16:57
+ * Generated at 2014-06-19 19:39:59
  */
 #include "emotions.h"
 
@@ -213,6 +213,7 @@ Reason_t reasons[] = {
  /* 104 */ { "Graywood", 0, 0 },
  /* 105 */ { "Hill", 0, 0 },
  /* 106 */ { "Malone", 0, 0 },
+ /* 107 */ { "Clayton", 0, 0 },
 };
 
 const int reasons_number = countof(reasons);

@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Character Processor for Ticket to Atlantis LARP.
 #
@@ -17,7 +18,7 @@ from sys import argv
 
 GAME_ID = 584
 
-NAME_COLUMN = 30
+NAME_COLUMN_TITLE = u'Имя на браслете'
 
 CHARACTER_ID_START = 101
 
@@ -80,9 +81,11 @@ def loadCharacters():
     print "Fetching data from allrpg.info..."
     try:
         # ToDo: Employ sorting by creation date when available
-        allRoles = sorted(getAllRoles(GAME_ID)[1:])
+        allRoles = getAllRoles(GAME_ID)
         print "Processing data..."
-        ret = tuple(str(name) for name in (row[NAME_COLUMN] for row in allRoles) if name)
+        nameColumnID = allRoles[0].index(NAME_COLUMN_TITLE)
+        allRoles = sorted(allRoles[1:])
+        ret = tuple(str(name) for name in (row[nameColumnID] for row in allRoles) if name)
         print "Done"
         return ret
     except Exception, e:
