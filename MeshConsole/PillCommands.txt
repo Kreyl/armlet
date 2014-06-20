@@ -22,5 +22,5 @@ empFixButton,,#pillRepeatWrite32,0,32,0,1800
 powerPlantButton,,#pillRepeatWrite32,0,33,0,7200
 
 uniqueIDButton,,#pillRepeatWrite32,0,1
-doseTopButton,,#pillRepeatWrite32,0,18,0,216000
+doseTopButton,,#pillRepeatWrite32,0,18,0,
 deviceTypeButton,,#pillRepeatWrite32,0,99,

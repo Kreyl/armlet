@@ -2,6 +2,7 @@
 #
 # Pill Control
 #
+from codecs import open as codecsOpen
 from collections import deque
 from functools import partial
 from getopt import getopt
@@ -219,7 +220,7 @@ class PillControl(QMainWindow):
         height = resolution.height()
         self.setGeometry(width * WINDOW_POSITION, height * WINDOW_POSITION, width * WINDOW_SIZE, height * WINDOW_SIZE)
         # Configuring widgets
-        self.documentationLabel.setText(open(DOCUMENTATION_FILE_NAME).read())
+        self.documentationLabel.setText(codecsOpen(DOCUMENTATION_FILE_NAME, 'r', 'utf-8').read())
         self.portLabel.configure()
         self.resetButton.configure(self.reset)
         self.consoleEdit.configure(self.consoleEnter)
@@ -244,6 +245,7 @@ class PillControl(QMainWindow):
             for w in self.commandWidget.findChildren(QWidget):
                 if str(w.objectName()).startswith('advanced'):
                     w.hide()
+        self.uniqueIDButton.hide()
         self.lastCommandButton = None
         self.writingPill = None
         # Setup logging

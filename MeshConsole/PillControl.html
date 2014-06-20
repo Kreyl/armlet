@@ -1,71 +1,79 @@
 <html>
 <head>
+<meta http-equiv="Content-Type" content="Text/HTML; CharSet=UTF-8">
 <title>Pill Control documentation</title>
 </head>
 <body>
+<center><h2>Инструкция по использованию</h2></center>
 <p>
-	Here be documentation
-	<b>Here be documentation</b>
-	<span style="font-style: italic">Here be documentation</span>
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
-	Here be documentation
+<b>При запуске программа должна сама найти прошивальщик</b>.
+Если в левом нижнем углу продолжает мигать надпись <b>SCAN</b>,
+значит, программа не видит прошивальщика.
+В этом случае убедитесь,
+что прошивальщик подключен,
+что в нём есть батарейка,
+что вы правильно поставили драйвера (см. файл <b>ReadMe.txt</b>).
+</p><p>
+<b>Если прошивальщик обнаружен</b>, в левом нижнем углу окна должна
+загореться надпись типа <b>COM11</b>&nbsp;(на&nbsp;Windows) или <b>ttyUSB0</b>&nbsp;(на&nbsp;Linux).
+В консоли (в правой части экрана) должна появиться надпись <b>connected&nbsp;device&nbsp;detected</b>.
+Это означает, что система готова к работе.
+</p><p>
+<b>Кнопки</b> в левой части окна задают типы пилюль.
+При нажатии кнопки программа программирует прошивальщик на изготовление пилюль заданного типа.
+В результате нажатия кнопки она становится <b>ярко-зелёной</b>
+(прошивальщик запрограммирован, в консоль выдаётся сообщение <b>Setup OK</b>)
+или <b>ярко-красной</b> (что-то пошло не так). Если что-то пошло не так, попробуйте ещё раз.
+</p><p>
+<b>Если кнопка стала ярко-зелёной</b> &ndash; всё, прошивальщик готов, его можно отключать,
+с этого момента ЛЮБАЯ вставленная в него пилюля будет прошита указанным образом.
+</p><p>
+Если при подключённом прошивальщике вставить в него пилюлю, соответствующая кнопка
+станет <b>бледно-зелёной</b> (пилюля успешно прошита) или <b>бледно-розовой</b> (что-то пошло не так).
+Если что-то пошло не так, попробуйте ещё раз.
+</p><p>
+Пока никакая кнопка не нажата, при вставлении в прошивальщик пилюли он прошивает её способом,
+указанным когда-то раньше, и никакая кнопка не загорается.
+</p><p>
+Если в момент нажатия кнопки в прошивальщик была вставлена пилюля,
+она тоже сразу будет прошита &ndash; кнопка вспыхнет ярко-зелёным,
+а потом станет бледно-зелёной.
+</p><p>
+<b>После прошивки пилюли не забудьте пометить её соответствующим цветом!</b>
+Цвета можно посмотреть в таблице типов устройств и индикации.
+</p><p>
+Если хочется <b>посмотреть состояние</b> пилюли &ndash; нужно нажать кнопку <b>Don't&nbsp;write&nbsp;pill</b>.
+После этого вставляемые пилюли будут только читаться и не будут записываться.
+</p><p>
+<b>При наведении мышки</b> на кнопку, в статусной строке внизу отображается команда,
+которая будет отправлена в прошивальщик при нажатии этой кнопки.
+</p><p>
+<b>В консоли</b> маркером <b>&gt;</b> помечаются команды, отправляемые в прошивальщик,
+маркером <b>&lt;</b> команды, приходящие из прошивальщика.
+Строчки без маркера &ndash; диагностические сообщения самой программы.
+</p><p>
+Краткая сводка команд:
+<br><code><b>Ping</b></code>, <code><b>Ack</b></code> &ndash; пара команд, с помощью которых программа обнаруживает прошивальщик.
+<br><code><b>PillRepeatWrite32</b></code> &ndash; настройка прошивальщика, что делать со вставляемыми в дальнейшем пилюлями.
+<br><code><b>PillWrite32</b></code> &ndash; инструкция, осуществляющая запись вставленной пилюли.
+<br><code><b>PillRead32</b></code> &ndash; инструкция, осуществляющая чтение вставленной пилюли.
+<br><code><b>PillData32</b></code> &ndash; данные, прочитанные из пилюли.
+</p><p>
+При вставлении пилюли выдаются последовательно команды
+<code><b>PillRead32</b></code>,
+<code><b>PillData32</b></code>,
+<code><b>PillWrite32</b></code>,
+так что есть возможность посмотреть, каким было состояние пилюли перед записью.
+Если же нажата кнопка <b>Don't&nbsp;write&nbsp;pill</b>, до будут выданы только команды
+<code><b>PillRead32</b></code> и <code><b>PillData32</b></code>.
+</p><p>
+В командной строке в правом нижнем углу можно вводить произвольные команды в прошивальщик &ndash; если вы знаете, какие.
+</p><p>
+Вся информация, которая выводится в консоль, одновременно сохраняется в файле <b>PillControl.log</b> в текущей директории.
+</p><p>
+При желании поэкспериментировать с программой в отсутствии прошивальщика, можно запустить программу с ключом <b>-e</b>,
+в этом случае она будет имитировать вставление пилюль раз в несколько секунд. Обычно настройка "прошивальщика"
+и прошивка пилюль" будут успешны, но иногда будут случаться "ошибки".
 </p>
 </body>
 </html>

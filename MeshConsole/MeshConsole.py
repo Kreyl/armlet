@@ -248,7 +248,7 @@ class MeshConsole(QMainWindow):
         if self.cycleLength < 1:
             self.error("Bad cycle length %d" % self.cycleLength)
         self.timeSetInterval = int(ceil(float(TIME_SET_INTERVAL * 1000) / self.cycleLength)) * self.cycleLength
-        self.logger.info("Time set interval set to %dms" % self.timeSetInterval)
+        self.logger.info("Time set interval set to %dms", self.timeSetInterval)
 
     def processInput(self, data):
         data = unicode(data).strip()

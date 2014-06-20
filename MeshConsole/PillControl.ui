@@ -336,6 +336,9 @@
             <pointsize>7</pointsize>
            </font>
           </property>
+          <property name="styleSheet">
+           <string notr="true">padding-right: 5px</string>
+          </property>
           <property name="text">
            <string>Here be documentation</string>
           </property>
