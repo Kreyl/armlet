@@ -17,17 +17,22 @@
 #define countof(a) (sizeof(a) / sizeof(a[0]))
 #endif
 
+// коричнево- желтый
 #define BUTTON_NOT_INITED 0
+//белый
 #define BUTTON_NORMAL 1
+//красный
 #define BUTTON_ENABLED 2
+// коричнево- желтый
 #define BUTTON_DISABLED 3
 #define BUTTON_ABSENT 4
+//желтый
 #define BUTTON_PRESSED 5
 #define BUTTON_ERROR 6
 #define GUI_BUTTON_NUMBER 9
 
 #define BUTTON_PRESSABLE 1
-#define BUTTON_LOCKED 2
+#define BUTTON_LOCKED 3
 #define BUTTONS "ABCLERXYZ"
 //abcxyzler
 //char * buttons_arr[9] {"A","B","C","L","E","R","X","Y","Z"};

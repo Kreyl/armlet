@@ -128,6 +128,7 @@ public:
     sndState_t State;
     void Init();
     void Play(const char* AFilename) {
+        return;
         IFilename = AFilename;
         chEvtSignal(PThread, VS_EVT_STOP);
     }

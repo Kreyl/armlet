@@ -82,14 +82,33 @@ Emotion_t emotions[] = {
 
 const int emotions_number = countof(emotions);
 
-// RIDs are indexes in this array.
+// RIDs are indexes in this array. reason_id
 Reason_t reasons[] = {
  /* 0 */ { "uliza1", 1, 0 }, 	/* fon */
  /* 1 */ { "uliza2", 1, 0 }, 	/* fon */
- /* 2 */ { "tuman", 10, 19 }, 	/* strah */
- /* 3 */ { "church", 2, 32 }, 	/* pozitiv */
- /* 4 */ { "kabak", 2, 1 }, 	/* negativ */
+ //hiding reasons
+ /* 2 */ { "master", 77, 0 }, 	/* masterka, fon playing */ //TODO add emofor this
+ /* 3 */ { "tuman", 77, 19 },  /* tuman, allplayers melody*/ //TODO add emofor this
+ /* 4 */ { "silence", 77, 0 }, 	/* nothing playing */ //TODO add emofor this
+ //user emit reasons
+ /* 5 */ { "murder", 77, 1 }, 	/* negativ */
+ /* 6 */ { "creation", 77, 32 },   /* fon */
+ /* 8 */ { "destruction", 77, 1 },   /* fon */
+ /* 9 */ { "sex", 77, 32 },   /* strah */
+ /* 10 */ { "fight", 77, 1 },   /* fon */
+ /* 11 */ { "narco", 77, 1 },   /* strah */
+ //user emit reasons end
+ /* 3 */ { "church", 2, 32 },   /* pozitiv */
+ /* 4 */ { "kabak", 2, 1 },     /* negativ */
 };
+
+
+//{0,20,120,300,120},//murder
+//{1,40,120,300,120},//creation
+//{2,40,120,300,120},//destruction
+//{3,2000,1,300,120},//sex
+//{4,2000,1,60,120},//fight
+//{5,2000,1200,2000,400},//narco
 
 const int reasons_number = countof(reasons);
 

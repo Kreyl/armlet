@@ -7,17 +7,18 @@
 #define SOUND_STEP 25
 #define MAX_VOL_CONST 256
 #define MIN_VOL_CONST 0
+
 #define SCREENS_WITH_REASONS 1
 typedef struct t_scrbtoarr
-{   int scr_id;
+{   int scr_id;//TODO change to screen name later
     int BtoR[9];
     }t_scrbtoarr;
 
-t_scrbtoarr ButtonsToReasons[SCREENS_WITH_REASONS]=
-    {1,
-        {-1,-1,-1,-1,-1,-1,-1,-1,-1,}
+t_scrbtoarr ButtonsToUserReasons[SCREENS_WITH_REASONS]=
+    {0,
+        {-1,0,1,3,4,2,-1,-1,-1}
     };
-int current_volume_lvl=220;
+int current_volume_lvl=START_VOL_CONST;
 void CallMainToReason()
 {
     Uart.Printf("MainToReason\r");
@@ -80,51 +81,96 @@ int buttonPress(int screen_id, int button_id)
 //reason button
 int bReasonCheck(int screen_id, int button_id)
 {
+    Uart.Printf("CALL bReasonCheck \r");
     //если есть соответствие кнопке и резону, то можно нажимать?
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
     {
-        if(screen_id==ButtonsToReasons[i].scr_id)
+        if(screen_id==ButtonsToUserReasons[i].scr_id)
         {
-            if(ButtonsToReasons[i].BtoR[button_id]>=0)
+            if(ButtonsToUserReasons[i].BtoR[button_id]>=0)
             {
+               // if(ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time>=0)
+               //     return BUTTON_ENABLED; //on the run!
                 //TODO сюда надо вставлять проверку на неотключаемые резоны???
+                Uart.Printf("CALL bReasonCheck return %d \r",BUTTON_PRESSABLE);
                 return BUTTON_PRESSABLE;
             }
         }
 
     }
-    return BUTTON_LOCKED;
+    Uart.Printf("CALL bReasonCheck return %d \r",BUTTON_LOCKED);
+    return BUTTON_LOCKED; //error??
+}
+int bReasonGetState(int screen_id, int button_id)
+{
+    Uart.Printf("CALL bReasonGetState \r");
+    for(int i=0;i<SCREENS_WITH_REASONS;i++)
+       {
+           if(screen_id==ButtonsToUserReasons[i].scr_id)
+           {
+               if(ButtonsToUserReasons[i].BtoR[button_id]>=0)
+               {
+                  if(ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time>=0)
+                  {
+                      Uart.Printf("bReasonGetState ENABLED, B%d\r",button_id);
+                      return BUTTON_ENABLED;
+                  }
+                   //TODO сюда надо вставлять проверку на неотключаемые резоны???
+                   return BUTTON_NORMAL;
+               }
+           }
+
+       }
+       return BUTTON_ERROR; //error??
 }
 int bReasonChange(int screen_id, int button_id)
 {
+   // Uart.Printf("CALL bReasonChange \r");
     //button is available, so just get it
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
        {
-           if(screen_id==ButtonsToReasons[i].scr_id)
+           if(screen_id==ButtonsToUserReasons[i].scr_id)
            {
-               int reason_id=ButtonsToReasons[i].BtoR[button_id];
+               int reason_id=ButtonsToUserReasons[i].BtoR[button_id];
                if(reason_id<0)
                    return BUTTON_ERROR;
-               if(GetPlayerReasonCurrentPower(reason_id)<0)
+              // if(GetPlayerReasonCurrentPower(reason_id)<0) true
+               if(ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time==-1)
                {
                    //setup reason
-
+                   ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time=0;
                    //return red
+                   return BUTTON_ENABLED;
                }
                else
                {
                    //turn off??
-
+                   ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time=-1;
+                   CallReasonSuccess(ButtonsToUserReasons[i].BtoR[button_id]);
                    //retrn normal??
+                   return BUTTON_NORMAL;
                }
-
            }
        }
     //get reason state
-
     //return state depends on reason state- if pseudo lamp is presented -
     return BUTTON_ERROR;
 }
+void CheckAndRedrawFinishedReasons()
+{
+    for(int i=0;i<SCREENS_WITH_REASONS;i++)
+    {
+        if(AtlGui.current_state==ButtonsToUserReasons[i].scr_id)
+            for(int j=0;j<9;j++)
+            {
+                if(ButtonsToUserReasons[i].BtoR[j]>0)
+                    if(bReasonGetState(i,j)!=BUTTON_ENABLED);
+                        AtlGui.RenderSingleButton(i,j,BUTTON_NORMAL);
+            }
+    }
+
+}
+
 
 int bChangeMelodyCheck(int screen_id, int button_id)
 {
@@ -152,8 +198,12 @@ int bLockCheck(int screen_id, int button_id)
 int bLockChange(int screen_id, int button_id)
 {
     AtlGui.is_locked=!AtlGui.is_locked;
+    if(AtlGui.is_locked)
+        return BUTTON_ENABLED;
+    else
+        return BUTTON_NORMAL;
 }
-int bLockState(int screen_id, int button_id)
+int bLockGetState(int screen_id, int button_id)
 {
     if(AtlGui.is_locked)
         return BUTTON_ENABLED;
