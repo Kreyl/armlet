@@ -15,7 +15,7 @@ typedef struct t_scrbtoarr
     }t_scrbtoarr;
 
 t_scrbtoarr ButtonsToUserReasons[SCREENS_WITH_REASONS]=
-    {0,
+    {1,
         {-1,0,1,3,4,2,-1,-1,-1}
     };
 int current_volume_lvl=START_VOL_CONST;
@@ -55,7 +55,7 @@ int bSoundUpChange(int screen_id, int button_id)
     current_volume_lvl+=SOUND_STEP;
     Sound.SetVolume(current_volume_lvl);
     Uart.Printf("sound up to %d \r", current_volume_lvl);
-    return 0;
+    return bSoundUpCheck(screen_id,button_id);
 }
 int bSoundDownChange(int screen_id, int button_id)
 {
@@ -63,7 +63,7 @@ int bSoundDownChange(int screen_id, int button_id)
     current_volume_lvl-=SOUND_STEP;
     Sound.SetVolume(current_volume_lvl);
     Uart.Printf("sound down to %d\r", current_volume_lvl);
-    return 0;
+    return bSoundDownCheck(screen_id,button_id);
 }
 
 int buttonIsPressable(int screen_id, int button_id)
@@ -176,7 +176,10 @@ int bChangeMelodyCheck(int screen_id, int button_id)
 {
     //get file number, if no, set it disabled
     //get current emo id
+    if(SICD.last_played_emo<0) //ничего еще не играло, тогдаявнобудет фон - можно не париться
+        return BUTTON_PRESSABLE;
     int emonum=GetFileNumerForEmoToPlay(SICD.last_played_emo);
+    Uart.Printf("bChangeMelodyCheck emonum%d \r",emonum);
     if(emonum<=1)
         return BUTTON_LOCKED;
     else
@@ -186,7 +189,7 @@ int bChangeMelodyCheck(int screen_id, int button_id)
 int bChangeMelody(int screen_id, int button_id)
 {
     Sound.Stop();
-    return 0;
+    return bChangeMelodyCheck(screen_id,button_id);
     //тут кодзавязан на события в application - там вызывается играть ту же эмоцию, если старая кончилась
 }
 

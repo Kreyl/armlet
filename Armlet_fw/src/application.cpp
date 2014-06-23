@@ -403,7 +403,7 @@ void App_t::Task() {
 #endif
 
     if(EvtMsk & EVTMASK_NEWSECOND) {
-         Uart.Printf("New_second!");
+       //  Uart.Printf("New_second!");
 
         //UPDATE user intentions timers
         if(UpdateUserIntentionsTime(1))

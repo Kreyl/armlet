@@ -198,11 +198,11 @@ bool UpdateUserIntentionsTime(int add_time_sec)
        {
            if(ArrayOfUserIntentions[i].current_time>=0)
            {
-               Uart.Printf("CALL ADD TIME SUCESS reason %d\r",i);
+             //  Uart.Printf("CALL ADD TIME SUCESS reason %d\r",i);
                ArrayOfUserIntentions[i].current_time+=add_time_sec;
                if(ArrayOfUserIntentions[i].current_time>ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau)//после плато, на спуске
                {
-                   Uart.Printf("ct%d, summ %d\r", ArrayOfUserIntentions[i].current_time,ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau);
+                  // Uart.Printf("ct%d, summ %d\r", ArrayOfUserIntentions[i].current_time,ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau);
                    ArrayOfUserIntentions[i].current_time=-1;
                    CallReasonFalure(i);
                    return_value=true;
