@@ -7,9 +7,10 @@
 #include "atlgui.h"
 #include"emotions.h"
 #include"stddef.h"
-
+#include"sound.h"
 #include "lcd2630.h"
 #include "gui.h"
+#include "power.h"
 AtlGui_t AtlGui;
 #define PATH_FOLDER_STR "\\"
 #define PATH_TO_GUI "\\GUI\\"
@@ -56,6 +57,7 @@ void AtlGui_t::ShowSplashscreen()
 #else
    Lcd.DrawBmpFile(0,0,"splash.bmp");
 #endif
+   Sound.Play("splash.wav");
 }
 void AtlGui_t::CallStateScreen(int screen_id)
 {
@@ -83,6 +85,11 @@ void AtlGui_t::RenderFullScreen(int screen_id)
     Uart.Printf("RenderFullScreen %s\r",bmp_filename);
     // render it
     Lcd.DrawBmpFile(0,0,bmp_filename);
+    strncpy (char_name,"1234567890",10);
+    time1=11;time2=22,bat=100;
+    //strncpy( time,"22_11",5);
+    //strncpy( bat,"100%",4);
+    RenderNameTimeBat();
     //and all buttons
     for(int i=0;i<9;i++)
     {
@@ -199,6 +206,12 @@ void AtlGui_t::ButtonIsClicked(int button_id)
 //    // если есть изменение экрана, меняем экран??
 //
 //    //отрисовываем изменения??
+}
+void AtlGui_t::RenderNameTimeBat()
+{
+    Lcd.Printf(0, 5, clGreen, clBlack, "%s %u:%u %u",char_name,time1,time2,Power.RemainingPercent);
+    Uart.Printf("T!!!!!!!!!!!!!!!!!! %d",Power.RemainingPercent);
+
 }
 void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
 {

@@ -25,6 +25,7 @@
 #include "../MusicProcessor/intention.h"
 #include "SensorTable.h"
 #include "..\AtlGui\atlgui.h"
+#include "energy.h"
 App_t App;
 static EventListener EvtListenerKeys;
 
@@ -409,7 +410,8 @@ void App_t::Task() {
         if(UpdateUserIntentionsTime(1))
             CheckAndRedrawFinishedReasons();
 
-
+        if(Time.S_total% SEC_TO_SELF_REDUCE ==0)
+            Energy.AddEnergy(-1);
         if(Time.S_total % 6 ==0)
         {
             //CalculateIntentionsRadioChange();

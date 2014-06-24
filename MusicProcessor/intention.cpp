@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include "cmd_uart.h"
 #include "Sound.h"
+#include "energy.h"
 //TODO move it right
 int CurrentIntentionArraySize=2;
 /*Intention intentionArray[INTENTIONS_ARRAY_SIZE]={
@@ -272,16 +273,22 @@ int GetPersentage100(int curval,int maxval)
 }
 int CalculateCurrentPowerOfPlayerReason(int array_indx)
 {//TODO normal func
+
+    //всё удлинняет
+    int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time);//>current_time
+    int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time);//<current_time
+
+
     if(ArrayOfUserIntentions[array_indx].current_time>=0)
     {
-        if(ArrayOfUserIntentions[array_indx].current_time<ArrayOfUserIntentions[array_indx].time_to_plateau)//перед плато
-            return (ArrayOfUserIntentions[array_indx].power256_plateau*GetPersentage100(ArrayOfUserIntentions[array_indx].current_time,ArrayOfUserIntentions[array_indx].time_to_plateau))/100;
-        if(ArrayOfUserIntentions[array_indx].current_time<ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau)//на плато
+        if(faster_time<ArrayOfUserIntentions[array_indx].time_to_plateau)//перед плато
+            return (ArrayOfUserIntentions[array_indx].power256_plateau*GetPersentage100(faster_time,ArrayOfUserIntentions[array_indx].time_to_plateau))/100;
+        if(slower_time<ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau)//на плато
             return (ArrayOfUserIntentions[array_indx].power256_plateau);
-        if(ArrayOfUserIntentions[array_indx].current_time<ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau+ArrayOfUserIntentions[array_indx].time_after_plateau)//после плато, на спуске
+        if(slower_time<ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau+ArrayOfUserIntentions[array_indx].time_after_plateau)//после плато, на спуске
             return (ArrayOfUserIntentions[array_indx].power256_plateau *
                     GetPersentage100(
-                            ArrayOfUserIntentions[array_indx].current_time-ArrayOfUserIntentions[array_indx].time_to_plateau-ArrayOfUserIntentions[array_indx].time_on_plateau
+                            slower_time-ArrayOfUserIntentions[array_indx].time_to_plateau-ArrayOfUserIntentions[array_indx].time_on_plateau
                             ,ArrayOfUserIntentions[array_indx].time_after_plateau
                             )
                     )/100;
@@ -297,12 +304,26 @@ int CalculateCurrentPowerOfPlayerReason(int array_indx)
 }
 void CallReasonFalure(int user_reason_id)
 {
+    if(user_reason_id==3)
+    {
+        // не прерванный секс всегда успешен! ^_^
+        CallReasonSuccess(user_reason_id);
+        return;
+    }
     Uart.Printf("CALL REASON FALURE reason %d\r",user_reason_id);
+    Energy.AddEnergy(-5);
+
     return;
 }
 
 void CallReasonSuccess(int user_reason_id)
 {
+    //если наркозависимость - перезапустить!
+    //подумать над размерамиинтервалов!
+    if(user_reason_id==5)
+        ArrayOfUserIntentions[5].current_time=0;
+    Energy.AddEnergy(5);
+
    return;
 }
 

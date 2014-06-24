@@ -76,6 +76,13 @@ public:
     void ButtonIsReleased(int button_id);
     void RenderFullScreen(int screen_id);
     void RenderSingleButton(int screen_id,int button_id,int button_state);
+
+    void RenderNameTimeBat();
+
+    char char_name[10];
+    int time1,  time2,  bat;
+
+
     int on_run;
     int is_splash_screen_onrun;//0 - not showed, 1- on show now, 2 - show finished
     int current_state;
@@ -83,6 +90,7 @@ public:
     bool is_locked;
     //TODO fill reactpress func
     void ReactLockedPress();
+
 };
 
 extern AtlGui_t AtlGui;
