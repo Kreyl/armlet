@@ -1,42 +1,51 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 #
 # Music Processor for Ticket to Atlantis LARP.
 #
-# Usage:
-# - Export emotions mind map to FreeMind format (Emotions.mm).
-# - Open Emotions.mm in FreeMind.
-# - Click File - Export - Using XSLT...
-# - In Choose XSL File, locate mm2csv.xsl template in FreeMind/accessories directory.
-# - In Choose ExportFile, specify Emotions.csv located in the same directory as this script.
-# - Perform Export.
-# - Run this script: python MusicProcessor.py [sourceDirectory [targetDirectory]]
-# - The script would:
-# -- Verify all the files in source directory (recursive) for the correct file name format.
-# -- Convert all the files to the format suitable for ArmLet3 to use.
-# -- Put the converted files to target directory.
-# - If source directory is not specified, current directory is used.
-# - If target directory is not specified, source/processed subdirectory is used.
+# - Uses CharacterProcessor.py to update character information.
+# - Uses EmotionProcessor.py to update emotions information.
+# - Updates and verifies information in Atlantis Music Directory
+#   specified with ATLANTIS_MUSIC environment variable, with a parameter
+#   or in current directory.
+# - Atlantis Music directory must contain music_here file.
+# - If -v|--verify option is used, actual processed files are verified for consistency.
 #
-from os import chdir, makedirs, walk
-from os.path import getsize, isdir, isfile, join
+# Usage:
+# - python MusicProcessor.py [-v|--verify] [musicDirectory]
+#
+from codecs import open as codecsOpen
+from errno import ENOENT
+from getopt import getopt
+from itertools import chain, count
+from os import getenv, listdir, makedirs, remove, rmdir, walk
+from os.path import expanduser, getmtime, getsize, isdir, isfile, islink, join
 from re import compile as reCompile
-from sys import argv
+from shutil import copy, copytree, rmtree
+from sys import argv, stdout
 
 try:
     from pydub import AudioSegment
 except ImportError, ex:
-    raise ImportError("%s: %s\n\nPlease install pydub v0.8.3 or later: https://pypi.python.org/pypi/pydub\n" % (ex.__class__.__name__, ex))
+    raise ImportError("%s: %s\n\nPlease install pydub v0.9.2 or later: https://pypi.python.org/pypi/pydub\n" % (ex.__class__.__name__, ex))
 
-from EmotionProcessor import convert, convertEmotion, convertTitle, processEmotions, processReasons
+from EmotionProcessor import convert, convertEmotion, convertTitle, updateEmotions, verifyCharacter
 
-CHARACTER_CSV = 'Character.csv'
+MUSIC_LOCATION_VARIABLE = 'ATLANTIS_MUSIC'
 
-EXTENSIONS = ('mp3', 'wav', 'wma', 'm4a')
+SOURCE_DIR = 'src'
+ARMLET_DIR = 'armlet'
+MUSIC_DIR = 'music'
+ERROR_DIR = 'errors'
 
-EXTENSIONS_RE = r'\.(%s)$' % '|'.join(EXTENSIONS)
+SD_DIR = '_SD'
+EXCLUDE_DIRS = (SD_DIR,)
 
-FILE_PATTERN = reCompile('(?i).*' + EXTENSIONS_RE)
+INI_FILE = 'settings.ini'
+INI_ID_LINE = 'id=%d\r\n'
+
+CHARACTER_CSV = 'character.csv'
+
+FILE_PATTERN = reCompile(r'.*\..*')
 
 EMOTION = 'emotion'
 ARTIST = 'artist'
@@ -45,9 +54,9 @@ TAIL = 'tail'
 
 SEPARATOR = '-'
 
-CHECK_PATTERN = reCompile('^(?P<%s>[^%s]+)%s(?P<%s>[^%s]+)%s(?P<%s>[^%s]+)(?P<%s>.*)%s' % (EMOTION, SEPARATOR, SEPARATOR, ARTIST, SEPARATOR, SEPARATOR, TITLE, SEPARATOR, TAIL, EXTENSIONS_RE))
+CHECK_PATTERN = reCompile(r'(?i)^(?P<%s>[^%s\s\d]+)\s*\d*\s*%s\s*(?P<%s>[^%s]+?)(?:\s*%s\s*(?P<%s>[^%s]*?)(?:\s*%s\s*(?P<%s>.*))?)?\..*' % (EMOTION, SEPARATOR, SEPARATOR, ARTIST, SEPARATOR, SEPARATOR, TITLE, SEPARATOR, SEPARATOR, TAIL))
 
-NEW_FORMAT = 'wav'
+NEW_FORMAT = 'mp3'
 
 MAX_FILE_NAME = 64
 
@@ -55,67 +64,305 @@ NEW_EXTENSION = '.' + NEW_FORMAT
 
 DEFAULT_TARGET_DIR = 'processed'
 
-def findFiles(directory, pattern, excludes = ()):
-    for (root, _dirNames, fileNames) in walk(directory):
-        if root not in excludes:
-            for fileName in fileNames:
-                if pattern.match(fileName):
-                    yield (root, fileName)
+TAGS = {
+    'publisher': 'Ticket to Atlantis',
+    'date': '2014',
+    'encoder': 'Pydub/FFMPEG'
+}
 
-def processFile(fullName, newFullName):
+MUSIC_MARK = 'music_here'
+
+RESULT_MARKS = { True: 'music_errors', False: 'music_ok' }
+
+def silentRemove(filename):
     try:
-        AudioSegment.from_file(fullName).export(newFullName, format = NEW_FORMAT)
-        return isfile(newFullName) and getsize(newFullName) >= getsize(fullName)
-    except EOFError:
-        return False
+        remove(filename)
+    except OSError, e:
+        if e.errno != ENOENT:
+            raise
 
-def main(sourceDir = None, targetDir = None):
-    if sourceDir:
-        chdir(sourceDir)
-    (emotionsIndexes, _emotionsTree) = processEmotions()
-    if isfile(CHARACTER_CSV):
-        print "%s found, verifying" % CHARACTER_CSV
-        processReasons(emotionsIndexes, CHARACTER_CSV)
-    targetDir = targetDir or join('.', DEFAULT_TARGET_DIR)
-    if not isdir(targetDir):
-        makedirs(targetDir)
-    error = False
+def createDir(dirName):
+    if not isdir(dirName):
+        makedirs(dirName)
+
+def deepListDir(dirName):
+    return tuple(chain.from_iterable(((dirPath, fileName) for fileName in fileNames) for (dirPath, dirNames, fileNames) in walk(dirName)))
+
+def getFiles(dirName):
+    return tuple(join(dirName, f) for f in listdir(dirName)) if isdir(dirName) else ()
+
+def deepGetFiles(dirName):
+    return tuple(join(d, f) for (d, f) in deepListDir(dirName)) if isdir(dirName) else ()
+
+def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion, artist, title, tail):
+    try:
+        sourceAudio = AudioSegment.from_file(fullName)
+        if sourceAudio.duration_seconds < 40:
+            return "Audio too short: %d seconds" % sourceAudio.duration_seconds
+        processedAudio = sourceAudio.normalize() # pylint: disable=E1103
+        if processedAudio.duration_seconds != sourceAudio.duration_seconds:
+            return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
+        TAGS.update({'disc': playerID, 'album': albumName, 'track': trackNumber, 'artist': artist, 'title': title, 'genre': emotion, 'comment': tail, 'comments': tail})
+        processedAudio.export(newFullName, format = NEW_FORMAT, bitrate = '256k', tags = TAGS)
+        if not isfile(newFullName) or getsize(newFullName) < 0.2 * getsize(fullName):
+            return "Processed file is too small: %d bytes, while original file was %d bytes" % (getsize(newFullName), getsize(fullName))
+        return None
+    except Exception, e:
+        return e
+
+def verifyFile(fullName):
+    try:
+        sourceAudio = AudioSegment.from_file(fullName)
+        if sourceAudio.duration_seconds < 40:
+            return "Audio too short: %d seconds" % sourceAudio.duration_seconds
+        processedAudio = sourceAudio.normalize() # pylint: disable=E1103
+        if processedAudio.duration_seconds != sourceAudio.duration_seconds:
+            return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
+        processedAudio.export(format = 'null')
+        return None
+    except Exception, e:
+        return e
+
+def resultMark(targetDir, result, okNum = None, okSize = None, errorText = None):
+    for markName in RESULT_MARKS.itervalues():
+        silentRemove(join(targetDir, markName))
+    if okNum is not None:
+        with open(join(targetDir, RESULT_MARKS[False]), 'wb') as f:
+            f.write('%d,%d\r\n' % (okNum, okSize))
+    if result:
+        with codecsOpen(join(targetDir, RESULT_MARKS[True]), 'wb', 'utf-8') as f:
+            f.write(errorText)
+
+def checkResultMark(targetDir):
+    okMark = join(targetDir, RESULT_MARKS[False])
+    okDate = getmtime(okMark) if isfile(okMark) else 0
+    okText = ''
+    if okDate:
+        with open(okMark) as f:
+            okText = tuple(int(i) for i in f.read().split(','))
+            okNum = okText[0]
+            okSize = okText[1] if len(okText) > 1 else 0
+    else:
+        okNum = okSize = None
+    errorMark = join(targetDir, RESULT_MARKS[True])
+    errorDate = getmtime(errorMark) if isfile(errorMark) else 0
+    errorText = ''
+    if errorDate:
+        with codecsOpen(errorMark, 'r', 'utf-8') as f:
+            errorText = f.read()
+    return (bool(errorDate), max(okDate, errorDate), okNum, okSize, errorText)
+
+def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False):
+    class ProcessException(Exception):
+        pass
+    def log(error, fileName, message):
+        s = '%s%s' % (('%s: ' % fileName) if fileName else '', message)
+        if fileName:
+            print
+        print s
+        messages.append('%s\r\n' % s)
+        hasErrors[0] = hasErrors[0] or error # pylint: disable=E0601
+    print "\nProcessing character: %s (%d)" % (name, number)
+    messages = []
+    hasErrors = [False]
+    sdDir = join(unicode(baseDir), SD_DIR)
+    baseDir = join(unicode(baseDir), name)
+    sourceDir = join(baseDir, SOURCE_DIR)
+    errorDir = join(baseDir, ERROR_DIR)
+    armletDir = join(baseDir, ARMLET_DIR)
+    musicDir = join(armletDir, MUSIC_DIR)
+    createDir(armletDir)
+    sourceFiles = deepGetFiles(sourceDir)
+    musicFiles = getFiles(musicDir)
+    errorFiles = getFiles(errorDir)
     newFileNameSet = set()
-    for (dirName, fileName) in findFiles('.', FILE_PATTERN, (targetDir,)):
-        fullName = join(dirName, fileName)
-        match = CHECK_PATTERN.match(fileName)
-        if not match:
-            print "ERROR: Bad file name: " + fullName
-            error = True
-            continue
-        groups = match.groupdict()
-        emotion = convertEmotion(groups[EMOTION])
-        artist = convertTitle(groups[ARTIST])
-        title = convertTitle(groups[TITLE])
-        tail = convert(groups[TAIL])
-        if emotion not in emotionsIndexes:
-            print "ERROR: Unknown emotion: " + fullName
-            error = True
-            continue
-        newFileName = (SEPARATOR.join((emotion, artist, title)) + tail)[:MAX_FILE_NAME] + NEW_EXTENSION
-        if newFileName in newFileNameSet:
-            print "ERROR: Duplicate processed file name: " + newFileName
-            error = True
-            continue
-        newFileNameSet.add(newFileName)
-        newFullName = join(targetDir, newFileName)
-        print
-        print "Processing: " + fullName
-        print "Emotion: " + emotion
-        print "Artist: " + artist
-        print "Title: " + title
-        print "Tail: " + tail
-        print "Processed name: " + newFullName
-        if not processFile(fullName, newFullName):
-            print "ERROR: Error processing!"
-            error = True
-            continue
-    print "\n!!! ERRORS !!!" if error else "\nOK"
+    # Removing common files
+    for fileName in (join(armletDir, f) for f in listdir(armletDir) if f not in (MUSIC_DIR, CHARACTER_CSV)):
+        if isdir(fileName) and not islink(fileName):
+            rmtree(fileName)
+        else:
+            remove(fileName)
+    # Copying common files
+    for fileName in listdir(sdDir):
+        src = join(sdDir, fileName)
+        dst = join(armletDir, fileName)
+        if isdir(src):
+            copytree(src, dst)
+        else:
+            copy(src, dst)
+    # Creating settings.ini
+    if number > 0:
+        with open(join(armletDir, INI_FILE), 'wb') as f:
+            f.write(INI_ID_LINE % number)
+    # Processing character.csv
+    characterFile = join(armletDir, CHARACTER_CSV)
+    if isfile(characterFile):
+        print "Character file found, verifying"
+        verifyCharacter(emotions, characterFile)
+    # Check music status
+    (withErrors, markDate, okNum, okSize, errorText) = checkResultMark(baseDir)
+    if markDate:
+        try:
+            # Verify that status mark is still actual
+            if any(date > markDate for date in (getmtime(f) for f in chain(sourceFiles, musicFiles, errorFiles))):
+                raise ProcessException("Status mark obsolete, newer music files exist")
+            if okNum is None:
+                raise ProcessException("No music files found")
+            if okNum != len(musicFiles):
+                raise ProcessException("Existing record mentions %s files, but %d is actually found" % (okNum, len(musicFiles)))
+            if okSize != sum(getsize(f) for f in musicFiles):
+                raise ProcessException("Existing record mentions total file size %d bytes, while actual total size is %d bytes" % (okSize, sum(getsize(f) for f in musicFiles)))
+            if verifyFiles:
+                # Verify existing music files
+                print "Veryfying files",
+                for fileName in listdir(musicDir):
+                    stdout.write('.')
+                    stdout.flush()
+                    fullName = join(musicDir, fileName)
+                    dumpToErrors = False
+                    match = CHECK_PATTERN.match(fileName)
+                    if match:
+                        groups = match.groupdict()
+                        emotion = convertEmotion(groups[EMOTION])
+                        artist = convertTitle(groups[ARTIST])
+                        title = convertTitle(groups[TITLE] or '')
+                        tail = convert(groups[TAIL] or '')
+                        if emotion not in emotions:
+                            raise ProcessException("\nUnknown emotion: %d" % emotion)
+                    else:
+                        raise ProcessException("\nBad file name: %s" % fileName)
+                    e = verifyFile(join(musicDir, fileName))
+                    if e:
+                        raise ProcessException("\nError processing: %s" % e)
+                print
+        except ProcessException, e:
+            print "%s, reprocessing" % e
+            resultMark(baseDir, None)
+            markDate = None
+    if markDate:
+        hasMusic = True
+        print "Music already processed %s, %s files found (%d total size)" % ('OK' if not withErrors else 'with ERRORS', okNum, okSize)
+        if errorText:
+            print errorText.strip()
+    elif not isdir(sourceDir):
+        hasMusic = False
+        log(True, None, "No music source directory found: %s" % sourceDir)
+    else:
+        # Process source music
+        files = deepListDir(sourceDir)
+        hasMusic = bool(files)
+        if not hasMusic:
+            log(True, None, "No music files found in source directory: %s" % sourceDir)
+        else:
+            log(False, None, "Source music files found: %d" % len(files))
+            createDir(musicDir)
+            if isdir(errorDir):
+                for f in chain(getFiles(musicDir), getFiles(errorDir)):
+                    remove(f)
+                rmdir(errorDir)
+            for (trackNumber, (dirName, fileName)) in enumerate(files, 1):
+                stdout.write('.')
+                stdout.flush()
+                fullName = join(dirName, fileName)
+                dumpToErrors = False
+                match = CHECK_PATTERN.match(fileName)
+                if match:
+                    groups = match.groupdict()
+                    emotion = convertEmotion(groups[EMOTION])
+                    artist = convertTitle(groups[ARTIST])
+                    title = convertTitle(groups[TITLE] or '')
+                    tail = convert(groups[TAIL] or '')
+                    if not title:
+                        title = artist
+                        artist = ''
+                    if emotion not in emotions:
+                        log(True, fileName, "Unknown emotion")
+                        dumpToErrors = True
+                    newFileNamePrefix = SEPARATOR.join((emotion, name))
+                    for s in (artist, title, tail):
+                        if s:
+                            newFileNamePrefix += SEPARATOR + s
+                    newFileNamePrefix = newFileNamePrefix[:MAX_FILE_NAME]
+                    for i in count():
+                        newFileName = '%s%s%s' % (newFileNamePrefix, i or '', NEW_EXTENSION)
+                        if newFileName not in newFileNameSet:
+                            break
+                    newFileNameSet.add(newFileName)
+                    newFullName = join(musicDir, newFileName)
+                else:
+                    log(True, fileName, "Bad file name")
+                    dumpToErrors = True
+                    newFileName = fileName
+                if dumpToErrors:
+                    createDir(errorDir)
+                    newFullName = join(errorDir, newFileName)
+                e = processFile(fullName, newFullName, number, name, '%d/%d' % (trackNumber, len(files)), emotion, artist, title, tail)
+                if e:
+                    log(True, fileName, "Error processing: %s" % e)
+                    createDir(errorDir)
+                    copy(fullName, errorDir)
+            print
+            obsoleteFiles = tuple(f for f in listdir(musicDir) if f not in newFileNameSet)
+            if obsoleteFiles:
+                print "Obsolete files found (%d), removing" % len(obsoleteFiles)
+                for fileName in obsoleteFiles:
+                    remove(join(musicDir, fileName))
+            processedFiles = getFiles(musicDir)
+            numProcessed = len(processedFiles)
+            processedSize = sum(getsize(f) for f in processedFiles)
+            resultMark(baseDir, hasErrors[0], numProcessed if hasMusic else None, processedSize if hasMusic else None, ''.join(messages))
+            if numProcessed:
+                print "Files OK: %d (%d total size)" % (numProcessed, processedSize)
+    return (hasMusic, hasErrors[0])
+
+def updateMusic(sourceDir = '.', verifyFiles = False):
+    sourceDir = expanduser(sourceDir)
+    if not isdir(sourceDir):
+        print "Music directory not found: %s" % sourceDir
+        return
+    if not isfile(join(sourceDir, MUSIC_MARK)):
+        print "Not a music directory: %s" % sourceDir
+        return
+    characterDirs = [str(d) for d in listdir(unicode(sourceDir)) if d not in EXCLUDE_DIRS and isdir(join(sourceDir, d))]
+    (emotions, characters) = updateEmotions()
+    okCharacters = []
+    unknownCharacters = tuple(sorted(d for d in characterDirs if d not in characters))
+    for name in (name for name in characters if name not in characterDirs):
+        characterDirs.append(name)
+        createDir(join(sourceDir, name, SOURCE_DIR))
+    characterDirs = tuple(sorted(characterDirs))
+    print
+    print "Processing music at %s" % sourceDir
+    print "Known characters found: %d" % len(characters)
+    print "Character directories found: %d%s" % (len(characterDirs), (' (%d unknown)' % len(unknownCharacters)) if unknownCharacters else '')
+    noMusicCharacters = []
+    errorCharacters = []
+    for d in characterDirs:
+        (hasMusic, hasErrors) = processCharacter(d, characters.get(d, -1), emotions, sourceDir, verifyFiles)
+        if hasMusic:
+            if not hasErrors:
+                okCharacters.append(d)
+        else:
+            noMusicCharacters.append(d)
+        if hasErrors:
+            errorCharacters.append(d)
+    if okCharacters:
+        print "\nOK character directories found (%d): %s" % (len(okCharacters), ', '.join(okCharacters))
+    if unknownCharacters:
+        print "\nUnknown character directories found (%d): %s" % (len(unknownCharacters), ', '.join(unknownCharacters))
+    if noMusicCharacters:
+        print "\nNo music found for characters (%d): %s" % (len(noMusicCharacters), ', '.join(sorted(noMusicCharacters)))
+    if errorCharacters:
+        print "\nErrors detected with music for characters (%d): %s" % (len(errorCharacters), ', '.join(sorted(errorCharacters)))
+    print
+
+def main(*args):
+    verifyFiles = False
+    (options, parameters) = getopt(args, 'v', ('verify',))
+    for (option, _value) in options:
+        if option in ('-v', '--verify'):
+            verifyFiles = True
+    updateMusic(parameters[0] if parameters else getenv(MUSIC_LOCATION_VARIABLE, '.'), verifyFiles)
 
 if __name__ == '__main__':
     main(*argv[1:])

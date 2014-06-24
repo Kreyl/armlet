@@ -1,0 +1,11 @@
+#
+# Character.csv
+#
+# RID->EID table patch for a particular character.
+#
+# If present, must be located at the root of ArmLet file system,
+# is read, processed and joined to the global table at boot time.
+#
+Parcs,8,nenavist'
+Huxley,6,lyubov'
+kabak,5,vostorg

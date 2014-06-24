@@ -1,0 +1,12 @@
+#
+# Locations.csv
+#
+# RID->EID table for a generic character.
+#
+# Processed by EmotionProcessor.py and integrated into ArmLet firmware.
+#
+hub,99,master
+uliza,1,fon
+grave,9,strah
+church,2,pozitiv
+kabak,2,negativ

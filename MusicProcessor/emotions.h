@@ -3,12 +3,14 @@
  *
  * Part of "Ticket to Atlantis" LARP music engine.
  *
- * Must be compatible with emotions.c that is generated automatically by EmotionProcessor.py
+ * Must be compatible with emotions.c
+ * that is generated automatically by EmotionProcessor.py
  */
 #ifndef EMOTIONS_H
 #define EMOTIONS_H
 
 #define ROOT -1
+#define CHARACTER_ID_START 101
 
 #ifndef countof
 #define countof(a) (sizeof(a) / sizeof(a[0]))
