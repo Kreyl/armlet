@@ -7,7 +7,7 @@
 #
 from cookielib import Cookie, LWPCookieJar
 from os import listdir
-from os.path import expanduser, getmtime, isdir, join
+from os.path import expanduser, getmtime, isfile, join
 from platform import system
 from sqlite3 import connect
 from urllib2 import build_opener, HTTPCookieProcessor, Request
@@ -26,10 +26,8 @@ def getFirefoxCookies(domain = ''):
     """Returns Mozilla Firefox cookies for the specified domain."""
     isWindows = system().lower().startswith('win')
     profilesPath = unicode(expanduser(FIREFOX_PROFILES_WINDOWS if isWindows else FIREFOX_PROFILES_LINUX))
-    profilesFiles = (join(profilesPath, f) for f in listdir(profilesPath))
-    profilesDirs = (f for f in profilesFiles if isdir(f) and f.endswith('.default'))
-    profileDir = sorted(profilesDirs, key = getmtime)[0]
-    cookieDB = join(profileDir, FIREFOX_COOKIE_FILE)
+    cookieFiles = (join(profilesPath, f, FIREFOX_COOKIE_FILE) for f in listdir(profilesPath))
+    cookieDB = sorted((f for f in cookieFiles if isfile(f)), key = getmtime)[-1]
     cursor = connect(cookieDB).cursor()
     cursor.execute(FIREFOX_COOKIES_SQL_REQUEST % domain)
     cookieJar = LWPCookieJar()

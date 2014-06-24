@@ -14,6 +14,7 @@ from csv import reader as CSVReader, writer as CSVWriter
 from datetime import datetime
 from os.path import dirname, isfile, join, realpath
 from urllib import urlopen
+from traceback import format_exc
 from sys import argv
 
 GAME_ID = 584
@@ -75,6 +76,7 @@ def loadCharacters():
         exec urlopen(ALLRPG_MODULE_PATH).read() in globals() # Importing getAllRoles function from remote allrpg module # pylint: disable=W0122
         assert getAllRoles
     except Exception, e:
+        print format_exc()
         print "ERROR fetching library: %s, using local version" % e
         from allrpg import getAllRoles # Importing getAllRoles function from local allrpg module
         assert getAllRoles
@@ -89,6 +91,7 @@ def loadCharacters():
         print "Done"
         return ret
     except Exception, e:
+        print format_exc()
         print "ERROR fetching data, using current version: %s" % e
         return ()
 
