@@ -5,12 +5,15 @@
 //TODO move it right
 int CurrentIntentionArraySize=2;
 /*Intention intentionArray[INTENTIONS_ARRAY_SIZE]={
+
 	{1000,"creation",0},			//0
 	{1000,"destruction",1},		//1 negativ
 	{1000,"horror_house",1},	//2 negativ
 	{1000,"wasteland",0},		//3
 	{1000,"reaper",4}		//4 positiv
 };*/
+
+//DYNAMIC ARRAY SIZE
 struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRAY_SIZE]={
 		{1,2},{4,3},
 		{1,2},{4,3},
@@ -18,12 +21,42 @@ struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRA
 		{1,2},{4,3},
 		{1,2},{4,3}
 };
+//int CurrentUserIntentionsArraySize=6;
+//STATIC ARRAY
 struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
-        {0,20,5,5,5},//murder
-        {1,40,5,5,5}//creation
-        //destruction
-        //smth else
+        {-1,25,120,300,120,-1},//murder 0
+        {-1,25,3,10,2,-1},//creation 1
+        {-1,25,3,10,2,-1},//destruction 2
+        {-1,250,1,300,120,-1},//sex 3
+        {-1,250,1,60,120,-1},//fight 4
+        {-1,250,1200,2000,400,-1},//narco 5
 };
+
+void InitArrayOfUserIntentions()
+{
+    for(int i=0;i<reasons_number;i++)
+    {
+         if(strcmp(reasons[i].name,"murder")==0)
+             ArrayOfUserIntentions[0].reason_indx=i;
+         if(strcmp(reasons[i].name,"creation")==0)
+             ArrayOfUserIntentions[1].reason_indx=i;
+         if(strcmp(reasons[i].name,"destruction")==0)
+             ArrayOfUserIntentions[2].reason_indx=i;
+         if(strcmp(reasons[i].name,"sex")==0)
+             ArrayOfUserIntentions[3].reason_indx=i;
+         if(strcmp(reasons[i].name,"fight")==0)
+             ArrayOfUserIntentions[4].reason_indx=i;
+         if(strcmp(reasons[i].name,"narco")==0)
+             ArrayOfUserIntentions[5].reason_indx=i;
+    }
+    //if any is not inited, panic!!
+    for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
+    {
+        if(ArrayOfUserIntentions[i].reason_indx<0)
+            Uart.Printf("CRITICAL ERROR User intention not inited %d , rn %d !!!!\r",i,reasons_number);
+    }
+    Uart.Printf("InitArrayOfUserIntentions done\r");
+}
 //typedef struct UserIntentions {
 //    int reason_indx;    //индекс из стандартного массива
 //    int power256_plateau; //[power256] сила сигнала наплато -1 если не включено, 0-256 если включено.
@@ -157,8 +190,59 @@ void CalculateIntentionsRadioChange() {
             SICD.last_intention_index_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].reason_indx;
         }
 }
+bool UpdateUserIntentionsTime(int add_time_sec)
+{
+    int return_value=false;
+
+    for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
+       {
+           if(ArrayOfUserIntentions[i].current_time>=0)
+           {
+             //  Uart.Printf("CALL ADD TIME SUCESS reason %d\r",i);
+               ArrayOfUserIntentions[i].current_time+=add_time_sec;
+               if(ArrayOfUserIntentions[i].current_time>ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau)//после плато, на спуске
+               {
+                  // Uart.Printf("ct%d, summ %d\r", ArrayOfUserIntentions[i].current_time,ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau);
+                   ArrayOfUserIntentions[i].current_time=-1;
+                   CallReasonFalure(i);
+                   return_value=true;
+               }
+           }
+       }
+    return return_value;
+}
+void PushPlayerReasonToArrayOfIntentions()
+{
+    //для каждого пользовательского резона должен быть шаблонный резон, обязательно! если нет- отметиться ошибкой!
+    //для каждого резона пересчитать силу, если сила >0 - добавить его в массив ArrayOfIntentions
+    for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
+    {
+        if(ArrayOfUserIntentions[i].current_time>=0)
+        {
+            int curr_power=CalculateCurrentPowerOfPlayerReason(i);
+            if(curr_power>=0)
+            {
+                if(curr_power>256)
+                    curr_power=256;
+                //перезаписываем силу, если есть место в массиве!
+                //иначе предупреждение о переполнении
+                   if(CurrentIntentionArraySize < MAX_INCOMING_INTENTIONS_ARRAY_SIZE)
+                   {
+                       //добавляем во входящие
+                       ArrayOfIncomingIntentions[CurrentIntentionArraySize].power256=curr_power;
+                       ArrayOfIncomingIntentions[CurrentIntentionArraySize].reason_indx=ArrayOfUserIntentions[i].reason_indx;
+                       CurrentIntentionArraySize++;
+                   }
+                   else
+                       Uart.Printf("WARNING PushPlayerReasonToArrayOfIntentions ArrayOfIncomingIntentions is to small for total incoming intentions\r");
+            }
+        }
+    }
+
+}
 
 int MainCalculateReasons() {
+
     bool is_more_than_9000 = false;
 //    int old_int = SICD.winning_integral;
     int old_winner = SICD.last_intention_index_winner;
@@ -182,12 +266,46 @@ int GetPlayerReasonCurrentPower(int reason_id)
     return -1;
     //search in last incoming array, where it's based??
 }
+int GetPersentage100(int curval,int maxval)
+{
+    return (curval*100)/maxval;
+}
 int CalculateCurrentPowerOfPlayerReason(int array_indx)
 {//TODO normal func
-    if(ArrayOfUserIntentions[array_indx].current_time>0)
-        return ArrayOfUserIntentions[array_indx].power256_plateau;
+    if(ArrayOfUserIntentions[array_indx].current_time>=0)
+    {
+        if(ArrayOfUserIntentions[array_indx].current_time<ArrayOfUserIntentions[array_indx].time_to_plateau)//перед плато
+            return (ArrayOfUserIntentions[array_indx].power256_plateau*GetPersentage100(ArrayOfUserIntentions[array_indx].current_time,ArrayOfUserIntentions[array_indx].time_to_plateau))/100;
+        if(ArrayOfUserIntentions[array_indx].current_time<ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau)//на плато
+            return (ArrayOfUserIntentions[array_indx].power256_plateau);
+        if(ArrayOfUserIntentions[array_indx].current_time<ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau+ArrayOfUserIntentions[array_indx].time_after_plateau)//после плато, на спуске
+            return (ArrayOfUserIntentions[array_indx].power256_plateau *
+                    GetPersentage100(
+                            ArrayOfUserIntentions[array_indx].current_time-ArrayOfUserIntentions[array_indx].time_to_plateau-ArrayOfUserIntentions[array_indx].time_on_plateau
+                            ,ArrayOfUserIntentions[array_indx].time_after_plateau
+                            )
+                    )/100;
+        else    //вышли за плато
+        {//выключить резон??
+            ArrayOfUserIntentions[array_indx].current_time=-1;
+            CallReasonFalure(array_indx);
+            return -1;
+
+        }
+    }
     else return -1;
 }
+void CallReasonFalure(int user_reason_id)
+{
+    Uart.Printf("CALL REASON FALURE reason %d\r",user_reason_id);
+    return;
+}
+
+void CallReasonSuccess(int user_reason_id)
+{
+   return;
+}
+
 void SwitchPlayerReason(int reason_id,bool is_turn_on)
 {
     for(int i =0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
@@ -198,7 +316,7 @@ void SwitchPlayerReason(int reason_id,bool is_turn_on)
                {
                    ArrayOfUserIntentions[i].current_time=0;
                }
-               else
+               else //turn off
                {
                    ArrayOfUserIntentions[i].current_time=-1;
                }

@@ -7,7 +7,7 @@
 #include "atlgui.h"
 #include"emotions.h"
 #include"stddef.h"
-#include "AtlGuiCF.h"
+
 #include "lcd2630.h"
 #include "gui.h"
 AtlGui_t AtlGui;
@@ -66,7 +66,6 @@ void AtlGui_t::CallStateScreen(int screen_id)
        Lcd.Printf(11, 31, clGreen, clBlack, "C stscr %u same", screen_id);
        return;
    }
-
    current_state=screen_id;
    RenderFullScreen(current_state);
    Lcd.Printf(11, 31, clGreen, clBlack, "C stscr %u new", screen_id);
@@ -90,13 +89,14 @@ void AtlGui_t::RenderFullScreen(int screen_id)
         if(screens[screen_id].buttons[i].isPressable!=nullptr)
         {
             int state1=screens[screen_id].buttons[i].isPressable(screen_id,i);
+            Uart.Printf("button_state_val2 %d\r",state1);
             RenderSingleButton(screen_id,i,state1);
         }//не рисовать кнопки, которых нет
     }
 }
 void AtlGui_t::ButtonIsReleased(int button_id)
 {
-    if(is_locked)
+    if(is_locked && button_id!=6)
         return;
     if(current_state>=0 && current_state<screens_number)
     {
@@ -136,7 +136,7 @@ void AtlGui_t::ButtonIsReleased(int button_id)
 }
 void AtlGui_t::ButtonIsClicked(int button_id)
 {
-    if(is_locked)
+    if(is_locked && button_id!=6)
         return;
     //вызываем геттер кнопки
     Uart.Printf("current_state %d screens_number %d button id %d \r",current_state,screens_number,button_id);
@@ -244,6 +244,7 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
         //memcpy(bstr,BUTTONS,sizeof(BUTTONS));
         //memcpy(bstr1,&bstr+button_id,1);
         //говнокод конец
+        //не пашет (
         //strcat(bmp_filename,bstr1);
 
         //кривокот
@@ -273,7 +274,4 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
         Uart.Printf("RenderSingleButton %s left %d Bot %d \r",bmp_filename,screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom);
         // render it
         Lcd.DrawBmpFile(screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom,bmp_filename);
-       // Lcd.DrawBmpFile(30,10,bmp_filename);
-    //render it inaproppriate place
-  //  Lcd.Printf(11, 41, clGreen, clBlack, "RB sc %d b %d st %d", screen_id,button_id,button_state);
 }

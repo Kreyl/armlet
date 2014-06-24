@@ -3,7 +3,7 @@
 //#include "emotions.h"
 #include "atlantis_music_tree.h"
 #define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 10
-#define MAX_USER_INTENTIONS_ARRAY_SIZE 2
+#define MAX_USER_INTENTIONS_ARRAY_SIZE 6
 #define INTENTIONS_ARRAY_SIZE 5
 #define WINING_INTEGRAL_SWITCH_LIMIT 50
 #define FON_RELAX_SPEED 50
@@ -24,17 +24,21 @@ typedef struct IncomingIntentions {
 	int power256; //сила сигнала
 } IncomingIntentions;
 
+
 typedef struct UserIntentions {
     int reason_indx;    //индекс из стандартного массива
     int power256_plateau; //[power256] сила сигнала наплато 0-256 если включено.
     int time_to_plateau;//[sec]
     int time_on_plateau;//sec
     int time_after_plateau;//[sec]
-    int current_time;//[sec] -1 если не включено
+    int current_time;//[sec] -1 если не включено, 0,+int если включено
 } UserIntentions;
 
 extern struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRAY_SIZE];
+
+//user_reason_id - номер лемента в этом массиве
 extern struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE];
+
 typedef struct IntentionCalculationData
 //структура для рассчета изменений по входящим намерениям,
 //TODO тут же тики по времени для намерений, если есть, потом сделать
@@ -54,13 +58,21 @@ void CalculateIntentionsRadioChange();
 //returns -1 if winner does not over switch limit, else return reason id
 
 //run through player recieved array of intentoins, and return its power if available, else -1;
+//obsolete,not used
 int GetPlayerReasonCurrentPower(int reason_id);
-int CalculateCurrentPowerOfPlayerReason(int array_indx);
-void SwitchPlayerReason(int reason_id,bool is_turn_on);
 
+int CalculateCurrentPowerOfPlayerReason(int array_indx); //считаеттекущую мощность позаданному стандартному алгоритму
+//Obsolete??
+void SwitchPlayerReason(int reason_id,bool is_turn_on);  // игрок нажал накнопку резона, вклили выкл.
+void CallReasonSuccess(int user_reason_id); // вызовется если игрок отключит резон, все id и проверки внутри
+void CallReasonFalure(int user_reason_id); // вызовется если игрок просрал по времени
+void PushPlayerReasonToArrayOfIntentions();
+//return true if any intention go fall, false otherwise
+bool UpdateUserIntentionsTime(int add_time_sec);
 int MainCalculateReasons();
 extern struct IntentionCalculationData SICD;//SingletonIntentionCalculationData;
 void PrintSCIDToUart();
+void InitArrayOfUserIntentions();
 //в структуре рассчета будет индекс текущего победителя мощности,
 //индекс предыдущего победителя мощности,
 //набранная дельта ( по определению принадлежит предыдущему победителю)

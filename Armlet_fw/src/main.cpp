@@ -92,7 +92,7 @@ void Init() {
     Init_emotionTreeMusicNodeFiles_FromFileIterrator();
 
     Sound.Init();
-    Sound.SetVolume(254);
+    Sound.SetVolume( START_VOL_CONST );
 
     //Sound.Play("fon-WhiteTower.mp3");//"alive.wav");
 

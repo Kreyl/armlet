@@ -1,5 +1,8 @@
 #ifndef ATLGUICF_H_
 #define ATLGUICF_H_
+
+#define START_VOL_CONST 122
+
 void CallMainToReason();
 void CallReasonToMain();
 
@@ -26,13 +29,17 @@ int bChangeMelody(int screen_id, int button_id);
 //lock button
 int bLockCheck(int screen_id, int button_id);
 int bLockChange(int screen_id, int button_id);
+int bLockGetState(int screen_id, int button_id);
 //reason button
 int bReasonCheck(int screen_id, int button_id);
 int bReasonChange(int screen_id, int button_id);
+int bReasonGetState(int screen_id, int button_id);
 
+//вызывается, если резон закончился а картинка у человека на кране - перерисовывает кнопку
+void CheckAndRedrawFinishedReasons();
 //lock button
-int bLockCheck(int screen_id, int button_id);
-int bLockChange(int screen_id, int button_id);
-int bLockState(int screen_id, int button_id);
+//int bLockCheck(int screen_id, int button_id);
+//int bLockChange(int screen_id, int button_id);
+//int bLockState(int screen_id, int button_id);
 extern int current_volume_lvl;
 #endif

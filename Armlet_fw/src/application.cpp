@@ -374,18 +374,21 @@ void App_t::Task() {
 #endif
 
 
+        //перекладываем данные с радио в массив текущих резонов
         int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
         CurrentIntentionArraySize = val1;
         int j=0;
         for(int i=0; i<val1; i++) {
-            if(SnsTable.PTable->Row[i].ID >= reasons_number || (SnsTable.PTable->Row[i].ID < 0) || (SnsTable.PTable->Row[i].Level < 70) ) {
+            if(SnsTable.PTable->Row[i].ID >= reasons_number || (SnsTable.PTable->Row[i].ID < 0) /*|| (SnsTable.PTable->Row[i].Level < 70)*/ ) {
                 CurrentIntentionArraySize--;
                 continue;
             }
-            ArrayOfIncomingIntentions[j].power256 = SnsTable.PTable->Row[i].Level-70;
+            ArrayOfIncomingIntentions[j].power256 = SnsTable.PTable->Row[i].Level/*-70*/;
             ArrayOfIncomingIntentions[j].reason_indx = SnsTable.PTable->Row[i].ID;
             j++;
         }
+        PushPlayerReasonToArrayOfIntentions();
+        //пересчитываем резоны
         int reason_id=MainCalculateReasons();
 
         if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3) {
@@ -401,6 +404,11 @@ void App_t::Task() {
 
     if(EvtMsk & EVTMASK_NEWSECOND) {
        //  Uart.Printf("New_second!");
+
+        //UPDATE user intentions timers
+        if(UpdateUserIntentionsTime(1))
+            CheckAndRedrawFinishedReasons();
+
 
         if(Time.S_total % 6 ==0)
         {
@@ -436,6 +444,7 @@ void App_t::Init() {
 
     Time.Init();
     Time.Reset();
+    InitArrayOfUserIntentions();
 }
 
 //NEW FROM BRAINENCH

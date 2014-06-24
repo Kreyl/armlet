@@ -8,6 +8,7 @@
 #ifndef ATLGUI_H_
 #define ATLGUI_H_
 #include "kl_lib_f2xx.h"
+#include "AtlGuiCF.h"
 /*
 #define KEY_A   Keys.Status[0]
 #define KEY_B   Keys.Status[1]
