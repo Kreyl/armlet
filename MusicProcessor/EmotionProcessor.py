@@ -25,7 +25,8 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pytils v0.2.3 or later: https://pypi.python.org/pypi/pytils\n" % (ex.__class__.__name__, ex))
 
-from CharacterProcessor import CHARACTERS_CSV, CHARACTER_ID_START, currentTime, getFileName, updateCharacters
+from Settings import LOCATION_IDS, CHARACTER_ID_START, CHARACTER_IDS, EMOTION_FIX_ID_START, EMOTION_FIX_IDS
+from CharacterProcessor import CHARACTERS_CSV, currentTime, getFileName, updateCharacters
 
 isWindows = system().lower().startswith('win')
 
@@ -60,9 +61,16 @@ const int emotions_number = countof(emotions);
 
 // RIDs are indexes in this array.
 Reason_t reasons[] = {
+%%s
 \t// Locations
 %%s
+\t// stuffing
+%%s
 \t// Characters
+%%s
+\t// stuffing
+%%s
+\t// Emotion fixes
 %%s
 };
 
@@ -101,10 +109,15 @@ MAX_WEIGHT = 99
 
 RESERVED_REASON = 'r%03d'
 
+EMOTION_FIX_REASON = 'x%s'
+
+EMOTION_FIX_WEIGHT = 5
+
 TEST_COMMAND = 'gcc -o test %s test.c && ./test && rm test' % C_TARGET
 
 EMOTION_PATCHES = {
-    'somneniya': 'somnenie'
+    'somneniya': 'somnenie',
+    'sex': 'seks'
 }
 
 WRONG = 'wrong'
@@ -112,6 +125,9 @@ MASTER = 'master'
 SILENCE = 'silence'
 TUMAN = 'tuman'
 ADDITIONAL_EMOTIONS = (WRONG, MASTER, SILENCE, TUMAN)
+
+def firstCapital(s):
+    return '%s%s' % (s[0].upper(), s[1:])
 
 def width(array):
     return len(str((len(array) or 1) - 1))
@@ -163,6 +179,7 @@ def processEmotions(fileName = getFileName(EMOTIONS_CSV)):
         emotionsIndexes[emotion] = eid
         emotionsTree.append((eid, level, emotion, parents[-1] if parents else None))
     assert len(emotionsIndexes) == len(emotionsTree), "Duplicate emotions detected"
+    assert len(emotionsIndexes) <= len(EMOTION_FIX_IDS)
     return (emotionsIndexes, tuple(emotionsTree))
 
 def processLocations(emotions, fileName = getFileName(LOCATIONS_CSV)):
@@ -173,6 +190,7 @@ def processLocations(emotions, fileName = getFileName(LOCATIONS_CSV)):
         eid = getEmotion(emotions, emotion)
         weight = getWeight(weight)
         addReason(reasons, rid, reason, weight, eid, emotion)
+    assert len(reasons) <= len(LOCATION_IDS)
     return tuple(reasons)
 
 def processCharacters(fileName = getFileName(CHARACTERS_CSV)):
@@ -181,23 +199,32 @@ def processCharacters(fileName = getFileName(CHARACTERS_CSV)):
         assert len(row) == 2, "Bad characters file format"
         (rid, reason) = row
         addReason(reasons, int(rid), reason, 0, 0, '')
+    assert len(reasons) <= len(CHARACTER_IDS)
     return tuple(reasons)
 
 def processReasons(emotions):
     def reserveReason(rid):
         return (rid, RESERVED_REASON % rid, MAX_WEIGHT, emotions[WRONG], WRONG) # ToDo: Default reserve to fon?
-    locations = (reserveReason(0),) + processLocations(emotions)
-    locationReasons = set(r[1].lower() for r in locations)
+    def emotionFixReason(eid, emotion):
+        return (eid + EMOTION_FIX_ID_START, EMOTION_FIX_REASON % firstCapital(emotion), EMOTION_FIX_WEIGHT, eid, emotion)
+    stuffing0 = (reserveReason(0),)
+    locations =  processLocations(emotions)
+    stuffing1 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations), CHARACTER_ID_START))
     characters = processCharacters()
-    for r in characters:
-        assert r[1].lower() not in locationReasons, "Duplicate reason: %s" % r[1]
-    stuffing = tuple(reserveReason(rid) for rid in xrange(len(locations), CHARACTER_ID_START))
-    assert tuple(r[0] for r in chain(locations, stuffing, characters)) == tuple(xrange(len(locations) + len(stuffing) + len(characters)))
-    return (locations + stuffing, characters)
+    stuffing2 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(characters), EMOTION_FIX_ID_START))
+    emotionFixes = tuple(emotionFixReason(eid, emotion) for (eid, emotion) in sorted((eid, emotion) for (emotion, eid) in emotions.iteritems()))
+    reasons = (stuffing0, locations, stuffing1, characters, stuffing2, emotionFixes)
+    checkSets = (emotions,) + tuple(set(r[1].lower() for r in reason) for reason in reasons)
+    for i in xrange(0, len(checkSets)):
+        for rs in checkSets[:i]:
+            for r in checkSets[i]:
+                assert r not in rs, "Duplicate reason: %s" % r
+    assert tuple(r[0] for r in chain.from_iterable(reasons)) == tuple(xrange(sum(len(r) for r in reasons)))
+    return reasons
 
 def verifyCharacter(emotions, fileName):
-    (locations, characters) = processReasons(emotions)
-    validReasons = tuple(r[1].lower() for r in locations + characters)
+    (locations, characters, emotionFixes) = processReasons(emotions)
+    validReasons = tuple(r[1].lower() for r in locations + characters + emotionFixes)
     characterReasons = processLocations(emotions, fileName)
     for r in characterReasons:
         assert r[1].lower() in validReasons, "Unknown reason: %s" % r[1]
@@ -219,29 +246,28 @@ def cEmotion(eidWidth, eid, level, emotion, parent):
 def cReason(ridWidth, rid, reason, weight, eid, emotion):
     return REASON_NODE % (str(rid).rjust(ridWidth), cString(reason), weight, eid) + (REASON_COMMENT % emotion if emotion else '')
 
-def writeC(emotions, locations, characters):
+def writeC(emotions, *reasons):
     eidWidth = width(emotions)
-    ridWidth = len(str(max(r[0] for r in chain(locations, characters))))
+    ridWidth = len(str(max(r[0] for r in chain.from_iterable(reasons))))
+    emotionsText = '\n'.join(cEmotion(eidWidth, *emotion) for emotion in emotions)
+    reasonsTexts = tuple('\n'.join(cReason(ridWidth, *r) for r in reason) for reason in reasons)
     with open(getFileName(C_TARGET), 'w') as f:
-        f.write(C_CONTENT % (currentTime(),
-                             '\n'.join(cEmotion(eidWidth, *emotion) for emotion in emotions),
-                             '\n'.join(cReason(ridWidth, *location) for location in locations),
-                             '\n'.join(cReason(ridWidth, *character) for character in characters)))
+        f.write(C_CONTENT % ((currentTime(), emotionsText) + reasonsTexts))
 
-def writeCSV(locations, characters):
+def writeCSV(*reasons):
     with open(getFileName(CSV_TARGET), 'wb') as f:
         f.writelines(s + '\r\n' for s in (REASONS_CSV_HEADER % currentTime()).splitlines())
-        CSVWriter(f).writerows((rid, reason) for (rid, reason, _weight, _eid, _emotion) in chain(locations, characters))
+        CSVWriter(f).writerows((rid, reason) for (rid, reason, _weight, _eid, _emotion) in chain.from_iterable(reasons))
 
 def updateEmotions():
     charactersList = updateCharacters()
     print "\nProcessing emotions..."
     (emotionsIndexes, emotionsTree) = processEmotions()
-    (locations, characters) = processReasons(emotionsIndexes)
-    writeC(emotionsTree, locations, characters)
-    writeCSV(locations, characters)
+    reasons = processReasons(emotionsIndexes)
+    writeC(emotionsTree, *reasons)
+    writeCSV(*reasons)
     if isWindows:
-        print "Done"
+        print "Not running test on Windows\nDone"
     else:
         print "Running test: %s" % TEST_COMMAND
         subprocess = Popen(TEST_COMMAND, shell = True, stdout = PIPE, stderr = STDOUT)

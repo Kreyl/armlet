@@ -17,7 +17,7 @@ from codecs import open as codecsOpen
 from errno import ENOENT
 from getopt import getopt
 from itertools import chain, count
-from os import getenv, listdir, makedirs, remove, rmdir
+from os import getenv, listdir, makedirs, remove, rmdir, walk
 from os.path import expanduser, getmtime, getsize, isdir, isfile, join
 from re import compile as reCompile
 from shutil import copy
@@ -111,13 +111,19 @@ def createDir(dirName):
     if not isdir(dirName):
         makedirs(dirName)
 
+def deepListDir(dirName):
+    return tuple(chain.from_iterable(((dirPath, fileName) for fileName in fileNames) for (dirPath, dirNames, fileNames) in walk(dirName)))
+
 def getFiles(dirName):
     return tuple(join(dirName, f) for f in listdir(dirName)) if isdir(dirName) else ()
+
+def deepGetFiles(dirName):
+    return tuple(join(d, f) for (d, f) in deepListDir(dirName)) if isdir(dirName) else ()
 
 def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion, artist, title, tail):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
-        if sourceAudio.duration_seconds < 50:
+        if sourceAudio.duration_seconds < 40:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
         processedAudio = sourceAudio.normalize() # pylint: disable=E1103
         if processedAudio.duration_seconds != sourceAudio.duration_seconds:
@@ -133,7 +139,7 @@ def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion
 def verifyFile(fullName):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
-        if sourceAudio.duration_seconds < 50:
+        if sourceAudio.duration_seconds < 40:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
         processedAudio = sourceAudio.normalize() # pylint: disable=E1103
         if processedAudio.duration_seconds != sourceAudio.duration_seconds:
@@ -192,7 +198,7 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
     armletDir = join(baseDir, ARMLET_DIR)
     musicDir = join(armletDir, MUSIC_DIR)
     createDir(armletDir)
-    sourceFiles = getFiles(sourceDir)
+    sourceFiles = deepGetFiles(sourceDir)
     musicFiles = getFiles(musicDir)
     errorFiles = getFiles(errorDir)
     newFileNameSet = set()
@@ -256,7 +262,7 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
         hasMusic = False
         log(True, None, "No music source directory found: %s" % sourceDir)
     else:
-        files = listdir(sourceDir)
+        files = deepListDir(sourceDir)
         hasMusic = bool(files)
         if not hasMusic:
             log(True, None, "No music files found in source directory: %s" % sourceDir)
@@ -267,10 +273,10 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
                 for f in chain(getFiles(musicDir), getFiles(errorDir)):
                     remove(f)
                 rmdir(errorDir)
-            for (trackNumber, fileName) in enumerate(files, 1):
+            for (trackNumber, (dirName, fileName)) in enumerate(files, 1):
                 stdout.write('.')
                 stdout.flush()
-                fullName = join(sourceDir, fileName)
+                fullName = join(dirName, fileName)
                 dumpToErrors = False
                 match = CHECK_PATTERN.match(fileName)
                 if match:
@@ -330,18 +336,19 @@ def updateMusic(sourceDir = '.', verifyFiles = False):
     if not isfile(join(sourceDir, MUSIC_MARK)):
         print "Not a music directory: %s" % sourceDir
         return
-    characterDirs = tuple(sorted(str(d) for d in listdir(unicode(sourceDir)) if d not in EXCLUDE_DIRS and isdir(join(sourceDir, d))))
-    if not characterDirs:
-        print "No character directories found in music directory: %s" % sourceDir
-        return
+    characterDirs = [str(d) for d in listdir(unicode(sourceDir)) if d not in EXCLUDE_DIRS and isdir(join(sourceDir, d))]
     (emotions, characters) = updateEmotions()
     okCharacters = []
     unknownCharacters = tuple(sorted(d for d in characterDirs if d not in characters))
-    noMusicCharacters = [name for name in characters if name not in characterDirs]
+    for name in (name for name in characters if name not in characterDirs):
+        characterDirs.append(name)
+        createDir(join(sourceDir, name, SOURCE_DIR))
+    characterDirs = tuple(sorted(characterDirs))
     print
     print "Processing music at %s" % sourceDir
-    print "Known characters found: %d%s" % (len(characters), (' (%d have no music dir)' % len(noMusicCharacters)) if noMusicCharacters else '')
+    print "Known characters found: %d" % len(characters)
     print "Character directories found: %d%s" % (len(characterDirs), (' (%d unknown)' % len(unknownCharacters)) if unknownCharacters else '')
+    noMusicCharacters = []
     errorCharacters = []
     for d in characterDirs:
         (hasMusic, hasErrors) = processCharacter(d, characters.get(d, -1), emotions, sourceDir, verifyFiles)
@@ -360,6 +367,7 @@ def updateMusic(sourceDir = '.', verifyFiles = False):
         print "\nNo music found for characters (%d): %s" % (len(noMusicCharacters), ', '.join(sorted(noMusicCharacters)))
     if errorCharacters:
         print "\nErrors detected with music for characters (%d): %s" % (len(errorCharacters), ', '.join(sorted(errorCharacters)))
+    print
 
 def main(*args):
     verifyFiles = False

@@ -17,11 +17,11 @@ from urllib import urlopen
 from traceback import format_exc
 from sys import argv
 
+from Settings import CHARACTER_ID_START, CHARACTER_IDS
+
 GAME_ID = 584
 
 NAME_COLUMN_TITLE = u'Имя на браслете'
-
-CHARACTER_ID_START = 101
 
 CHARACTERS_CSV = 'Characters.csv'
 
@@ -54,6 +54,8 @@ def readCSV(csv): # generator
                 yield row
 
 def verifyCharacters(characters):
+    assert characters
+    assert len(characters) <= len(CHARACTER_IDS)
     assert tuple(sorted(characters.itervalues())) == tuple(xrange(CHARACTER_ID_START, CHARACTER_ID_START + len(characters))), "Damaged %s file" % CHARACTERS_CSV
 
 def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
@@ -100,7 +102,9 @@ def updateCharacters():
     characters = readCharacters()
     for name in loadCharacters():
         if name not in characters:
-            characters[name] = len(characters) + CHARACTER_ID_START
+            characterID = len(characters) + CHARACTER_ID_START
+            assert characterID in CHARACTER_IDS
+            characters[name] = characterID
     verifyCharacters(characters)
     writeCharacters(characters)
     return characters
