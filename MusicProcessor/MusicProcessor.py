@@ -18,41 +18,15 @@ from errno import ENOENT
 from getopt import getopt
 from itertools import chain, count
 from os import getenv, listdir, makedirs, remove, rmdir, walk
-from os.path import expanduser, getmtime, getsize, isdir, isfile, join
+from os.path import expanduser, getmtime, getsize, isdir, isfile, islink, join
 from re import compile as reCompile
-from shutil import copy
+from shutil import copy, copytree, rmtree
 from sys import argv, stdout
 
 try:
     from pydub import AudioSegment
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pydub v0.9.2 or later: https://pypi.python.org/pypi/pydub\n" % (ex.__class__.__name__, ex))
-
-try: # Filesystem symbolic links configuration
-    from os import symlink # UNIX # pylint: disable=E0611
-    from os.path import islink # UNIX # pylint: disable=E0611
-    rmlink = remove
-except ImportError:
-    global symlink # pylint: disable=W0604
-    try:
-        import ctypes
-        FILE_ATTRIBUTE_REPARSE_POINT = 1024
-        INVALID_FILE_ATTRIBUTES = -1
-        dll = ctypes.windll.LoadLibrary('kernel32.dll')
-        def symlink(source, linkName):
-            if not dll.CreateSymbolicLinkW(linkName, source, int(isdir(source))):
-                raise OSError("code %d" % dll.GetLastError())
-        def islink(path):
-            ret = dll.GetFileAttributesW(path)
-            if ret == INVALID_FILE_ATTRIBUTES:
-                raise OSError("code %d" % dll.GetLastError())
-            return bool(ret & FILE_ATTRIBUTE_REPARSE_POINT)
-        def rmlink(path):
-            if not (dll.RemoveDirectoryW(path) if isdir(path) else dll.DeleteFileW(path)):
-                raise OSError("code %d" % dll.GetLastError())
-    except Exception, ex:
-        symlink = islink = None
-        print "%s: %s\nWARNING: Filesystem links will not be available.\nPlease run on UNIX or Windows Vista or later.\n" % (ex.__class__.__name__, ex)
 
 from EmotionProcessor import convert, convertEmotion, convertTitle, updateEmotions, verifyCharacter
 
@@ -69,7 +43,7 @@ EXCLUDE_DIRS = (SD_DIR,)
 INI_FILE = 'settings.ini'
 INI_ID_LINE = 'id=%d\r\n'
 
-CHARACTER_CSV = 'Character.csv'
+CHARACTER_CSV = 'character.csv'
 
 FILE_PATTERN = reCompile(r'.*\..*')
 
@@ -202,23 +176,34 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
     musicFiles = getFiles(musicDir)
     errorFiles = getFiles(errorDir)
     newFileNameSet = set()
+    # Removing common files
+    for fileName in (join(armletDir, f) for f in listdir(armletDir) if f not in (MUSIC_DIR, CHARACTER_CSV)):
+        if isdir(fileName) and not islink(fileName):
+            rmtree(fileName)
+        else:
+            remove(fileName)
+    # Copying common files
+    for fileName in listdir(sdDir):
+        src = join(sdDir, fileName)
+        dst = join(armletDir, fileName)
+        if isdir(src):
+            copytree(src, dst)
+        else:
+            copy(src, dst)
+    # Creating settings.ini
     if number > 0:
         with open(join(armletDir, INI_FILE), 'wb') as f:
             f.write(INI_ID_LINE % number)
-    else:
-        silentRemove(join(armletDir, INI_FILE))
-    if symlink:
-        for fileName in (f for f in getFiles(armletDir) if islink(f)):
-            rmlink(fileName)
-        for fileName in listdir(sdDir):
-            symlink(join(sdDir, fileName), join(armletDir, fileName.lower()))
+    # Processing character.csv
     characterFile = join(armletDir, CHARACTER_CSV)
     if isfile(characterFile):
         print "Character file found, verifying"
         verifyCharacter(emotions, characterFile)
+    # Check music status
     (withErrors, markDate, okNum, okSize, errorText) = checkResultMark(baseDir)
     if markDate:
         try:
+            # Verify that status mark is still actual
             if any(date > markDate for date in (getmtime(f) for f in chain(sourceFiles, musicFiles, errorFiles))):
                 raise ProcessException("Status mark obsolete, newer music files exist")
             if okNum is None:
@@ -228,6 +213,7 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
             if okSize != sum(getsize(f) for f in musicFiles):
                 raise ProcessException("Existing record mentions total file size %d bytes, while actual total size is %d bytes" % (okSize, sum(getsize(f) for f in musicFiles)))
             if verifyFiles:
+                # Verify existing music files
                 print "Veryfying files",
                 for fileName in listdir(musicDir):
                     stdout.write('.')
@@ -262,6 +248,7 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
         hasMusic = False
         log(True, None, "No music source directory found: %s" % sourceDir)
     else:
+        # Process source music
         files = deepListDir(sourceDir)
         hasMusic = bool(files)
         if not hasMusic:

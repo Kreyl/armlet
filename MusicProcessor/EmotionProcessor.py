@@ -223,8 +223,8 @@ def processReasons(emotions):
     return reasons
 
 def verifyCharacter(emotions, fileName):
-    (locations, characters, emotionFixes) = processReasons(emotions)
-    validReasons = tuple(r[1].lower() for r in locations + characters + emotionFixes)
+    reasons = processReasons(emotions)
+    validReasons = tuple(r[1].lower() for r in chain.from_iterable(reasons))
     characterReasons = processLocations(emotions, fileName)
     for r in characterReasons:
         assert r[1].lower() in validReasons, "Unknown reason: %s" % r[1]
