@@ -302,6 +302,7 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
                     createDir(errorDir)
                     copy(fullName, errorDir)
             print
+            assert len(files) == len(newFileNameSet)
             obsoleteFiles = tuple(f for f in listdir(musicDir) if f not in newFileNameSet)
             if obsoleteFiles:
                 print "Obsolete files found (%d), removing" % len(obsoleteFiles)
@@ -309,6 +310,8 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
                     remove(join(musicDir, fileName))
             processedFiles = getFiles(musicDir)
             numProcessed = len(processedFiles)
+            if numProcessed != len(files):
+                log(True, None, "Processed file number mismatch: %d, expected %d" % (numProcessed, len(files)))
             processedSize = sum(getsize(f) for f in processedFiles)
             resultMark(baseDir, hasErrors[0], numProcessed if hasMusic else None, processedSize if hasMusic else None, ''.join(messages))
             if numProcessed:
