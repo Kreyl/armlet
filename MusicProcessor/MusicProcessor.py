@@ -204,7 +204,7 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
     if markDate:
         try:
             # Verify that status mark is still actual
-            if any(date > markDate for date in (getmtime(f) for f in chain(sourceFiles, musicFiles, errorFiles))):
+            if any(date > markDate for date in (getmtime(f) for f in chain((sourceDir, musicDir), sourceFiles, musicFiles, errorFiles))):
                 raise ProcessException("Status mark obsolete, newer music files exist")
             if okNum is None:
                 raise ProcessException("No music files found")
