@@ -393,8 +393,18 @@ Reason_t reasons[] = {
  /* 281 */ { "xMeditatsiya", 5, 81 },	/* meditatsiya */
  /* 282 */ { "xEkzal'tatsiya", 5, 82 },	/* ekzal'tatsiya */
  /* 283 */ { "xProsvetlenie", 5, 83 },	/* prosvetlenie */
-};
 
+ // user reason connection part
+ /*   4 */ { "murder", 2, 39 },    /* pozitiv */
+ /*   5 */ { "creation", 2, 5 },   /* negativ */
+ /*   4 */ { "destruction", 2, 39 },    /* pozitiv */
+ /*   5 */ { "sex", 2, 5 },   /* negativ */
+ /*   4 */ { "fight", 2, 39 },    /* pozitiv */
+ /*   5 */ { "narco", 2, 5 },   /* negativ */
+ // user reason connection part end
+
+
+};
 const int reasons_number = countof(reasons);
 
 // End of emotions.c

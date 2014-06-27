@@ -379,6 +379,10 @@ void App_t::Task() {
         int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
         CurrentIntentionArraySize = val1;
         int j=0;
+        //сбрасываем  human syupport
+        for(int kl=0;kl<MAX_USER_INTENTIONS_ARRAY_SIZE;kl++)
+            ArrayOfUserIntentions[kl].human_support_number=0;
+
         for(int i=0; i<val1; i++) {
             if(SnsTable.PTable->Row[i].ID >= reasons_number || (SnsTable.PTable->Row[i].ID < 0) /*|| (SnsTable.PTable->Row[i].Level < 70)*/ ) {
                 CurrentIntentionArraySize--;
@@ -386,16 +390,35 @@ void App_t::Task() {
             }
             ArrayOfIncomingIntentions[j].power256 = SnsTable.PTable->Row[i].Level/*-70*/;
             ArrayOfIncomingIntentions[j].reason_indx = SnsTable.PTable->Row[i].ID;
+            //если входной резон пользователя - пользовательский, добавляем его в челподдержку
+            for(int kk=0;kk<MAX_USER_INTENTIONS_ARRAY_SIZE;kk++)
+            {
+                int PTABLE_REASON =-1;
+                if(PTABLE_REASON==ArrayOfUserIntentions[kk].reason_indx)
+                {
+                    ArrayOfUserIntentions[kk].human_support_number++;
+                    break;
+                }
+            }
+
             j++;
         }
+        //добавляем массив игроцких резонов в общий
         PushPlayerReasonToArrayOfIntentions();
+           // сюда - все массивы резонов с других источников!
+
         //пересчитываем резоны
         int reason_id=MainCalculateReasons();
 
         if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3) {
             Uart.Printf("ID to play=%d\r",reason_id);
+            //new reason to play!
             if(reasons[reason_id].eID != SICD.last_played_emo)
-            PlayNewEmo(reasons[reason_id].eID,3);
+            {
+                //check if it's user reason,if any, set already played flag
+                UserReasonFlagRecalc(reason_id);
+                PlayNewEmo(reasons[reason_id].eID,3);
+            }
         }
         if(reason_id==-3) {
             PlayNewEmo(0,4);

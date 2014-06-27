@@ -32,6 +32,15 @@ typedef struct UserIntentions {
     int time_on_plateau;//sec
     int time_after_plateau;//[sec]
     int current_time;//[sec] -1 если не включено, 0,+int если включено
+    //если уже музыка играла, true. - нужно для поддержки переподключений
+    bool was_winning;
+    //storage for data from radiochannel, recalc every radio_in
+    int human_support_number;
+    void TurnOff()
+    {
+        current_time=-1;
+        was_winning=false;
+    }
 } UserIntentions;
 
 extern struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRAY_SIZE];
@@ -72,7 +81,11 @@ bool UpdateUserIntentionsTime(int add_time_sec);
 int MainCalculateReasons();
 extern struct IntentionCalculationData SICD;//SingletonIntentionCalculationData;
 void PrintSCIDToUart();
+
+//user intentions array funcs
 void InitArrayOfUserIntentions();
+void UserReasonFlagRecalc(int reason_id);
+
 //в структуре рассчета будет индекс текущего победителя мощности,
 //индекс предыдущего победителя мощности,
 //набранная дельта ( по определению принадлежит предыдущему победителю)

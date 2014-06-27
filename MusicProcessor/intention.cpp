@@ -23,14 +23,14 @@ struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRA
 		{1,2},{4,3}
 };
 //int CurrentUserIntentionsArraySize=6;
-//STATIC ARRAY
+//STATIC ARRAY, inits inside, all external are in InitArrayOfUserIntentions
 struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
-        {-1,25,120,300,120,-1},//murder 0
-        {-1,25,3,10,2,-1},//creation 1
-        {-1,25,3,10,2,-1},//destruction 2
-        {-1,250,1,300,120,-1},//sex 3
-        {-1,250,1,60,120,-1},//fight 4
-        {-1,250,1200,2000,400,-1},//narco 5
+        {-1,25,120,300,120,-1,false,0},//murder 0
+        {-1,25,3,10,2,-1,false,0},//creation 1
+        {-1,25,3,10,2,-1,false,0},//destruction 2
+        {-1,250,1,300,120,-1,false,0},//sex 3
+        {-1,250,1,60,120,-1,false,0},//fight 4
+        {-1,250,1200,2000,400,-1,false,0},//narco 5
 };
 
 void InitArrayOfUserIntentions()
@@ -204,7 +204,7 @@ bool UpdateUserIntentionsTime(int add_time_sec)
                if(ArrayOfUserIntentions[i].current_time>ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau)//после плато, на спуске
                {
                   // Uart.Printf("ct%d, summ %d\r", ArrayOfUserIntentions[i].current_time,ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau);
-                   ArrayOfUserIntentions[i].current_time=-1;
+                   ArrayOfUserIntentions[i].TurnOff();//current_time=-1;
                    CallReasonFalure(i);
                    return_value=true;
                }
@@ -241,9 +241,21 @@ void PushPlayerReasonToArrayOfIntentions()
     }
 
 }
-
+void UserReasonFlagRecalc(int reason_id)
+{
+    for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
+       {
+           if(ArrayOfUserIntentions[i].reason_indx==reason_id)
+               ArrayOfUserIntentions[i].was_winning=true;
+       }
+}
 int MainCalculateReasons() {
 
+
+    //return valie:
+    //-1; low winner intergral to play new
+    //-2??? still enough interalto play,dont switch??
+    //????? why play fon now?; -3;
     bool is_more_than_9000 = false;
 //    int old_int = SICD.winning_integral;
     int old_winner = SICD.last_intention_index_winner;
@@ -274,6 +286,7 @@ int GetPersentage100(int curval,int maxval)
 int CalculateCurrentPowerOfPlayerReason(int array_indx)
 {//TODO normal func
 
+    Energy.human_support=ArrayOfUserIntentions[array_indx].human_support_number;
     //всё удлинняет
     int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time);//>current_time
     int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time);//<current_time
@@ -294,7 +307,7 @@ int CalculateCurrentPowerOfPlayerReason(int array_indx)
                     )/100;
         else    //вышли за плато
         {//выключить резон??
-            ArrayOfUserIntentions[array_indx].current_time=-1;
+            ArrayOfUserIntentions[array_indx].TurnOff();//current_time=-1;
             CallReasonFalure(array_indx);
             return -1;
 
@@ -339,7 +352,7 @@ void SwitchPlayerReason(int reason_id,bool is_turn_on)
                }
                else //turn off
                {
-                   ArrayOfUserIntentions[i].current_time=-1;
+                   ArrayOfUserIntentions[i].TurnOff();//current_time=-1;
                }
                return;
            }

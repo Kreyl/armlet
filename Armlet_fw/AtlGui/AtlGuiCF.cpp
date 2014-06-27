@@ -12,11 +12,20 @@
 typedef struct t_scrbtoarr
 {   int scr_id;//TODO change to screen name later
     int BtoR[9];
+    const char * scr_name;
+    //-1 if no, indx in ButtonsToUserReasons if yes
+    bool is_this_screen_with_reasons(const char * screen_name)
+    {
+            if(strcmp(scr_name,screen_name)==0)
+               return true;
+        return false;
+    }
     }t_scrbtoarr;
 
 t_scrbtoarr ButtonsToUserReasons[SCREENS_WITH_REASONS]=
     {1,
-        {-1,0,1,3,4,2,-1,-1,-1}
+        {-1,0,1,3,4,2,-1,-1,-1},
+        "intentions"
     };
 int current_volume_lvl=START_VOL_CONST;
 void CallMainToReason()
@@ -85,7 +94,10 @@ int bReasonCheck(int screen_id, int button_id)
     //если есть соответствие кнопке и резону, то можно нажимать?
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
     {
-        if(screen_id==ButtonsToUserReasons[i].scr_id)
+        //int scr_id=ButtonsToUserReasons[0].is_this_screen_with_reasons("haha");
+        for(int i=0;i<SCREENS_WITH_REASONS;i++)
+            if(ButtonsToUserReasons[i].is_this_screen_with_reasons(screens[screen_id].name))
+       // if(screen_id==ButtonsToUserReasons[i].scr_id)
         {
             if(ButtonsToUserReasons[i].BtoR[button_id]>=0)
             {
@@ -106,13 +118,14 @@ int bReasonGetState(int screen_id, int button_id)
     Uart.Printf("CALL bReasonGetState \r");
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
        {
-           if(screen_id==ButtonsToUserReasons[i].scr_id)
+           if(ButtonsToUserReasons[i].is_this_screen_with_reasons(screens[screen_id].name))
+         //  if(screen_id==ButtonsToUserReasons[i].scr_id)
            {
                if(ButtonsToUserReasons[i].BtoR[button_id]>=0)
                {
                   if(ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time>=0)
                   {
-                      Uart.Printf("bReasonGetState ENABLED, B%d\r",button_id);
+                      Uart.Printf("bReasonGetState ENABLED, time %d , B%d\r",ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time,button_id);
                       return BUTTON_ENABLED;
                   }
                    //TODO сюда надо вставлять проверку на неотключаемые резоны???
@@ -129,24 +142,35 @@ int bReasonChange(int screen_id, int button_id)
     //button is available, so just get it
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
        {
-           if(screen_id==ButtonsToUserReasons[i].scr_id)
+           if(ButtonsToUserReasons[i].is_this_screen_with_reasons(screens[screen_id].name))
+          // if(screen_id==ButtonsToUserReasons[i].scr_id)
            {
                int reason_id=ButtonsToUserReasons[i].BtoR[button_id];
                if(reason_id<0)
                    return BUTTON_ERROR;
+               int user_reason_indx=ButtonsToUserReasons[i].BtoR[button_id];
               // if(GetPlayerReasonCurrentPower(reason_id)<0) true
-               if(ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time==-1)
+               if(ArrayOfUserIntentions[user_reason_indx].current_time==-1)
                {
                    //setup reason
-                   ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time=0;
+                   ArrayOfUserIntentions[user_reason_indx].current_time=0;
                    //return red
                    return BUTTON_ENABLED;
                }
                else
                {
                    //turn off??
-                   ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time=-1;
-                   CallReasonSuccess(ButtonsToUserReasons[i].BtoR[button_id]);
+                   //if we were playing, current reason to play is not our, and pressed
+                   if(ArrayOfUserIntentions[user_reason_indx].was_winning &&
+                           SICD.last_intention_index_winner==ArrayOfUserIntentions[user_reason_indx].reason_indx)
+                   {
+                       ArrayOfUserIntentions[user_reason_indx].current_time=0;
+                       return BUTTON_ENABLED;
+                   }
+
+                   // if we are on the tail, and it's not wining reason, restart it.
+                   ArrayOfUserIntentions[user_reason_indx].TurnOff();
+                   CallReasonSuccess(user_reason_indx);
                    //retrn normal??
                    return BUTTON_NORMAL;
                }
@@ -160,13 +184,18 @@ void CheckAndRedrawFinishedReasons()
 {
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
     {
-        if(AtlGui.current_state==ButtonsToUserReasons[i].scr_id)
+        if(ButtonsToUserReasons[i].is_this_screen_with_reasons(screens[AtlGui.current_state].name))
+        {
+            int scr_id=AtlGui.current_state;
+       // if(AtlGui.current_state==ButtonsToUserReasons[i].scr_id)
             for(int j=0;j<9;j++)
             {
-                if(ButtonsToUserReasons[i].BtoR[j]>0)
-                    if(bReasonGetState(i,j)!=BUTTON_ENABLED);
-                        AtlGui.RenderSingleButton(i,j,BUTTON_NORMAL);
+                Uart.Printf("CheckAndRedrawFinishedReasons CURRENT STATE%d, bttr %d \r",AtlGui.current_state,ButtonsToUserReasons[i].BtoR[j]);
+                if(ButtonsToUserReasons[i].BtoR[j]>=0)
+                    if(bReasonGetState(scr_id,j)!=BUTTON_ENABLED)
+                        AtlGui.RenderSingleButton(scr_id,j,BUTTON_NORMAL);
             }
+        }
     }
 
 }
