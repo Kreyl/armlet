@@ -13,7 +13,7 @@
 from csv import reader as CSVReader, writer as CSVWriter
 from datetime import datetime
 from os.path import dirname, isfile, join, realpath
-from urllib import urlopen
+#from urllib import urlopen
 from traceback import format_exc
 from sys import argv
 
@@ -71,15 +71,17 @@ def writeCharacters(characters, fileName = getFileName(CHARACTERS_CSV), header =
         CSVWriter(f).writerows((number, name) for (name, number) in sorted(characters.iteritems(), key = lambda (name, number): number))
 
 def loadCharacters():
-    print "Fetching allrpg.info library..."
-    ALLRPG_MODULE_PATH = 'https://raw.githubusercontent.com/aestetique/ALLRPG/master/tools/excel-functions.py'
-    global getAllRoles # pylint: disable=W0602
-    try:
-        exec urlopen(ALLRPG_MODULE_PATH).read() in globals() # Importing getAllRoles function from remote allrpg module # pylint: disable=W0122
-        assert getAllRoles
-    except Exception, e:
-        print format_exc()
-        print "ERROR fetching library: %s, using local version" % e
+    #print "Fetching allrpg.info library..."
+    #ALLRPG_MODULE_PATH = 'https://raw.githubusercontent.com/aestetique/ALLRPG/master/tools/excel-functions.py'
+    #global getAllRoles # pylint: disable=W0602
+    #try:
+    #    raise Exception('tmp')
+    #    exec urlopen(ALLRPG_MODULE_PATH).read() in globals() # Importing getAllRoles function from remote allrpg module # pylint: disable=W0122
+    #    assert getAllRoles
+    #except Exception, e:
+    #    print format_exc()
+    #    print "ERROR fetching library: %s, using local version" % e
+    if True:
         from allrpg import getAllRoles # Importing getAllRoles function from local allrpg module
         assert getAllRoles
     print "Fetching data from allrpg.info..."

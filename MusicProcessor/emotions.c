@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-06-24 22:20:13
+ * Generated at 2014-07-02 06:07:46
  */
 #include "emotions.h"
 
@@ -218,9 +218,9 @@ Reason_t reasons[] = {
  /* 108 */ { "Durden", 0, 0 },
  /* 109 */ { "Epstein", 0, 0 },
  /* 110 */ { "Sunday", 0, 0 },
+ /* 111 */ { "Lehndorff", 0, 0 },
+ /* 112 */ { "Williams", 0, 0 },
 	// stuffing
- /* 111 */ { "r111", 99, 1 },	/* wrong */
- /* 112 */ { "r112", 99, 1 },	/* wrong */
  /* 113 */ { "r113", 99, 1 },	/* wrong */
  /* 114 */ { "r114", 99, 1 },	/* wrong */
  /* 115 */ { "r115", 99, 1 },	/* wrong */
