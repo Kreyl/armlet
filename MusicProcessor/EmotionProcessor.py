@@ -25,6 +25,12 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pytils v0.2.3 or later: https://pypi.python.org/pypi/pytils\n" % (ex.__class__.__name__, ex))
 
+try:
+    from Levenshtein import distance
+except ImportError, ex:
+    distance = None
+    print "%s: %s\nWARNING: Emotion guessing will not be available.\bPlease install Levenshtein v0.11.2 or later: https://pypi.python.org/pypi/python-Levenshtein\n" % (ex.__class__.__name__, ex)
+
 from Settings import LOCATION_IDS, CHARACTER_ID_START, CHARACTER_IDS, EMOTION_FIX_ID_START, EMOTION_FIX_IDS
 from CharacterProcessor import CHARACTERS_CSV, currentTime, getFileName, updateCharacters
 
@@ -141,6 +147,34 @@ def convertTitle(s):
 def convertEmotion(s):
     e = convertTitle(s).lower()
     return EMOTION_PATCHES.get(e, e)
+
+EMOTION_GUESS_RANGE = 3
+EMOTION_GUESS_MAX_PROPOSALS = 9
+
+def guessEmotion(emotions, emotion):
+    emotion = convertEmotion(emotion)
+    if not distance or emotion in emotions:
+        return emotion
+    distances = ((distance(e, emotion), e) for e in emotions)
+    close = ((d, e) for (d, e) in distances if d <= EMOTION_GUESS_RANGE)
+    proposals = (emotion,) + tuple(e for (d, e) in sorted(close))[:EMOTION_GUESS_MAX_PROPOSALS]
+    ret = None
+    while True:
+        print "\nUnknown emotion: %s, possible matches are:" % emotion
+        for (i, proposal) in enumerate(proposals):
+            print "%d: %s%s" % (i, proposal, '' if i else ' (leave as is)')
+        s = raw_input("Choose: ").strip()
+        try:
+            n = int(s)
+            if 0 <= n < len(proposals):
+                ret = proposals[n]
+                break
+        except Exception:
+            if s in emotions:
+                ret = s
+                break
+    print "Using: %s" % ret
+    return ret
 
 def readCSV(csv): # generator
     with open(csv) as f:

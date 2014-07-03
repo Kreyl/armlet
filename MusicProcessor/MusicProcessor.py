@@ -28,7 +28,7 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pydub v0.9.2 or later: https://pypi.python.org/pypi/pydub\n" % (ex.__class__.__name__, ex))
 
-from EmotionProcessor import convert, convertEmotion, convertTitle, updateEmotions, verifyCharacter
+from EmotionProcessor import convert, convertEmotion, guessEmotion, convertTitle, updateEmotions, verifyCharacter
 
 MUSIC_LOCATION_VARIABLE = 'ATLANTIS_MUSIC'
 
@@ -268,7 +268,7 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
                 match = CHECK_PATTERN.match(fileName)
                 if match:
                     groups = match.groupdict()
-                    emotion = convertEmotion(groups[EMOTION])
+                    emotion = guessEmotion(emotions, groups[EMOTION])
                     artist = convertTitle(groups[ARTIST])
                     title = convertTitle(groups[TITLE] or '')
                     tail = convert(groups[TAIL] or '')
