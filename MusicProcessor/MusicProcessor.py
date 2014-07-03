@@ -28,7 +28,7 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pydub v0.9.2 or later: https://pypi.python.org/pypi/pydub\n" % (ex.__class__.__name__, ex))
 
-from EmotionProcessor import convert, convertEmotion, convertTitle, updateEmotions, verifyCharacter
+from EmotionProcessor import convert, convertEmotion, guessEmotion, convertTitle, updateEmotions, verifyCharacter
 
 MUSIC_LOCATION_VARIABLE = 'ATLANTIS_MUSIC'
 
@@ -204,7 +204,7 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
     if markDate:
         try:
             # Verify that status mark is still actual
-            if any(date > markDate for date in (getmtime(f) for f in chain(sourceFiles, musicFiles, errorFiles))):
+            if any(date > markDate for date in (getmtime(f) for f in chain((sourceDir, musicDir), sourceFiles, musicFiles, errorFiles))):
                 raise ProcessException("Status mark obsolete, newer music files exist")
             if okNum is None:
                 raise ProcessException("No music files found")
@@ -268,7 +268,7 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
                 match = CHECK_PATTERN.match(fileName)
                 if match:
                     groups = match.groupdict()
-                    emotion = convertEmotion(groups[EMOTION])
+                    emotion = guessEmotion(emotions, groups[EMOTION])
                     artist = convertTitle(groups[ARTIST])
                     title = convertTitle(groups[TITLE] or '')
                     tail = convert(groups[TAIL] or '')
@@ -302,6 +302,7 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
                     createDir(errorDir)
                     copy(fullName, errorDir)
             print
+            assert len(files) == len(newFileNameSet)
             obsoleteFiles = tuple(f for f in listdir(musicDir) if f not in newFileNameSet)
             if obsoleteFiles:
                 print "Obsolete files found (%d), removing" % len(obsoleteFiles)
@@ -309,6 +310,8 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
                     remove(join(musicDir, fileName))
             processedFiles = getFiles(musicDir)
             numProcessed = len(processedFiles)
+            if numProcessed != len(files):
+                log(True, None, "Processed file number mismatch: %d, expected %d" % (numProcessed, len(files)))
             processedSize = sum(getsize(f) for f in processedFiles)
             resultMark(baseDir, hasErrors[0], numProcessed if hasMusic else None, processedSize if hasMusic else None, ''.join(messages))
             if numProcessed:
