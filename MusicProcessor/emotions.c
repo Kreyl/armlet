@@ -4,11 +4,11 @@
  * Part of "Ticket to Atlantis" LARP music engine.
  *
  * Generated automatically by EmotionProcessor.py
- * from Emotions.csv, Locations.csv and Characters.csv
+ * from Emotions.csv, Locations.csv, Characters.csv and Intentions.csv
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-07-02 06:07:46
+ * Generated at 2014-07-05 03:46:17
  */
 #include "emotions.h"
 
@@ -111,7 +111,7 @@ Reason_t reasons[] = {
  /*   3 */ { "grave", 9, 24 },	/* strah */
  /*   4 */ { "church", 2, 39 },	/* pozitiv */
  /*   5 */ { "kabak", 2, 5 },	/* negativ */
-	// stuffing
+	// end of locations
  /*   6 */ { "r006", 99, 1 },	/* wrong */
  /*   7 */ { "r007", 99, 1 },	/* wrong */
  /*   8 */ { "r008", 99, 1 },	/* wrong */
@@ -220,7 +220,7 @@ Reason_t reasons[] = {
  /* 110 */ { "Sunday", 0, 0 },
  /* 111 */ { "Lehndorff", 0, 0 },
  /* 112 */ { "Williams", 0, 0 },
-	// stuffing
+	// end of characters
  /* 113 */ { "r113", 99, 1 },	/* wrong */
  /* 114 */ { "r114", 99, 1 },	/* wrong */
  /* 115 */ { "r115", 99, 1 },	/* wrong */
@@ -298,12 +298,14 @@ Reason_t reasons[] = {
  /* 187 */ { "r187", 99, 1 },	/* wrong */
  /* 188 */ { "r188", 99, 1 },	/* wrong */
  /* 189 */ { "r189", 99, 1 },	/* wrong */
- /* 190 */ { "r190", 99, 1 },	/* wrong */
- /* 191 */ { "r191", 99, 1 },	/* wrong */
- /* 192 */ { "r192", 99, 1 },	/* wrong */
- /* 193 */ { "r193", 99, 1 },	/* wrong */
- /* 194 */ { "r194", 99, 1 },	/* wrong */
- /* 195 */ { "r195", 99, 1 },	/* wrong */
+	// Intentions
+ /* 190 */ { "murder", 1, 38 },	/* ubijstvo */
+ /* 191 */ { "creation", 5, 70 },	/* sozidanie */
+ /* 192 */ { "destruction", 5, 36 },	/* razrushenie */
+ /* 193 */ { "sex", 9, 71 },	/* seks */
+ /* 194 */ { "fight", 50, 37 },	/* draka */
+ /* 195 */ { "drug", 20, 78 },	/* zavisimost' */
+	// end of intentions
  /* 196 */ { "r196", 99, 1 },	/* wrong */
  /* 197 */ { "r197", 99, 1 },	/* wrong */
  /* 198 */ { "r198", 99, 1 },	/* wrong */

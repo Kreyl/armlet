@@ -31,13 +31,15 @@ except ImportError, ex:
     distance = None
     print "%s: %s\nWARNING: Emotion guessing will not be available.\bPlease install Levenshtein v0.11.2 or later: https://pypi.python.org/pypi/python-Levenshtein\n" % (ex.__class__.__name__, ex)
 
-from Settings import LOCATION_IDS, CHARACTER_ID_START, CHARACTER_IDS, EMOTION_FIX_ID_START, EMOTION_FIX_IDS
+from Settings import LOCATION_ID_START, LOCATION_IDS, CHARACTER_ID_START, CHARACTER_IDS, INTENTION_ID_START, INTENTION_IDS, EMOTION_FIX_ID_START, EMOTION_FIX_IDS
+
 from CharacterProcessor import CHARACTERS_CSV, currentTime, getFileName, updateCharacters
 
 isWindows = system().lower().startswith('win')
 
 EMOTIONS_CSV = 'Emotions.csv'
 LOCATIONS_CSV = 'Locations.csv'
+INTENTIONS_CSV = 'Intentions.csv'
 
 C_TARGET = 'emotions.c'
 
@@ -50,7 +52,7 @@ C_CONTENT = '''\
  * Part of "Ticket to Atlantis" LARP music engine.
  *
  * Generated automatically by EmotionProcessor.py
- * from %s, %s and %s
+ * from %s, %s, %s and %s
  *
  * !!! DO NOT EDIT !!!
  *
@@ -70,11 +72,15 @@ Reason_t reasons[] = {
 %%s
 \t// Locations
 %%s
-\t// stuffing
+\t// end of locations
 %%s
 \t// Characters
 %%s
-\t// stuffing
+\t// end of characters
+%%s
+\t// Intentions
+%%s
+\t// end of intentions
 %%s
 \t// Emotion fixes
 %%s
@@ -83,7 +89,7 @@ Reason_t reasons[] = {
 const int reasons_number = countof(reasons);
 
 // End of emotions.c
-''' % (EMOTIONS_CSV, LOCATIONS_CSV, CHARACTERS_CSV)
+''' % (EMOTIONS_CSV, LOCATIONS_CSV, CHARACTERS_CSV, INTENTIONS_CSV)
 
 REASONS_CSV_HEADER = '''\
 #
@@ -216,16 +222,19 @@ def processEmotions(fileName = getFileName(EMOTIONS_CSV)):
     assert len(emotionsIndexes) <= len(EMOTION_FIX_IDS)
     return (emotionsIndexes, tuple(emotionsTree))
 
-def processLocations(emotions, fileName = getFileName(LOCATIONS_CSV)):
+def processLocations(emotions, fileName = getFileName(LOCATIONS_CSV), tag = 'locations', startID = LOCATION_ID_START, maxLength = len(LOCATION_IDS)):
     reasons = []
-    for (rid, row) in enumerate(readCSV(fileName), 1):
-        assert len(row) == 3, "Bad locations file format"
+    for (rid, row) in enumerate(readCSV(fileName), startID):
+        assert len(row) == 3, "Bad %s file format" % tag
         (reason, weight, emotion) = row
         eid = getEmotion(emotions, emotion)
         weight = getWeight(weight)
         addReason(reasons, rid, reason, weight, eid, emotion)
-    assert len(reasons) <= len(LOCATION_IDS)
+    assert len(reasons) <= maxLength
     return tuple(reasons)
+
+def processIntentions(emotions, fileName = getFileName(INTENTIONS_CSV)):
+    return processLocations(emotions, fileName, 'intentions', INTENTION_ID_START, len(INTENTION_IDS))
 
 def processCharacters(fileName = getFileName(CHARACTERS_CSV)):
     reasons = []
@@ -245,9 +254,11 @@ def processReasons(emotions):
     locations =  processLocations(emotions)
     stuffing1 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations), CHARACTER_ID_START))
     characters = processCharacters()
-    stuffing2 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(characters), EMOTION_FIX_ID_START))
+    stuffing2 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(characters), INTENTION_ID_START))
+    intentions =  processIntentions(emotions)
+    stuffing3 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(characters) + len(stuffing2) + len(intentions), EMOTION_FIX_ID_START))
     emotionFixes = tuple(emotionFixReason(eid, emotion) for (eid, emotion) in sorted((eid, emotion) for (emotion, eid) in emotions.iteritems()))
-    reasons = (stuffing0, locations, stuffing1, characters, stuffing2, emotionFixes)
+    reasons = (stuffing0, locations, stuffing1, characters, stuffing2, intentions, stuffing3, emotionFixes)
     checkSets = (emotions,) + tuple(set(r[1].lower() for r in reason) for reason in reasons)
     for i in xrange(0, len(checkSets)):
         for rs in checkSets[:i]:
