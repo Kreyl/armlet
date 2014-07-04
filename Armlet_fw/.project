@@ -25,14 +25,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>Common_fw</name>
-			<type>2</type>
-			<locationURI>copy_PARENT/Common_fw</locationURI>
-		</link>
-		<link>
 			<name>MusicProcessor</name>
 			<type>2</type>
-			<locationURI>copy_PARENT/MusicProcessor</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/MusicProcessor</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>
