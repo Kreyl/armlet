@@ -80,7 +80,6 @@ static inline uint32_t BuildUint32(uint8_t Lo, uint8_t MidLo, uint8_t MidHi, uin
     return r;
 }
 
-
 // IRQ priorities
 #define IRQ_PRIO_LOW            15  // Minimum
 #define IRQ_PRIO_MEDIUM         9
@@ -227,18 +226,6 @@ public:
     void SetFreqHz(uint32_t FreqHz);
     void Init(GPIO_TypeDef *GPIO, uint16_t N, TIM_TypeDef* PTim, uint8_t Chnl, uint16_t TopValue, bool Inverted=false);
     void Set(uint16_t Value) { *PCCR = Value; }
-    void Off() { *PCCR = 0; }
-};
-
-class PwmPin_t_LCD {
-private:
-    uint32_t *PClk;
-    TIM_TypeDef* Tim;
-public:
-    __IO uint32_t *PCCR;    // Made public to allow DMA
-    void SetFreqHz(uint32_t FreqHz);
-    void Init(GPIO_TypeDef *GPIO, uint16_t N, uint8_t TimN, uint8_t Chnl, uint16_t TopValue, bool Inverted=false);
-    void On(uint16_t Brightness) { *PCCR = Brightness; }
     void Off() { *PCCR = 0; }
 };
 
