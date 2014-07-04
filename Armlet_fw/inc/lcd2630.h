@@ -66,7 +66,8 @@ enum Color_t {
 #define LCD_W               160 // } Pixels count
 #define LCD_TOP_BRIGHTNESS  100 // i.e. 100%
 
-#define BUF_SZ  72
+#define LCD_FILE_BUF_SZ     512
+
 class Lcd_t {
 private:
     uint16_t IX, IY;
@@ -75,7 +76,7 @@ private:
     void WriteCmd(uint8_t ACmd);
     void WriteCmd(uint8_t ACmd, uint8_t AData);
     FIL IFile;
-    char IBuf[BUF_SZ];
+    char IFileBuf[LCD_FILE_BUF_SZ];
 public:
     // General use
     uint16_t Brightness;

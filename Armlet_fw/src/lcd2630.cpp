@@ -313,15 +313,17 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
     // Check if zero file
     if(IFile.fsize == 0) {
         Uart.Printf("Empty file\r");
-        f_close(&IFile); return;
+        f_close(&IFile);
+        return;
     }
 
     unsigned int RCnt=0;
     // Read BITMAPFILEHEADER
-    if((rslt = f_read(&IFile, IBuf, sizeof(BmpHeader_t), &RCnt)) != 0) {
-        f_close(&IFile); return;
+    if((rslt = f_read(&IFile, IFileBuf, sizeof(BmpHeader_t), &RCnt)) != 0) {
+        f_close(&IFile);
+        return;
     }
-    BmpHeader_t *PHdr = (BmpHeader_t*)IBuf;
+    BmpHeader_t *PHdr = (BmpHeader_t*)IFileBuf;
     Uart.Printf("T=%X; Sz=%u; Off=%u\r", PHdr->bfType, PHdr->bfSize, PHdr->bfOffBits);
     uint32_t FOff = PHdr->bfOffBits;
 
@@ -351,10 +353,10 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
         WriteByte(0x2C);    // Memory write
         DC_Hi();
         while(Info.SzImage) {
-            if((rslt = f_read(&IFile, IBuf, BUF_SZ, &RCnt)) != 0) break;
+            if((rslt = f_read(&IFile, IFileBuf, LCD_FILE_BUF_SZ, &RCnt)) != 0) break;
             for(uint32_t i=0; i<RCnt; i+=2) {
-                WriteByte(IBuf[i+1]);
-                WriteByte(IBuf[i]);
+                WriteByte(IFileBuf[i+1]);
+                WriteByte(IFileBuf[i]);
             }
             Info.SzImage -= RCnt;
         }
