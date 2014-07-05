@@ -84,6 +84,7 @@ Reason_t reasons[] = {
 %%s
 \t// Emotion fixes
 %%s
+\t// end of emotion fixes
 };
 
 const int reasons_number = countof(reasons);
@@ -296,7 +297,7 @@ def writeC(emotions, *reasons):
     ridWidth = len(str(max(r[0] for r in chain.from_iterable(reasons))))
     emotionsText = '\n'.join(cEmotion(eidWidth, *emotion) for emotion in emotions)
     reasonsTexts = tuple('\n'.join(cReason(ridWidth, *r) for r in reason) for reason in reasons)
-    with open(getFileName(C_TARGET), 'w') as f:
+    with open(getFileName(C_TARGET), 'wb') as f:
         f.write(C_CONTENT % ((currentTime(), emotionsText) + reasonsTexts))
 
 def writeCSV(*reasons):
