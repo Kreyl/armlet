@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-07-05 19:10:54
+ * Generated at 2014-07-06 00:44:51
  */
 #include "emotions.h"
 
@@ -220,8 +220,8 @@ Reason_t reasons[] = {
  /* 110 */ { "Sunday", 0, 0 },
  /* 111 */ { "Lehndorff", 0, 0 },
  /* 112 */ { "Williams", 0, 0 },
+ /* 113 */ { "Cross", 0, 0 },
 	// end of characters
- /* 113 */ { "r113", 99, 1 },	/* wrong */
  /* 114 */ { "r114", 99, 1 },	/* wrong */
  /* 115 */ { "r115", 99, 1 },	/* wrong */
  /* 116 */ { "r116", 99, 1 },	/* wrong */
