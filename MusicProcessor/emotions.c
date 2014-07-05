@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-07-05 03:46:17
+ * Generated at 2014-07-05 19:10:54
  */
 #include "emotions.h"
 
@@ -395,6 +395,7 @@ Reason_t reasons[] = {
  /* 281 */ { "xMeditatsiya", 5, 81 },	/* meditatsiya */
  /* 282 */ { "xEkzal'tatsiya", 5, 82 },	/* ekzal'tatsiya */
  /* 283 */ { "xProsvetlenie", 5, 83 },	/* prosvetlenie */
+	// end of emotion fixes
 };
 
 const int reasons_number = countof(reasons);
