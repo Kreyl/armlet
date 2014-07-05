@@ -1,0 +1,4 @@
+* text=unset
+
+*.py text eol=lf
+*.csv text eol=crlf
