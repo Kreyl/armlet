@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-07-06 00:44:51
+ * Generated at 2014-07-09 01:23:27
  */
 #include "emotions.h"
 
@@ -208,22 +208,22 @@ Reason_t reasons[] = {
  /*  99 */ { "r099", 99, 1 },	/* wrong */
  /* 100 */ { "r100", 99, 1 },	/* wrong */
 	// Characters
- /* 101 */ { "Parcs", 0, 0 },
- /* 102 */ { "Dawson", 0, 0 },
- /* 103 */ { "Huxley", 0, 0 },
- /* 104 */ { "Graywood", 0, 0 },
- /* 105 */ { "Hill", 0, 0 },
- /* 106 */ { "Malone", 0, 0 },
- /* 107 */ { "Clayton", 0, 0 },
- /* 108 */ { "Durden", 0, 0 },
- /* 109 */ { "Epstein", 0, 0 },
- /* 110 */ { "Sunday", 0, 0 },
- /* 111 */ { "Lehndorff", 0, 0 },
- /* 112 */ { "Williams", 0, 0 },
- /* 113 */ { "Cross", 0, 0 },
+ /* 101 */ { "MParcs", 0, 0 },
+ /* 102 */ { "JDawson", 0, 0 },
+ /* 103 */ { "AHuxley", 0, 0 },
+ /* 104 */ { "AGraywood", 0, 0 },
+ /* 105 */ { "BHill", 0, 0 },
+ /* 106 */ { "TMalone", 0, 0 },
+ /* 107 */ { "SClayton", 0, 0 },
+ /* 108 */ { "MDurden", 0, 0 },
+ /* 109 */ { "NEpstein", 0, 0 },
+ /* 110 */ { "TSunday", 0, 0 },
+ /* 111 */ { "VLehndorff", 0, 0 },
+ /* 112 */ { "HWilliams", 0, 0 },
+ /* 113 */ { "GCross", 0, 0 },
+ /* 114 */ { "JChamber", 0, 0 },
+ /* 115 */ { "EWilliams", 0, 0 },
 	// end of characters
- /* 114 */ { "r114", 99, 1 },	/* wrong */
- /* 115 */ { "r115", 99, 1 },	/* wrong */
  /* 116 */ { "r116", 99, 1 },	/* wrong */
  /* 117 */ { "r117", 99, 1 },	/* wrong */
  /* 118 */ { "r118", 99, 1 },	/* wrong */
