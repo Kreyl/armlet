@@ -102,6 +102,7 @@ private:
     bool IDmaIdle;
     int16_t IAttenuation;
     const char* IFilename;
+    uint32_t IStartPosition;
     Thread *IPThd;
     // Pin operations
     inline void Rst_Lo()   { PinClear(VS_GPIO, VS_RST); }
@@ -127,9 +128,9 @@ private:
 public:
     sndState_t State;
     void Init();
-    void Play(const char* AFilename) {
-
+    void Play(const char* AFilename, uint32_t StartPosition = 0) {
         IFilename = AFilename;
+        IStartPosition = StartPosition;
         chEvtSignal(PThread, VS_EVT_STOP);
     }
     void Stop() {
@@ -153,6 +154,8 @@ public:
         AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
     }
     void RegisterAppThd(Thread *PThd) { IPThd = PThd; }
+
+    uint32_t GetPosition() { return IFile.fptr; }
     // Inner use
     IrqPin_t IDreq;
     void IrqDreqHandler();

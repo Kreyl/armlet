@@ -52,7 +52,10 @@ int main() {
     // Report problem with clock if any
     if(ClkResult) Uart.Printf("Clock failure\r");
     while(TRUE) {
-        chThdSleepMilliseconds(999);
+        chThdSleepMilliseconds(1000);
+        //Sound.tmp(9);
+        Uart.Printf("Pos: %u\r\n", Sound.GetPosition());
+
   //      Lcd.Printf(11, 21, clWhite, clBlack, "%ums   ", Mesh.GetAbsTimeMS());
     }
 }
@@ -77,26 +80,26 @@ void Init() {
  //   Init_emotionTreeMusicNodeFiles_FromFile(filename);
  //   Print_emotionTreeMusicNodeFiles_ToUART();
 
-    Keys.Init();
-    Beeper.Init();
+//    Keys.Init();
+//    Beeper.Init();
 //    Vibro.Init();
 
 //    IR.TxInit();
 //    IR.RxInit();
-    Power.Init();
+//    Power.Init();
     //Power.Task();
 //    PillInit();
 
-    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
+//    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
 
     Sound.Init();
-    Sound.SetVolume( START_VOL_CONST );
+    Sound.SetVolume(200);
 
-    //Sound.Play("fon-WhiteTower.mp3");//"alive.wav");
+    Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
 
-    App.Init();
-    AtlGui.Init();
-
-    rLevel1.Init(ID);
-    Mesh.Init(ID);
+//    App.Init();
+//    AtlGui.Init();
+//
+//    rLevel1.Init(ID);
+//    Mesh.Init(ID);
 }
