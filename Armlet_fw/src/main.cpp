@@ -51,12 +51,10 @@ int main() {
     Init();
     // Report problem with clock if any
     if(ClkResult) Uart.Printf("Clock failure\r");
-#ifndef CLEAR_SCREEN_FOR_DEBUG
     while(TRUE) {
         chThdSleepMilliseconds(999);
-        Lcd.Printf(11, 21, clWhite, clBlack, "%ums   ", Mesh.GetAbsTimeMS());
+  //      Lcd.Printf(11, 21, clWhite, clBlack, "%ums   ", Mesh.GetAbsTimeMS());
     }
-#endif
 }
 
 void Init() {
@@ -73,9 +71,8 @@ void Init() {
 #ifndef CLEAR_SCREEN_FOR_DEBUG
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
 #endif
-  // Lcd.DrawBmpFile(0, 0, "splash.bmp");
-    //Lcd.DrawBmpFile(0, 0, "TestHorizontal.png");
-   // Lcd.PutBitmap(0,0,160,128,PBuf)
+//    Lcd.DrawBmpFile(0, 0, "splash.bmp");
+//    Lcd.DrawBmpFile(100, 18, "GUI/intentions/enabled/X.bmp");
 
  //   Init_emotionTreeMusicNodeFiles_FromFile(filename);
  //   Print_emotionTreeMusicNodeFiles_ToUART();

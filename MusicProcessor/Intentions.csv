@@ -1,0 +1,13 @@
+#
+# Intentions.csv
+#
+# Intention RID->EID table for a generic character.
+#
+# Processed by EmotionProcessor.py and integrated into ArmLet firmware.
+#
+murder,1,ubijstvo
+creation,5,sozidanie
+destruction,5,razrushenie
+sex,9,seks
+fight,50,draka
+drug,20,zavisimost'
