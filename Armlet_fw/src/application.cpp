@@ -416,7 +416,7 @@ void App_t::Task() {
             if(reasons[reason_id].eID != SICD.last_played_emo)
             {
                 //check if it's user reason,if any, set already played flag
-                UserReasonFlagRecalc(reason_id);
+                UserReasonFlagRecalc(SICD.last_intention_index_winner);//тут должэн стоять прошлый победитель!!
                 PlayNewEmo(reasons[reason_id].eID,3);
             }
         }

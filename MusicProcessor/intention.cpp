@@ -137,7 +137,7 @@ int SeekRecentlyPlayedFilesEmo::CheckIfRecent(int emo_id,int file_id)
     return -1;
 }
 
-int SeekRecentlyPlayedFilesEmo::IncrementArrayId()
+void SeekRecentlyPlayedFilesEmo::IncrementArrayId()
 {
     this->last_array_id--;
     if(this->last_array_id<0)
@@ -393,7 +393,7 @@ void CallReasonSuccess(int user_reason_id)
 
    return;
 }
-
+//not used!
 void SwitchPlayerReason(int reason_id,bool is_turn_on)
 {
     for(int i =0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)

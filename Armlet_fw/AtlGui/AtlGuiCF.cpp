@@ -147,13 +147,17 @@ int bReasonChange(int screen_id, int button_id)
            {
                int reason_id=ButtonsToUserReasons[i].BtoR[button_id];
                if(reason_id<0)
+               {
+                   Uart.Printf("CALL bReasonChange REASON ERROR \r");
                    return BUTTON_ERROR;
+               }
                int user_reason_indx=ButtonsToUserReasons[i].BtoR[button_id];
               // if(GetPlayerReasonCurrentPower(reason_id)<0) true
                if(ArrayOfUserIntentions[user_reason_indx].current_time==-1)
                {
                    //setup reason
                    ArrayOfUserIntentions[user_reason_indx].current_time=0;
+                   Uart.Printf("CALL bReasonChange REASON IS ON THE RUN \r");
                    //return red
                    return BUTTON_ENABLED;
                }
@@ -164,14 +168,19 @@ int bReasonChange(int screen_id, int button_id)
                    if(ArrayOfUserIntentions[user_reason_indx].was_winning &&
                            SICD.last_intention_index_winner==ArrayOfUserIntentions[user_reason_indx].reason_indx)
                    {
+                       Uart.Printf("CALL bReasonChange RESTART \r");
                        ArrayOfUserIntentions[user_reason_indx].current_time=0;
+                       //теперь продолжение можно выключить!
+                       ArrayOfUserIntentions[user_reason_indx].was_winning=false;
                        return BUTTON_ENABLED;
                    }
 
                    // if we are on the tail, and it's not wining reason, restart it.
                    ArrayOfUserIntentions[user_reason_indx].TurnOff();
                    CallReasonSuccess(user_reason_indx);
+                   ArrayOfUserIntentions[user_reason_indx].was_winning=false;
                    //retrn normal??
+                   Uart.Printf("CALL bReasonChange TURNED OFF \r");
                    return BUTTON_NORMAL;
                }
            }

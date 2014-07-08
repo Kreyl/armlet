@@ -58,7 +58,7 @@ typedef struct IntentionCalculationData
 	int Signal_power_weight_cost;
 	int Normalizer;
 	int last_intention_power_winner;//NOT NORMALIZED
-	int last_intention_index_winner;
+	int last_intention_index_winner;//reason_indx
 	int winning_integral;//NORMALIZED
 	int winning_integral_top_limit_normalizer;
 	bool is_empty_fon;
@@ -80,7 +80,7 @@ typedef struct SeekRecentlyPlayedFilesEmo
     void OnCallStopPlay(int emo_id,int file_id, int pos);
     //return -1 if no, pos if yes
     int CheckIfRecent(int emo_id,int file_id);
-    int IncrementArrayId();
+    void IncrementArrayId();
     int GetNext(int current_array_id);
 }SeekRecentlyPlayedFilesEmo;
 
