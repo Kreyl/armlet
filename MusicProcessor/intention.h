@@ -7,6 +7,7 @@
 #define INTENTIONS_ARRAY_SIZE 5
 #define WINING_INTEGRAL_SWITCH_LIMIT 50
 #define FON_RELAX_SPEED 50
+#define MAX_RECENTLY_PLAYED_ARRAY 10
 /*typedef struct Intention {
 	int weight1000;	//константа, определяющая степень и время роста
 	//int last_measure_weight;//
@@ -62,7 +63,29 @@ typedef struct IntentionCalculationData
 	int winning_integral_top_limit_normalizer;
 	bool is_empty_fon;
     int last_played_emo;
+    int last_played_file;
+    bool is_last_played_id_recent;
 }IntentionCalculationData;
+
+typedef struct SRPFEArrayEl
+{
+    int seek_pos;
+    int emo_id;
+    int file_indx;
+ }SRPFEArrayEl;
+typedef struct SeekRecentlyPlayedFilesEmo
+{
+    int last_array_id;
+    SRPFEArrayEl seek_array[MAX_RECENTLY_PLAYED_ARRAY];
+    void OnCallStopPlay(int emo_id,int file_id, int pos);
+    //return -1 if no, pos if yes
+    int CheckIfRecent(int emo_id,int file_id);
+    int IncrementArrayId();
+    int GetNext(int current_array_id);
+}SeekRecentlyPlayedFilesEmo;
+
+extern struct SeekRecentlyPlayedFilesEmo SRPFESingleton;
+
 void CalculateIntentionsRadioChange();
 //returns -1 if winner does not over switch limit, else return reason id
 

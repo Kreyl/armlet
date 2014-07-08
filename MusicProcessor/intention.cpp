@@ -14,6 +14,21 @@ int CurrentIntentionArraySize=2;
 	{1000,"reaper",4}		//4 positiv
 };*/
 
+struct SeekRecentlyPlayedFilesEmo SRPFESingleton
+{
+    -1,{
+    {0,-1,-1},
+    {0,-1,-1},
+    {0,-1,-1},
+    {0,-1,-1},
+    {0,-1,-1},
+    {0,-1,-1},
+    {0,-1,-1},
+    {0,-1,-1},
+    {0,-1,-1},
+    {0,-1,-1},}
+};
+
 //DYNAMIC ARRAY SIZE
 struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRAY_SIZE]={
 		{1,2},{4,3},
@@ -76,7 +91,9 @@ struct IntentionCalculationData SICD=
       0,//  winning_integral;//NORMALIZED
       10000,//  winning_integral_top_limit_normalizer;
       false,
-      -1
+      -1,
+      -1,
+      false
         /*
 		10,//int Intention_weight_cost;
 		4,//	int Signal_power_weight_cost;
@@ -96,7 +113,44 @@ int winning_integral;//NORMALIZED
 int winning_integral_top_limit_normalizer;*/
 
 
+void SeekRecentlyPlayedFilesEmo::OnCallStopPlay(int emo_id,int file_id, int pos)
+{
+    //this->last_array_id идет в минус по ходу пляски, проверяются в плюс начиная с этого
+    //стартовый -
+    this->IncrementArrayId();
+    seek_array[this->last_array_id].emo_id=emo_id;
+    seek_array[this->last_array_id].file_indx=file_id;
+    seek_array[this->last_array_id].seek_pos=pos;
+}
+int SeekRecentlyPlayedFilesEmo::CheckIfRecent(int emo_id,int file_id)
+{
+    int curr_id=this->last_array_id;
+    for(int i=0;i<MAX_RECENTLY_PLAYED_ARRAY;i++)
+    {
 
+        if(seek_array[this->last_array_id].emo_id==emo_id)
+            if(seek_array[this->last_array_id].file_indx==file_id)
+                return seek_array[this->last_array_id].seek_pos;
+
+        curr_id=GetNext(curr_id);
+    }
+    return -1;
+}
+
+int SeekRecentlyPlayedFilesEmo::IncrementArrayId()
+{
+    this->last_array_id--;
+    if(this->last_array_id<0)
+        this->last_array_id=MAX_RECENTLY_PLAYED_ARRAY-1;
+}
+int SeekRecentlyPlayedFilesEmo::GetNext(int current_array_id)
+{
+    if(current_array_id==MAX_RECENTLY_PLAYED_ARRAY-1)
+        return 0;
+    else
+        return current_array_id+1;
+
+}
 
 void PrintSCIDToUart()
 {
