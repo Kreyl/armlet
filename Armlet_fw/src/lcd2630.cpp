@@ -286,8 +286,10 @@ struct BmpHeader_t {
     uint16_t Reserved[2];
     uint32_t bfOffBits;
 } __packed;
+#define BMP_HEADER_SZ   sizeof(BmpHeader_t)
 
-struct BmpInfo_t {  // Length is absent as read first
+struct BmpInfo_t {
+    int32_t Size;
     int32_t Width;
     int32_t Height;
     uint16_t Planes;
@@ -299,7 +301,7 @@ struct BmpInfo_t {  // Length is absent as read first
     // v4 begins. Only Adobe version here
     uint32_t RedMsk, GreenMsk, BlueMsk, AlphaMsk;
 } __packed;
-
+#define BMP_INFO_SZ   sizeof(BmpInfo_t)
 
 void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
     Uart.Printf("Draw %S\r", Filename);
@@ -317,63 +319,51 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
         return;
     }
 
+    // Read piece of file
     unsigned int RCnt=0;
-    // Read BITMAPFILEHEADER
-    if((rslt = f_read(&IFile, IFileBuf, sizeof(BmpHeader_t), &RCnt)) != 0) {
-        f_close(&IFile);
-        return;
-    }
+    if((rslt = f_read(&IFile, IFileBuf, LCD_FILE_BUF_SZ, &RCnt)) != 0) { f_close(&IFile); return; }
+
+    // ==== BMPHEADER ====
+    if(RCnt < BMP_HEADER_SZ) { f_close(&IFile); return; }
     BmpHeader_t *PHdr = (BmpHeader_t*)IFileBuf;
     Uart.Printf("T=%X; Sz=%u; Off=%u\r", PHdr->bfType, PHdr->bfSize, PHdr->bfOffBits);
-    uint32_t FOff = PHdr->bfOffBits;
+    if(PHdr->bfOffBits < BMP_HEADER_SZ) { f_close(&IFile); return; } // return if offset is too large
 
-    // ==== Read BITMAPINFO ====
+
+    // ==== BITMAPINFO ====
+    if((RCnt - BMP_HEADER_SZ) < BMP_INFO_SZ) { f_close(&IFile); return; }
+    BmpInfo_t *PInfo = (BmpInfo_t*)&IFileBuf[BMP_HEADER_SZ];
     // Get struct size => version
-    uint32_t Sz=0;
-    if((rslt = f_read(&IFile, (uint8_t*)&Sz, 4, &RCnt)) != 0) {
-        f_close(&IFile); return;
-    }
-    if((Sz == 40) or (Sz == 52) or (Sz == 56)) {  // V3 or V4 adobe
-        BmpInfo_t Info;
-        if((rslt = f_read(&IFile, (uint8_t*)&Info, Sz-4, &RCnt)) != 0) {
-            f_close(&IFile); return;
-        }
-        if(Info.Height < 0) Info.Height = -Info.Height;
+    if((PInfo->Size == 40) or (PInfo->Size == 52) or (PInfo->Size == 56)) {  // V3 or V4 adobe
+        if(PInfo->Height < 0) PInfo->Height = -PInfo->Height;
+        uint32_t Sz = PInfo->SzImage;
         Uart.Printf("W=%u; H=%u; BitCnt=%u; Cmp=%u; Sz=%u;  MskR=%X; MskG=%X; MskB=%X; MskA=%X\r",
-                Info.Width, Info.Height, Info.BitCnt, Info.Compression,
-                Info.SzImage, Info.RedMsk, Info.GreenMsk, Info.BlueMsk, Info.AlphaMsk);
+                PInfo->Width, PInfo->Height, PInfo->BitCnt, PInfo->Compression,
+                PInfo->SzImage, PInfo->RedMsk, PInfo->GreenMsk, PInfo->BlueMsk, PInfo->AlphaMsk);
 
-        // Move to pixel data
-        if((rslt = f_lseek(&IFile, FOff)) != 0) {
-            f_close(&IFile); return;
-        }
+        SetBounds(x0, PInfo->Width, y0, PInfo->Height);
 
-        SetBounds(x0, Info.Width, y0, Info.Height);
-        // Write RAM
-        WriteByte(0x2C);    // Memory write
+        // ==== Write RAM ====
+        WriteByte(0x2C); // Memory write
         DC_Hi();
-        while(Info.SzImage) {
+        // First, write piece currently in memory
+        for(uint32_t i=PHdr->bfOffBits; i<RCnt; i+=2) {
+            WriteByte(IFileBuf[i+1]);
+            WriteByte(IFileBuf[i]);
+        }
+        Sz -= (RCnt - PHdr->bfOffBits);
+        // Read remainder
+        while(Sz) {
             if((rslt = f_read(&IFile, IFileBuf, LCD_FILE_BUF_SZ, &RCnt)) != 0) break;
             for(uint32_t i=0; i<RCnt; i+=2) {
                 WriteByte(IFileBuf[i+1]);
                 WriteByte(IFileBuf[i]);
             }
-            Info.SzImage -= RCnt;
+            Sz -= RCnt;
         }
         DC_Lo();
     }
-
-    else {
-        Uart.Printf("Core, V4 or V5");
-    }
-
-
-//    if(strncmp(IBuf, PngSignature, 8) != 0) {
-//        Uart.Printf("SigErr\r");
-//        f_close(&IFile); return;
-//    }
-
-
+    else Uart.Printf("Core, V4 or V5");
 
     f_close(&IFile);
     Uart.Printf("Done\r");
