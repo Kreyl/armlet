@@ -21,7 +21,8 @@ from Settings import CHARACTER_ID_START, CHARACTER_IDS
 
 GAME_ID = 584
 
-NAME_COLUMN_TITLE = u'Имя на браслете'
+SHORT_NAME_COLUMN_TITLE = u'Имя на браслете'
+LONG_NAME_COLUMN_TITLE = u'Имя латиницей'
 
 CHARACTERS_CSV = 'Characters.csv'
 
@@ -56,19 +57,19 @@ def readCSV(csv): # generator
 def verifyCharacters(characters):
     assert characters
     assert len(characters) <= len(CHARACTER_IDS)
-    assert tuple(sorted(characters.itervalues())) == tuple(xrange(CHARACTER_ID_START, CHARACTER_ID_START + len(characters))), "Damaged %s file" % CHARACTERS_CSV
+    assert tuple(sorted(number for (number, longName) in characters.itervalues())) == tuple(xrange(CHARACTER_ID_START, CHARACTER_ID_START + len(characters))), "Damaged %s file" % CHARACTERS_CSV
 
 def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
     if not isfile(fileName):
         return {}
-    ret = dict((name, int(number)) for (number, name) in readCSV(fileName))
+    ret = dict((shortName, (int(number), longName)) for (number, shortName, longName) in readCSV(fileName))
     verifyCharacters(ret)
     return ret
 
 def writeCharacters(characters, fileName = getFileName(CHARACTERS_CSV), header = CHARACTERS_CSV_HEADER):
     with open(fileName, 'wb') as f:
         f.writelines(s + '\r\n' for s in (header % currentTime()).splitlines())
-        CSVWriter(f).writerows((number, name) for (name, number) in sorted(characters.iteritems(), key = lambda (name, number): number))
+        CSVWriter(f).writerows((number, shortName, longName) for (shortName, (number, longName)) in sorted(characters.iteritems(), key = lambda (shortName, (number, longName)): number))
 
 def loadCharacters():
     #print "Fetching allrpg.info library..."
@@ -89,9 +90,11 @@ def loadCharacters():
         # ToDo: Employ sorting by creation date when available
         allRoles = getAllRoles(GAME_ID)
         print "Processing data..."
-        nameColumnID = allRoles[0].index(NAME_COLUMN_TITLE)
+        header = allRoles[0]
+        shortNameColumnID = header.index(SHORT_NAME_COLUMN_TITLE)
+        longNameColumnID = header.index(LONG_NAME_COLUMN_TITLE)
         allRoles = sorted(allRoles[1:])
-        ret = tuple(str(name) for name in (row[nameColumnID] for row in allRoles) if name)
+        ret = tuple((str(shortName.strip()), str(longName.strip())) for (shortName, longName) in ((row[shortNameColumnID], row[longNameColumnID]) for row in allRoles) if shortName)
         print "Done"
         return ret
     except Exception, e:
@@ -102,11 +105,13 @@ def loadCharacters():
 def updateCharacters():
     print "Processing characters..."
     characters = readCharacters()
-    for name in loadCharacters():
-        if name not in characters:
+    for (shortName, longName) in loadCharacters():
+        if shortName not in characters:
             characterID = len(characters) + CHARACTER_ID_START
             assert characterID in CHARACTER_IDS
-            characters[name] = characterID
+            characters[shortName] = (characterID, longName)
+        else:
+            characters[shortName] = (characters[shortName][0], longName)
     verifyCharacters(characters)
     writeCharacters(characters)
     return characters
