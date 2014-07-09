@@ -95,7 +95,6 @@ def loadCharacters():
         longNameColumnID = header.index(LONG_NAME_COLUMN_TITLE)
         allRoles = sorted(allRoles[1:])
         ret = tuple((str(shortName.strip()), str(longName.strip())) for (shortName, longName) in ((row[shortNameColumnID], row[longNameColumnID]) for row in allRoles) if shortName)
-        print "Done"
         return ret
     except Exception, e:
         print format_exc()
@@ -105,15 +104,24 @@ def loadCharacters():
 def updateCharacters():
     print "Processing characters..."
     characters = readCharacters()
+    changed = False
     for (shortName, longName) in loadCharacters():
-        if shortName not in characters:
+        (rid, oldLongName) = characters.get(shortName, (None, None))
+        if not rid: # new character
             characterID = len(characters) + CHARACTER_ID_START
             assert characterID in CHARACTER_IDS
             characters[shortName] = (characterID, longName)
-        else:
-            characters[shortName] = (characters[shortName][0], longName)
+            changed = True
+        elif longName != oldLongName: # changed character
+            characters[shortName] = (rid, longName)
+            changed = True
     verifyCharacters(characters)
-    writeCharacters(characters)
+    if changed:
+        print "Updating %s..." % CHARACTERS_CSV
+        writeCharacters(characters)
+    else:
+        print "No changes detected"
+    print "Done"
     return characters
 
 def main():
