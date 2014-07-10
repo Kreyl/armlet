@@ -304,7 +304,7 @@ struct BmpInfo_t {
 #define BMP_INFO_SZ   sizeof(BmpInfo_t)
 
 void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
-    Uart.Printf("Draw %S\r", Filename);
+//    Uart.Printf("Draw %S\r", Filename);
     // Open file
     FRESULT rslt = f_open(&IFile, Filename, FA_READ+FA_OPEN_EXISTING);
     if(rslt != FR_OK) {
@@ -326,7 +326,7 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
     // ==== BMPHEADER ====
     if(RCnt < BMP_HEADER_SZ) { f_close(&IFile); return; }
     BmpHeader_t *PHdr = (BmpHeader_t*)IFileBuf;
-    Uart.Printf("T=%X; Sz=%u; Off=%u\r", PHdr->bfType, PHdr->bfSize, PHdr->bfOffBits);
+//    Uart.Printf("T=%X; Sz=%u; Off=%u\r", PHdr->bfType, PHdr->bfSize, PHdr->bfOffBits);
     if(PHdr->bfOffBits < BMP_HEADER_SZ) { f_close(&IFile); return; } // return if offset is too large
 
 
@@ -337,9 +337,9 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
     if((PInfo->Size == 40) or (PInfo->Size == 52) or (PInfo->Size == 56)) {  // V3 or V4 adobe
         if(PInfo->Height < 0) PInfo->Height = -PInfo->Height;
         uint32_t Sz = PInfo->SzImage;
-        Uart.Printf("W=%u; H=%u; BitCnt=%u; Cmp=%u; Sz=%u;  MskR=%X; MskG=%X; MskB=%X; MskA=%X\r",
-                PInfo->Width, PInfo->Height, PInfo->BitCnt, PInfo->Compression,
-                PInfo->SzImage, PInfo->RedMsk, PInfo->GreenMsk, PInfo->BlueMsk, PInfo->AlphaMsk);
+//        Uart.Printf("W=%u; H=%u; BitCnt=%u; Cmp=%u; Sz=%u;  MskR=%X; MskG=%X; MskB=%X; MskA=%X\r",
+//                PInfo->Width, PInfo->Height, PInfo->BitCnt, PInfo->Compression,
+//                PInfo->SzImage, PInfo->RedMsk, PInfo->GreenMsk, PInfo->BlueMsk, PInfo->AlphaMsk);
 
         SetBounds(x0, PInfo->Width, y0, PInfo->Height);
 
@@ -363,9 +363,9 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
         }
         DC_Lo();
     }
-    else Uart.Printf("Core, V4 or V5");
+//    else Uart.Printf("Core, V4 or V5");
 
     f_close(&IFile);
-    Uart.Printf("Done\r");
+//    Uart.Printf("Done\r");
 }
 #endif

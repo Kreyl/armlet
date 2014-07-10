@@ -92,12 +92,12 @@ void Init() {
 
 //    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
 
-//    Sound.Init();
+    Sound.Init();
 //    Sound.SetVolume(200);
 
 //    Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
 
-//    App.Init();
+    App.Init();
 //    AtlGui.Init();
 //
 //    rLevel1.Init(ID);

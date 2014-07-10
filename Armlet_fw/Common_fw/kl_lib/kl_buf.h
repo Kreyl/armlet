@@ -22,8 +22,8 @@ struct Buf_t {
 template <typename T, uint32_t Sz>
 class CircBuf_t {
 protected:
-    uint32_t IFullSlotsCount;
-    T IBuf[Sz], *PRead, *PWrite;
+    uint32_t IFullSlotsCount=0;
+    T IBuf[Sz], *PRead=IBuf, *PWrite=IBuf;
 public:
     uint8_t Get(T *p) {
         if(IFullSlotsCount == 0) return FAILURE;
@@ -52,7 +52,6 @@ public:
         }
         else PRead += ALength;
     }
-    void Init() { PRead = IBuf; PWrite = IBuf; IFullSlotsCount = 0; }
     // Friendship
     //friend class BufChunkPut_t;
 };

@@ -39,8 +39,7 @@ public:
         chVTReset(&ITimer);
         chVTSet(&ITimer, MS2ST(1000), TimeTmrCallback, NULL);
     }
-    void Init ()
-    {
+    void Init () {
         H = 0;
         M = 0;
         S = 0;
@@ -109,6 +108,14 @@ void Keylock_t::Unlock() {
 
 #if 1 // =========================== Key handler ===============================
 static inline void KeysHandler() { // FIXME
+    uint8_t rslt;
+    KeyEvtInfo_t Evt;
+    while((rslt = Keys.EvtBuf.Get(&Evt)) == OK) {
+        Uart.Printf("KeyEvtType=%u; Keys: ", Evt.Type);
+        for(uint8_t i=0; i<Evt.NKeys; i++) Uart.Printf("%u ", Evt.KeyID[i]);
+        Uart.Printf("\r\n");
+    }
+
 //    Keylock.TimerReset();   // Reset timer as Any key pressed or released
 //    if(Keylock.Locked) {
 //        // Just unlock, do not handle pressed keys
@@ -413,7 +420,7 @@ void App_t::Task() {
         }
     }
 #endif
-
+#if 0 // ==== New second ====
     if(EvtMsk & EVTMASK_NEWSECOND) {
        //  Uart.Printf("New_second!");
 
@@ -446,6 +453,7 @@ void App_t::Task() {
             AtlGui.is_splash_screen_onrun=2;
         }
     }
+#endif
 }
 
 void App_t::Init() {
@@ -457,7 +465,7 @@ void App_t::Init() {
 
     Time.Init();
     Time.Reset();
-    InitArrayOfUserIntentions();
+//    InitArrayOfUserIntentions();
 }
 
 //NEW FROM BRAINENCH

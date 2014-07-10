@@ -10,9 +10,9 @@
 
 #include "hal.h"
 #include "kl_lib_f2xx.h"
+#include "kl_buf.h"
 
 // Keys ports and pins
-// Keys data
 struct KeyData_t {
     GPIO_TypeDef *PGpio;
     uint16_t Pin;
@@ -35,6 +35,8 @@ const KeyData_t KeyData[] = {
 #define KEY_LONGPRESS_DELAY_MS      801
 #define KEYS_DELAY_BEFORE_REPEAT_MS (KEY_REPEAT_PERIOD_MS + KEY_LONGPRESS_DELAY_MS)
 
+#define KEYS_EVT_Q_LEN              7
+
 enum KeyName_t {keyA=0, keyB=1, keyC=2, keyX=3, keyY=4, keyZ=5, keyL=6, keyE=7, keyR=8};
 
 // Key status
@@ -51,15 +53,16 @@ struct KeyEvtInfo_t {
 
 class Keys_t {
 private:
-    KeyEvtInfo_t IEvt;
     Key_t Key[KEYS_CNT];
     systime_t RepeatTimer, LongPressTimer;
     bool IsCombo;
-    void AddEvtToQueue();
-    void AddEvtToQueue(KeyEvt_t Type, uint8_t KeyID);
+    void AddEvtToQueue(KeyEvtInfo_t Evt);
 public:
     void Init();
     void Shutdown() { for(uint8_t i=0; i<KEYS_CNT; i++) PinSetupAnalog(KeyData[i].PGpio, KeyData[i].Pin); }
+    // Events
+    CircBuf_t<KeyEvtInfo_t, KEYS_EVT_Q_LEN> EvtBuf;
+
     // Inner use
     void ITask();
 };
