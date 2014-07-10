@@ -54,7 +54,7 @@ int main() {
     while(TRUE) {
         chThdSleepMilliseconds(1000);
         //Sound.tmp(9);
-        Uart.Printf("Pos: %u\r\n", Sound.GetPosition());
+//        Uart.Printf("Pos: %u\r\n", Sound.GetPosition());
 
   //      Lcd.Printf(11, 21, clWhite, clBlack, "%ums   ", Mesh.GetAbsTimeMS());
     }
@@ -80,7 +80,7 @@ void Init() {
  //   Init_emotionTreeMusicNodeFiles_FromFile(filename);
  //   Print_emotionTreeMusicNodeFiles_ToUART();
 
-//    Keys.Init();
+    Keys.Init();
 //    Beeper.Init();
 //    Vibro.Init();
 
@@ -92,10 +92,10 @@ void Init() {
 
 //    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
 
-    Sound.Init();
-    Sound.SetVolume(200);
+//    Sound.Init();
+//    Sound.SetVolume(200);
 
-    Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
+//    Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
 
 //    App.Init();
 //    AtlGui.Init();

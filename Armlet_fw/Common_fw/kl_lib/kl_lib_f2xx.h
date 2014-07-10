@@ -94,14 +94,15 @@ static inline uint32_t BuildUint32(uint8_t Lo, uint8_t MidLo, uint8_t MidHi, uin
 
 #define REBOOT()                SCB_AIRCR = AIRCR_VECTKEY | 0x04
 
-// ============================ Simple delay ===================================
-__attribute__ ((always_inline))
-static inline void DelayLoop(volatile uint32_t ACounter) { while(ACounter--); }
-__attribute__ ((always_inline))
-static inline void Delay_ms(uint32_t Ams) {
-    volatile uint32_t __ticks = (Clk.AHBFreqHz / 4000) * Ams;
-    DelayLoop(__ticks);
+#if 1 // =========================== Time ======================================
+static inline bool TimeElapsed(systime_t *PSince, uint32_t Delay_ms) {
+    chSysLock();
+    bool Rslt = (systime_t)(chTimeNow() - *PSince) > MS2ST(Delay_ms);
+    if(Rslt) *PSince = chTimeNow();
+    chSysUnlock();
+    return Rslt;
 }
+#endif
 
 // ===================== Single pin manipulations ==============================
 enum PinOutMode_t {
