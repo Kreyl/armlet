@@ -17,7 +17,7 @@ C_TARGET = 'gui.c'
 
 ENCODING = "Windows-1251"
 
-BUTTONS = 'ABCLERXYZ'
+BUTTONS = 'ABCXYZLER'
 
 INDENT = '    '
 
@@ -68,13 +68,13 @@ def cButton(node):
     isPressable = node.attrs.get('isPressable')
     getState = node.attrs.get('getState')
     press = node.attrs.get('press')
-    return (index, '{%s, %d, %d, %s, %s, %s}' % (cString(name), left, bottom, isPressable or 'buttonIsPressable', getState or 'buttonGetState', press or 'buttonPress'))
+    return (index, '/* %s */ { %s, %d, %d, %s, %s, %s }' % (key, cString(name), left, bottom, isPressable or 'buttonIsPressable', getState or 'buttonGetState', press or 'buttonPress'))
 
 def cScreen(node, indent = ''):
     name = str(node.attrs['id'])
     buttons = dict(cButton(button) for button in node.find_all(class_ = 'button'))
-    buttonsText = indent + INDENT + (',\n' + indent + INDENT).join(buttons.get(i, 'NO_BUTTON') for i in xrange(len(BUTTONS)))
-    return indent + ('{\"%s\", {\n' % name) + buttonsText + '\n' + indent +'}}'
+    buttonsText = indent + INDENT + (',\n' + indent + INDENT).join(buttons.get(i, '/* %s */ NO_BUTTON' % BUTTONS[i]) for i in xrange(len(BUTTONS)))
+    return indent + ('{ \"%s\", {\n' % name) + buttonsText + '\n' + indent +'}}'
 
 def main():
     soup = BeautifulSoup(open(GUI_HTML))
