@@ -119,6 +119,9 @@ def updateCharacters():
     if changed:
         print "Updating %s..." % CHARACTERS_CSV
         writeCharacters(characters)
+        print "Updating tickets..."
+        from TicketProcessor import generateTickets
+        generateTickets(characters.iteritems())
     else:
         print "No changes detected"
     print "Done"
