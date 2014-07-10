@@ -21,7 +21,7 @@
 #define BUTTON_ENABLED 2
 #define BUTTON_DISABLED 3
 
-#define BUTTONS "ABCLERXYZ"
+#define BUTTONS "ABCXYZLER"
 
 #define NO_BUTTON {nullptr, 0, 0, nullptr, nullptr, nullptr}
 
