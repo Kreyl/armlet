@@ -7,8 +7,7 @@
  */
 #ifndef GUI_H
 #define GUI_H
-#include "AtlGuiCF.h"
-//#include "..\Armlet_fw\Atlgui\AtlGuiCF.h"
+
 #ifndef nullptr
 #define nullptr 0
 #endif
@@ -17,51 +16,45 @@
 #define countof(a) (sizeof(a) / sizeof(a[0]))
 #endif
 
-// коричнево- желтый
-#define BUTTON_NOT_INITED 0
-//белый
-#define BUTTON_NORMAL 1
-//красный
-#define BUTTON_ENABLED 2
-// коричнево- желтый
-#define BUTTON_DISABLED 3
-#define BUTTON_ABSENT 4
-//желтый
-#define BUTTON_PRESSED 5
-#define BUTTON_ERROR 6
-#define GUI_BUTTON_NUMBER 9
+#define BUTTON_ABSENT      0
+#define BUTTON_NORMAL      1  // белый
+#define BUTTON_ENABLED     2  // красный
+#define BUTTON_DISABLED    3  // коричнево-желтый
+#define BUTTON_PRESSED     4  // желтый
+#define BUTTON_NOT_PRESSED 5  // коричнево-желтый
+#define BUTTON_ERROR       6
 
 #define BUTTON_PRESSABLE 1
-#define BUTTON_LOCKED 3
-#define BUTTONS "ABCLERXYZ"
-//abcxyzler
-//char * buttons_arr[9] {"A","B","C","L","E","R","X","Y","Z"};
-#define NO_BUTTON {nullptr, 0, 0, 0, nullptr, nullptr, nullptr}
+#define BUTTON_LOCKED    3
 
+#define BUTTONS "ABCXYZLER"
+#define NUM_BUTTONS sizeof(BUTTONS)
 
+#define NO_BUTTON {nullptr, 0, 0, nullptr, nullptr, nullptr}
 
 typedef struct Button {
     const char* name; // Text to be displayed for a button if text interface is used.
-    int state_id;
     const int left;
     const int bottom;
-    // All function arguments are screen number and button number, may be ignored.
-    int (*isPressable)(int, int); // Called if pressed, must return non-zero if pressable, zero otherwise.
-    int (*getState)(int, int); // Called at redrawing, must return button state.
-    int (*press)(int, int); // Called after pressed, must process pressing and return new button state.
+    int (*isPressable)(int nScreen, int nButton);      // Called if pressed, must return non-zero if pressable, zero otherwise.
+    int (*getState)(int nScreen, int nButton);         // Called at redrawing, must return button state.
+    int (*press)(int nScreen, int nButton, int event); // Called after pressed, must process pressing and return new button state.
 } Button_t;
 
 typedef struct Screen {
     const char* name; // Name of the subfolder containing respective imagery.
-    int screen_switch[GUI_BUTTON_NUMBER]; //list of new states on sucessifull clicks on buttons
-    int (* fptr_gui_state_array_switch_functions[GUI_BUTTON_NUMBER])(); // apply datachanges from gui on screenchanges
-    const Button_t buttons[sizeof(BUTTONS)];
+    const char* screen_switch[NUM_BUTTONS]; // New states on successful clicks on buttons
+    int (* fptr_gui_state_array_switch_functions[NUM_BUTTONS])(); // apply datachanges from gui on screenchanges
+    const Button_t buttons[NUM_BUTTONS];
 } Screen_t;
 
+extern const char* buttons;
 extern Screen_t screens[];
 extern const int screens_number;
 
-
+extern int buttonIsPressable(int nScreen, int nButton);
+extern int buttonGetState(int nScreen, int nButton);
+extern int buttonPress(int nScreen, int nButton, int event);
 
 #endif
 
