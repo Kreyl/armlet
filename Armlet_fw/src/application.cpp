@@ -428,7 +428,7 @@ void App_t::Task() {
 
     if(EvtMsk & EVTMASK_NEWSECOND) {
        //  Uart.Printf("New_second!");
-
+        AtlGui.AddSuspendScreenTimer(1);
         //UPDATE user intentions timers
         if(UpdateUserIntentionsTime(1))
             CheckAndRedrawFinishedReasons();
@@ -457,6 +457,8 @@ void App_t::Task() {
             AtlGui.CallStateScreen(0);
             AtlGui.is_splash_screen_onrun=2;
         }
+        //гашение крана
+
     }
 }
 

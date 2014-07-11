@@ -43,7 +43,43 @@ void AtlGui_t::Init()
     current_state=-1;
     is_gui_shown=false;
     is_locked=false;
+    is_screen_suspended=false;
+    is_suspend_timer_run=false;
 }
+void AtlGui_t::TurnOnScreen()
+{
+    if(!is_screen_suspended)
+    {
+        Uart.Printf("AtlGui_t::TurnOffScreen already turned on \r");
+        return;
+    }
+    is_screen_suspended=false;
+    Uart.Printf("AtlGui_t::TurnOffScreen  turn on \r");
+    Lcd.SetBrightness(100);
+    screen_suspend_timer=0;
+}
+void AtlGui_t::TurnOffScreen()
+{
+    if(is_screen_suspended)
+    {
+        Uart.Printf("AtlGui_t::TurnOffScreen already turned off \r");
+        return;
+    }
+    is_screen_suspended=true;
+    Uart.Printf("AtlGui_t::TurnOffScreen  turn off \r");
+    Lcd.SetBrightness(0);
+}
+void AtlGui_t::AddSuspendScreenTimer(int sec_to_add)
+{
+    if(is_screen_suspended)
+        return;
+    if(is_suspend_timer_run)
+        return;
+    screen_suspend_timer+=sec_to_add;
+    Uart.Printf("AtlGui_t::AddSuspendScreenTimer  screen_suspend_timer %d \r",screen_suspend_timer);
+    if(screen_suspend_timer>=SUSPEND_SCREEN_SEC)
+        TurnOffScreen();
+};
 void AtlGui_t::ReactLockedPress()
 {
     Uart.Printf("CALL ON LOCKED SCREEN \r");
@@ -61,16 +97,17 @@ void AtlGui_t::ShowSplashscreen()
 }
 void AtlGui_t::CallStateScreen(int screen_id)
 {
-    Lcd.Printf(11, 21, clGreen, clBlack, "STATESCREEN %u", screen_id);
+
+   // Lcd.Printf(11, 21, clGreen, clBlack, "STATESCREEN %u", screen_id);
    if(current_state==screen_id)
    {
        //если вернулись на тотже экран, не перерисовываем его
-       Lcd.Printf(11, 31, clGreen, clBlack, "C stscr %u same", screen_id);
+       //Lcd.Printf(11, 31, clGreen, clBlack, "C stscr %u same", screen_id);
        return;
    }
    current_state=screen_id;
    RenderFullScreen(current_state);
-   Lcd.Printf(11, 31, clGreen, clBlack, "C stscr %u new", screen_id);
+  // Lcd.Printf(11, 31, clGreen, clBlack, "C stscr %u new", screen_id);
    //TODO render??
 }
 void AtlGui_t::RenderFullScreen(int screen_id)
@@ -85,8 +122,8 @@ void AtlGui_t::RenderFullScreen(int screen_id)
     Uart.Printf("RenderFullScreen %s\r",bmp_filename);
     // render it
     Lcd.DrawBmpFile(0,0,bmp_filename);
-    strncpy (char_name,"1234567890",10);
-    time1=11;time2=22,bat=100;
+    strncpy (char_name,"char_name",10);
+    time1=11;time2=22,bat=Power.RemainingPercent;
     //strncpy( time,"22_11",5);
     //strncpy( bat,"100%",4);
     RenderNameTimeBat();
@@ -103,6 +140,12 @@ void AtlGui_t::RenderFullScreen(int screen_id)
 }
 void AtlGui_t::ButtonIsReleased(int button_id)
 {
+    is_suspend_timer_run=false;
+    if(is_screen_suspended)
+    {
+        this->TurnOnScreen();
+        return;
+    }
     if(is_locked && button_id!=6)
         return;
     if(current_state>=0 && current_state<screens_number)
@@ -143,6 +186,9 @@ void AtlGui_t::ButtonIsReleased(int button_id)
 }
 void AtlGui_t::ButtonIsClicked(int button_id)
 {
+    if(is_screen_suspended)
+        return;
+    is_suspend_timer_run=true;
     if(is_locked && button_id!=6)
         return;
     //вызываем геттер кнопки

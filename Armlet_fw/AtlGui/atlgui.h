@@ -30,7 +30,7 @@
 #define GUI_STATE_NOT 6
 
 #define GUI_BUTTON_NUMBER 9
-
+#define SUSPEND_SCREEN_SEC 30
 /* GSI - init this
  * GUI_STATE_ABSENT - no color
  * GUI_STATE_BASIC - white
@@ -88,8 +88,15 @@ public:
     int current_state;
     bool is_gui_shown;
     bool is_locked;
+    bool is_screen_suspended;
+    bool is_suspend_timer_run;
+    int screen_suspend_timer;
+    void TurnOnScreen();
+    void TurnOffScreen();
+    void AddSuspendScreenTimer(int sec_to_add);
     //TODO fill reactpress func
     void ReactLockedPress();
+
 
 };
 
