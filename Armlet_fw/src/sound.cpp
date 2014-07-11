@@ -54,7 +54,7 @@ void Sound_t::ITask() {
     // Play new request
     if(EvtMsk & VS_EVT_COMPLETED) {
 //        Uart.Printf("cmp\r");
-        AddCmd(VS_REG_MODE, 0x0004);
+        AddCmd(VS_REG_MODE, 0x0004);    // Soft reset
         if(IFilename != NULL) IPlayNew();
         else if(IPThd != nullptr) chEvtSignal(IPThd, EVTMASK_PLAY_ENDS);  // Raise event if nothing to play
     }
@@ -135,7 +135,7 @@ void Sound_t::Init() {
 
 void Sound_t::IPlayNew() {
     AddCmd(VS_REG_MODE, VS_MODE_REG_VALUE);
-    AddCmd(VS_REG_CLOCKF, 0x8000 + (12000000/2000));
+    AddCmd(VS_REG_CLOCKF, (0x8000 + (12000000/2000)));
     AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
 
     FRESULT rslt;
@@ -156,6 +156,11 @@ void Sound_t::IPlayNew() {
         Stop();
         return;
     }
+    // Fast forward to start position if not zero
+    if(IStartPosition != 0) {
+        if(IStartPosition < IFile.fsize) f_lseek(&IFile, IStartPosition);
+    }
+
     // Initially, fill both buffers
     if(Buf1.ReadFromFile(&IFile) != OK) { Stop(); return; }
     // Fill second buffer if needed

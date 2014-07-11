@@ -27,7 +27,6 @@
 #include "..\AtlGui\atlgui.h"
 #include "energy.h"
 App_t App;
-static EventListener EvtListenerKeys;
 
 #if 1 // ================================ Time =================================
 static void TimeTmrCallback(void *p);
@@ -40,8 +39,7 @@ public:
         chVTReset(&ITimer);
         chVTSet(&ITimer, MS2ST(1000), TimeTmrCallback, NULL);
     }
-    void Init ()
-    {
+    void Init () {
         H = 0;
         M = 0;
         S = 0;
@@ -83,13 +81,13 @@ public:
     void Lock();
     void Unlock();
 };
-static Keylock_t Keylock;
+//static Keylock_t Keylock; // FIXME
 
 
 // Timer callback
-void KeylockTmrCallback(void *p) {
+void KeylockTmrCallback(void *p) {  // FIXME: is it still in use?
     chSysLockFromIsr();
-    chEvtSignalI(App.PThd, EVTMASK_KEYLOCK);
+//    chEvtSignalI(App.PThd, EVTMASK_KEYLOCK);
     chSysUnlockFromIsr();
 }
 
@@ -109,73 +107,71 @@ void Keylock_t::Unlock() {
 #endif
 
 #if 1 // =========================== Key handler ===============================
-static inline void KeysHandler() {
-    Keylock.TimerReset();   // Reset timer as Any key pressed or released
-    if(Keylock.Locked) {
-        // Just unlock, do not handle pressed keys
-        //if(Keys.AnyPressed()) Keylock.Unlock();   // Check if any key pressed, not released, not holded
-        if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
-            Keylock.Unlock();
-            Keylock.TimerSet();     // Start autolock timer
-            Vibro.Vibrate(ShortBrr);	//doesnt work?!
-        }
+static inline void KeysHandler() { // FIXME
+    uint8_t rslt;
+    KeyEvtInfo_t Evt;
+    while((rslt = Keys.EvtBuf.Get(&Evt)) == OK) {
+        Uart.Printf("KeyEvtType=%u; Keys: ", Evt.Type);
+        for(uint8_t i=0; i<Evt.NKeys; i++) Uart.Printf("%u ", Evt.KeyID[i]);
+        Uart.Printf("\r\n");
     }
-    // Check if lock
-    else if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
-        Keylock.Lock();
-    }
-    // Not locked, not lock pressed
-#define KEY_A   Keys.Status[0]
-#define KEY_B   Keys.Status[1]
-#define KEY_C   Keys.Status[2]
-#define KEY_X   Keys.Status[3]
-#define KEY_Y   Keys.Status[4]
-#define KEY_Z   Keys.Status[5]
-#define KEY_L   Keys.Status[6]
-#define KEY_E   Keys.Status[7]
-#define KEY_R   Keys.Status[8]
 
-    else {
-        for(uint8_t i=0; i<KEYS_CNT; i++) {
-            if(Keys.Status[i].HasChanged) {
-                if(Keys.Status[i].State == ksReleased) {
-                    //KEY RELEASE
-                    Uart.Printf(" !AtlGui.ButtonIsReleased\r");
-                    AtlGui.ButtonIsReleased(i);
-                    Uart.Printf(" !!!AtlGui.ButtonIsReleased\r");
-                   // ArmletApi::OnButtonRelease(i);
-                	Beeper.Beep(ShortBeep);	//doesnt work?!
-                }
-                else {
-                    Uart.Printf(" !AtlGui.ButtonIsClicked\r");
-                    AtlGui.ButtonIsClicked(i);
-                    Uart.Printf(" !!!AtlGui.ButtonIsClicked\r");
-                    //KEY PRESS
-//                    Beeper.Beep(ShortBeep);
-    /*            	if(i==0)
-                	{
-                		Sound.Stop();
-                		Uart.Printf("sound stop");
-                	}
-                	if(i==1)
-                	{
-                		Sound.Play("church_bells.wav");
-                		Uart.Printf("church_bells.wav");
-                	}
-                	if(i==2)
-                	{
-                		Sound.Play("techview.wav");
-                		Uart.Printf("techview.wav");
-                	}
-                	*/
-                    Vibro.Vibrate(ShortBrr);
-                    //ArmletApi::OnButtonPress(i);
-                }
-            }
-        } // for
-        Keylock.TimerSet(); // Start autolock timer
-    } // if not locked
-    Keys.Reset();
+//    Keylock.TimerReset();   // Reset timer as Any key pressed or released
+//    if(Keylock.Locked) {
+//        // Just unlock, do not handle pressed keys
+//        //if(Keys.AnyPressed()) Keylock.Unlock();   // Check if any key pressed, not released, not holded
+//        if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
+//            Keylock.Unlock();
+//            Keylock.TimerSet();     // Start autolock timer
+//            Vibro.Vibrate(ShortBrr);	//doesnt work?!
+//        }
+//    }
+//    // Check if lock
+//    else if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
+//        Keylock.Lock();
+//    }
+//    // Not locked, not lock pressed
+//    else {
+//        for(uint8_t i=0; i<KEYS_CNT; i++) {
+//            if(Keys.Status[i].HasChanged) {
+//                if(Keys.Status[i].State == ksReleased) {
+//                    //KEY RELEASE
+//                    Uart.Printf(" !AtlGui.ButtonIsReleased\r");
+//                    AtlGui.ButtonIsReleased(i);
+//                    Uart.Printf(" !!!AtlGui.ButtonIsReleased\r");
+//                   // ArmletApi::OnButtonRelease(i);
+//                	Beeper.Beep(ShortBeep);	//doesnt work?!
+//                }
+//                else {
+//                    Uart.Printf(" !AtlGui.ButtonIsClicked\r");
+//                    AtlGui.ButtonIsClicked(i);
+//                    Uart.Printf(" !!!AtlGui.ButtonIsClicked\r");
+//                    //KEY PRESS
+////                    Beeper.Beep(ShortBeep);
+//    /*            	if(i==0)
+//                	{
+//                		Sound.Stop();
+//                		Uart.Printf("sound stop");
+//                	}
+//                	if(i==1)
+//                	{
+//                		Sound.Play("church_bells.wav");
+//                		Uart.Printf("church_bells.wav");
+//                	}
+//                	if(i==2)
+//                	{
+//                		Sound.Play("techview.wav");
+//                		Uart.Printf("techview.wav");
+//                	}
+//                	*/
+//                    Vibro.Vibrate(ShortBrr);
+//                    //ArmletApi::OnButtonPress(i);
+//                }
+//            }
+//        } // for
+//        Keylock.TimerSet(); // Start autolock timer
+//    } // if not locked
+//    Keys.Reset();
 }
 #endif
 
@@ -186,7 +182,6 @@ static WORKING_AREA(waAppThread, 1024);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
     chRegSetThreadName("App");
-    Keys.RegisterEvt(&EvtListenerKeys, EVTMASK_KEYS);
     while(true) App.Task();
 }
     /*
@@ -425,7 +420,7 @@ void App_t::Task() {
         }
     }
 #endif
-
+#if 0 // ==== New second ====
     if(EvtMsk & EVTMASK_NEWSECOND) {
        //  Uart.Printf("New_second!");
         AtlGui.AddSuspendScreenTimer(1);
@@ -460,6 +455,7 @@ void App_t::Task() {
         //гашение крана
 
     }
+#endif
 }
 
 void App_t::Init() {
@@ -471,7 +467,7 @@ void App_t::Init() {
 
     Time.Init();
     Time.Reset();
-    InitArrayOfUserIntentions();
+//    InitArrayOfUserIntentions();
 }
 
 //NEW FROM BRAINENCH
