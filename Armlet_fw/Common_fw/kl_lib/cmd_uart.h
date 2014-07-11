@@ -20,7 +20,7 @@
 #define UART_RX_ENABLED     FALSE
 
 // UART
-#define UART_TXBUF_SIZE     1024
+#define UART_TXBUF_SIZE     7
 #define UART                USART2
 #define UART_GPIO           GPIOD
 #define UART_TX_PIN         5
@@ -55,19 +55,23 @@ private:
     char *PWrite, *PRead;
     bool IDmaIsIdle;
     uint32_t IFullSlotsCount, ITransSize;
+    void ISendViaDMA();
 #if UART_RX_ENABLED
     RcvState_t RxState;
     uint8_t IRxBuf[UART_RXBUF_SZ];
     uint8_t CmdCode;
     uint8_t CmdData[UART_CMDDATA_SZ], *PCmdWrite;
 #endif
+    void IPrintf(const char *format, va_list args);
 public:
     void Printf(const char *S, ...);
+    void PrintfI(const char *S, ...);
     void FlushTx() { while(!IDmaIsIdle); }  // wait DMA
     void PrintNow(const char *S) {
         while(*S != 0) {
             while(!(UART->SR & USART_SR_TXE));
             UART->DR = *S++;
+            while(!(UART->SR & USART_SR_TXE));
         }
     }
     void Init(uint32_t ABaudrate);
