@@ -110,10 +110,36 @@ void Keylock_t::Unlock() {
 static inline void KeysHandler() { // FIXME
     uint8_t rslt;
     KeyEvtInfo_t Evt;
+
+
     while((rslt = Keys.EvtBuf.Get(&Evt)) == OK) {
+        //key debug info
         Uart.Printf("KeyEvtType=%u; Keys: ", Evt.Type);
         for(uint8_t i=0; i<Evt.NKeys; i++) Uart.Printf("%u ", Evt.KeyID[i]);
         Uart.Printf("\r\n");
+
+        if(Evt.Type==kePress)
+        {
+            AtlGui.ButtonIsClicked(Evt.KeyID[0]);
+        }
+        if(Evt.Type==keRelease)
+        {
+            AtlGui.ButtonIsReleased(Evt.KeyID[0],keRelease);
+        }
+
+        //                if(Keys.Status[i].State == ksReleased) {
+        //                    //KEY RELEASE
+        //                    Uart.Printf(" !AtlGui.ButtonIsReleased\r");
+        //                    AtlGui.ButtonIsReleased(i);
+        //                    Uart.Printf(" !!!AtlGui.ButtonIsReleased\r");
+        //                   // ArmletApi::OnButtonRelease(i);
+        //                  Beeper.Beep(ShortBeep); //doesnt work?!
+        //                }
+        //                else {
+        //                    Uart.Printf(" !AtlGui.ButtonIsClicked\r");
+        //                    AtlGui.ButtonIsClicked(i);
+        //                    Uart.Printf(" !!!AtlGui.ButtonIsClicked\r");
+        //key debug info end
     }
 
 //    Keylock.TimerReset();   // Reset timer as Any key pressed or released
@@ -134,18 +160,7 @@ static inline void KeysHandler() { // FIXME
 //    else {
 //        for(uint8_t i=0; i<KEYS_CNT; i++) {
 //            if(Keys.Status[i].HasChanged) {
-//                if(Keys.Status[i].State == ksReleased) {
-//                    //KEY RELEASE
-//                    Uart.Printf(" !AtlGui.ButtonIsReleased\r");
-//                    AtlGui.ButtonIsReleased(i);
-//                    Uart.Printf(" !!!AtlGui.ButtonIsReleased\r");
-//                   // ArmletApi::OnButtonRelease(i);
-//                	Beeper.Beep(ShortBeep);	//doesnt work?!
-//                }
-//                else {
-//                    Uart.Printf(" !AtlGui.ButtonIsClicked\r");
-//                    AtlGui.ButtonIsClicked(i);
-//                    Uart.Printf(" !!!AtlGui.ButtonIsClicked\r");
+
 //                    //KEY PRESS
 ////                    Beeper.Beep(ShortBeep);
 //    /*            	if(i==0)
@@ -411,7 +426,7 @@ void App_t::Task() {
             if(reasons[reason_id].eID != SICD.last_played_emo)
             {
                 //check if it's user reason,if any, set already played flag
-                UserReasonFlagRecalc(reason_id);
+                UserReasonFlagRecalc(SICD.last_intention_index_winner);//тут должэн стоять прошлый победитель!!
                 PlayNewEmo(reasons[reason_id].eID,3);
             }
         }
@@ -420,10 +435,10 @@ void App_t::Task() {
         }
     }
 #endif
-#if 0 // ==== New second ====
+#if 1 // ==== New second ====
     if(EvtMsk & EVTMASK_NEWSECOND) {
        //  Uart.Printf("New_second!");
-
+        AtlGui.AddSuspendScreenTimer(1);
         //UPDATE user intentions timers
         if(UpdateUserIntentionsTime(1))
             CheckAndRedrawFinishedReasons();
@@ -452,6 +467,8 @@ void App_t::Task() {
             AtlGui.CallStateScreen(0);
             AtlGui.is_splash_screen_onrun=2;
         }
+        //гашение крана
+
     }
 #endif
 }

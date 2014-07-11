@@ -58,7 +58,7 @@ int bSoundDownCheck(int screen_id, int button_id)
     else
         return BUTTON_LOCKED;
 }
-int bSoundUpChange(int screen_id, int button_id)
+int bSoundUpChange(int screen_id, int button_id ,int press_mode)
 {
     //ничего не чекает - все проверки в соседнем вызове
     current_volume_lvl+=SOUND_STEP;
@@ -66,7 +66,7 @@ int bSoundUpChange(int screen_id, int button_id)
     Uart.Printf("sound up to %d \r", current_volume_lvl);
     return bSoundUpCheck(screen_id,button_id);
 }
-int bSoundDownChange(int screen_id, int button_id)
+int bSoundDownChange(int screen_id, int button_id ,int press_mode)
 {
    // buttonIsPressable(1,10);
     current_volume_lvl-=SOUND_STEP;
@@ -83,7 +83,7 @@ int buttonGetState(int screen_id, int button_id)
 {
     return 0;
 }
-int buttonPress(int screen_id, int button_id)
+int buttonPress(int screen_id, int button_id, int press_mode)
 {
    return 0;
 }
@@ -136,7 +136,7 @@ int bReasonGetState(int screen_id, int button_id)
        }
        return BUTTON_ERROR; //error??
 }
-int bReasonChange(int screen_id, int button_id)
+int bReasonChange(int screen_id, int button_id ,int press_mode)
 {
    // Uart.Printf("CALL bReasonChange \r");
     //button is available, so just get it
@@ -147,13 +147,17 @@ int bReasonChange(int screen_id, int button_id)
            {
                int reason_id=ButtonsToUserReasons[i].BtoR[button_id];
                if(reason_id<0)
+               {
+                   Uart.Printf("CALL bReasonChange REASON ERROR \r");
                    return BUTTON_ERROR;
+               }
                int user_reason_indx=ButtonsToUserReasons[i].BtoR[button_id];
               // if(GetPlayerReasonCurrentPower(reason_id)<0) true
                if(ArrayOfUserIntentions[user_reason_indx].current_time==-1)
                {
                    //setup reason
                    ArrayOfUserIntentions[user_reason_indx].current_time=0;
+                   Uart.Printf("CALL bReasonChange REASON IS ON THE RUN \r");
                    //return red
                    return BUTTON_ENABLED;
                }
@@ -164,14 +168,19 @@ int bReasonChange(int screen_id, int button_id)
                    if(ArrayOfUserIntentions[user_reason_indx].was_winning &&
                            SICD.last_intention_index_winner==ArrayOfUserIntentions[user_reason_indx].reason_indx)
                    {
+                       Uart.Printf("CALL bReasonChange RESTART \r");
                        ArrayOfUserIntentions[user_reason_indx].current_time=0;
+                       //теперь продолжение можно выключить!
+                       ArrayOfUserIntentions[user_reason_indx].was_winning=false;
                        return BUTTON_ENABLED;
                    }
 
                    // if we are on the tail, and it's not wining reason, restart it.
                    ArrayOfUserIntentions[user_reason_indx].TurnOff();
                    CallReasonSuccess(user_reason_indx);
+                   ArrayOfUserIntentions[user_reason_indx].was_winning=false;
                    //retrn normal??
+                   Uart.Printf("CALL bReasonChange TURNED OFF \r");
                    return BUTTON_NORMAL;
                }
            }
@@ -215,7 +224,7 @@ int bChangeMelodyCheck(int screen_id, int button_id)
         return BUTTON_PRESSABLE;
     //get this emo file numbers
 }
-int bChangeMelody(int screen_id, int button_id)
+int bChangeMelody(int screen_id, int button_id,int press_mode)
 {
     Sound.Stop();
     return bChangeMelodyCheck(screen_id,button_id);
@@ -227,7 +236,7 @@ int bLockCheck(int screen_id, int button_id)
 {
     return BUTTON_PRESSABLE;
 }
-int bLockChange(int screen_id, int button_id)
+int bLockChange(int screen_id, int button_id ,int press_mode)
 {
     AtlGui.is_locked=!AtlGui.is_locked;
     if(AtlGui.is_locked)

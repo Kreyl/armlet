@@ -248,8 +248,8 @@ def processIntentions(emotions, fileName = getFileName(INTENTIONS_CSV)):
 def processCharacters(fileName = getFileName(CHARACTERS_CSV)):
     reasons = []
     for row in readCSV(fileName):
-        assert len(row) == 2, "Bad characters file format"
-        (rid, reason) = row
+        assert len(row) == 3, "Bad characters file format"
+        (rid, reason, _longName) = row
         addReason(reasons, int(rid), reason, 0, 0, '')
     assert len(reasons) <= len(CHARACTER_IDS)
     return tuple(reasons)
