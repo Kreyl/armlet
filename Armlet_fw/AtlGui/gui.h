@@ -28,7 +28,7 @@
 #define BUTTON_LOCKED    3
 
 #define BUTTONS "ABCXYZLER"
-#define NUM_BUTTONS sizeof(BUTTONS)
+#define NUM_BUTTONS (sizeof(BUTTONS)-1)
 
 #define NO_BUTTON {nullptr, 0, 0, nullptr, nullptr, nullptr}
 
@@ -45,7 +45,7 @@ typedef struct Screen {
     const char* name; // Name of the subfolder containing respective imagery.
     const char* screen_switch[NUM_BUTTONS]; // New states on successful clicks on buttons
     int (* fptr_gui_state_array_switch_functions[NUM_BUTTONS])(); // apply datachanges from gui on screenchanges
-    const Button_t buttons[NUM_BUTTONS];
+    Button_t buttons[NUM_BUTTONS];
 } Screen_t;
 
 extern const char* buttons;

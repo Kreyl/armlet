@@ -81,25 +81,25 @@ void Init() {
  //   Print_emotionTreeMusicNodeFiles_ToUART();
 
     Keys.Init();
-//    Beeper.Init();
+    Beeper.Init();
 //    Vibro.Init();
 
 //    IR.TxInit();
 //    IR.RxInit();
-//    Power.Init();
+    Power.Init();
     //Power.Task();
 //    PillInit();
 
-//    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
+    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
 
     Sound.Init();
-//    Sound.SetVolume(200);
+    Sound.SetVolume(START_VOL_CONST);
 
 //    Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
 
     App.Init();
-//    AtlGui.Init();
-//
-//    rLevel1.Init(ID);
-//    Mesh.Init(ID);
+    AtlGui.Init();
+
+    rLevel1.Init(ID);
+    Mesh.Init(ID);
 }

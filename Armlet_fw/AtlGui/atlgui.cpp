@@ -11,6 +11,7 @@
 #include "lcd2630.h"
 #include "gui.h"
 #include "power.h"
+#include "AtlGuiCF.h"
 AtlGui_t AtlGui;
 #define PATH_FOLDER_STR "\\"
 #define PATH_TO_GUI "\\GUI\\"
@@ -45,6 +46,71 @@ void AtlGui_t::Init()
     is_locked=false;
     is_screen_suspended=false;
     is_suspend_timer_run=false;
+
+    //init gui pos andfunc arrays
+
+    //get screen ptrs
+    char * ptr_main;
+    char *ptr_intentions;
+    for(int i=0;i<screens_number;i++)
+    {
+        if(strcmp("main",screens[i].name)==0)
+            ptr_main=(char*)screens[i].name;
+        if(strcmp("intentions",screens[i].name)==0)
+            ptr_intentions=(char*)screens[i].name;
+    }
+    //put screen ptr
+    for(int i=0;i<screens_number;i++)
+    {
+        if(strcmp("main",screens[i].name)==0)
+           screens[i].screen_switch[7]=ptr_intentions;
+        if(strcmp("intentions",screens[i].name)==0)
+            screens[i].screen_switch[7]=ptr_main;
+    }
+    //init funcs
+    for(int i=0;i<screens_number;i++)
+    {
+        if(strcmp("main",screens[i].name)==0)
+        {
+            //выставляем кнопки
+            //new track
+            screens[i].buttons[3].isPressable=bChangeMelodyCheck;
+            screens[i].buttons[3].press=bChangeMelody;
+            //sound up
+            screens[i].buttons[4].isPressable=bSoundUpCheck;
+            screens[i].buttons[4].press=bSoundUpChange;
+            //sound down
+            screens[i].buttons[5].isPressable=bSoundDownCheck;
+            screens[i].buttons[5].press=bSoundDownChange;
+            //lock
+
+        }
+        if(strcmp("intentions",screens[i].name)==0)
+        {
+            //kill
+            screens[i].buttons[1].isPressable=bReasonCheck;
+            screens[i].buttons[1].getState=bReasonGetState;
+            screens[i].buttons[1].press=bReasonChange;
+            //create
+            screens[i].buttons[2].isPressable=bReasonCheck;
+            screens[i].buttons[2].getState=bReasonGetState;
+            screens[i].buttons[2].press=bReasonChange;
+            //fight
+            screens[i].buttons[3].isPressable=bReasonCheck;
+            screens[i].buttons[3].getState=bReasonGetState;
+            screens[i].buttons[3].press=bReasonChange;
+            //sex
+            screens[i].buttons[4].isPressable=bReasonCheck;
+            screens[i].buttons[4].getState=bReasonGetState;
+            screens[i].buttons[4].press=bReasonChange;
+            //destroy
+            screens[i].buttons[5].isPressable=bReasonCheck;
+            screens[i].buttons[5].getState=bReasonGetState;
+            screens[i].buttons[5].press=bReasonChange;
+
+        }
+
+    }
 }
 void AtlGui_t::TurnOnScreen()
 {
@@ -74,7 +140,10 @@ void AtlGui_t::AddSuspendScreenTimer(int sec_to_add)
     if(is_screen_suspended)
         return;
     if(is_suspend_timer_run)
+    {
+        this->screen_suspend_timer=0;
         return;
+    }
     screen_suspend_timer+=sec_to_add;
     Uart.Printf("AtlGui_t::AddSuspendScreenTimer  screen_suspend_timer %d \r",screen_suspend_timer);
     if(screen_suspend_timer>=SUSPEND_SCREEN_SEC)
@@ -138,8 +207,12 @@ void AtlGui_t::RenderFullScreen(int screen_id)
         }//не рисовать кнопки, которых нет
     }
 }
-void AtlGui_t::ButtonIsReleased(int button_id)
+void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
 {
+
+    int kmode=-1;
+    if(Type==kePress)
+        kmode=0;
     is_suspend_timer_run=false;
     if(is_screen_suspended)
     {
@@ -160,7 +233,7 @@ void AtlGui_t::ButtonIsReleased(int button_id)
                 //если геттер успешен,и можем что-то сделать,вызываем сеттер кнопки
                 if( screens[current_state].buttons[button_id].press!= nullptr)
                 {
-                   int new_b_state= screens[current_state].buttons[button_id].press(current_state,button_id);
+                   int new_b_state= screens[current_state].buttons[button_id].press(current_state,button_id,kmode);
                    RenderSingleButton(current_state,button_id,new_b_state);
                 }
                 else
@@ -169,11 +242,18 @@ void AtlGui_t::ButtonIsReleased(int button_id)
                 }
                 //вызываем смену крана,если есть
                 Uart.Printf("CallStateScreen %d \r",screens[current_state].screen_switch[button_id]);
-                  if( screens[current_state].screen_switch[button_id]>=0  )
+                  if( screens[current_state].screen_switch[button_id]!=nullptr  )
                   {
-                      Uart.Printf("!!!!CallStateScreen %d \r",screens[current_state].screen_switch[button_id]);
+                      Uart.Printf("!!!!CallStateScreen %s \r",screens[current_state].screen_switch[button_id]);
                       // вызываем новое состояние экрана, отрисовываем
-                      CallStateScreen(screens[current_state].screen_switch[button_id]);
+                      int new_scrid=AtlGui.GetScreenIndxFromName((char*)screens[current_state].screen_switch[button_id]);
+                      if(new_scrid>=0)
+                          CallStateScreen(new_scrid);
+                      else
+                      {
+                          Uart.Printf("ERROR in AtlGui_t::ButtonIsReleased on GetScreenIndxFromName\r");
+                          return;
+                      }
                       //вызываем фуркцию логики смены крана
                       if(screens[current_state].fptr_gui_state_array_switch_functions[button_id]!= NULL)
                           screens[current_state].fptr_gui_state_array_switch_functions[button_id]();
@@ -184,11 +264,20 @@ void AtlGui_t::ButtonIsReleased(int button_id)
         else return;// нельзя вызвать смену крана кнопкой, которой нет! хотя логика позволяет
      }
 }
+int AtlGui_t::GetScreenIndxFromName(char* name)
+{
+    for(int i=0;i<screens_number;i++)
+        if(strcmp(name,screens[i].name)==0)
+            return i;
+    return -1;
+}
+
 void AtlGui_t::ButtonIsClicked(int button_id)
 {
     if(is_screen_suspended)
         return;
     is_suspend_timer_run=true;
+
     if(is_locked && button_id!=6)
         return;
     //вызываем геттер кнопки
@@ -270,7 +359,7 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
     //not
     //pressed
 
-//#define BUTTON_NOT_INITED 0
+//#define BUTTON_NOT_PRESSED 0
 //#define BUTTON_NORMAL 1
 //#define BUTTON_ENABLED 2
 //#define BUTTON_DISABLED 3
@@ -290,7 +379,7 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
             strcat(bmp_filename,"enabled");
         else if(button_state==BUTTON_NORMAL)
             strcat(bmp_filename,"normal");
-        else if(button_state==BUTTON_NOT_INITED)
+        else if(button_state==BUTTON_NOT_PRESSED)
             strcat(bmp_filename,"not");
         else if(button_state==BUTTON_PRESSED)
             strcat(bmp_filename,"pressed");
