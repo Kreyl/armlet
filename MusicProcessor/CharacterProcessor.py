@@ -22,7 +22,7 @@ from Settings import CHARACTER_ID_START, CHARACTER_IDS
 GAME_ID = 584
 
 SHORT_NAME_COLUMN_TITLE = u'Имя на браслете'
-LONG_NAME_COLUMN_TITLE = u'Имя латиницей'
+LONG_NAME_COLUMN_TITLE = u'Имя и фамилия латиницей'
 
 CHARACTERS_CSV = 'Characters.csv'
 
@@ -62,7 +62,19 @@ def verifyCharacters(characters):
 def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
     if not isfile(fileName):
         return {}
-    ret = dict((shortName, (int(number), longName)) for (number, shortName, longName) in readCSV(fileName))
+    data = tuple(tuple(s.strip() for s in d) for d in readCSV(fileName))
+    numbers = set()
+    shortNames = set()
+    longNames = set()
+    ret = {}
+    for (number, shortName, longName) in readCSV(fileName):
+        assert number not in numbers, "Duplicate character ID %s" % number
+        assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
+        assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
+        numbers.add(number)
+        shortNames.add(shortName.lower())
+        longNames.add(longName.lower())
+    ret = dict((shortName, (int(number), longName)) for (number, shortName, longName) in data)
     verifyCharacters(ret)
     return ret
 
@@ -95,6 +107,13 @@ def loadCharacters():
         longNameColumnID = header.index(LONG_NAME_COLUMN_TITLE)
         allRoles = sorted(allRoles[1:])
         ret = tuple((str(shortName.strip()), str(longName.strip())) for (shortName, longName) in ((row[shortNameColumnID], row[longNameColumnID]) for row in allRoles) if shortName)
+        shortNames = set()
+        longNames = set()
+        for (shortName, longName) in ret:
+            assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
+            assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
+            shortNames.add(shortName.lower())
+            longNames.add(longName.lower())
         return ret
     except Exception, e:
         print format_exc()
