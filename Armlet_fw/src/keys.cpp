@@ -111,6 +111,6 @@ void Keys_t::AddEvtToQueue(KeyEvtInfo_t Evt) {
     if(App.PThd == nullptr) return;
     chSysLock();
     EvtBuf.Put(&Evt);
-    chEvtSignalI(App.PThd, EVTMASK_KEYS);
+    chEvtSignalI(App.PThd, EVTMSK_KEYS);
     chSysUnlock();
 }
