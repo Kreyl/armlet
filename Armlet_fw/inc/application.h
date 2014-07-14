@@ -18,6 +18,7 @@ enum AppState_t {asIdle, asCurrent};
 
 class App_t {
 public:
+    uint32_t ID=0;
     //bool UseQuartz;
     Thread *PThd;
     AppState_t State;

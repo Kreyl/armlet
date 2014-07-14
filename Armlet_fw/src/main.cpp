@@ -63,9 +63,8 @@ void Init() {
 
     SD.Init();
     // Read config
-    uint32_t ID=0;
-    iniReadUint32("Radio", "ID", "settings.ini", &ID);
-    Uart.Printf("\rID=%u", ID);
+    iniReadUint32("Radio", "ID", "settings.ini", &App.ID);
+    Uart.Printf("\rID=%u", App.ID);
 
 //    Lcd.Init();
 #ifndef CLEAR_SCREEN_FOR_DEBUG
