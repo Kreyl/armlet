@@ -17,6 +17,7 @@ except ImportError, ex:
 isWindows = system().lower().startswith('win')
 
 GUI_HTML = 'GUI.html'
+
 C_TARGET = 'gui.c'
 
 ENCODING = "Windows-1251"
@@ -36,6 +37,8 @@ C_CONTENT = '''\
  * !!! DO NOT EDIT !!!
  */
 #include "gui.h"
+
+const char* buttons = BUTTONS;
 
 Screen_t screens[] = {
 %s

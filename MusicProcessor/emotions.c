@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-07-12 04:43:58
+ * Generated at 2014-07-12 13:29:30
  */
 #include "emotions.h"
 
@@ -245,7 +245,7 @@ Reason_t reasons[] = {
  /* 135 */ { "CComes", 0, 0 },
  /* 136 */ { "ZCampbell", 0, 0 },
  /* 137 */ { "MReed", 0, 0 },
- /* 138 */ { "CGreenhall", 0, 0 },
+ /* 138 */ { "KGreenhall", 0, 0 },
 	// end of characters
  /* 139 */ { "r139", 99, 1 },	/* wrong */
  /* 140 */ { "r140", 99, 1 },	/* wrong */

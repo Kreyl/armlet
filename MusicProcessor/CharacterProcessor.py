@@ -23,6 +23,9 @@ GAME_ID = 584
 
 SHORT_NAME_COLUMN_TITLE = u'Имя на браслете'
 LONG_NAME_COLUMN_TITLE = u'Имя и фамилия латиницей'
+SEX_COLUMN_TITLE = u'Пол персонажа'
+
+SEXES = {u'мужчина': 'Mr', u'женщина': 'Ms'}
 
 CHARACTERS_CSV = 'Characters.csv'
 
@@ -105,16 +108,24 @@ def loadCharacters():
         header = allRoles[0]
         shortNameColumnID = header.index(SHORT_NAME_COLUMN_TITLE)
         longNameColumnID = header.index(LONG_NAME_COLUMN_TITLE)
+        sexColumnID = header.index(SEX_COLUMN_TITLE)
         allRoles = sorted(allRoles[1:])
-        ret = tuple((str(shortName.strip()), str(longName.strip())) for (shortName, longName) in ((row[shortNameColumnID], row[longNameColumnID]) for row in allRoles) if shortName)
+        ret = []
         shortNames = set()
         longNames = set()
-        for (shortName, longName) in ret:
+        for (shortName, longName, sex) in ((row[shortNameColumnID], row[longNameColumnID], row[sexColumnID]) for row in allRoles):
+            if not shortName:
+                continue
+            shortName = str(shortName.strip())
+            sex = sex.strip()
+            assert sex in SEXES, "%s: unknown sex: %s" % (shortName, repr(sex))
+            longName = '%s. %s' % (SEXES[sex], str(longName.strip()))
             assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
             assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
             shortNames.add(shortName.lower())
             longNames.add(longName.lower())
-        return ret
+            ret.append((shortName, longName))
+        return tuple(ret)
     except Exception, e:
         print format_exc()
         print "ERROR fetching data, using current version: %s" % e
