@@ -10,7 +10,7 @@ void CallReasonToMain();
 //extern int buttonIsPressable(int, int);
 //extern int buttonGetState(int, int);
 //extern int buttonPress(int, int);
-
+//press_mode 0- keRelease  2 - keLongPress 3 - keRepeat
 //int buttonIsPressable(int, int);
 //int buttonGetState(int , int );
 //int buttonPress(int, int);

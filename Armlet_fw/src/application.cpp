@@ -122,9 +122,17 @@ static inline void KeysHandler() { // FIXME
         {
             AtlGui.ButtonIsClicked(Evt.KeyID[0]);
         }
-        if(Evt.Type==keRelease)
+        else if(Evt.Type==keRelease)
         {
             AtlGui.ButtonIsReleased(Evt.KeyID[0],keRelease);
+        }
+        else if(Evt.Type==keLongPress)
+        {
+            AtlGui.ButtonIsReleased(Evt.KeyID[0],keLongPress);
+        }
+        else if(Evt.Type==keRepeat)
+        {
+            AtlGui.ButtonIsReleased(Evt.KeyID[0],keRepeat);
         }
 
         //                if(Keys.Status[i].State == ksReleased) {
