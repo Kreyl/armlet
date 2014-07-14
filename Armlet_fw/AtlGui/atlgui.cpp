@@ -83,6 +83,8 @@ void AtlGui_t::Init()
             screens[i].buttons[5].isPressable=bSoundDownCheck;
             screens[i].buttons[5].press=bSoundDownChange;
             //lock
+            screens[i].buttons[6].isPressable=bLockCheck;
+            screens[i].buttons[6].press=bLockChange;
 
         }
         if(strcmp("intentions",screens[i].name)==0)
@@ -107,6 +109,9 @@ void AtlGui_t::Init()
             screens[i].buttons[5].isPressable=bReasonCheck;
             screens[i].buttons[5].getState=bReasonGetState;
             screens[i].buttons[5].press=bReasonChange;
+
+            screens[i].buttons[6].isPressable=bLockCheck;
+            screens[i].buttons[6].press=bLockChange;
 
         }
 
@@ -145,7 +150,7 @@ void AtlGui_t::AddSuspendScreenTimer(int sec_to_add)
         return;
     }
     screen_suspend_timer+=sec_to_add;
-    Uart.Printf("AtlGui_t::AddSuspendScreenTimer  screen_suspend_timer %d \r",screen_suspend_timer);
+   // Uart.Printf("AtlGui_t::AddSuspendScreenTimer  screen_suspend_timer %d \r",screen_suspend_timer);
     if(screen_suspend_timer>=SUSPEND_SCREEN_SEC)
         TurnOffScreen();
 };
@@ -211,16 +216,22 @@ void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
 {
 
     int kmode=-1;
-    if(Type==kePress)
+    if(Type==keRelease)
         kmode=0;
+    if(Type==keLongPress)
+        kmode=2;
+    if(Type==keRepeat)
+        kmode=3;
+
     is_suspend_timer_run=false;
     if(is_screen_suspended)
     {
         this->TurnOnScreen();
         return;
     }
-    if(is_locked && button_id!=6)
+    if(is_locked && button_id!=6)//если не лок и залочена - вернуться
         return;
+
     if(current_state>=0 && current_state<screens_number)
     {
         if( screens[current_state].buttons[button_id].isPressable!= nullptr)
@@ -234,6 +245,8 @@ void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
                 if( screens[current_state].buttons[button_id].press!= nullptr)
                 {
                    int new_b_state= screens[current_state].buttons[button_id].press(current_state,button_id,kmode);
+                   if(new_b_state!=BUTTON_NO_REDRAW)
+                       //return mb???
                    RenderSingleButton(current_state,button_id,new_b_state);
                 }
                 else
@@ -287,7 +300,7 @@ void AtlGui_t::ButtonIsClicked(int button_id)
         if( screens[current_state].buttons[button_id].isPressable!= nullptr)
         {
            int button_state_val=screens[current_state].buttons[button_id].isPressable(current_state,button_id);//sptr_button_state[button_id]->fptr_on_press());
-           Uart.Printf("button_state_val %d\r",button_state_val);
+           Uart.Printf("button_state_val3 %d\r",button_state_val);
            if(button_state_val==BUTTON_PRESSABLE)
            {
                Uart.Printf("button%d on screen %d is pressable %d\r",button_id,current_state );

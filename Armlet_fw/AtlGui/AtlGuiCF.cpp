@@ -60,6 +60,8 @@ int bSoundDownCheck(int screen_id, int button_id)
 }
 int bSoundUpChange(int screen_id, int button_id ,int press_mode)
 {
+    if(press_mode!=0)
+        return BUTTON_NO_REDRAW;
     //ничего не чекает - все проверки в соседнем вызове
     current_volume_lvl+=SOUND_STEP;
     Sound.SetVolume(current_volume_lvl);
@@ -68,6 +70,8 @@ int bSoundUpChange(int screen_id, int button_id ,int press_mode)
 }
 int bSoundDownChange(int screen_id, int button_id ,int press_mode)
 {
+    if(press_mode!=0)
+        return BUTTON_NO_REDRAW;
    // buttonIsPressable(1,10);
     current_volume_lvl-=SOUND_STEP;
     Sound.SetVolume(current_volume_lvl);
@@ -138,6 +142,8 @@ int bReasonGetState(int screen_id, int button_id)
 }
 int bReasonChange(int screen_id, int button_id ,int press_mode)
 {
+    if(press_mode!=0)
+        return BUTTON_NO_REDRAW;
    // Uart.Printf("CALL bReasonChange \r");
     //button is available, so just get it
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
@@ -226,6 +232,10 @@ int bChangeMelodyCheck(int screen_id, int button_id)
 }
 int bChangeMelody(int screen_id, int button_id,int press_mode)
 {
+    Uart.Printf("bChangeMelodyCheck press_mode%d \r",press_mode);
+    if(press_mode!=0)
+
+        return BUTTON_NO_REDRAW;
     Sound.Stop();
     return bChangeMelodyCheck(screen_id,button_id);
     //тут кодзавязан на события в application - там вызывается играть ту же эмоцию, если старая кончилась
@@ -238,7 +248,10 @@ int bLockCheck(int screen_id, int button_id)
 }
 int bLockChange(int screen_id, int button_id ,int press_mode)
 {
+    if(press_mode==2)
     AtlGui.is_locked=!AtlGui.is_locked;
+
+    Uart.Printf("bLockChange press_mode%d islocked%d \r",press_mode,AtlGui.is_locked);
     if(AtlGui.is_locked)
         return BUTTON_ENABLED;
     else

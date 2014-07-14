@@ -23,6 +23,7 @@
 #define BUTTON_PRESSED     4  // желтый
 #define BUTTON_NOT_PRESSED 5  // коричнево-желтый
 #define BUTTON_ERROR       6
+#define BUTTON_NO_REDRAW   7
 
 #define BUTTON_PRESSABLE 1
 #define BUTTON_LOCKED    3
