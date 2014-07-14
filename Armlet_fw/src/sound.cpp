@@ -53,14 +53,14 @@ void Sound_t::ITask() {
     eventmask_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
     // Play new request
     if(EvtMsk & VS_EVT_COMPLETED) {
-//        Uart.Printf("cmp\r");
+//        Uart.Printf("\rcmp");
         AddCmd(VS_REG_MODE, 0x0004);    // Soft reset
         if(IFilename != NULL) IPlayNew();
         else if(IPThd != nullptr) chEvtSignal(IPThd, EVTMASK_PLAY_ENDS);  // Raise event if nothing to play
     }
     // Stop request
     else if(EvtMsk & VS_EVT_STOP) {
-//        Uart.Printf("Stop\r");
+//        Uart.Printf("\rStop");
         PrepareToStop();
     }
     // Data read request
@@ -74,7 +74,6 @@ void Sound_t::ITask() {
         }
         // Check if was EOF or if error occured during reading. Do not do it if EOF occured during reading.
         if((rslt != FR_OK) or EofAtStart) {
-//            Uart.Printf("C");
             PrepareToStop();
         }
         else StartTransmissionIfNotBusy();
@@ -116,18 +115,8 @@ void Sound_t::Init() {
     Rst_Hi();
     Clk.MCO1Enable(mco1HSE, mcoDiv1);   // Only after reset, as pins are grounded when Rst is Lo
     chThdSleepMicroseconds(45);
-
     // ==== DREQ IRQ ====
     IDreq.Setup(VS_GPIO, VS_DREQ, ttRising);
-
-//   CmdWrite(VS_REG_MODE, (VS_SM_SDInew | VS_SM_RESET));    // Perform software reset
-//    AddCmd(VS_REG_MODE, VS_MODE_REG_VALUE);
-//    AddCmd(VS_REG_CLOCKF, 0x8000 + (12000000/2000));
-//    AddCmd(VS_REG_VOL, ((IAttenuation * 256) + IAttenuation));
-//    CmdWrite(VS_REG_MIXERVOL, (VS_SMV_ACTIVE | VS_SMV_GAIN2));
-//    CmdWrite(VS_REG_RECCTRL, VS_SARC_DREQ512);    // VS1103 only
-    //chThdSleepMilliseconds(45);
-
     // ==== Thread ====
     PThread = chThdCreateStatic(waSoundThread, sizeof(waSoundThread), NORMALPRIO, (tfunc_t)SoundThread, NULL);
     //StartTransmissionIfNotBusy();   // Send init commands
@@ -140,19 +129,19 @@ void Sound_t::IPlayNew() {
 
     FRESULT rslt;
     // Open new file
-    Uart.Printf("Play %S\r", IFilename);
+    Uart.Printf("\rPlay %S", IFilename);
     rslt = f_open(&IFile, IFilename, FA_READ+FA_OPEN_EXISTING);
     IFilename = NULL;
     if (rslt != FR_OK) {
-        if (rslt == FR_NO_FILE) Uart.Printf("%S: not found\r", IFilename);
-        else Uart.Printf("OpenFile error: %u", rslt);
+        if (rslt == FR_NO_FILE) Uart.Printf("\r%S: not found", IFilename);
+        else Uart.Printf("\rOpenFile error: %u", rslt);
         Stop();
         return;
     }
     // Check if zero file
     if (IFile.fsize == 0) {
         f_close(&IFile);
-        Uart.Printf("Empty file\r");
+        Uart.Printf("\rEmpty file");
         Stop();
         return;
     }
