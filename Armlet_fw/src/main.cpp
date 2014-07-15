@@ -24,6 +24,7 @@
 #include "mesh_lvl.h"
 
 #include "ff.h"
+#include "flashloader_support.h"
 
 #include "application.h"
 #include "atlantis_music_tree.h"
@@ -51,6 +52,10 @@ int main() {
     Init();
     // Report problem with clock if any
     if(ClkResult) Uart.Printf("Clock failure\r");
+
+    Bootloader.Iwdt_enable();
+    Bootloader.JumpToAddr(SYSTEM_MEMORY_ADDR);
+
     while(TRUE) {
         chThdSleepMilliseconds(2700);
 //        Uart.Printf("\r_abW");
@@ -92,7 +97,7 @@ void Init() {
 
     Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
 
-    PillMgr.Init();
+//    PillMgr.Init();
 
 //    App.Init();
 //    AtlGui.Init();
@@ -101,7 +106,7 @@ void Init() {
 //    Mesh.Init(ID);
 
     // Common Timers
-    chSysLock();
-    chVTSetI(&App.TmrPillCheck, MS2ST(T_PILL_CHECK_MS),    TmrPillCheckCallback, nullptr);
-    chSysUnlock();
+//    chSysLock();
+//    chVTSetI(&App.TmrPillCheck, MS2ST(T_PILL_CHECK_MS),    TmrPillCheckCallback, nullptr);
+//    chSysUnlock();
 }
