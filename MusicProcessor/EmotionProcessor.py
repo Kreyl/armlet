@@ -145,14 +145,6 @@ EMOTION_PATCHES = {
     'sex': 'seks'
 }
 
-WRONG = 'wrong'
-MASTER = 'master'
-SILENCE = 'silence'
-TUMAN = 'tuman'
-SMERT = "smert'"
-MERTV = 'mertvyak'
-ADDITIONAL_EMOTIONS = (WRONG, MASTER, SILENCE, TUMAN, SMERT, MERTV)
-
 def firstCapital(s):
     return '%s%s' % (s[0].upper(), s[1:])
 
@@ -170,6 +162,15 @@ def convertTitle(s):
 def convertEmotion(s):
     e = convertTitle(s).lower()
     return EMOTION_PATCHES.get(e, e)
+
+WRONG = convertEmotion(u'неверно')
+MASTER = convertEmotion(u'мастерка')
+SILENCE = convertEmotion(u'тишина')
+TUMAN = convertEmotion(u'туман')
+SMERT = convertEmotion(u'смерть')
+MERTV = convertEmotion(u'мертвяк')
+HEARTBEAT = convertEmotion(u'сердцебиение')
+ADDITIONAL_EMOTIONS = (WRONG, MASTER, SILENCE, TUMAN, SMERT, MERTV, HEARTBEAT)
 
 EMOTION_GUESS_RANGE = 3
 EMOTION_GUESS_MAX_PROPOSALS = 9
@@ -266,7 +267,7 @@ def processReasons(emotions):
     def reserveReason(rid):
         return (rid, RESERVED_REASON % rid, MAX_WEIGHT, emotions[WRONG], WRONG) # ToDo: Default reserve to fon?
     def mistReason(rid):
-        return (rid, MIST_REASON % rid, MAX_WEIGHT, emotions[TUMAN], TUMAN)
+        return (rid, MIST_REASON % rid, 0, emotions['fon'], 'fon')
     def emotionFixReason(eid, emotion):
         return (eid + EMOTION_FIX_ID_START, EMOTION_FIX_REASON % firstCapital(emotion), EMOTION_FIX_WEIGHT, eid, emotion)
     stuffing0 = (reserveReason(0),)
