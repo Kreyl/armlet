@@ -18,7 +18,7 @@
 #include "infrared.h"
 #include "cmd_uart.h"
 #include "power.h"
-#include "pill.h"
+#include "pill_mgr.h"
 
 #include "radio_lvl1.h"
 #include "mesh_lvl.h"
@@ -84,7 +84,6 @@ void Init() {
 //    IR.RxInit();
 //    Power.Init();
     //Power.Task();
-//    PillInit();
 
 //    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
 
@@ -93,9 +92,16 @@ void Init() {
 
     Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
 
+    PillMgr.Init();
+
 //    App.Init();
 //    AtlGui.Init();
 
 //    rLevel1.Init(ID);
 //    Mesh.Init(ID);
+
+    // Common Timers
+    chSysLock();
+    chVTSetI(&App.TmrPillCheck, MS2ST(T_PILL_CHECK_MS),    TmrPillCheckCallback, nullptr);
+    chSysUnlock();
 }
