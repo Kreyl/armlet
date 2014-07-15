@@ -31,7 +31,7 @@ except ImportError, ex:
     distance = None
     print "%s: %s\nWARNING: Emotion guessing will not be available.\bPlease install Levenshtein v0.11.2 or later: https://pypi.python.org/pypi/python-Levenshtein\n" % (ex.__class__.__name__, ex)
 
-from Settings import LOCATION_ID_START, LOCATION_IDS, CHARACTER_ID_START, CHARACTER_IDS, INTENTION_ID_START, INTENTION_IDS, EMOTION_FIX_ID_START, EMOTION_FIX_IDS
+from Settings import LOCATION_ID_START, LOCATION_IDS, MIST_ID_START, MIST_IDS, CHARACTER_ID_START, CHARACTER_IDS, INTENTION_ID_START, INTENTION_IDS, EMOTION_FIX_ID_START, EMOTION_FIX_IDS
 
 from CharacterProcessor import CHARACTERS_CSV, currentTime, getFileName, updateCharacters
 
@@ -73,6 +73,10 @@ Reason_t reasons[] = {
 \t// Locations
 %%s
 \t// end of locations
+%%s
+\t// Mist sources
+%%s
+\t// end of mist sources
 %%s
 \t// Characters
 %%s
@@ -122,6 +126,8 @@ MAX_WEIGHT = 99
 
 RESERVED_REASON = 'r%03d'
 
+MIST_REASON = 'm%02d'
+
 EMOTION_FIX_REASON = 'x%s'
 
 EMOTION_FIX_WEIGHT = 5
@@ -143,7 +149,9 @@ WRONG = 'wrong'
 MASTER = 'master'
 SILENCE = 'silence'
 TUMAN = 'tuman'
-ADDITIONAL_EMOTIONS = (WRONG, MASTER, SILENCE, TUMAN)
+SMERT = 'smert\''
+MERTV = 'mertvyak'
+ADDITIONAL_EMOTIONS = (WRONG, MASTER, SILENCE, TUMAN, SMERT, MERTV)
 
 def firstCapital(s):
     return '%s%s' % (s[0].upper(), s[1:])
@@ -257,17 +265,21 @@ def processCharacters(fileName = getFileName(CHARACTERS_CSV)):
 def processReasons(emotions):
     def reserveReason(rid):
         return (rid, RESERVED_REASON % rid, MAX_WEIGHT, emotions[WRONG], WRONG) # ToDo: Default reserve to fon?
+    def mistReason(rid):
+        return (rid, MIST_REASON % rid, MAX_WEIGHT, emotions[TUMAN], TUMAN)
     def emotionFixReason(eid, emotion):
         return (eid + EMOTION_FIX_ID_START, EMOTION_FIX_REASON % firstCapital(emotion), EMOTION_FIX_WEIGHT, eid, emotion)
     stuffing0 = (reserveReason(0),)
     locations =  processLocations(emotions)
-    stuffing1 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations), CHARACTER_ID_START))
+    stuffing1 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations), MIST_ID_START))
+    mists = tuple(mistReason(rid) for rid in MIST_IDS)
+    stuffing2 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(mists), CHARACTER_ID_START))
     characters = processCharacters()
-    stuffing2 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(characters), INTENTION_ID_START))
+    stuffing3 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(mists) + len(stuffing2) + len(characters), INTENTION_ID_START))
     intentions =  processIntentions(emotions)
-    stuffing3 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(characters) + len(stuffing2) + len(intentions), EMOTION_FIX_ID_START))
+    stuffing4 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(mists) + len(stuffing2) + len(characters) + len(stuffing3) + len(intentions), EMOTION_FIX_ID_START))
     emotionFixes = tuple(emotionFixReason(eid, emotion) for (eid, emotion) in sorted((eid, emotion) for (emotion, eid) in emotions.iteritems()))
-    reasons = (stuffing0, locations, stuffing1, characters, stuffing2, intentions, stuffing3, emotionFixes)
+    reasons = (stuffing0, locations, stuffing1, mists, stuffing2, characters, stuffing3, intentions, stuffing4, emotionFixes)
     checkSets = (emotions,) + tuple(set(r[1].lower() for r in reason) for reason in reasons)
     for i in xrange(0, len(checkSets)):
         for rs in checkSets[:i]:

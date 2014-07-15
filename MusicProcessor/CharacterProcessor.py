@@ -119,7 +119,14 @@ def loadCharacters():
             shortName = str(shortName.strip())
             sex = sex.strip()
             assert sex in SEXES, "%s: unknown sex: %s" % (shortName, repr(sex))
-            longName = '%s. %s' % (SEXES[sex], str(longName.strip()))
+            words = str(longName.strip()).split()
+            prefix = words[0]
+            if prefix.lower() == 'no.':
+                longName = ' '.join(words[1:])
+            elif prefix.endswith('.') or len(prefix) <= 2:
+                longName = ' '.join(words)
+            else:
+                longName = '%s. %s' % (SEXES[sex], ' '.join(words))
             assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
             assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
             shortNames.add(shortName.lower())
