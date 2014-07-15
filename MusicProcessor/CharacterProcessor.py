@@ -110,10 +110,12 @@ def loadCharacters():
         longNameColumnID = header.index(LONG_NAME_COLUMN_TITLE)
         sexColumnID = header.index(SEX_COLUMN_TITLE)
         allRoles = sorted(allRoles[1:])
+        data = ((row[shortNameColumnID], row[longNameColumnID], row[sexColumnID]) for row in allRoles[1:])
+        data = sorted(data, key = lambda (shortName, longName, sex): longName.split()[-1:])
         ret = []
         shortNames = set()
         longNames = set()
-        for (shortName, longName, sex) in ((row[shortNameColumnID], row[longNameColumnID], row[sexColumnID]) for row in allRoles):
+        for (shortName, longName, sex) in data:
             if not shortName:
                 continue
             shortName = str(shortName.strip())

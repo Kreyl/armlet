@@ -149,7 +149,7 @@ WRONG = 'wrong'
 MASTER = 'master'
 SILENCE = 'silence'
 TUMAN = 'tuman'
-SMERT = 'smert\''
+SMERT = "smert'"
 MERTV = 'mertvyak'
 ADDITIONAL_EMOTIONS = (WRONG, MASTER, SILENCE, TUMAN, SMERT, MERTV)
 
