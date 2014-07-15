@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-07-09 01:23:27
+ * Generated at 2014-07-15 04:27:07
  */
 #include "emotions.h"
 
@@ -19,85 +19,87 @@ Emotion_t emotions[] = {
  /*  2 */     { "master", 1, 0, -1, -1 },
  /*  3 */     { "silence", 1, 0, -1, -1 },
  /*  4 */     { "tuman", 1, 0, -1, -1 },
- /*  5 */     { "negativ", 1, 0, -1, -1 },
- /*  6 */         { "ravnodushie", 1, 5, -1, -1 },
- /*  7 */             { "skuka", 1, 6, -1, -1 },
- /*  8 */                 { "apatiya", 1, 7, -1, -1 },
- /*  9 */                     { "depressiya", 1, 8, -1, -1 },
- /* 10 */         { "zlost'", 1, 5, -1, -1 },
- /* 11 */             { "gnev", 1, 10, -1, -1 },
- /* 12 */                 { "yarost'", 1, 11, -1, -1 },
- /* 13 */             { "razdrazhenie", 1, 10, -1, -1 },
- /* 14 */         { "grust'", 1, 5, -1, -1 },
- /* 15 */             { "toska", 1, 14, -1, -1 },
- /* 16 */                 { "obrechennost'", 1, 15, -1, -1 },
- /* 17 */                 { "otchayanie", 1, 15, -1, -1 },
- /* 18 */         { "neuverennost'", 1, 5, -1, -1 },
- /* 19 */             { "ozabochennost'", 1, 18, -1, -1 },
- /* 20 */                 { "napryazhennost'", 1, 19, -1, -1 },
- /* 21 */                     { "isterika", 1, 20, -1, -1 },
- /* 22 */             { "somnenie", 1, 18, -1, -1 },
- /* 23 */         { "trevozhnost'", 1, 5, -1, -1 },
- /* 24 */             { "strah", 1, 23, -1, -1 },
- /* 25 */                 { "uzhas", 1, 24, -1, -1 },
- /* 26 */                     { "panika", 1, 25, -1, -1 },
- /* 27 */                         { "fobiya", 1, 26, -1, -1 },
- /* 28 */                         { "paranojya", 1, 26, -1, -1 },
- /* 29 */         { "nepriyazn'", 1, 5, -1, -1 },
- /* 30 */             { "nenavist'", 1, 29, -1, -1 },
- /* 31 */             { "otvraschenie", 1, 29, -1, -1 },
- /* 32 */             { "prezrenie", 1, 29, -1, -1 },
- /* 33 */         { "neudovletvorennost'", 1, 5, -1, -1 },
- /* 34 */         { "sozhalenie", 1, 5, -1, -1 },
- /* 35 */             { "styid", 1, 34, -1, -1 },
- /* 36 */     { "razrushenie", 1, 0, -1, -1 },
- /* 37 */     { "draka", 1, 0, -1, -1 },
- /* 38 */     { "ubijstvo", 1, 0, -1, -1 },
- /* 39 */     { "pozitiv", 1, 0, -1, -1 },
- /* 40 */         { "vesel'e", 1, 39, -1, -1 },
- /* 41 */             { "radost'", 1, 40, -1, -1 },
- /* 42 */                 { "vostorg", 1, 41, -1, -1 },
- /* 43 */         { "dovol'stvo", 1, 39, -1, -1 },
- /* 44 */             { "gordost'", 1, 43, -1, -1 },
- /* 45 */             { "udovletvorenie", 1, 43, -1, -1 },
- /* 46 */         { "lyubopyitstvo", 1, 39, -1, -1 },
- /* 47 */             { "interes", 1, 46, -1, -1 },
- /* 48 */             { "uvlechennost'", 1, 46, -1, -1 },
- /* 49 */                 { "azart", 1, 48, -1, -1 },
- /* 50 */                 { "voodushevlenie", 1, 48, -1, -1 },
- /* 51 */                     { "tseleustremlennost'", 1, 50, -1, -1 },
- /* 52 */                     { "otvaga", 1, 50, -1, -1 },
- /* 53 */                     { "reshimost'", 1, 50, -1, -1 },
- /* 54 */                 { "vdohnovenie", 1, 48, -1, -1 },
- /* 55 */         { "priyazn'", 1, 39, -1, -1 },
- /* 56 */             { "simpatiya", 1, 55, -1, -1 },
- /* 57 */                 { "privyazannost'", 1, 56, -1, -1 },
- /* 58 */                     { "lyubov'", 1, 57, -1, -1 },
- /* 59 */                 { "vozhdelenie", 1, 56, -1, -1 },
- /* 60 */             { "umilenie", 1, 55, -1, -1 },
- /* 61 */         { "nadezhda", 1, 39, -1, -1 },
- /* 62 */             { "predvkushenie", 1, 61, -1, -1 },
- /* 63 */                 { "vera", 1, 62, -1, -1 },
- /* 64 */                 { "uverennost'", 1, 62, -1, -1 },
- /* 65 */         { "pokoj", 1, 39, -1, -1 },
- /* 66 */             { "umirotvorenie", 1, 65, -1, -1 },
- /* 67 */             { "nostal'giya", 1, 65, -1, -1 },
- /* 68 */         { "soperezhivanie", 1, 39, -1, -1 },
- /* 69 */             { "sostradanie", 1, 68, -1, -1 },
- /* 70 */     { "sozidanie", 1, 0, -1, -1 },
- /* 71 */     { "seks", 1, 0, -1, -1 },
- /* 72 */     { "zhelanie", 1, 0, -1, -1 },
- /* 73 */         { "vlechenie", 1, 72, -1, -1 },
- /* 74 */             { "strast'", 1, 73, -1, -1 },
- /* 75 */                 { "oderzhimost'", 1, 74, -1, -1 },
- /* 76 */                     { "maniya", 1, 75, -1, -1 },
- /* 77 */         { "zainteresovannost'", 1, 72, -1, -1 },
- /* 78 */     { "zavisimost'", 1, 0, -1, -1 },
- /* 79 */     { "duhovnoe", 1, 0, -1, -1 },
- /* 80 */         { "trans", 1, 79, -1, -1 },
- /* 81 */         { "meditatsiya", 1, 79, -1, -1 },
- /* 82 */         { "ekzal'tatsiya", 1, 79, -1, -1 },
- /* 83 */         { "prosvetlenie", 1, 79, -1, -1 },
+ /*  5 */     { "smert'", 1, 0, -1, -1 },
+ /*  6 */     { "mertvyak", 1, 0, -1, -1 },
+ /*  7 */     { "negativ", 1, 0, -1, -1 },
+ /*  8 */         { "ravnodushie", 1, 7, -1, -1 },
+ /*  9 */             { "skuka", 1, 8, -1, -1 },
+ /* 10 */                 { "apatiya", 1, 9, -1, -1 },
+ /* 11 */                     { "depressiya", 1, 10, -1, -1 },
+ /* 12 */         { "zlost'", 1, 7, -1, -1 },
+ /* 13 */             { "gnev", 1, 12, -1, -1 },
+ /* 14 */                 { "yarost'", 1, 13, -1, -1 },
+ /* 15 */             { "razdrazhenie", 1, 12, -1, -1 },
+ /* 16 */         { "grust'", 1, 7, -1, -1 },
+ /* 17 */             { "toska", 1, 16, -1, -1 },
+ /* 18 */                 { "obrechennost'", 1, 17, -1, -1 },
+ /* 19 */                 { "otchayanie", 1, 17, -1, -1 },
+ /* 20 */         { "neuverennost'", 1, 7, -1, -1 },
+ /* 21 */             { "ozabochennost'", 1, 20, -1, -1 },
+ /* 22 */                 { "napryazhennost'", 1, 21, -1, -1 },
+ /* 23 */                     { "isterika", 1, 22, -1, -1 },
+ /* 24 */             { "somnenie", 1, 20, -1, -1 },
+ /* 25 */         { "trevozhnost'", 1, 7, -1, -1 },
+ /* 26 */             { "strah", 1, 25, -1, -1 },
+ /* 27 */                 { "uzhas", 1, 26, -1, -1 },
+ /* 28 */                     { "panika", 1, 27, -1, -1 },
+ /* 29 */                         { "fobiya", 1, 28, -1, -1 },
+ /* 30 */                         { "paranojya", 1, 28, -1, -1 },
+ /* 31 */         { "nepriyazn'", 1, 7, -1, -1 },
+ /* 32 */             { "nenavist'", 1, 31, -1, -1 },
+ /* 33 */             { "otvraschenie", 1, 31, -1, -1 },
+ /* 34 */             { "prezrenie", 1, 31, -1, -1 },
+ /* 35 */         { "neudovletvorennost'", 1, 7, -1, -1 },
+ /* 36 */         { "sozhalenie", 1, 7, -1, -1 },
+ /* 37 */             { "styid", 1, 36, -1, -1 },
+ /* 38 */     { "razrushenie", 1, 0, -1, -1 },
+ /* 39 */     { "draka", 1, 0, -1, -1 },
+ /* 40 */     { "ubijstvo", 1, 0, -1, -1 },
+ /* 41 */     { "pozitiv", 1, 0, -1, -1 },
+ /* 42 */         { "vesel'e", 1, 41, -1, -1 },
+ /* 43 */             { "radost'", 1, 42, -1, -1 },
+ /* 44 */                 { "vostorg", 1, 43, -1, -1 },
+ /* 45 */         { "dovol'stvo", 1, 41, -1, -1 },
+ /* 46 */             { "gordost'", 1, 45, -1, -1 },
+ /* 47 */             { "udovletvorenie", 1, 45, -1, -1 },
+ /* 48 */         { "lyubopyitstvo", 1, 41, -1, -1 },
+ /* 49 */             { "interes", 1, 48, -1, -1 },
+ /* 50 */             { "uvlechennost'", 1, 48, -1, -1 },
+ /* 51 */                 { "azart", 1, 50, -1, -1 },
+ /* 52 */                 { "voodushevlenie", 1, 50, -1, -1 },
+ /* 53 */                     { "tseleustremlennost'", 1, 52, -1, -1 },
+ /* 54 */                     { "otvaga", 1, 52, -1, -1 },
+ /* 55 */                     { "reshimost'", 1, 52, -1, -1 },
+ /* 56 */                 { "vdohnovenie", 1, 50, -1, -1 },
+ /* 57 */         { "priyazn'", 1, 41, -1, -1 },
+ /* 58 */             { "simpatiya", 1, 57, -1, -1 },
+ /* 59 */                 { "privyazannost'", 1, 58, -1, -1 },
+ /* 60 */                     { "lyubov'", 1, 59, -1, -1 },
+ /* 61 */                 { "vozhdelenie", 1, 58, -1, -1 },
+ /* 62 */             { "umilenie", 1, 57, -1, -1 },
+ /* 63 */         { "nadezhda", 1, 41, -1, -1 },
+ /* 64 */             { "predvkushenie", 1, 63, -1, -1 },
+ /* 65 */                 { "vera", 1, 64, -1, -1 },
+ /* 66 */                 { "uverennost'", 1, 64, -1, -1 },
+ /* 67 */         { "pokoj", 1, 41, -1, -1 },
+ /* 68 */             { "umirotvorenie", 1, 67, -1, -1 },
+ /* 69 */             { "nostal'giya", 1, 67, -1, -1 },
+ /* 70 */         { "soperezhivanie", 1, 41, -1, -1 },
+ /* 71 */             { "sostradanie", 1, 70, -1, -1 },
+ /* 72 */     { "sozidanie", 1, 0, -1, -1 },
+ /* 73 */     { "seks", 1, 0, -1, -1 },
+ /* 74 */     { "zhelanie", 1, 0, -1, -1 },
+ /* 75 */         { "vlechenie", 1, 74, -1, -1 },
+ /* 76 */             { "strast'", 1, 75, -1, -1 },
+ /* 77 */                 { "oderzhimost'", 1, 76, -1, -1 },
+ /* 78 */                     { "maniya", 1, 77, -1, -1 },
+ /* 79 */         { "zainteresovannost'", 1, 74, -1, -1 },
+ /* 80 */     { "zavisimost'", 1, 0, -1, -1 },
+ /* 81 */     { "duhovnoe", 1, 0, -1, -1 },
+ /* 82 */         { "trans", 1, 81, -1, -1 },
+ /* 83 */         { "meditatsiya", 1, 81, -1, -1 },
+ /* 84 */         { "ekzal'tatsiya", 1, 81, -1, -1 },
+ /* 85 */         { "prosvetlenie", 1, 81, -1, -1 },
 };
 
 const int emotions_number = countof(emotions);
@@ -108,13 +110,13 @@ Reason_t reasons[] = {
 	// Locations
  /*   1 */ { "hub", 99, 2 },	/* master */
  /*   2 */ { "uliza", 1, 0 },	/* fon */
- /*   3 */ { "grave", 9, 24 },	/* strah */
- /*   4 */ { "church", 2, 39 },	/* pozitiv */
- /*   5 */ { "kabak", 2, 5 },	/* negativ */
+ /*   3 */ { "grave", 3, 26 },	/* strah */
+ /*   4 */ { "church", 2, 41 },	/* pozitiv */
+ /*   5 */ { "kabak", 2, 7 },	/* negativ */
+ /*   6 */ { "mSource", 9, 26 },	/* strah */
+ /*   7 */ { "mProject", 9, 26 },	/* strah */
+ /*   8 */ { "dead", 99, 6 },	/* mertvyak */
 	// end of locations
- /*   6 */ { "r006", 99, 1 },	/* wrong */
- /*   7 */ { "r007", 99, 1 },	/* wrong */
- /*   8 */ { "r008", 99, 1 },	/* wrong */
  /*   9 */ { "r009", 99, 1 },	/* wrong */
  /*  10 */ { "r010", 99, 1 },	/* wrong */
  /*  11 */ { "r011", 99, 1 },	/* wrong */
@@ -196,16 +198,18 @@ Reason_t reasons[] = {
  /*  87 */ { "r087", 99, 1 },	/* wrong */
  /*  88 */ { "r088", 99, 1 },	/* wrong */
  /*  89 */ { "r089", 99, 1 },	/* wrong */
- /*  90 */ { "r090", 99, 1 },	/* wrong */
- /*  91 */ { "r091", 99, 1 },	/* wrong */
- /*  92 */ { "r092", 99, 1 },	/* wrong */
- /*  93 */ { "r093", 99, 1 },	/* wrong */
- /*  94 */ { "r094", 99, 1 },	/* wrong */
- /*  95 */ { "r095", 99, 1 },	/* wrong */
- /*  96 */ { "r096", 99, 1 },	/* wrong */
- /*  97 */ { "r097", 99, 1 },	/* wrong */
- /*  98 */ { "r098", 99, 1 },	/* wrong */
- /*  99 */ { "r099", 99, 1 },	/* wrong */
+	// Mist sources
+ /*  90 */ { "m90", 99, 4 },	/* tuman */
+ /*  91 */ { "m91", 99, 4 },	/* tuman */
+ /*  92 */ { "m92", 99, 4 },	/* tuman */
+ /*  93 */ { "m93", 99, 4 },	/* tuman */
+ /*  94 */ { "m94", 99, 4 },	/* tuman */
+ /*  95 */ { "m95", 99, 4 },	/* tuman */
+ /*  96 */ { "m96", 99, 4 },	/* tuman */
+ /*  97 */ { "m97", 99, 4 },	/* tuman */
+ /*  98 */ { "m98", 99, 4 },	/* tuman */
+ /*  99 */ { "m99", 99, 4 },	/* tuman */
+	// end of mist sources
  /* 100 */ { "r100", 99, 1 },	/* wrong */
 	// Characters
  /* 101 */ { "MParcs", 0, 0 },
@@ -223,33 +227,33 @@ Reason_t reasons[] = {
  /* 113 */ { "GCross", 0, 0 },
  /* 114 */ { "JChamber", 0, 0 },
  /* 115 */ { "EWilliams", 0, 0 },
+ /* 116 */ { "WThomas", 0, 0 },
+ /* 117 */ { "JOSullivan", 0, 0 },
+ /* 118 */ { "UMcGee", 0, 0 },
+ /* 119 */ { "DStanley", 0, 0 },
+ /* 120 */ { "JCollins", 0, 0 },
+ /* 121 */ { "AJoe", 0, 0 },
+ /* 122 */ { "RGilmore", 0, 0 },
+ /* 123 */ { "CLefebvre", 0, 0 },
+ /* 124 */ { "LYoung", 0, 0 },
+ /* 125 */ { "CDeLorean", 0, 0 },
+ /* 126 */ { "CStanfield", 0, 0 },
+ /* 127 */ { "FCunningham", 0, 0 },
+ /* 128 */ { "ADecker", 0, 0 },
+ /* 129 */ { "MHailey", 0, 0 },
+ /* 130 */ { "PAdams", 0, 0 },
+ /* 131 */ { "GDay", 0, 0 },
+ /* 132 */ { "LLane", 0, 0 },
+ /* 133 */ { "FBuster", 0, 0 },
+ /* 134 */ { "ZHarriot", 0, 0 },
+ /* 135 */ { "CComes", 0, 0 },
+ /* 136 */ { "ZCampbell", 0, 0 },
+ /* 137 */ { "MReed", 0, 0 },
+ /* 138 */ { "KGreenhall", 0, 0 },
+ /* 139 */ { "Guide", 0, 0 },
+ /* 140 */ { "EThorp", 0, 0 },
+ /* 141 */ { "RConnor", 0, 0 },
 	// end of characters
- /* 116 */ { "r116", 99, 1 },	/* wrong */
- /* 117 */ { "r117", 99, 1 },	/* wrong */
- /* 118 */ { "r118", 99, 1 },	/* wrong */
- /* 119 */ { "r119", 99, 1 },	/* wrong */
- /* 120 */ { "r120", 99, 1 },	/* wrong */
- /* 121 */ { "r121", 99, 1 },	/* wrong */
- /* 122 */ { "r122", 99, 1 },	/* wrong */
- /* 123 */ { "r123", 99, 1 },	/* wrong */
- /* 124 */ { "r124", 99, 1 },	/* wrong */
- /* 125 */ { "r125", 99, 1 },	/* wrong */
- /* 126 */ { "r126", 99, 1 },	/* wrong */
- /* 127 */ { "r127", 99, 1 },	/* wrong */
- /* 128 */ { "r128", 99, 1 },	/* wrong */
- /* 129 */ { "r129", 99, 1 },	/* wrong */
- /* 130 */ { "r130", 99, 1 },	/* wrong */
- /* 131 */ { "r131", 99, 1 },	/* wrong */
- /* 132 */ { "r132", 99, 1 },	/* wrong */
- /* 133 */ { "r133", 99, 1 },	/* wrong */
- /* 134 */ { "r134", 99, 1 },	/* wrong */
- /* 135 */ { "r135", 99, 1 },	/* wrong */
- /* 136 */ { "r136", 99, 1 },	/* wrong */
- /* 137 */ { "r137", 99, 1 },	/* wrong */
- /* 138 */ { "r138", 99, 1 },	/* wrong */
- /* 139 */ { "r139", 99, 1 },	/* wrong */
- /* 140 */ { "r140", 99, 1 },	/* wrong */
- /* 141 */ { "r141", 99, 1 },	/* wrong */
  /* 142 */ { "r142", 99, 1 },	/* wrong */
  /* 143 */ { "r143", 99, 1 },	/* wrong */
  /* 144 */ { "r144", 99, 1 },	/* wrong */
@@ -299,16 +303,16 @@ Reason_t reasons[] = {
  /* 188 */ { "r188", 99, 1 },	/* wrong */
  /* 189 */ { "r189", 99, 1 },	/* wrong */
 	// Intentions
- /* 190 */ { "murder", 1, 38 },	/* ubijstvo */
- /* 191 */ { "creation", 5, 70 },	/* sozidanie */
- /* 192 */ { "destruction", 5, 36 },	/* razrushenie */
- /* 193 */ { "sex", 9, 71 },	/* seks */
- /* 194 */ { "fight", 50, 37 },	/* draka */
- /* 195 */ { "drug", 20, 78 },	/* zavisimost' */
+ /* 190 */ { "murder", 1, 40 },	/* ubijstvo */
+ /* 191 */ { "creation", 5, 72 },	/* sozidanie */
+ /* 192 */ { "destruction", 5, 38 },	/* razrushenie */
+ /* 193 */ { "sex", 9, 73 },	/* seks */
+ /* 194 */ { "fight", 50, 39 },	/* draka */
+ /* 195 */ { "drug", 20, 80 },	/* zavisimost' */
+ /* 196 */ { "death", 50, 5 },	/* smert' */
+ /* 197 */ { "mist", 50, 4 },	/* tuman */
+ /* 198 */ { "fear", 40, 26 },	/* strah */
 	// end of intentions
- /* 196 */ { "r196", 99, 1 },	/* wrong */
- /* 197 */ { "r197", 99, 1 },	/* wrong */
- /* 198 */ { "r198", 99, 1 },	/* wrong */
  /* 199 */ { "r199", 99, 1 },	/* wrong */
 	// Emotion fixes
  /* 200 */ { "xFon", 5, 0 },	/* fon */
@@ -316,85 +320,87 @@ Reason_t reasons[] = {
  /* 202 */ { "xMaster", 5, 2 },	/* master */
  /* 203 */ { "xSilence", 5, 3 },	/* silence */
  /* 204 */ { "xTuman", 5, 4 },	/* tuman */
- /* 205 */ { "xNegativ", 5, 5 },	/* negativ */
- /* 206 */ { "xRavnodushie", 5, 6 },	/* ravnodushie */
- /* 207 */ { "xSkuka", 5, 7 },	/* skuka */
- /* 208 */ { "xApatiya", 5, 8 },	/* apatiya */
- /* 209 */ { "xDepressiya", 5, 9 },	/* depressiya */
- /* 210 */ { "xZlost'", 5, 10 },	/* zlost' */
- /* 211 */ { "xGnev", 5, 11 },	/* gnev */
- /* 212 */ { "xYarost'", 5, 12 },	/* yarost' */
- /* 213 */ { "xRazdrazhenie", 5, 13 },	/* razdrazhenie */
- /* 214 */ { "xGrust'", 5, 14 },	/* grust' */
- /* 215 */ { "xToska", 5, 15 },	/* toska */
- /* 216 */ { "xObrechennost'", 5, 16 },	/* obrechennost' */
- /* 217 */ { "xOtchayanie", 5, 17 },	/* otchayanie */
- /* 218 */ { "xNeuverennost'", 5, 18 },	/* neuverennost' */
- /* 219 */ { "xOzabochennost'", 5, 19 },	/* ozabochennost' */
- /* 220 */ { "xNapryazhennost'", 5, 20 },	/* napryazhennost' */
- /* 221 */ { "xIsterika", 5, 21 },	/* isterika */
- /* 222 */ { "xSomnenie", 5, 22 },	/* somnenie */
- /* 223 */ { "xTrevozhnost'", 5, 23 },	/* trevozhnost' */
- /* 224 */ { "xStrah", 5, 24 },	/* strah */
- /* 225 */ { "xUzhas", 5, 25 },	/* uzhas */
- /* 226 */ { "xPanika", 5, 26 },	/* panika */
- /* 227 */ { "xFobiya", 5, 27 },	/* fobiya */
- /* 228 */ { "xParanojya", 5, 28 },	/* paranojya */
- /* 229 */ { "xNepriyazn'", 5, 29 },	/* nepriyazn' */
- /* 230 */ { "xNenavist'", 5, 30 },	/* nenavist' */
- /* 231 */ { "xOtvraschenie", 5, 31 },	/* otvraschenie */
- /* 232 */ { "xPrezrenie", 5, 32 },	/* prezrenie */
- /* 233 */ { "xNeudovletvorennost'", 5, 33 },	/* neudovletvorennost' */
- /* 234 */ { "xSozhalenie", 5, 34 },	/* sozhalenie */
- /* 235 */ { "xStyid", 5, 35 },	/* styid */
- /* 236 */ { "xRazrushenie", 5, 36 },	/* razrushenie */
- /* 237 */ { "xDraka", 5, 37 },	/* draka */
- /* 238 */ { "xUbijstvo", 5, 38 },	/* ubijstvo */
- /* 239 */ { "xPozitiv", 5, 39 },	/* pozitiv */
- /* 240 */ { "xVesel'e", 5, 40 },	/* vesel'e */
- /* 241 */ { "xRadost'", 5, 41 },	/* radost' */
- /* 242 */ { "xVostorg", 5, 42 },	/* vostorg */
- /* 243 */ { "xDovol'stvo", 5, 43 },	/* dovol'stvo */
- /* 244 */ { "xGordost'", 5, 44 },	/* gordost' */
- /* 245 */ { "xUdovletvorenie", 5, 45 },	/* udovletvorenie */
- /* 246 */ { "xLyubopyitstvo", 5, 46 },	/* lyubopyitstvo */
- /* 247 */ { "xInteres", 5, 47 },	/* interes */
- /* 248 */ { "xUvlechennost'", 5, 48 },	/* uvlechennost' */
- /* 249 */ { "xAzart", 5, 49 },	/* azart */
- /* 250 */ { "xVoodushevlenie", 5, 50 },	/* voodushevlenie */
- /* 251 */ { "xTseleustremlennost'", 5, 51 },	/* tseleustremlennost' */
- /* 252 */ { "xOtvaga", 5, 52 },	/* otvaga */
- /* 253 */ { "xReshimost'", 5, 53 },	/* reshimost' */
- /* 254 */ { "xVdohnovenie", 5, 54 },	/* vdohnovenie */
- /* 255 */ { "xPriyazn'", 5, 55 },	/* priyazn' */
- /* 256 */ { "xSimpatiya", 5, 56 },	/* simpatiya */
- /* 257 */ { "xPrivyazannost'", 5, 57 },	/* privyazannost' */
- /* 258 */ { "xLyubov'", 5, 58 },	/* lyubov' */
- /* 259 */ { "xVozhdelenie", 5, 59 },	/* vozhdelenie */
- /* 260 */ { "xUmilenie", 5, 60 },	/* umilenie */
- /* 261 */ { "xNadezhda", 5, 61 },	/* nadezhda */
- /* 262 */ { "xPredvkushenie", 5, 62 },	/* predvkushenie */
- /* 263 */ { "xVera", 5, 63 },	/* vera */
- /* 264 */ { "xUverennost'", 5, 64 },	/* uverennost' */
- /* 265 */ { "xPokoj", 5, 65 },	/* pokoj */
- /* 266 */ { "xUmirotvorenie", 5, 66 },	/* umirotvorenie */
- /* 267 */ { "xNostal'giya", 5, 67 },	/* nostal'giya */
- /* 268 */ { "xSoperezhivanie", 5, 68 },	/* soperezhivanie */
- /* 269 */ { "xSostradanie", 5, 69 },	/* sostradanie */
- /* 270 */ { "xSozidanie", 5, 70 },	/* sozidanie */
- /* 271 */ { "xSeks", 5, 71 },	/* seks */
- /* 272 */ { "xZhelanie", 5, 72 },	/* zhelanie */
- /* 273 */ { "xVlechenie", 5, 73 },	/* vlechenie */
- /* 274 */ { "xStrast'", 5, 74 },	/* strast' */
- /* 275 */ { "xOderzhimost'", 5, 75 },	/* oderzhimost' */
- /* 276 */ { "xManiya", 5, 76 },	/* maniya */
- /* 277 */ { "xZainteresovannost'", 5, 77 },	/* zainteresovannost' */
- /* 278 */ { "xZavisimost'", 5, 78 },	/* zavisimost' */
- /* 279 */ { "xDuhovnoe", 5, 79 },	/* duhovnoe */
- /* 280 */ { "xTrans", 5, 80 },	/* trans */
- /* 281 */ { "xMeditatsiya", 5, 81 },	/* meditatsiya */
- /* 282 */ { "xEkzal'tatsiya", 5, 82 },	/* ekzal'tatsiya */
- /* 283 */ { "xProsvetlenie", 5, 83 },	/* prosvetlenie */
+ /* 205 */ { "xSmert'", 5, 5 },	/* smert' */
+ /* 206 */ { "xMertvyak", 5, 6 },	/* mertvyak */
+ /* 207 */ { "xNegativ", 5, 7 },	/* negativ */
+ /* 208 */ { "xRavnodushie", 5, 8 },	/* ravnodushie */
+ /* 209 */ { "xSkuka", 5, 9 },	/* skuka */
+ /* 210 */ { "xApatiya", 5, 10 },	/* apatiya */
+ /* 211 */ { "xDepressiya", 5, 11 },	/* depressiya */
+ /* 212 */ { "xZlost'", 5, 12 },	/* zlost' */
+ /* 213 */ { "xGnev", 5, 13 },	/* gnev */
+ /* 214 */ { "xYarost'", 5, 14 },	/* yarost' */
+ /* 215 */ { "xRazdrazhenie", 5, 15 },	/* razdrazhenie */
+ /* 216 */ { "xGrust'", 5, 16 },	/* grust' */
+ /* 217 */ { "xToska", 5, 17 },	/* toska */
+ /* 218 */ { "xObrechennost'", 5, 18 },	/* obrechennost' */
+ /* 219 */ { "xOtchayanie", 5, 19 },	/* otchayanie */
+ /* 220 */ { "xNeuverennost'", 5, 20 },	/* neuverennost' */
+ /* 221 */ { "xOzabochennost'", 5, 21 },	/* ozabochennost' */
+ /* 222 */ { "xNapryazhennost'", 5, 22 },	/* napryazhennost' */
+ /* 223 */ { "xIsterika", 5, 23 },	/* isterika */
+ /* 224 */ { "xSomnenie", 5, 24 },	/* somnenie */
+ /* 225 */ { "xTrevozhnost'", 5, 25 },	/* trevozhnost' */
+ /* 226 */ { "xStrah", 5, 26 },	/* strah */
+ /* 227 */ { "xUzhas", 5, 27 },	/* uzhas */
+ /* 228 */ { "xPanika", 5, 28 },	/* panika */
+ /* 229 */ { "xFobiya", 5, 29 },	/* fobiya */
+ /* 230 */ { "xParanojya", 5, 30 },	/* paranojya */
+ /* 231 */ { "xNepriyazn'", 5, 31 },	/* nepriyazn' */
+ /* 232 */ { "xNenavist'", 5, 32 },	/* nenavist' */
+ /* 233 */ { "xOtvraschenie", 5, 33 },	/* otvraschenie */
+ /* 234 */ { "xPrezrenie", 5, 34 },	/* prezrenie */
+ /* 235 */ { "xNeudovletvorennost'", 5, 35 },	/* neudovletvorennost' */
+ /* 236 */ { "xSozhalenie", 5, 36 },	/* sozhalenie */
+ /* 237 */ { "xStyid", 5, 37 },	/* styid */
+ /* 238 */ { "xRazrushenie", 5, 38 },	/* razrushenie */
+ /* 239 */ { "xDraka", 5, 39 },	/* draka */
+ /* 240 */ { "xUbijstvo", 5, 40 },	/* ubijstvo */
+ /* 241 */ { "xPozitiv", 5, 41 },	/* pozitiv */
+ /* 242 */ { "xVesel'e", 5, 42 },	/* vesel'e */
+ /* 243 */ { "xRadost'", 5, 43 },	/* radost' */
+ /* 244 */ { "xVostorg", 5, 44 },	/* vostorg */
+ /* 245 */ { "xDovol'stvo", 5, 45 },	/* dovol'stvo */
+ /* 246 */ { "xGordost'", 5, 46 },	/* gordost' */
+ /* 247 */ { "xUdovletvorenie", 5, 47 },	/* udovletvorenie */
+ /* 248 */ { "xLyubopyitstvo", 5, 48 },	/* lyubopyitstvo */
+ /* 249 */ { "xInteres", 5, 49 },	/* interes */
+ /* 250 */ { "xUvlechennost'", 5, 50 },	/* uvlechennost' */
+ /* 251 */ { "xAzart", 5, 51 },	/* azart */
+ /* 252 */ { "xVoodushevlenie", 5, 52 },	/* voodushevlenie */
+ /* 253 */ { "xTseleustremlennost'", 5, 53 },	/* tseleustremlennost' */
+ /* 254 */ { "xOtvaga", 5, 54 },	/* otvaga */
+ /* 255 */ { "xReshimost'", 5, 55 },	/* reshimost' */
+ /* 256 */ { "xVdohnovenie", 5, 56 },	/* vdohnovenie */
+ /* 257 */ { "xPriyazn'", 5, 57 },	/* priyazn' */
+ /* 258 */ { "xSimpatiya", 5, 58 },	/* simpatiya */
+ /* 259 */ { "xPrivyazannost'", 5, 59 },	/* privyazannost' */
+ /* 260 */ { "xLyubov'", 5, 60 },	/* lyubov' */
+ /* 261 */ { "xVozhdelenie", 5, 61 },	/* vozhdelenie */
+ /* 262 */ { "xUmilenie", 5, 62 },	/* umilenie */
+ /* 263 */ { "xNadezhda", 5, 63 },	/* nadezhda */
+ /* 264 */ { "xPredvkushenie", 5, 64 },	/* predvkushenie */
+ /* 265 */ { "xVera", 5, 65 },	/* vera */
+ /* 266 */ { "xUverennost'", 5, 66 },	/* uverennost' */
+ /* 267 */ { "xPokoj", 5, 67 },	/* pokoj */
+ /* 268 */ { "xUmirotvorenie", 5, 68 },	/* umirotvorenie */
+ /* 269 */ { "xNostal'giya", 5, 69 },	/* nostal'giya */
+ /* 270 */ { "xSoperezhivanie", 5, 70 },	/* soperezhivanie */
+ /* 271 */ { "xSostradanie", 5, 71 },	/* sostradanie */
+ /* 272 */ { "xSozidanie", 5, 72 },	/* sozidanie */
+ /* 273 */ { "xSeks", 5, 73 },	/* seks */
+ /* 274 */ { "xZhelanie", 5, 74 },	/* zhelanie */
+ /* 275 */ { "xVlechenie", 5, 75 },	/* vlechenie */
+ /* 276 */ { "xStrast'", 5, 76 },	/* strast' */
+ /* 277 */ { "xOderzhimost'", 5, 77 },	/* oderzhimost' */
+ /* 278 */ { "xManiya", 5, 78 },	/* maniya */
+ /* 279 */ { "xZainteresovannost'", 5, 79 },	/* zainteresovannost' */
+ /* 280 */ { "xZavisimost'", 5, 80 },	/* zavisimost' */
+ /* 281 */ { "xDuhovnoe", 5, 81 },	/* duhovnoe */
+ /* 282 */ { "xTrans", 5, 82 },	/* trans */
+ /* 283 */ { "xMeditatsiya", 5, 83 },	/* meditatsiya */
+ /* 284 */ { "xEkzal'tatsiya", 5, 84 },	/* ekzal'tatsiya */
+ /* 285 */ { "xProsvetlenie", 5, 85 },	/* prosvetlenie */
 	// end of emotion fixes
 };
 

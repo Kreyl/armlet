@@ -4,7 +4,9 @@
 #
 
 from os.path import dirname, join, realpath
+from platform import system
 from re import match, split
+from subprocess import Popen, PIPE, STDOUT
 from sys import argv
 
 try:
@@ -12,7 +14,10 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\nPlease install BeautifulSoup v4.3.2 or later: http://www.crummy.com/software/BeautifulSoup\n" % (ex.__class__.__name__, ex))
 
+isWindows = system().lower().startswith('win')
+
 GUI_HTML = 'GUI.html'
+
 C_TARGET = 'gui.c'
 
 ENCODING = "Windows-1251"
@@ -33,6 +38,8 @@ C_CONTENT = '''\
  */
 #include "gui.h"
 
+const char* buttons = BUTTONS;
+
 Screen_t screens[] = {
 %s
 };
@@ -41,6 +48,8 @@ const int screens_number = countof(screens);
 
 // End of gui.c
 '''
+
+TEST_COMMAND = 'gcc -o test %s test.c && ./test && rm test' % C_TARGET
 
 def getFileName(fileName):
     return join(dirname(realpath(argv[0])), fileName)
@@ -77,10 +86,18 @@ def cScreen(node, indent = ''):
     return indent + ('{ \"%s\", {\n' % name) + buttonsText + '\n' + indent +'}}'
 
 def main():
+    print "Processing %s..." % GUI_HTML
     soup = BeautifulSoup(open(GUI_HTML))
     screens = soup.find_all(class_ = 'screen')
-    with open(getFileName(C_TARGET), 'w') as f:
+    with open(getFileName(C_TARGET), 'wb') as f:
         f.write(C_CONTENT % (',\n'.join(cScreen(screen, INDENT) for screen in screens)))
+    if isWindows:
+        print "Not running test on Windows\nDone"
+    else:
+        print "Running test: %s" % TEST_COMMAND
+        subprocess = Popen(TEST_COMMAND, shell = True, stdout = PIPE, stderr = STDOUT)
+        output = subprocess.communicate()[0]
+        print "Done (%s): %s" % (subprocess.returncode, output),
 
 if __name__ == '__main__':
     main()
