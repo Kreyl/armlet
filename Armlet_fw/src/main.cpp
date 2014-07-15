@@ -82,7 +82,7 @@ void Init() {
 
 //    IR.TxInit();
 //    IR.RxInit();
-//    Power.Init();
+    Power.Init();
     //Power.Task();
 
 //    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
