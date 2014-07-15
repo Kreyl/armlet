@@ -94,7 +94,7 @@ void Init() {
 
     PillMgr.Init();
 
-//    App.Init();
+    App.Init();
 //    AtlGui.Init();
 
 //    rLevel1.Init(ID);

@@ -28,7 +28,6 @@ public:
     FRESULT GetNext();
     uint8_t GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName);
     bool IsReady;
-    FIL File;
     void Init();
 };
 
