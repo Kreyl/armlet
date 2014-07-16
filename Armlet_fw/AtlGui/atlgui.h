@@ -82,8 +82,9 @@ public:
     void RenderSingleButton(int screen_id,int button_id,int button_state);
 
     void RenderNameTimeBat();
-
-    char char_name[10];
+    void GetCharname();//getname by id
+    char char_name[11];
+    char timechar[5];
     int time1,  time2,  bat;
 
 

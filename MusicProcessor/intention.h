@@ -8,6 +8,12 @@
 #define WINING_INTEGRAL_SWITCH_LIMIT 50
 #define FON_RELAX_SPEED 50
 #define MAX_RECENTLY_PLAYED_ARRAY 10
+
+#define PROCESS_NORMAL 0
+#define PROCESS_NARCO  1
+#define PROCESS_FIGHT  2
+#define PROCESS_DEATH  3
+#define PROCESS_TUMAN  4
 /*typedef struct Intention {
 	int weight1000;	//константа, определяющая степень и время роста
 	//int last_measure_weight;//
@@ -37,6 +43,7 @@ typedef struct UserIntentions {
     bool was_winning;
     //storage for data from radiochannel, recalc every radio_in
     int human_support_number;
+    int process_type;
     void TurnOff()
     {
         current_time=-1;

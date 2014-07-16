@@ -40,12 +40,12 @@ struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRA
 //int CurrentUserIntentionsArraySize=6;
 //STATIC ARRAY, inits inside, all external are in InitArrayOfUserIntentions
 struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
-        {-1,25,120,300,120,-1,false,0},//murder 0
-        {-1,25,3,10,2,-1,false,0},//creation 1
-        {-1,25,3,10,2,-1,false,0},//destruction 2
-        {-1,250,1,300,120,-1,false,0},//sex 3
-        {-1,250,1,60,120,-1,false,0},//fight 4
-        {-1,250,1200,2000,400,-1,false,0},//narco 5
+        {-1,25,120,300,120,-1,false,0,PROCESS_NORMAL},//murder 0
+        {-1,25,3,10,2,-1,false,0,PROCESS_NORMAL},//creation 1
+        {-1,25,3,10,2,-1,false,0,PROCESS_NORMAL},//destruction 2
+        {-1,250,1,300,120,-1,false,0,PROCESS_NORMAL},//sex 3
+        {-1,250,1,60,120,-1,false,0,PROCESS_FIGHT},//fight 4
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO},//narco 5
 };
 
 void InitArrayOfUserIntentions()

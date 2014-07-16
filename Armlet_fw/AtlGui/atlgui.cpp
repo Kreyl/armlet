@@ -361,6 +361,9 @@ void AtlGui_t::RenderNameTimeBat()
     Uart.Printf("T!!!!!!!!!!!!!!!!!! %d",Power.RemainingPercent);
 
 }
+void GetCharname()
+{
+}
 void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
 {
     //getfilename
