@@ -22,7 +22,10 @@ from Settings import CHARACTER_ID_START, CHARACTER_IDS
 GAME_ID = 584
 
 SHORT_NAME_COLUMN_TITLE = u'Имя на браслете'
-LONG_NAME_COLUMN_TITLE = u'Имя латиницей'
+LONG_NAME_COLUMN_TITLE = u'Имя и фамилия латиницей'
+SEX_COLUMN_TITLE = u'Пол персонажа'
+
+SEXES = {u'мужчина': 'Mr', u'женщина': 'Ms'}
 
 CHARACTERS_CSV = 'Characters.csv'
 
@@ -62,7 +65,19 @@ def verifyCharacters(characters):
 def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
     if not isfile(fileName):
         return {}
-    ret = dict((shortName, (int(number), longName)) for (number, shortName, longName) in readCSV(fileName))
+    data = tuple(tuple(s.strip() for s in d) for d in readCSV(fileName))
+    numbers = set()
+    shortNames = set()
+    longNames = set()
+    ret = {}
+    for (number, shortName, longName) in readCSV(fileName):
+        assert number not in numbers, "Duplicate character ID %s" % number
+        assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
+        assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
+        numbers.add(number)
+        shortNames.add(shortName.lower())
+        longNames.add(longName.lower())
+    ret = dict((shortName, (int(number), longName)) for (number, shortName, longName) in data)
     verifyCharacters(ret)
     return ret
 
@@ -93,9 +108,33 @@ def loadCharacters():
         header = allRoles[0]
         shortNameColumnID = header.index(SHORT_NAME_COLUMN_TITLE)
         longNameColumnID = header.index(LONG_NAME_COLUMN_TITLE)
+        sexColumnID = header.index(SEX_COLUMN_TITLE)
         allRoles = sorted(allRoles[1:])
-        ret = tuple((str(shortName.strip()), str(longName.strip())) for (shortName, longName) in ((row[shortNameColumnID], row[longNameColumnID]) for row in allRoles) if shortName)
-        return ret
+        data = ((row[shortNameColumnID], row[longNameColumnID], row[sexColumnID]) for row in allRoles[1:])
+        data = sorted(data, key = lambda (shortName, longName, sex): longName.split()[-1:])
+        ret = []
+        shortNames = set()
+        longNames = set()
+        for (shortName, longName, sex) in data:
+            if not shortName:
+                continue
+            shortName = str(shortName.strip())
+            sex = sex.strip()
+            assert sex in SEXES, "%s: unknown sex: %s" % (shortName, repr(sex))
+            words = str(longName.strip()).split()
+            prefix = words[0]
+            if prefix.lower() == 'no.':
+                longName = ' '.join(words[1:])
+            elif prefix.endswith('.') or len(prefix) <= 2:
+                longName = ' '.join(words)
+            else:
+                longName = '%s. %s' % (SEXES[sex], ' '.join(words))
+            assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
+            assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
+            shortNames.add(shortName.lower())
+            longNames.add(longName.lower())
+            ret.append((shortName, longName))
+        return tuple(ret)
     except Exception, e:
         print format_exc()
         print "ERROR fetching data, using current version: %s" % e

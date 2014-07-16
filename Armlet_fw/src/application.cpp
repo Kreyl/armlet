@@ -14,7 +14,7 @@
 #include "BeepSequences.h"
 #include "VibroSequences.h"
 #include "keys.h"
-#include "pill.h"
+#include "pill_mgr.h"
 #include "infrared.h"
 #include "power.h"
 
@@ -27,6 +27,16 @@
 #include "..\AtlGui\atlgui.h"
 #include "energy.h"
 App_t App;
+
+#if 1 // ============================ Timers ===================================
+// Pill check
+void TmrPillCheckCallback(void *p) {
+    chSysLockFromIsr();
+    chEvtSignalI(App.PThd, EVTMSK_PILL_CHECK);
+    chVTSetI(&App.TmrPillCheck, MS2ST(T_PILL_CHECK_MS), TmrPillCheckCallback, nullptr);
+    chSysUnlockFromIsr();
+}
+#endif
 
 #if 1 // ================================ Time =================================
 static void TimeTmrCallback(void *p);
@@ -60,7 +70,7 @@ void TimeTmrCallback(void *p) {
         }
     }
     Time.S_total++;
-    chEvtSignalI(App.PThd, EVTMASK_NEWSECOND);
+    chEvtSignalI(App.PThd, EVTMSK_NEWSECOND);
     chSysUnlockFromIsr();
 }
 #endif
@@ -205,179 +215,28 @@ static WORKING_AREA(waAppThread, 1024);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
     chRegSetThreadName("App");
-    while(true) App.Task();
+    App.Task();
 }
-    /*
+
+__attribute__((__noreturn__))
+void App_t::Task() {
     uint32_t EvtMsk;
-    int onrun=0;
-    Uart.Printf("!!call  App_t::AppThread()\r");
-    Keys.RegisterEvt(&EvtListenerKeys, EVTMASK_KEYS);
-    Sound.RegisterEvtPlayEnd(&EvtListenerSound,EVTMASK_PLAY_ENDS);
+    bool PillWasConnected = false;
     while(true) {
         EvtMsk = chEvtWaitAny(ALL_EVENTS);
-        if(EvtMsk & EVTMASK_KEYS)
-        	{
-        	 Uart.Printf("!!KeysHandler called  App_t::AppThread()\r");
-        	KeysHandler();
-        	}
-        if(EvtMsk & EVTMASK_RADIO) {
-        //   Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", RLvl2.PTable->RowCnt);
-           Uart.Printf("!!EVTMASK_RADIO called  App_t::AppThread() %d\r", SnsTable.PTable->Size);
-           // continue;
-            int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
 
-            //copy to ArrayOfIncomingIntentions
-            CurrentIntentionArraySize=val1;
-            for(int i=0;i<val1;i++)
-            {
-                ArrayOfIncomingIntentions[i].power256=SnsTable.PTable->Row[i].Level;
-                ArrayOfIncomingIntentions[i].reason_indx=SnsTable.PTable->Row[i].ID;
-                Uart.Printf("radio_in int_id %d, int_pw %d, val1 %d\r",ArrayOfIncomingIntentions[i].reason_indx,ArrayOfIncomingIntentions[i].power256,val1);
-            }
-
-            Uart.Printf("radio incoming ends!!!\r");
-            int reason_id=MainCalculateReasons();
-            if(reason_id==-1)
-                //играть фон
-            {
-                strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
-                Sound.Play(appbufftmp);
-                Uart.Printf(appbufftmp);
-                Uart.Printf("\r");
-            }
-            else
-                //играть музыку по резону, если у нас всё еще тот же победитель - не трогать музыку.
-            if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3)
-            {
-                Uart.Printf("REASON to play %d\r",reason_id);
-                strcpy(appbufftmp,GetFileNameToPlayFromEmoId(reasons[reason_id].eID));
-                Sound.Play(appbufftmp);
-                Uart.Printf(appbufftmp);
-                Uart.Printf("\r");
-            }
-            if(reason_id==-3)
-            {
-                strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
-                Sound.Play(appbufftmp);
-                Uart.Printf(appbufftmp);
-                Uart.Printf("\r");
-            }
-
-         //   CalculateIntentionsRadioChange();
-           // int chmaxval=-1;
-           // int chmax_indx=-1;
-           // for(int i=0;i<val1;i++)
-           // {
-              //  if(chmaxval<
-
-
-           // }
-
+        if(EvtMsk & EVTMSK_KEYS) {
+            Uart.Printf("App Keys\r");
+            KeysHandler();
         }
 
         if(EvtMsk & EVTMASK_PLAY_ENDS) {
-            //пересчитываем суммарные резоны
-            // по резону победителю считаем  новую эмоцию и включаем рандомный трек из неё.
-            Uart.Printf("music ends!!!\r");
-            int reason_id=MainCalculateReasons();
-            if(reason_id==-1)
-                //играть фон
-            {
-                strcpy(appbufftmp,GetFileNameToPlayFromEmoId(0));
-                Sound.Play(appbufftmp);
-                Uart.Printf(appbufftmp);
-                Uart.Printf("\r");
-            }
-            else
-                //играть музыку по резону
-            {
-                strcpy(appbufftmp,GetFileNameToPlayFromEmoId(reasons[reason_id].eID));
-                Sound.Play(appbufftmp);
-                Uart.Printf(appbufftmp);
-                Uart.Printf("\r");
-            }
-
-        	//int rval=GetRandomEmoToPlay();
-        	//strcpy(appbufftmp,GetFileNameToPlayFromEmoId(rval));
-        	// Sound.Play(appbufftmp);
-        	// Uart.Printf(appbufftmp);
-        	//Uart.Printf("sound track ended");
-        	//Uart.Printf("music ends!!!\r");
+            Uart.Printf("App PlayEnd\r");
+            //играть музыку по текущей эмоции
+            PlayNewEmo(SICD.last_played_emo,1);
         }
-        if(EvtMsk & EVTMASK_NEWSECOND) {
-        	// Uart.Printf("New_second!");
-
-        	if(Time.S_total % 4 ==0)
-        	{
-        		//CalculateIntentionsRadioChange();
-        		//PrintSCIDToUart();
-        		//Uart.Printf("every 4 sec\r");
-        	}
-        	 if(onrun==0)
-        	 {
-        		 onrun=1;
-        		 Sound.Play("church_bells.wav");
-        		 Uart.Printf("church_bells.wav");
-        	 }
-        	// int rval=GetRandomEmoToPlay();
-        	// GetFileNameToPlayFromEmoId(rval);
-        	// Uart.Printf("!!App_t::AppThread() random id=%d, name = %s \r",
-        	//		 rval,emotions[rval].name );//,GetFileNameToPlayFromEmoId(rval));
-            /// Time.DecreaseSecond();
-            // if(Time.IsZero()) App.StopEverything();
-            // else Interface.ShowTimeNow();
-       	}
-
-    }//while 1
-}
-        // Keys
-        if(EvtMsk & EVTMSK_KEY_START)            KeyStart();
-        if(App.State == asIdle) {
-           if(EvtMsk & EVTMSK_KEY_TIME_UP)      KeyTimeUp();
-            if(EvtMsk & EVTMSK_KEY_TIME_DOWN)    KeyTimeDown();
-            if(EvtMsk & EVTMSK_KEY_CURRENT_UP)   KeyCurrentUp();
-            if(EvtMsk & EVTMSK_KEY_CURRENT_DOWN) KeyCurrentDown();
-        }
-
-        // Time
-        if(EvtMsk & EVTMSK_NEWSECOND) {
-            Time.DecreaseSecond();
-            if(Time.IsZero()) App.StopEverything();
-            else Interface.ShowTimeNow();
-        }
-
-        // Measurement
-        if(EvtMsk & EVTMSK_MEASURE_TIME) Measure.StartMeasurement();
-        if(EvtMsk & EVTMSK_MEASUREMENT_DONE) {
-            Interface.DisplayBattery();
-            if(App.State == asCurrent) {
-                Interface.DisplayCurrentMeasured();
-                // Check if overcurrent (current regulation loop failure)
-                int32_t tmp = Measure.GetResult(CURRENT_CHNL);
-                tmp = Current.Adc2uA(tmp);
-                if((tmp - Current.uA) > 504) {
-                    App.StopEverything();
-                    Interface.ShowFailure();
-                }
-            }
-
-       // }
-    //} // while 1
-*/
-
-void App_t::Task() {
-    uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-    if(EvtMsk & EVTMASK_KEYS) {
-        Uart.Printf("App Keys\r");
-        KeysHandler();
-    }
-    if(EvtMsk & EVTMASK_PLAY_ENDS) {
-        Uart.Printf("App PlayEnd\r");
-        //играть музыку по текущей эмоции
-        PlayNewEmo(SICD.last_played_emo,1);
-    }
 #if 1 //EVTMASK_RADIO on/off
-    if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
+        if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
 #ifdef       UART_MESH_DEBUG
         Uart.Printf("App TabGet, s=%u, t=%u\r", SnsTable.PTable->Size, chTimeNow());
 
@@ -391,94 +250,113 @@ void App_t::Task() {
             Lcd.Printf(11, 31+(i*10), clRed, clBlack,"ID=%u; Pwr=%u", SnsTable.PTable->Row[i].ID, SnsTable.PTable->Row[i].Level);
         }
 #endif
+            //перекладываем данные с радио в массив текущих резонов
+            int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
+            CurrentIntentionArraySize = val1;
+            int j=0;
+            //сбрасываем  human syupport
+            for(int kl=0;kl<MAX_USER_INTENTIONS_ARRAY_SIZE;kl++)
+                ArrayOfUserIntentions[kl].human_support_number=0;
 
-
-        //перекладываем данные с радио в массив текущих резонов
-        int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
-        CurrentIntentionArraySize = val1;
-        int j=0;
-        //сбрасываем  human syupport
-        for(int kl=0;kl<MAX_USER_INTENTIONS_ARRAY_SIZE;kl++)
-            ArrayOfUserIntentions[kl].human_support_number=0;
-
-        for(int i=0; i<val1; i++) {
-            if(SnsTable.PTable->Row[i].ID >= reasons_number || (SnsTable.PTable->Row[i].ID < 0) /*|| (SnsTable.PTable->Row[i].Level < 70)*/ ) {
-                CurrentIntentionArraySize--;
-                continue;
-            }
-            ArrayOfIncomingIntentions[j].power256 = SnsTable.PTable->Row[i].Level/*-70*/;
-            ArrayOfIncomingIntentions[j].reason_indx = SnsTable.PTable->Row[i].ID;
-            //если входной резон пользователя - пользовательский, добавляем его в челподдержку
-            for(int kk=0;kk<MAX_USER_INTENTIONS_ARRAY_SIZE;kk++)
-            {
-                int PTABLE_REASON =-1;
-                if(PTABLE_REASON==ArrayOfUserIntentions[kk].reason_indx)
+            for(int i=0; i<val1; i++) {
+                if(SnsTable.PTable->Row[i].ID >= reasons_number || (SnsTable.PTable->Row[i].ID < 0) /*|| (SnsTable.PTable->Row[i].Level < 70)*/ ) {
+                    CurrentIntentionArraySize--;
+                    continue;
+                }
+                ArrayOfIncomingIntentions[j].power256 = SnsTable.PTable->Row[i].Level/*-70*/;
+                ArrayOfIncomingIntentions[j].reason_indx = SnsTable.PTable->Row[i].ID;
+                //если входной резон пользователя - пользовательский, добавляем его в челподдержку
+                for(int kk=0;kk<MAX_USER_INTENTIONS_ARRAY_SIZE;kk++)
                 {
-                    ArrayOfUserIntentions[kk].human_support_number++;
-                    break;
+                    int PTABLE_REASON =-1;
+                    if(PTABLE_REASON==ArrayOfUserIntentions[kk].reason_indx)
+                    {
+                        ArrayOfUserIntentions[kk].human_support_number++;
+                        break;
+                    }
+                }
+
+                j++;
+            }
+            //добавляем массив игроцких резонов в общий
+            PushPlayerReasonToArrayOfIntentions();
+               // сюда - все массивы резонов с других источников!
+
+            //пересчитываем резоны
+            int reason_id=MainCalculateReasons();
+
+            if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3) {
+                Uart.Printf("ID to play=%d\r",reason_id);
+                //new reason to play!
+                if(reasons[reason_id].eID != SICD.last_played_emo)
+                {
+                    //check if it's user reason,if any, set already played flag
+                    UserReasonFlagRecalc(SICD.last_intention_index_winner);//тут должэн стоять прошлый победитель!!
+                    PlayNewEmo(reasons[reason_id].eID,3);
                 }
             }
-
-            j++;
-        }
-        //добавляем массив игроцких резонов в общий
-        PushPlayerReasonToArrayOfIntentions();
-           // сюда - все массивы резонов с других источников!
-
-        //пересчитываем резоны
-        int reason_id=MainCalculateReasons();
-
-        if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3) {
-            Uart.Printf("ID to play=%d\r",reason_id);
-            //new reason to play!
-            if(reasons[reason_id].eID != SICD.last_played_emo)
-            {
-                //check if it's user reason,if any, set already played flag
-                UserReasonFlagRecalc(SICD.last_intention_index_winner);//тут должэн стоять прошлый победитель!!
-                PlayNewEmo(reasons[reason_id].eID,3);
+            if(reason_id==-3) {
+                PlayNewEmo(0,4);
             }
         }
-        if(reason_id==-3) {
-            PlayNewEmo(0,4);
-        }
-    }
 #endif
 #if 1 // ==== New second ====
-    if(EvtMsk & EVTMASK_NEWSECOND) {
-       //  Uart.Printf("New_second!");
-        AtlGui.AddSuspendScreenTimer(1);
-        //UPDATE user intentions timers
-        if(UpdateUserIntentionsTime(1))
-            CheckAndRedrawFinishedReasons();
+        if(EvtMsk & EVTMSK_NEWSECOND) {
+           //  Uart.Printf("New_second!");
+            AtlGui.AddSuspendScreenTimer(1);
+            //UPDATE user intentions timers
+            if(UpdateUserIntentionsTime(1))
+                CheckAndRedrawFinishedReasons();
 
-        if(Time.S_total% SEC_TO_SELF_REDUCE ==0)
-            Energy.AddEnergy(-1);
-        if(Time.S_total % 6 ==0)
-        {
-            //CalculateIntentionsRadioChange();
-            //PrintSCIDToUart();
-            //Uart.Printf("every 4 sec\r");
-            //Sound.SetVolume(0);
-          ///  Sound.Stop();
+            if(Time.S_total% SEC_TO_SELF_REDUCE ==0)
+                Energy.AddEnergy(-1);
+            if(Time.S_total % 6 ==0)
+            {
+                //CalculateIntentionsRadioChange();
+                //PrintSCIDToUart();
+                //Uart.Printf("every 4 sec\r");
+                //Sound.SetVolume(0);
+              ///  Sound.Stop();
+            }
+            if(on_run==0)
+            {
+                on_run=1;
+                // включить сплеш скрин
+                AtlGui.ShowSplashscreen();
+    //            Sound.Play("church_bells.wav");
+    //            Uart.Printf("church_bells.wav");
+            }
+            else if(AtlGui.is_splash_screen_onrun==1 )
+            {
+                //черезсекундувключить основной
+                AtlGui.CallStateScreen(0);
+                AtlGui.is_splash_screen_onrun=2;
+            }
+            //гашение крана
         }
-        if(on_run==0)
-        {
-            on_run=1;
-            // включить сплеш скрин
-            AtlGui.ShowSplashscreen();
-//            Sound.Play("church_bells.wav");
-//            Uart.Printf("church_bells.wav");
-        }
-        else if(AtlGui.is_splash_screen_onrun==1 )
-        {
-            //черезсекундувключить основной
-            AtlGui.CallStateScreen(0);
-            AtlGui.is_splash_screen_onrun=2;
-        }
-        //гашение крана
-
-    }
 #endif
+        // ==== Check pill ====
+        if(EvtMsk & EVTMSK_PILL_CHECK) {
+            bool IsNowConnected = (PillMgr.CheckIfConnected(PILL_I2C_ADDR) == OK);
+            if(IsNowConnected and !PillWasConnected) {  // OnConnect
+                PillWasConnected = true;
+                // Read Charge Count
+                uint8_t rslt = PillMgr.Read(PILL_I2C_ADDR, PILL_START_ADDR, &Pill, sizeof(Pill_t));
+                if(rslt == OK) {
+                    Uart.Printf("\rPill: %d %d", Pill.Type, Pill.ChargeCnt);
+                    if(Pill.ChargeCnt > 0) {    // Check charge count, decrease it and write it back
+                        Pill.ChargeCnt--;
+                        rslt = PillMgr.Write(PILL_I2C_ADDR, (PILL_START_ADDR + PILL_CHARGECNT_ADDR), &Pill.ChargeCnt, sizeof(Pill.ChargeCnt));
+                        if(rslt == OK) {
+                            Uart.Printf("\rConnect: %d", Pill.ChargeCnt);
+                            // Here is OnPillConnect
+                        } // if rslt ok
+                    } // if chargecnt > 0
+                } // if rslt ok
+            } // OnConnect
+            else if(!IsNowConnected and PillWasConnected) PillWasConnected = false;
+        } // if EVTMSK_PILL_CHECK
+    } // while true
 }
 
 void App_t::Init() {

@@ -5,8 +5,9 @@
 #
 # Processed by EmotionProcessor.py and integrated into ArmLet firmware.
 #
-hub,99,master
+hub,99,masterka
 uliza,1,fon
-grave,9,strah
+grave,3,strah
 church,2,pozitiv
 kabak,2,negativ
+dead,99,mertvyak

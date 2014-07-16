@@ -104,7 +104,7 @@ def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion
             return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
         TAGS.update({'disc': playerID, 'album': albumName, 'track': trackNumber, 'artist': artist, 'title': title, 'genre': emotion, 'comment': tail, 'comments': tail})
         processedAudio.export(newFullName, format = NEW_FORMAT, bitrate = '256k', tags = TAGS)
-        if not isfile(newFullName) or getsize(newFullName) < 0.2 * getsize(fullName):
+        if not isfile(newFullName) or getsize(newFullName) < 0.1 * getsize(fullName):
             return "Processed file is too small: %d bytes, while original file was %d bytes" % (getsize(newFullName), getsize(fullName))
         return None
     except Exception, e:

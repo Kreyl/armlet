@@ -86,9 +86,8 @@ void Pwr_t::Init() {
     PinSetupIn(PWR_EXTERNAL_GPIO, PWR_EXTERNAL_PIN, pudPullDown);
     PinSetupIn(PWR_CHARGING_GPIO, PWR_CHARGING_PIN, pudPullUp);
     PinSetupAnalog(PWR_BATTERY_GPIO, PWR_BATTERY_PIN);
-    Adc.Init();
+//    Adc.Init();
     // Event
-//    chEvtInit(&IEvtSrcPwrChange);
     // Create and start thread
     PThr = chThdCreateStatic(waPwrThread, sizeof(waPwrThread), LOWPRIO, (tfunc_t)PwrThread, NULL);
 }

@@ -32,15 +32,15 @@ void sd_t::Init() {
     sdcInit();
     sdcStart(&SDCD1, NULL);
     if(sdcConnect(&SDCD1)) {
-        Uart.Printf("SD connect error\r");
+        Uart.Printf("\rSD connect error");
         return;
     }
     else {
-        Uart.Printf("SD capacity: %u\r", SDCD1.capacity);
+        Uart.Printf("\rSD capacity: %u", SDCD1.capacity);
     }
     err = f_mount(0, &SDC_FS);
     if (err != FR_OK) {
-        Uart.Printf("SD mount error\r");
+        Uart.Printf("\rSD mount error");
         sdcDisconnect(&SDCD1);
         return;
     }
@@ -98,6 +98,7 @@ uint8_t sd_t::GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName) {
 #define INI_BUF_SIZE    512
 static char IBuf[INI_BUF_SIZE];
 static char FBuf[64];
+static FIL File;
 
 // ==== Inner use ====
 static inline char* skipleading(char *S) {
@@ -118,7 +119,7 @@ static inline char* striptrailing(char *S) {
 uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileName, char *POutput, uint32_t AMaxLen) {
     FRESULT rslt;
     // Open file
-    rslt = f_open(&SD.File, AFileName, FA_READ+FA_OPEN_EXISTING);
+    rslt = f_open(&File, AFileName, FA_READ+FA_OPEN_EXISTING);
     if(rslt != FR_OK) {
         Uart.Printf(AFileName);
         if (rslt == FR_NO_FILE) Uart.Printf(": file not found\r");
@@ -126,8 +127,8 @@ uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileN
         return FAILURE;
     }
     // Check if zero file
-    if(SD.File.fsize == 0) {
-        f_close(&SD.File);
+    if(File.fsize == 0) {
+        f_close(&File);
         Uart.Printf("Empty file\r");
         return FAILURE;
     }
@@ -136,9 +137,9 @@ uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileN
     char *StartP, *EndP;
     uint32_t len = strlen(ASection);
     do {
-        if (!f_gets(IBuf, INI_BUF_SIZE, &SD.File)) {
+        if (!f_gets(IBuf, INI_BUF_SIZE, &File)) {
             Uart.Printf("Section Read Err\r");
-            f_close(&SD.File);
+            f_close(&File);
             return FAILURE;
         }
         StartP = skipleading(IBuf);
@@ -148,9 +149,9 @@ uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileN
     // Section found, find the key
     len = strlen(AKey);
     do {
-        if (!f_gets(IBuf, INI_BUF_SIZE, &SD.File) or *(StartP = skipleading(IBuf)) == '[') {
+        if (!f_gets(IBuf, INI_BUF_SIZE, &File) or *(StartP = skipleading(IBuf)) == '[') {
             Uart.Printf("Key Read Err\r");
-            f_close(&SD.File);
+            f_close(&File);
             return FAILURE;
         }
         StartP = skipleading(IBuf);
@@ -171,7 +172,7 @@ uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileN
     *EndP = '\0';   // Terminate at a comment
     striptrailing(StartP);
     strcpy(POutput, StartP);
-    f_close(&SD.File);
+    f_close(&File);
     return OK;
 }
 
@@ -197,15 +198,9 @@ uint8_t iniReadUint32(const char *ASection, const char *AKey, const char *AFileN
 extern "C" {
 #endif
 
-bool_t sdc_lld_is_card_inserted(SDCDriver *sdcp) {
-    (void)sdcp;
-    return TRUE;
-}
+bool_t sdc_lld_is_card_inserted(SDCDriver *sdcp) { return TRUE; }
 
-bool_t sdc_lld_is_write_protected(SDCDriver *sdcp) {
-    (void)sdcp;
-    return FALSE;
-}
+bool_t sdc_lld_is_write_protected(SDCDriver *sdcp) { return FALSE; }
 
 #ifdef __cplusplus
 }

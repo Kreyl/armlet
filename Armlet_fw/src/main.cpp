@@ -18,7 +18,7 @@
 #include "infrared.h"
 #include "cmd_uart.h"
 #include "power.h"
-#include "pill.h"
+#include "pill_mgr.h"
 
 #include "radio_lvl1.h"
 #include "mesh_lvl.h"
@@ -52,25 +52,21 @@ int main() {
     // Report problem with clock if any
     if(ClkResult) Uart.Printf("Clock failure\r");
     while(TRUE) {
-        chThdSleepMilliseconds(1000);
-        //Sound.tmp(9);
-//        Uart.Printf("Pos: %u\r\n", Sound.GetPosition());
-
-  //      Lcd.Printf(11, 21, clWhite, clBlack, "%ums   ", Mesh.GetAbsTimeMS());
+        chThdSleepMilliseconds(2700);
+//        Uart.Printf("\r_abW");
     }
 }
 
 void Init() {
     Uart.Init(256000);
-    Uart.Printf("Atlantis Armlet\r");
+    Uart.Printf("\rAtlantis Armlet");
 
     SD.Init();
     // Read config
-    uint32_t ID=0;
-    iniReadUint32("Radio", "ID", "settings.ini", &ID);
-    Uart.Printf("ID=%u\r", ID);
+    iniReadUint32("Radio", "ID", "settings.ini", &App.ID);
+    Uart.Printf("\rID=%u", App.ID);
 
-    Lcd.Init();
+//    Lcd.Init();
 #ifndef CLEAR_SCREEN_FOR_DEBUG
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
 #endif
@@ -88,18 +84,24 @@ void Init() {
 //    IR.RxInit();
     Power.Init();
     //Power.Task();
-//    PillInit();
 
-    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
+//    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
 
     Sound.Init();
     Sound.SetVolume(START_VOL_CONST);
 
-//    Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
+    Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
+
+    PillMgr.Init();
 
     App.Init();
-    AtlGui.Init();
+//    AtlGui.Init();
 
-    rLevel1.Init(ID);
-    Mesh.Init(ID);
+//    rLevel1.Init(ID);
+//    Mesh.Init(ID);
+
+    // Common Timers
+    chSysLock();
+    chVTSetI(&App.TmrPillCheck, MS2ST(T_PILL_CHECK_MS),    TmrPillCheckCallback, nullptr);
+    chSysUnlock();
 }
