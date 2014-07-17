@@ -279,6 +279,56 @@ void Lcd_t::PutBitmap(uint8_t x0, uint8_t y0, uint8_t Width, uint8_t Height, uin
 }
 #endif
 
+#if 1 // ======================== Font printf ==================================
+void Lcd_t::PutFontChar(char c) {
+    const tChar *PChar = Fnt.PFirstChar + (c - Fnt.PFirstChar->Code);
+    // Read char params
+    uint8_t nCols = PChar->PImage->Width;
+    uint8_t nRows = PChar->PImage->Height;
+    SetBounds(IX, nCols, IY, nRows);
+    // Get pointer to the first byte of the desired character
+    const uint8_t *p = PChar->PImage->PData;
+    // Write RAM
+    WriteByte(0x2C);    // Memory write
+    DC_Hi();
+    // Iterate rows of the char
+    uint8_t row, col;
+
+    for(row = 0; row < nRows; row++) {
+        if((IY+row) >= LCD_H) break;
+        for(col=0; col < nCols; col++) {
+            if((IX+col) >= LCD_W) break;
+            uint32_t L = *p++;
+            Fnt.Mix(L);
+            WriteByte(Fnt.MixClr.RGB2HiHalf()); // RRRRR-GGG
+            WriteByte(Fnt.MixClr.RGB2LoHalf()); // GGG-BBBBB
+//            Uart.Printf("\rL=%u; C=%u; B=%u; M=%u", L, Fnt.FClr.G, Fnt.BClr.G, Fnt.MixClr.G);
+        } // col
+    } // row
+    DC_Lo();
+    IX += nCols;
+}
+
+static inline void FLcdPutFontChar(char c) { Lcd.PutFontChar(c); }
+
+void Lcd_t::Printf(const tFont &Font, uint8_t x, uint8_t y, Color_t ForeClr, Color_t BckClr, const char *S, ...) {
+    IX = x;
+    IY = y;
+    IForeClr = ForeClr;
+    IBckClr = BckClr;
+    Fnt.FClr.ColorT2RGB(IForeClr);
+    Fnt.BClr.ColorT2RGB(IBckClr);
+    // Decode font params
+    Fnt.PFirstChar = Font.Chars;
+    va_list args;
+    va_start(args, S);
+    kl_vsprintf(FLcdPutFontChar, 20, S, args);
+    va_end(args);
+}
+
+
+#endif
+
 #if 1 // ============================= BMP =====================================
 struct BmpHeader_t {
     uint16_t bfType;

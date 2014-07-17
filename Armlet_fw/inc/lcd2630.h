@@ -12,6 +12,7 @@
 #include "kl_lib_f2xx.h"
 #include <string.h>
 #include "ff.h"
+#include "Fonts.h"
 
 // ================================ Defines ====================================
 #define LCD_GPIO        GPIOE
@@ -58,7 +59,27 @@ enum Color_t {
     clCyan      = 0x07FF,
     clWhite     = 0xFFFF,
 };
+
+struct ColorRGB_t {
+    uint32_t R,G,B;
+    void ColorT2RGB(Color_t Clr) {
+        R = (Clr & 0xF800) >> 11;
+        G = (Clr & 0x07E0) >> 5;
+        B = Clr & 0x001F;
+    }
+    uint8_t RGB2HiHalf() {
+        uint32_t rslt = R << 3;
+        rslt |= (G & 0b00111111) >> 3;
+        return (uint8_t)rslt;
+    }
+    uint8_t RGB2LoHalf() {
+        uint32_t rslt = G << 5;
+        rslt |= B & 0b00011111;
+        return (uint8_t)rslt;
+    }
+};
 #endif
+
 
 #define LCD_X_0             1   // }
 #define LCD_Y_0             2   // } Zero pixels are shifted
@@ -68,10 +89,22 @@ enum Color_t {
 
 #define LCD_FILE_BUF_SZ     8192    // Must be 512 or larger
 
+#define ClrMix(C, B, L)     ((C * L + B * (255 - L)) / 255)
+struct FontParams_t {
+    const tChar *PFirstChar;
+    ColorRGB_t FClr, BClr, MixClr;
+    void Mix(uint32_t Brt) {
+        MixClr.R = ClrMix(FClr.R, BClr.R, Brt);
+        MixClr.G = ClrMix(FClr.G, BClr.G, Brt);
+        MixClr.B = ClrMix(FClr.B, BClr.B, Brt);
+    }
+};
+
 class Lcd_t {
 private:
     uint16_t IX, IY;
     Color_t IForeClr, IBckClr;
+    FontParams_t Fnt;
     PwmPin_t BckLt;
     void WriteCmd(uint8_t ACmd);
     void WriteCmd(uint8_t ACmd, uint8_t AData);
@@ -86,6 +119,7 @@ public:
 
     // High-level
     void PutChar(char c);
+    void PutFontChar(char c);
     void Printf(uint8_t x, uint8_t y, Color_t ForeClr, Color_t BckClr, const char *S, ...);
     void Cls(Color_t Color);
     void GetBitmap(uint8_t x0, uint8_t y0, uint8_t Width, uint8_t Height, uint16_t *PBuf);
@@ -93,6 +127,7 @@ public:
 //    void DrawImage(const uint8_t x, const uint8_t y, const uint8_t *Img);
 //    void DrawSymbol(const uint8_t x, const uint8_t y, const uint8_t ACode);
     void DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename);
+    void Printf(const tFont &Font, uint8_t x, uint8_t y, Color_t ForeClr, Color_t BckClr, const char *S, ...);
 };
 
 extern Lcd_t Lcd;

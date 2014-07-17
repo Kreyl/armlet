@@ -72,7 +72,9 @@ void Init() {
     iniReadUint32("Radio", "ID", "settings.ini", &App.ID);
     Uart.Printf("\rID=%u", App.ID);
 
-//    Lcd.Init();
+    Lcd.Init();
+    Lcd.Cls(clWhite);
+    Lcd.Printf(Impact, 9, 4, clBlack, clWhite, "Aiya Feanaro!");
 #ifndef CLEAR_SCREEN_FOR_DEBUG
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
 #endif

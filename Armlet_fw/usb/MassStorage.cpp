@@ -291,7 +291,7 @@ bool MassStorage_t::CmdWrite10() {
     // Get transaction size
     if(ReadWriteCommon(&BlockAddress, &TotalBlocks) == false) return false;
 //    Uart.Printf("Addr=%u; Len=%u\r", BlockAddress, TotalBlocks);
-    uint32_t BlocksToWrite1, BlocksToWrite2, BytesToReceive1, BytesToReceive2;
+    uint32_t BlocksToWrite1, BlocksToWrite2=0, BytesToReceive1, BytesToReceive2=0;
     bool Rslt = CH_SUCCESS;
     // Fill Buf1
     BytesToReceive1 = MIN(MS_DATABUF_SZ, TotalBlocks * MMCSD_BLOCK_SIZE);
