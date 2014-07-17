@@ -8,6 +8,8 @@
 #ifndef FONTS_H_
 #define FONTS_H_
 
+#include <stdint.h>
+
 // Types
 typedef struct {
     const uint8_t *PData;
