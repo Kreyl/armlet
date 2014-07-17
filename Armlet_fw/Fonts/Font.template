@@ -32,7 +32,7 @@ $(start_block_header)/*
 /*
  * Character definitions
  */$(end_block_header)$(start_block_images_table)
-static const uint$(img_data_block_size)_t image_data_$(doc_name_ws)_0x$(out_char_code)[$(out_blocks_count)] = { // $(out_char_text)
+static const uint$(img_data_block_size)_t image_data_$(doc_name_ws)_0x$(out_char_code)[$(out_blocks_count)] = { /* $(out_char_text) */
     $(out_image_data)
 };
 static const tImage $(doc_name_ws)_0x$(out_char_code) = { image_data_$(doc_name_ws)_0x$(out_char_code), $(out_image_width), $(out_image_height)};
@@ -41,7 +41,7 @@ $(end_block_images_table)
  * Character table
  */
 static const tChar $(doc_name_ws)_array[] = {$(start_block_images_table)
-    { 0x$(out_char_code), &$(doc_name_ws)_0x$(out_char_code) }$(out_comma) // $(out_char_text)$(end_block_images_table)
+    { 0x$(out_char_code), &$(doc_name_ws)_0x$(out_char_code) }$(out_comma) /* $(out_char_text) */$(end_block_images_table)
 };
 $(start_block_font_def)
 /*

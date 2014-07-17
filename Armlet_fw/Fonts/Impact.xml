@@ -4,7 +4,7 @@
     <size>10</size>
     <style>Normal</style>
     <widthType>proportional</widthType>
-    <antialiasing>false</antialiasing>
+    <antialiasing>true</antialiasing>
     <string> !"#$%&amp;'()*+,-./0123456789:;&lt;=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~</string>
     <converted>Impact.c</converted>
     <chars>
