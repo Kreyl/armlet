@@ -1,12 +1,12 @@
 
 /*******************************************************************************
 * font
-* filename: D:/Dropbox/Atlantis/Armlet/Font/LCDImageConverter/B52.xml
+* filename: B52.xml
 * name: B52
 * family: B52
 * size: 13
 * style: Normal
-* included characters:  !"#$%&'()*+,-./0123456789:;<=>?\x0040ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
+* included characters:  !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
 * antialiasing: yes
 * type: monospaced
 * encoding: ASCII
