@@ -6,6 +6,7 @@
  */
 
 #include "pill_mgr.h"
+#include "application.h"
 
 PillMgr_t PillMgr;
 
@@ -17,6 +18,7 @@ void PillMgr_t::Init() {
     chThdSleepMilliseconds(1);  // Allow power to rise
     i2c.Init(PILL_I2C, PILL_I2C_GPIO, PILL_SCL_PIN, PILL_SDA_PIN, PILL_I2C_BITRATE_HZ, PILL_DMATX, PILL_DMARX);
     chSemSignal(&Sem);
+    chVTSet(&App.TmrPillCheck, MS2ST(T_PILL_CHECK_MS), TmrPillCheckCallback, nullptr);
 }
 
 void PillMgr_t::Deinit() {

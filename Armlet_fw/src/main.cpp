@@ -26,6 +26,8 @@
 #include "ff.h"
 #include "MassStorage.h"
 
+#include "flashloader_support.h"
+
 #include "application.h"
 #include "atlantis_music_tree.h"
 #include "..\AtlGui\atlgui.h"
@@ -54,6 +56,7 @@ int main() {
     Init();
     // Report problem with clock if any
     if(ClkResult) Uart.Printf("Clock failure\r");
+
     while(TRUE) {
         chThdSleepMilliseconds(2700);
 //        Uart.Printf("\r_abW");
@@ -87,23 +90,18 @@ void Init() {
 //    IR.RxInit();
     MassStorage.Init();
     Power.Init();
-    //Power.Task();
 
 //    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
 
     Sound.Init();
     Sound.SetVolume(START_VOL_CONST);
 
-    PillMgr.Init();
+//    PillMgr.Init();
+//    Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
 
     App.Init();
 //    AtlGui.Init();
 
 //    rLevel1.Init(ID);
 //    Mesh.Init(ID);
-
-    // Common Timers
-    chSysLock();
-    chVTSetI(&App.TmrPillCheck, MS2ST(T_PILL_CHECK_MS),    TmrPillCheckCallback, nullptr);
-    chSysUnlock();
 }
