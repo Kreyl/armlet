@@ -54,7 +54,7 @@ struct MS_CommandStatusWrapper_t {
 #endif
 
 #define MS_TIMEOUT_MS   2700
-#define MS_DATABUF_SZ   2048
+#define MS_DATABUF_SZ   4096
 
 class MassStorage_t {
     MS_CommandBlockWrapper_t CmdBlock;
