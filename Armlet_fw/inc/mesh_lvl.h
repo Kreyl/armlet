@@ -38,6 +38,29 @@
 #define TIME_AGE_THRESHOLD  99 // in cycles
 
 
+/* Time specific */
+#define TIME_SZ             5  //  "hh:mm\0"
+#define TIME_SZ_LONG        8   // "hh:mm:ss\0"
+#define MESH_MS_IN_DAY      (uint32_t)86400000
+
+class Time {
+public:
+    static void PutTimeTo(char *PStr, uint8_t HH, uint8_t MM, char Sep) {
+        char digit;
+        digit = HH/10;
+        digit = (digit < 10)? '0'+digit : 'A'+digit-10;
+        PStr[0] = digit;
+        digit = HH%10;
+        PStr[1] = digit = (digit < 10)? '0'+digit : 'A'+digit-10;
+        PStr[2] = Sep;
+        digit = MM/10;
+        PStr[3] = digit = (digit < 10)? '0'+digit : 'A'+digit-10;
+        digit = MM%10;
+        PStr[4] = (digit < 10)? '0'+digit : 'A'+digit-10;
+    }
+};
+
+
 #if 1 // ======================== Circ Buf of Pkt ==============================
 #define CIRC_PKT_BUF_SZ     5 // MAX_ABONENTS FIXME: 5 size set to debug only
 
@@ -76,6 +99,7 @@ private:
     uint32_t RxCycleN;
     uint32_t SleepTime;
     bool NeedUpdateTime;
+    char TimeSeparator;
     uint32_t SelfID;
     uint8_t NeedToSendTable;
 
@@ -98,6 +122,7 @@ public:
                 RxCycleN(*PRndTable),
                 SleepTime(0),
                 NeedUpdateTime(false),
+                TimeSeparator(':'),
                 SelfID(0),
                 NeedToSendTable(0),
                 CycleTmr(MESH_TIM),
@@ -107,6 +132,7 @@ public:
     CircBufPkt_t PktBuf;
     uint32_t GetAbsTime()       { return (AbsCycle);             }
     uint32_t GetAbsTimeMS()     { return (AbsCycle*CYCLE_TIME);  }
+    uint8_t GetAstronomicTime(char *PToStr);
     void SetCurrCycleN(uint32_t ANew)   { AbsCycle = ANew; CurrCycle = 0; NewRxCycle(); }
     MsgBox_t<mshMsg_t, RPKT_SZ> MsgBox;
     void Init(uint32_t ID);

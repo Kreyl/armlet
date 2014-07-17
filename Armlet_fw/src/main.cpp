@@ -53,9 +53,6 @@ int main() {
     // Report problem with clock if any
     if(ClkResult) Uart.Printf("Clock failure\r");
 
-    Bootloader.Iwdt_enable();
-    Bootloader.JumpToAddr(SYSTEM_MEMORY_ADDR);
-
     while(TRUE) {
         chThdSleepMilliseconds(2700);
 //        Uart.Printf("\r_abW");
