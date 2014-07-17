@@ -47,24 +47,34 @@ EpState_t Usb_t::NonStandardControlRequestHandler(uint8_t **PPtr, uint32_t *PLen
 static WORKING_AREA(waUsbOutThd, 10000);
 static void UsbOutThd(void *arg) {
     chRegSetThreadName("UsbOut");
-    while(1) MassStorage.UsbOutTask();
+    MassStorage.UsbOutTask();
 }
 
 void MassStorage_t::Init() {
     SenseData.ResponseCode = 0x70;
     SenseData.AddSenseLen = 0x0A;
     // Thread
-    Thread *PThread = chThdCreateStatic(waUsbOutThd, sizeof(waUsbOutThd), NORMALPRIO, (tfunc_t)UsbOutThd, NULL);
+    PThread = chThdCreateStatic(waUsbOutThd, sizeof(waUsbOutThd), NORMALPRIO, (tfunc_t)UsbOutThd, NULL);
     Usb.PThread = PThread;
 }
 
+void MassStorage_t::Reset() {
+    // Wake thread if sleeping
+    chSysLock();
+    if(PThread->p_state == THD_STATE_SUSPENDED) chSchReadyI(PThread);
+    chSysUnlock();
+}
+
 #if 1 // ====================== OUT task =======================================
+__attribute__((__noreturn__))
 void MassStorage_t::UsbOutTask() {
-    if(!Usb.IsReady) chEvtWaitAny(EVTMASK_USB_READY);
-    // Receive header
-    Usb.PEpBulkOut->StartReceiveToBuf((uint8_t*)&CmdBlock, MS_CMD_SZ);
-    uint8_t rslt = Usb.PEpBulkOut->WaitUntilReady();
-    if(rslt == OK) SCSICmdHandler();
+    while(true) {
+        if(!Usb.IsReady) chEvtWaitAny(EVTMSK_USB_READY);
+        // Receive header
+        Usb.PEpBulkOut->StartReceiveToBuf((uint8_t*)&CmdBlock, MS_CMD_SZ);
+        uint8_t rslt = Usb.PEpBulkOut->WaitUntilReady();
+        if(rslt == OK) SCSICmdHandler();
+    }
 }
 #endif
 
@@ -89,7 +99,7 @@ void MassStorage_t::SCSICmdHandler() {
             CmdBlock.DataTransferLen = 0;
             break;
         default:
-            Uart.Printf("Cmd %X not supported\r", CmdBlock.SCSICmdData[0]);
+            Uart.Printf("\rMSCmd %X not supported", CmdBlock.SCSICmdData[0]);
             // Update the SENSE key to reflect the invalid command
             SenseData.SenseKey = SCSI_SENSE_KEY_ILLEGAL_REQUEST;
             SenseData.AdditionalSenseCode = SCSI_ASENSE_INVALID_COMMAND;

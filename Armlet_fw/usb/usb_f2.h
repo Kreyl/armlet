@@ -12,7 +12,6 @@
 #include "hal.h"
 #include "kl_lib_f2xx.h"
 #include "descriptors.h"
-//#include "buf_sizes.h"
 #include "stm32_otg.h"
 
 #if 1 // ========================== Endpoint ===================================

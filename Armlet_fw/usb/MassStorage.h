@@ -55,6 +55,7 @@ struct MS_CommandStatusWrapper_t {
 
 #define MS_TIMEOUT_MS   2700
 #define MS_DATABUF_SZ   2048
+
 class MassStorage_t {
     MS_CommandBlockWrapper_t CmdBlock;
     MS_CommandStatusWrapper_t CmdStatus;
@@ -73,12 +74,21 @@ class MassStorage_t {
     bool CmdModeSense6();
     // Buffers need to be aligned to 4-byte boundaries to allow advanced DMA to use aligned access.
     struct {
-        uint8_t Buf1[MS_DATABUF_SZ];
-        uint8_t Buf2[MS_DATABUF_SZ];
-    } __attribute__((aligned(MS_DATABUF_SZ * 2)));
+        union {
+            uint32_t DummyBuf1[(MS_DATABUF_SZ/4)];
+            uint8_t Buf1[MS_DATABUF_SZ];
+        };
+        union {
+            uint32_t DummyBuf2[(MS_DATABUF_SZ/4)];
+            uint8_t Buf2[MS_DATABUF_SZ];
+        };
+    };
     bool ReadWriteCommon(uint32_t *PAddr, uint16_t *PLen);
+    Thread *PThread;
 public:
     void Init();
+    void Reset();
+    // Inner Use
     void UsbOutTask();
 };
 

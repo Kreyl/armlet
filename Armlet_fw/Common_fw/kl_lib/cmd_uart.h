@@ -63,6 +63,7 @@ private:
     uint8_t CmdData[UART_CMDDATA_SZ], *PCmdWrite;
 #endif
     void IPrintf(const char *format, va_list args);
+    uint32_t IBaudrate;
 public:
     void Printf(const char *S, ...);
     void PrintfI(const char *S, ...);
@@ -75,6 +76,7 @@ public:
         }
     }
     void Init(uint32_t ABaudrate);
+    void OnAHBFreqChange();
     void Cmd(uint8_t CmdCode, uint8_t *PData, uint32_t Length) { Printf("#%X,%A\r\n", CmdCode, PData, Length, 0); }
     // Inner use
     void IRQDmaTxHandler();

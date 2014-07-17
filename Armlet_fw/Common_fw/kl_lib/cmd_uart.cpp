@@ -133,13 +133,13 @@ void CmdUart_t::Init(uint32_t ABaudrate) {
     PRead = TXBuf;
     IDmaIsIdle = true;
     IFullSlotsCount = 0;
+    IBaudrate = ABaudrate;
     PinSetupAlterFunc(UART_GPIO, UART_TX_PIN, omPushPull, pudNone, UART_AF);
 
     // ==== USART configuration ====
     UART_RCC_ENABLE();
     UART->CR1 = USART_CR1_UE;     // Enable USART
-    if(UART == USART1) UART->BRR = Clk.APB2FreqHz / ABaudrate;
-    else               UART->BRR = Clk.APB1FreqHz / ABaudrate;
+    OnAHBFreqChange();
     UART->CR2 = 0;
     UART->CR3 = USART_CR3_DMAT;   // Enable DMA at transmitter
 #if UART_RX_ENABLED
@@ -166,6 +166,11 @@ void CmdUart_t::Init(uint32_t ABaudrate) {
     chThdCreateStatic(waUartRxThread, sizeof(waUartRxThread), NORMALPRIO, UartRxThread, NULL);
 #endif
     UART->CR1 |= USART_CR1_UE;       // Enable USART
+}
+
+void CmdUart_t::OnAHBFreqChange() {
+    if(UART == USART1) UART->BRR = Clk.APB2FreqHz / IBaudrate;
+    else               UART->BRR = Clk.APB1FreqHz / IBaudrate;
 }
 
 // ==== TX DMA IRQ ====
