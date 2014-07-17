@@ -343,11 +343,12 @@ void App_t::Task() {
                 // Read Charge Count
                 uint8_t rslt = PillMgr.Read(PILL_I2C_ADDR, PILL_START_ADDR, &Pill, sizeof(Pill_t));
                 if(rslt == OK) {
-                    Uart.Printf("/rPill: %d %d", Pill.Type, Pill.ChargeCnt);
+                    Uart.Printf("\rPill: %d %d", Pill.Type, Pill.ChargeCnt);
                     if(Pill.ChargeCnt > 0) {    // Check charge count, decrease it and write it back
                         Pill.ChargeCnt--;
                         rslt = PillMgr.Write(PILL_I2C_ADDR, (PILL_START_ADDR + PILL_CHARGECNT_ADDR), &Pill.ChargeCnt, sizeof(Pill.ChargeCnt));
                         if(rslt == OK) {
+                            Uart.Printf("\rConnect: %d", Pill.ChargeCnt);
                             // Here is OnPillConnect
                         } // if rslt ok
                     } // if chargecnt > 0

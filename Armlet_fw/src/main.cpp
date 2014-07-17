@@ -87,7 +87,7 @@ void Init() {
 
 //    IR.TxInit();
 //    IR.RxInit();
-//    Power.Init();
+    Power.Init();
     //Power.Task();
 
 //    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
@@ -99,7 +99,7 @@ void Init() {
 
 //    PillMgr.Init();
 
-//    App.Init();
+    App.Init();
 //    AtlGui.Init();
 
 //    rLevel1.Init(ID);

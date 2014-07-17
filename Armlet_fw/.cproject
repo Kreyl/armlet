@@ -74,6 +74,7 @@
 									<listOptionValue builtIn="false" value="../Common_fw/os/hal"/>
 									<listOptionValue builtIn="false" value="../Common_fw/os/hal/include"/>
 									<listOptionValue builtIn="false" value="../Common_fw/os/kernel/include"/>
+									<listOptionValue builtIn="false" value="../usb"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.std.415641982" name="Language standard" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.std" useByScannerDiscovery="true" value="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.std.gnucpp11" valueType="enumerated"/>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.noexceptions.1504150261" name="Do not use exceptions (-fno-exceptions)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.noexceptions" useByScannerDiscovery="true" value="true" valueType="boolean"/>
