@@ -167,10 +167,10 @@ void Mesh_t::Init(uint32_t ID) {
 }
 
 uint8_t Mesh_t::GetAstronomicTime(char *PToStr) {
-    uint8_t Rslt = FAILURE;
     uint8_t StrSz = strlen(PToStr);
-    if((StrSz < TIME_SZ) or (PToStr = nullptr)) goto end;
+    if(StrSz < TIME_SZ) return FAILURE;
     else {
+        memset(PToStr, 0, StrSz);
         uint32_t Time;
         Time = AbsCycle * CYCLE_TIME;          // Time from start of epoch
         uint8_t Days;
@@ -186,11 +186,8 @@ uint8_t Mesh_t::GetAstronomicTime(char *PToStr) {
     //    ss = Time;
 //        TimeSeparator = (TimeSeparator == ':')? ' ' : ':';
         Time::PutTimeTo(PToStr, hh, mm, TimeSeparator);
-        Rslt = OK;
-        goto end;
+        return OK;
     }
-end:
-    return Rslt;
 }
 
 
