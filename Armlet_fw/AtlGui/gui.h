@@ -23,7 +23,7 @@
 #define BUTTON_PRESSED     4    // Button is pressed right now (yellow)
 #define BUTTON_NOT_PRESSED 5    // Button is pressed but can't be used right now (gray)
 #define BUTTON_ERROR       6    // Bad state for a button
-
+#define BUTTON_NO_REDRAW   7
 #define BUTTON_PRESSABLE 1
 #define BUTTON_LOCKED    3
 
@@ -45,10 +45,10 @@ typedef struct Screen {
     const char* name;                                            // Name of the subfolder containing respective imagery.
     const char* screen_switch[NUM_BUTTONS];                      // Screens to go to after the respective buttons are pressed.
     int (*fptr_gui_state_array_switch_functions[NUM_BUTTONS])(); // Functions to change screen contents after the respective buttons are pressed.
-    const Button_t buttons[NUM_BUTTONS];
+    Button_t buttons[NUM_BUTTONS];
 } Screen_t;
 
-extern const char* buttons_names;
+extern const char* buttons;
 
 extern Screen_t screens[];
 extern const int screens_number;
