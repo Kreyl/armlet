@@ -66,6 +66,8 @@ int main() {
 void Init() {
     Uart.Init(256000);
     Uart.Printf("\rAtlantis   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
+//    Uart.Printf("\r%X", clAtlFront);
+
 
     SD.Init();
     // Read config
@@ -73,9 +75,12 @@ void Init() {
     Uart.Printf("\rID=%u", App.ID);
 
     Lcd.Init();
-    Lcd.Cls(clWhite);
-    Lcd.Printf(Impact, 9, 4, clBlack, clWhite, "Aiya Feanaro!");
-#ifndef CLEAR_SCREEN_FOR_DEBUG
+    Lcd.Cls(clAtlBack);
+//    Lcd.Printf(Impact, 45, 54, clAtlFront, clAtlBack, "Aiya Feanaro!");
+//    Lcd.Printf(Impact, 45, 65, clGreen, clBlack, "Aiya Feanaro!");
+//    Lcd.Printf(Impact, 45, 76, clBlue, clBlack, "Aiya Feanaro!");
+
+    #ifndef CLEAR_SCREEN_FOR_DEBUG
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
 #endif
 //    Lcd.DrawBmpFile(0, 0, "splash.bmp");

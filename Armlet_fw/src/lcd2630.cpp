@@ -129,7 +129,7 @@ void Lcd_t::PutChar(char c) {
     uint8_t nCols = PFont[0];
     uint8_t nRows = PFont[1];
     uint16_t nBytes = PFont[2];
-    SetBounds(IX, nCols, IY, nRows);
+    SetBounds(Fnt.X, nCols, Fnt.Y, nRows);
     // Get pointer to the first byte of the desired character
     const char *PChar = Font8x8 + (nBytes * (c - 0x1F));
     // Write RAM
@@ -138,45 +138,28 @@ void Lcd_t::PutChar(char c) {
     // Iterate rows of the char
     uint8_t row, col;
     for(row = 0; row < nRows; row++) {
-        if((IY+row) >= LCD_H) break;
+        if((Fnt.Y+row) >= LCD_H) break;
         uint8_t PixelRow = *PChar++;
         // Loop on each pixel in the row (left to right)
-#ifdef LCD_12BIT
-        for(col=0; col < nCols; col+=2) {
-            if((IX+col) >= LCD_W) break;
-            // Two pixels at one time
-            uint16_t Clr1 = (PixelRow & 0x80)? IForeClr : IBckClr;
-            PixelRow <<= 1;
-            uint16_t Clr2 = (PixelRow & 0x80)? IForeClr : IBckClr;
-            PixelRow <<= 1;
-            uint8_t b1 = (uint8_t)(Clr1 >> 4);       // RRRR-GGGG
-            uint8_t b2 = (uint8_t)(((Clr1 & 0x00F) << 4) | (Clr2 >> 8));  // BBBB-RRRR
-            uint8_t b3 = (uint8_t)(Clr2 & 0x0FF);    // GGGG-BBBB
-            WriteByte(b1);
-            WriteByte(b2);
-            WriteByte(b3);
-        } // col
-#else
         for(col=0; col < nCols; col++) {
-            if((IX+col) >= LCD_W) break;
-            uint16_t Clr = (PixelRow & 0x80)? IForeClr : IBckClr;
+            if((Fnt.X+col) >= LCD_W) break;
+            Color_t *PClr = (PixelRow & 0x80)? &Fnt.FClr : &Fnt.BClr;
             PixelRow <<= 1;
-            WriteByte(Clr >> 8);    // RRRRR-GGG
-            WriteByte(Clr & 0xFF);  // GGG-BBBBB
+            WriteByte(PClr->RGBTo565_HiByte());
+            WriteByte(PClr->RGBTo565_LoByte());
         } // col
-#endif
     } // row
     DC_Lo();
-    IX += nCols;
+    Fnt.X += nCols;
 }
 
 static inline void FLcdPutChar(char c) { Lcd.PutChar(c); }
 
-void Lcd_t::Printf(uint8_t x, uint8_t y, const Color_t ForeClr, const Color_t BckClr, const char *S, ...) {
-    IX = x;
-    IY = y;
-    IForeClr = ForeClr;
-    IBckClr = BckClr;
+void Lcd_t::Printf(uint8_t x, uint8_t y, Color_t ForeClr, Color_t BckClr, const char *S, ...) {
+    Fnt.X = x;
+    Fnt.Y = y;
+    Fnt.FClr = ForeClr;
+    Fnt.BClr = BckClr;
     va_list args;
     va_start(args, S);
     kl_vsprintf(FLcdPutChar, 20, S, args);
@@ -187,25 +170,9 @@ void Lcd_t::Printf(uint8_t x, uint8_t y, const Color_t ForeClr, const Color_t Bc
 void Lcd_t::Cls(Color_t Color) {
     SetBounds(0, LCD_W, 0, LCD_H);
     // Prepare variables
-    uint16_t Clr = (uint16_t)Color;
-#ifdef LCD_12BIT
-    uint32_t Cnt = LCD_W * LCD_H / 2;       // Two pixels at one time
-    uint8_t b1 = (uint8_t)(Clr >> 4);       // RRRR-GGGG
-    uint8_t b2 = (uint8_t)(((Clr & 0x00F) << 4) | (Clr >> 8));  // BBBB-RRRR
-    uint8_t b3 = (uint8_t)(Clr & 0x0FF);    // GGGG-BBBB
-    // Write RAM
-    WriteByte(0x2C);    // Memory write
-    DC_Hi();
-    for(uint32_t i=0; i<Cnt; i++) {
-        WriteByte(b1);
-        WriteByte(b2);
-        WriteByte(b3);
-    }
-    DC_Lo();
-#else
     uint32_t Cnt = LCD_W * LCD_H;
-    uint8_t b1 = (Clr >> 8) & 0x00FF;
-    uint8_t b2 =  Clr       & 0x00FF;
+    uint8_t b1 = Color.RGBTo565_HiByte();
+    uint8_t b2 = Color.RGBTo565_LoByte();
     // Write RAM
     WriteByte(0x2C);    // Memory write
     DC_Hi();
@@ -214,7 +181,6 @@ void Lcd_t::Cls(Color_t Color) {
         WriteByte(b2);
     }
     DC_Lo();
-#endif
 }
 
 void Lcd_t::GetBitmap(uint8_t x0, uint8_t y0, uint8_t Width, uint8_t Height, uint16_t *PBuf) {
@@ -285,40 +251,37 @@ void Lcd_t::PutFontChar(char c) {
     // Read char params
     uint8_t nCols = PChar->PImage->Width;
     uint8_t nRows = PChar->PImage->Height;
-    SetBounds(IX, nCols, IY, nRows);
+    SetBounds(Fnt.X, nCols, Fnt.Y, nRows);
     // Get pointer to the first byte of the desired character
     const uint8_t *p = PChar->PImage->PData;
+    Color_t MixClr;
     // Write RAM
     WriteByte(0x2C);    // Memory write
     DC_Hi();
     // Iterate rows of the char
     uint8_t row, col;
-
     for(row = 0; row < nRows; row++) {
-        if((IY+row) >= LCD_H) break;
+        if((Fnt.Y+row) >= LCD_H) break;
         for(col=0; col < nCols; col++) {
-            if((IX+col) >= LCD_W) break;
+            if((Fnt.X+col) >= LCD_W) break;
             uint32_t L = *p++;
-            Fnt.Mix(L);
-            WriteByte(Fnt.MixClr.RGB2HiHalf()); // RRRRR-GGG
-            WriteByte(Fnt.MixClr.RGB2LoHalf()); // GGG-BBBBB
-//            Uart.Printf("\rL=%u; C=%u; B=%u; M=%u", L, Fnt.FClr.G, Fnt.BClr.G, Fnt.MixClr.G);
+            MixClr.MixOf(Fnt.FClr, Fnt.BClr, L);
+            WriteByte(MixClr.RGBTo565_HiByte());
+            WriteByte(MixClr.RGBTo565_LoByte());
+//            Uart.Printf("\rRGB: %02X %02X %02X; 565: %02X %02X", MixClr.R, MixClr.G, MixClr.B, MixClr.RGBTo565_HiByte(), MixClr.RGBTo565_LoByte());
         } // col
     } // row
     DC_Lo();
-    IX += nCols;
+    Fnt.X += nCols;
 }
 
 static inline void FLcdPutFontChar(char c) { Lcd.PutFontChar(c); }
 
 void Lcd_t::Printf(const tFont &Font, uint8_t x, uint8_t y, Color_t ForeClr, Color_t BckClr, const char *S, ...) {
-    IX = x;
-    IY = y;
-    IForeClr = ForeClr;
-    IBckClr = BckClr;
-    Fnt.FClr.ColorT2RGB(IForeClr);
-    Fnt.BClr.ColorT2RGB(IBckClr);
-    // Decode font params
+    Fnt.X = x;
+    Fnt.Y = y;
+    Fnt.FClr = ForeClr;
+    Fnt.BClr = BckClr;
     Fnt.PFirstChar = Font.Chars;
     va_list args;
     va_start(args, S);
