@@ -226,12 +226,12 @@ void App_t::Task() {
         EvtMsk = chEvtWaitAny(ALL_EVENTS);
 
         if(EvtMsk & EVTMSK_KEYS) {
-            Uart.Printf("App Keys\r");
+            Uart.Printf("\rApp Keys");
             KeysHandler();
         }
 
         if(EvtMsk & EVTMASK_PLAY_ENDS) {
-            Uart.Printf("App PlayEnd\r");
+            Uart.Printf("\rApp PlayEnd");
             //играть музыку по текущей эмоции
             PlayNewEmo(SICD.last_played_emo,1);
         }
@@ -286,7 +286,7 @@ void App_t::Task() {
             int reason_id=MainCalculateReasons();
 
             if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3) {
-                Uart.Printf("ID to play=%d\r",reason_id);
+                Uart.Printf("\rID to play=%d",reason_id);
                 //new reason to play!
                 if(reasons[reason_id].eID != SICD.last_played_emo)
                 {
@@ -302,7 +302,7 @@ void App_t::Task() {
 #endif
 #if 1 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
-            // Uart.Printf("New_second!");
+            Uart.Printf("\rNewSecond");
             AtlGui.AddSuspendScreenTimer(1);
             //UPDATE user intentions timers
             if(UpdateUserIntentionsTime(1))
@@ -330,10 +330,11 @@ void App_t::Task() {
             {
                 //черезсекундувключить основной
                 AtlGui.CallStateScreen(0);
+                Uart.Printf("\rR");
                 AtlGui.is_splash_screen_onrun=2;
             }
             //гашение крана
-        }
+        } // New second
 #endif
         // ==== Check pill ====
         if(EvtMsk & EVTMSK_PILL_CHECK) {

@@ -110,5 +110,5 @@ void Init() {
     rLevel1.Init(App.ID);
     Mesh.Init(App.ID);
 
-    Uart.Printf("mAIN INIT DONE\r");
+    Uart.Printf("\rInit done");
 }

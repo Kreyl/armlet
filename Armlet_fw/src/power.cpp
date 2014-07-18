@@ -11,7 +11,9 @@
 #include "infrared.h"
 #include "usb_f2.h"
 #include "MassStorage.h"
-//#define USB_ENABLED
+
+#define USB_ENABLED
+
 Pwr_t Power;
 static Thread *PThr;
 

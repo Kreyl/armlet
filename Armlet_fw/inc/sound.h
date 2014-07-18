@@ -129,6 +129,7 @@ public:
     sndState_t State;
     void Init();
     void Play(const char* AFilename, uint32_t StartPosition = 0) {
+        return; //FIXME
         IFilename = AFilename;
         IStartPosition = StartPosition;
         chEvtSignal(PThread, VS_EVT_STOP);

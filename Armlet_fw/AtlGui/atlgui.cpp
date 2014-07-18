@@ -175,7 +175,7 @@ void AtlGui_t::ShowSplashscreen()
 }
 void AtlGui_t::CallStateScreen(int screen_id)
 {
-    Uart.Printf("CALL state SCREEN \r");
+    Uart.Printf("\r%S", __func__);
    // Lcd.Printf(11, 21, clGreen, clBlack, "STATESCREEN %u", screen_id);
    if(current_state==screen_id)
    {
@@ -190,6 +190,7 @@ void AtlGui_t::CallStateScreen(int screen_id)
 }
 void AtlGui_t::RenderFullScreen(int screen_id)
 {
+    Uart.Printf("\r%S", __func__);
     //get filename
     strcpy(bmp_filename,PATH_TO_GUI);
     strcat(bmp_filename,screens[screen_id].name);
@@ -197,10 +198,10 @@ void AtlGui_t::RenderFullScreen(int screen_id)
     strcat(bmp_filename,"back");
     strcat(bmp_filename,GUI_PATH_EXT);
     //strcpy(bmp_filename,"TestHorizontal.png");
-    Uart.Printf("RenderFullScreen %s\r",bmp_filename);
+    Uart.Printf("\rRenderFullScreen %s", bmp_filename);
     // render it
     Lcd.DrawBmpFile(0,0,bmp_filename);
-    strncpy (char_name,"char_name",10);
+    /*strncpy (char_name,"char_name",10);
     time1=11;time2=22,bat=Power.RemainingPercent;
     //strncpy( time,"22_11",5);
     //strncpy( bat,"100%",4);
@@ -215,6 +216,7 @@ void AtlGui_t::RenderFullScreen(int screen_id)
             RenderSingleButton(screen_id,i,state1);
         }//не рисовать кнопки, которых нет
     }
+    */
 }
 void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
 {
