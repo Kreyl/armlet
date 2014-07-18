@@ -17,6 +17,7 @@
 #
 from csv import reader as CSVReader, writer as CSVWriter
 from itertools import chain
+from os.path import join
 from platform import system
 from subprocess import Popen, PIPE, STDOUT
 
@@ -41,7 +42,9 @@ EMOTIONS_CSV = 'Emotions.csv'
 LOCATIONS_CSV = 'Locations.csv'
 INTENTIONS_CSV = 'Intentions.csv'
 
-C_TARGET = 'emotions.c'
+C_PATH = '../Armlet_fw/AppLogic'
+
+C_TARGET = join(C_PATH, 'emotions.c')
 
 CSV_TARGET = 'Reasons.csv'
 
@@ -132,7 +135,7 @@ EMOTION_FIX_REASON = 'x%s'
 
 EMOTION_FIX_WEIGHT = 5
 
-TEST_COMMAND = 'gcc -o test %s test.c && ./test && rm test' % C_TARGET
+TEST_COMMAND = 'gcc -I "%s" -o test "%s" test.c && ./test && rm test' % (C_PATH, C_TARGET)
 
 TRANSLIFY_PATCHES = {
     u'ё': u'е',

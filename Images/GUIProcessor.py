@@ -18,7 +18,9 @@ isWindows = system().lower().startswith('win')
 
 GUI_HTML = 'GUI.html'
 
-C_TARGET = 'gui.c'
+C_PATH = '../Armlet_fw/AtlGui'
+
+C_TARGET = join(C_PATH, 'gui.c')
 
 ENCODING = "Windows-1251"
 
@@ -50,7 +52,7 @@ const int screens_number = countof(screens);
 // End of gui.c
 '''
 
-TEST_COMMAND = 'gcc -o test %s test.c && ./test && rm test' % C_TARGET
+TEST_COMMAND = 'gcc -I "%s" -o test "%s" test.c && ./test && rm test' % (C_PATH, C_TARGET)
 
 def getFileName(fileName):
     return join(dirname(realpath(argv[0])), fileName)
