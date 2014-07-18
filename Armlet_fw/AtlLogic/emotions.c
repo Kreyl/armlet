@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-07-18 18:06:59
+ * Generated at 2014-07-18 22:00:43
  */
 #include "emotions.h"
 
@@ -229,38 +229,38 @@ Reason_t reasons[] = {
  /* 114 */ { "ADecker", 0, 0 },
  /* 115 */ { "MDurden", 0, 0 },
  /* 116 */ { "NEpstein", 0, 0 },
- /* 117 */ { "RGilmore", 0, 0 },
- /* 118 */ { "AGraywood", 0, 0 },
- /* 119 */ { "KGreenhall", 0, 0 },
- /* 120 */ { "Guide", 0, 0 },
- /* 121 */ { "MHailey", 0, 0 },
- /* 122 */ { "ZHarriot", 0, 0 },
- /* 123 */ { "BHill", 0, 0 },
- /* 124 */ { "AHuxley", 0, 0 },
- /* 125 */ { "AJoe", 0, 0 },
- /* 126 */ { "LLane", 0, 0 },
- /* 127 */ { "CLefebvre", 0, 0 },
- /* 128 */ { "VLehndorff", 0, 0 },
- /* 129 */ { "TMalone", 0, 0 },
- /* 130 */ { "UMcGee", 0, 0 },
- /* 131 */ { "FMilligan", 0, 0 },
- /* 132 */ { "AMorientes", 0, 0 },
- /* 133 */ { "JOSullivan", 0, 0 },
- /* 134 */ { "MParcs", 0, 0 },
- /* 135 */ { "MReed", 0, 0 },
- /* 136 */ { "MRose", 0, 0 },
- /* 137 */ { "JSherman", 0, 0 },
- /* 138 */ { "CStanfield", 0, 0 },
- /* 139 */ { "DStanley", 0, 0 },
- /* 140 */ { "TSunday", 0, 0 },
- /* 141 */ { "WThomas", 0, 0 },
- /* 142 */ { "EThorp", 0, 0 },
- /* 143 */ { "HWilliams", 0, 0 },
- /* 144 */ { "EWilliams", 0, 0 },
- /* 145 */ { "LYoung", 0, 0 },
+ /* 117 */ { "CFranklin", 0, 0 },
+ /* 118 */ { "RGilmore", 0, 0 },
+ /* 119 */ { "AGraywood", 0, 0 },
+ /* 120 */ { "KGreenhall", 0, 0 },
+ /* 121 */ { "Guide", 0, 0 },
+ /* 122 */ { "MHailey", 0, 0 },
+ /* 123 */ { "ZHarriot", 0, 0 },
+ /* 124 */ { "BHill", 0, 0 },
+ /* 125 */ { "AHuxley", 0, 0 },
+ /* 126 */ { "AJoe", 0, 0 },
+ /* 127 */ { "LLane", 0, 0 },
+ /* 128 */ { "CLefebvre", 0, 0 },
+ /* 129 */ { "VLehndorff", 0, 0 },
+ /* 130 */ { "TMalone", 0, 0 },
+ /* 131 */ { "UMcGee", 0, 0 },
+ /* 132 */ { "FMilligan", 0, 0 },
+ /* 133 */ { "AMorientes", 0, 0 },
+ /* 134 */ { "JOSullivan", 0, 0 },
+ /* 135 */ { "MParcs", 0, 0 },
+ /* 136 */ { "SRandom", 0, 0 },
+ /* 137 */ { "MReed", 0, 0 },
+ /* 138 */ { "MRose", 0, 0 },
+ /* 139 */ { "JSherman", 0, 0 },
+ /* 140 */ { "CStanfield", 0, 0 },
+ /* 141 */ { "DStanley", 0, 0 },
+ /* 142 */ { "TSunday", 0, 0 },
+ /* 143 */ { "WThomas", 0, 0 },
+ /* 144 */ { "EThorp", 0, 0 },
+ /* 145 */ { "HWilliams", 0, 0 },
+ /* 146 */ { "EWilliams", 0, 0 },
+ /* 147 */ { "LYoung", 0, 0 },
 	// end of characters
- /* 146 */ { "r146", 99, 1 },	/* neverno */
- /* 147 */ { "r147", 99, 1 },	/* neverno */
  /* 148 */ { "r148", 99, 1 },	/* neverno */
  /* 149 */ { "r149", 99, 1 },	/* neverno */
  /* 150 */ { "r150", 99, 1 },	/* neverno */

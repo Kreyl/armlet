@@ -1,5 +1,6 @@
 * text=unset
 
+.git* text eol=lf
 *.c text eol=crlf
 *.cmd text eol=crlf
 *.cpp text eol=crlf
