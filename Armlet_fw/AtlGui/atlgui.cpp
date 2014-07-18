@@ -12,6 +12,8 @@
 #include "gui.h"
 #include "power.h"
 #include "AtlGuiCF.h"
+#include "mesh_lvl.h"
+#include "application.h"
 AtlGui_t AtlGui;
 #define PATH_FOLDER_STR "\\"
 #define PATH_TO_GUI "\\GUI\\"
@@ -67,6 +69,8 @@ void AtlGui_t::Init()
         if(strcmp("intentions",screens[i].name)==0)
             screens[i].screen_switch[7]=ptr_main;
     }
+    //init charname
+    GetCharname();
     //init funcs
     for(int i=0;i<screens_number;i++)
     {
@@ -357,12 +361,21 @@ void AtlGui_t::ButtonIsClicked(int button_id)
 }
 void AtlGui_t::RenderNameTimeBat()
 {
-    Lcd.Printf(0, 5, clGreen, clBlack, "%s %u:%u %u",char_name,time1,time2,Power.RemainingPercent);
+    //timechar
+    if(Mesh.GetAstronomicTime(timechar)==FAILURE)
+        strcpy(timechar,"00.00");
+
+    Lcd.Printf(0, 5, clGreen, clBlack, "%s %s %u",char_name,timechar,Power.RemainingPercent);
     Uart.Printf("T!!!!!!!!!!!!!!!!!! %d",Power.RemainingPercent);
 
 }
-void GetCharname()
+void AtlGui_t::GetCharname()
 {
+    //ID
+    int chsize=sizeof(reasons[App.ID])/sizeof(char);
+    if(chsize>11)
+        chsize=11;
+    strncpy(char_name,reasons[App.ID].name,chsize);
 }
 void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
 {
