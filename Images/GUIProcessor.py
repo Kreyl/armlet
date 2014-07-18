@@ -37,8 +37,6 @@ C_CONTENT = '''\
  * !!! DO NOT EDIT !!!
  */
 
-#include <stddef.h>
-
 #include "gui.h"
 
 const char* buttons = BUTTONS;
@@ -88,7 +86,7 @@ def cScreen(node, indent = ''):
     name = str(node.attrs['id'])
     buttons = dict(cButton(button) for button in node.find_all(class_ = 'button'))
     buttonsText = indent + INDENT + (',\n' + indent + INDENT).join(buttons.get(i, '/* %s */ NO_BUTTON' % BUTTONS[i]) for i in xrange(len(BUTTONS)))
-    nulls = '%s{ %s },\n' % (indent + INDENT, ', '.join(('NULL',) * len(BUTTONS)))
+    nulls = '%s{ %s },\n' % (indent + INDENT, ', '.join(('nullptr',) * len(BUTTONS)))
     return indent + ('{ \"%s\",\n' % name) + nulls + nulls + indent + INDENT + '{\n' + buttonsText + '\n' + indent +'}}'
 
 def main():
