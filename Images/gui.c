@@ -7,29 +7,40 @@
  *
  * !!! DO NOT EDIT !!!
  */
+
+#include <stddef.h>
+
 #include "gui.h"
 
+const char* buttons = BUTTONS;
+
 Screen_t screens[] = {
-    { "main", {
+    { "main",
+        { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+        { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+        {
         /* A */ NO_BUTTON,
-        /* B */ NO_BUTTON,
-        /* C */ NO_BUTTON,
-        /* X */ { "\xec\xf3\xe7\xfb\xea\xe0", 130, 68, buttonIsPressable, buttonGetState, buttonPress },
-        /* Y */ { "^^", 130, 33, buttonIsPressable, buttonGetState, buttonPress },
-        /* Z */ { "vv", 130, 0, buttonIsPressable, buttonGetState, buttonPress },
-        /* L */ { "lock", 4, 0, buttonIsPressable, buttonGetState, buttonPress },
-        /* E */ { "\xfd\xea\xf0\xe0\xed", 59, 0, buttonIsPressable, buttonGetState, buttonPress },
+        /* B */ { "\xc4\xf0\xe0\xea\xe0" /* Драка */, 0, 45, buttonIsPressable, buttonGetState, buttonPress },
+        /* C */ { "\xd1\xe5\xea\xf1" /* Секс */, 0, 82, buttonIsPressable, buttonGetState, buttonPress },
+        /* X */ { "M", 130, 19, buttonIsPressable, buttonGetState, buttonPress },
+        /* Y */ { "^^", 130, 60, buttonIsPressable, buttonGetState, buttonPress },
+        /* Z */ { "vv", 130, 95, buttonIsPressable, buttonGetState, buttonPress },
+        /* L */ { "lock", 4, 110, buttonIsPressable, buttonGetState, buttonPress },
+        /* E */ { "\xfd\xea\xf0\xe0\xed" /* экран */, 59, 111, buttonIsPressable, buttonGetState, buttonPress },
         /* R */ NO_BUTTON
     }},
-    { "intentions", {
+    { "intentions",
+        { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+        { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+        {
         /* A */ NO_BUTTON,
-        /* B */ { "\xd3\xe1\xe8\xe9\xf1\xf2\xe2\xee", 0, 56, buttonIsPressable, buttonGetState, buttonPress },
-        /* C */ { "\xd1\xee\xe7\xe8\xe4\xe0\xed\xe8\xe5", 0, 17, buttonIsPressable, buttonGetState, buttonPress },
-        /* X */ { "\xd7\xf2\xee-\xf2\xee", 109, 74, buttonIsPressable, buttonGetState, buttonPress },
-        /* Y */ { "\xc5\xf9\xb8", 125, 35, buttonIsPressable, buttonGetState, buttonPress },
-        /* Z */ { "\xd0\xe0\xe7\xf0\xf3\xf8\xe5\xed\xe8\xe5", 103, 1, buttonIsPressable, buttonGetState, buttonPress },
-        /* L */ { "lock", 4, 0, buttonIsPressable, buttonGetState, buttonPress },
-        /* E */ { "\xfd\xea\xf0\xe0\xed", 59, 0, buttonIsPressable, buttonGetState, buttonPress },
+        /* B */ { "\xd3\xe1\xe8\xe9\xf1\xf2\xe2\xee" /* Убийство */, 0, 42, buttonIsPressable, buttonGetState, buttonPress },
+        /* C */ { "\xd0\xe0\xe7\xf0\xf3\xf8\xe5\xed\xe8\xe5" /* Разрушение */, 0, 82, buttonIsPressable, buttonGetState, buttonPress },
+        /* X */ { "\xd1\xee\xe7\xe8\xe4\xe0\xed\xe8\xe5" /* Созидание */, 82, 26, buttonIsPressable, buttonGetState, buttonPress },
+        /* Y */ NO_BUTTON,
+        /* Z */ { "\xd1\xec\xe5\xf0\xf2\xfc" /* Смерть */, 105, 99, buttonIsPressable, buttonGetState, buttonPress },
+        /* L */ { "lock", 4, 110, buttonIsPressable, buttonGetState, buttonPress },
+        /* E */ { "\xfd\xea\xf0\xe0\xed" /* экран */, 59, 111, buttonIsPressable, buttonGetState, buttonPress },
         /* R */ NO_BUTTON
     }}
 };

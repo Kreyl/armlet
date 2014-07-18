@@ -36,6 +36,9 @@ C_CONTENT = '''\
  *
  * !!! DO NOT EDIT !!!
  */
+
+#include <stddef.h>
+
 #include "gui.h"
 
 const char* buttons = BUTTONS;
@@ -77,13 +80,16 @@ def cButton(node):
     isPressable = node.attrs.get('isPressable')
     getState = node.attrs.get('getState')
     press = node.attrs.get('press')
-    return (index, '/* %s */ { %s, %d, %d, %s, %s, %s }' % (key, cString(name), left, top, isPressable or 'buttonIsPressable', getState or 'buttonGetState', press or 'buttonPress'))
+    cName = cString(name)
+    comment = (" /* %s */" % name.encode(ENCODING)) if len(cName) > len(name) + 2 else ''
+    return (index, '/* %s */ { %s%s, %d, %d, %s, %s, %s }' % (key, cName, comment, left, top, isPressable or 'buttonIsPressable', getState or 'buttonGetState', press or 'buttonPress'))
 
 def cScreen(node, indent = ''):
     name = str(node.attrs['id'])
     buttons = dict(cButton(button) for button in node.find_all(class_ = 'button'))
     buttonsText = indent + INDENT + (',\n' + indent + INDENT).join(buttons.get(i, '/* %s */ NO_BUTTON' % BUTTONS[i]) for i in xrange(len(BUTTONS)))
-    return indent + ('{ \"%s\", {\n' % name) + buttonsText + '\n' + indent +'}}'
+    nulls = '%s{ %s },\n' % (indent + INDENT, ', '.join(('NULL',) * len(BUTTONS)))
+    return indent + ('{ \"%s\",\n' % name) + nulls + nulls + indent + INDENT + '{\n' + buttonsText + '\n' + indent +'}}'
 
 def main():
     print "Processing %s..." % GUI_HTML

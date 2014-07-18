@@ -2,9 +2,9 @@
 
 #include "gui.h"
 
-int buttonIsPressable(int a, int b) {}
-int buttonGetState(int a, int b) {}
-int buttonPress(int a, int b) {}
+int buttonIsPressable(int num_screen, int num_button) {}
+int buttonGetState(int num_screen, int num_button) {}
+int buttonPress(int num_screen, int num_button, int event) {}
 
 int main() {
     printf("%d screens found\n", screens_number );
