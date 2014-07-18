@@ -169,9 +169,9 @@ void AtlGui_t::ShowSplashscreen()
 #ifdef TEXT_OR_BMP_SCREEN
     Lcd.Printf(11, 11, clGreen, clBlack, "SPLASH SCREEN");
 #else
-   Lcd.DrawBmpFile(0,0,"\\GUI\\splash.bmp");
+   Lcd.DrawBmpFile(0,0,"splash.bmp");
 #endif
-   Sound.Play("\\GUI\\splash.wav");
+   Sound.Play("splash.wav");
 }
 void AtlGui_t::CallStateScreen(int screen_id)
 {
@@ -200,8 +200,9 @@ void AtlGui_t::RenderFullScreen(int screen_id)
     Uart.Printf("RenderFullScreen %s\r",bmp_filename);
     // render it
     Lcd.DrawBmpFile(0,0,bmp_filename);
-    strncpy (char_name,"char_name",10);
-    time1=11;time2=22,bat=Power.RemainingPercent;
+   // strncpy (char_name,"char_name",10);
+   // time1=11;time2=22,
+    bat=Power.RemainingPercent;
     //strncpy( time,"22_11",5);
     //strncpy( bat,"100%",4);
     RenderNameTimeBat();
@@ -252,6 +253,8 @@ void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
                    if(new_b_state!=BUTTON_NO_REDRAW)
                        //return mb???
                    RenderSingleButton(current_state,button_id,new_b_state);
+                   else
+                       return; // нельзя вызвать смену крана кнопкой,которая говорит, что еёэтот вызов не касается
                 }
                 else
                 {
