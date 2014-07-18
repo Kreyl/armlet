@@ -2,7 +2,7 @@
 #
 # GUI Processor for Ticket to Atlantis LARP.
 #
-
+from datetime import datetime
 from os.path import dirname, join, realpath
 from platform import system
 from re import match, split
@@ -18,7 +18,9 @@ isWindows = system().lower().startswith('win')
 
 GUI_HTML = 'GUI.html'
 
-C_TARGET = 'gui.c'
+C_PATH = '../Armlet_fw/AtlGui'
+
+C_TARGET = join(C_PATH, 'gui.c')
 
 ENCODING = "Windows-1251"
 
@@ -35,9 +37,9 @@ C_CONTENT = '''\
  * Generated automatically by GUIProcessor.py from GUI.html
  *
  * !!! DO NOT EDIT !!!
+ *
+ * Generated at %s
  */
-
-#include <stddef.h>
 
 #include "gui.h"
 
@@ -52,7 +54,10 @@ const int screens_number = countof(screens);
 // End of gui.c
 '''
 
-TEST_COMMAND = 'gcc -o test %s test.c && ./test && rm test' % C_TARGET
+TEST_COMMAND = 'gcc -I "%s" -o test "%s" test.c && ./test && rm test' % (C_PATH, C_TARGET)
+
+def currentTime():
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 def getFileName(fileName):
     return join(dirname(realpath(argv[0])), fileName)
@@ -88,7 +93,7 @@ def cScreen(node, indent = ''):
     name = str(node.attrs['id'])
     buttons = dict(cButton(button) for button in node.find_all(class_ = 'button'))
     buttonsText = indent + INDENT + (',\n' + indent + INDENT).join(buttons.get(i, '/* %s */ NO_BUTTON' % BUTTONS[i]) for i in xrange(len(BUTTONS)))
-    nulls = '%s{ %s },\n' % (indent + INDENT, ', '.join(('NULL',) * len(BUTTONS)))
+    nulls = '%s{ %s },\n' % (indent + INDENT, ', '.join(('nullptr',) * len(BUTTONS)))
     return indent + ('{ \"%s\",\n' % name) + nulls + nulls + indent + INDENT + '{\n' + buttonsText + '\n' + indent +'}}'
 
 def main():
@@ -96,7 +101,7 @@ def main():
     soup = BeautifulSoup(open(GUI_HTML))
     screens = soup.find_all(class_ = 'screen')
     with open(getFileName(C_TARGET), 'wb') as f:
-        f.write(C_CONTENT % (',\n'.join(cScreen(screen, INDENT) for screen in screens)))
+        f.write(C_CONTENT % (currentTime(), ',\n'.join(cScreen(screen, INDENT) for screen in screens)))
     if isWindows:
         print "Not running test on Windows\nDone"
     else:

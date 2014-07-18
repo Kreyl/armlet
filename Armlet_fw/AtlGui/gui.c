@@ -6,9 +6,9 @@
  * Generated automatically by GUIProcessor.py from GUI.html
  *
  * !!! DO NOT EDIT !!!
+ *
+ * Generated at 2014-07-18 20:56:26
  */
-
-#include <stddef.h>
 
 #include "gui.h"
 
@@ -16,8 +16,8 @@ const char* buttons = BUTTONS;
 
 Screen_t screens[] = {
     { "main",
-        { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
-        { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+        { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr },
+        { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr },
         {
         /* A */ NO_BUTTON,
         /* B */ { "\xc4\xf0\xe0\xea\xe0" /* Драка */, 0, 45, buttonIsPressable, buttonGetState, buttonPress },
@@ -30,8 +30,8 @@ Screen_t screens[] = {
         /* R */ NO_BUTTON
     }},
     { "intentions",
-        { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
-        { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL },
+        { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr },
+        { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr },
         {
         /* A */ NO_BUTTON,
         /* B */ { "\xd3\xe1\xe8\xe9\xf1\xf2\xe2\xee" /* Убийство */, 0, 42, buttonIsPressable, buttonGetState, buttonPress },

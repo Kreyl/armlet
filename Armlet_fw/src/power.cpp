@@ -11,7 +11,7 @@
 #include "infrared.h"
 #include "usb_f2.h"
 #include "MassStorage.h"
-
+//#define USB_ENABLED
 Pwr_t Power;
 static Thread *PThr;
 
@@ -55,20 +55,24 @@ void Pwr_t::Task() {
         // Check if power src changed
         if(WasExternal and !ExternalPwrOn()) {
             WasExternal = false;
+#ifdef USB_ENABLED
             Uart.Printf("\rExtPwr Off");
             Usb.Shutdown();
             MassStorage.Reset();
             Clk.SetFreq12Mhz();
             Uart.OnAHBFreqChange();
+#endif
         }
         else if(!WasExternal and ExternalPwrOn()) {
             WasExternal = true;
+#ifdef USB_ENABLED
             Uart.Printf("\rExtPwr On");
             Clk.SetFreq48Mhz();
             Uart.OnAHBFreqChange();
             Usb.Init();
             chThdSleepMilliseconds(540);
             Usb.Connect();
+#endif
         }
         //if(IsCharging()) Uart.Printf("\rCharging");
 

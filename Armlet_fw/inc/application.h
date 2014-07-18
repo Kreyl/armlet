@@ -10,7 +10,7 @@
 /*
 void AppInit();
 */
-#include "../MusicProcessor/atlantis_music_tree.h"
+#include "atlantis_music_tree.h"
 #include "kl_lib_f2xx.h"
 
 #if 1 // ==== Timings ====
