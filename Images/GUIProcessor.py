@@ -2,7 +2,7 @@
 #
 # GUI Processor for Ticket to Atlantis LARP.
 #
-
+from datetime import datetime
 from os.path import dirname, join, realpath
 from platform import system
 from re import match, split
@@ -37,6 +37,8 @@ C_CONTENT = '''\
  * Generated automatically by GUIProcessor.py from GUI.html
  *
  * !!! DO NOT EDIT !!!
+ *
+ * Generated at %s
  */
 
 #include "gui.h"
@@ -53,6 +55,9 @@ const int screens_number = countof(screens);
 '''
 
 TEST_COMMAND = 'gcc -I "%s" -o test "%s" test.c && ./test && rm test' % (C_PATH, C_TARGET)
+
+def currentTime():
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 def getFileName(fileName):
     return join(dirname(realpath(argv[0])), fileName)
@@ -96,7 +101,7 @@ def main():
     soup = BeautifulSoup(open(GUI_HTML))
     screens = soup.find_all(class_ = 'screen')
     with open(getFileName(C_TARGET), 'wb') as f:
-        f.write(C_CONTENT % (',\n'.join(cScreen(screen, INDENT) for screen in screens)))
+        f.write(C_CONTENT % (currentTime(), ',\n'.join(cScreen(screen, INDENT) for screen in screens)))
     if isWindows:
         print "Not running test on Windows\nDone"
     else:

@@ -6,6 +6,8 @@
  * Generated automatically by GUIProcessor.py from GUI.html
  *
  * !!! DO NOT EDIT !!!
+ *
+ * Generated at 2014-07-18 20:56:26
  */
 
 #include "gui.h"
