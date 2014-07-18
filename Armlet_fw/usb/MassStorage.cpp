@@ -11,6 +11,7 @@
 #include "MassStorage.h"
 #include "sdc_lld.h"
 #include "evt_mask.h"
+#include "diskio.h"
 
 MassStorage_t MassStorage;
 static uint8_t SByte;
@@ -229,7 +230,7 @@ bool MassStorage_t::CmdRead10() {
         // Fill first buffer
         BlocksToRead = MIN(MS_DATABUF_SZ / MMCSD_BLOCK_SIZE, TotalBlocks);
         BytesToSend = BlocksToRead * MMCSD_BLOCK_SIZE;
-        Rslt = sdcRead(&SDCD1, BlockAddress, Buf1, BlocksToRead);
+        Rslt = SDRead(BlockAddress, Buf1, BlocksToRead);
 //        Uart.Printf("%A\r", Buf1, 50, ' ');
         if(Rslt == CH_SUCCESS) {
             Usb.PEpBulkIn->WaitUntilReady();
@@ -247,7 +248,7 @@ bool MassStorage_t::CmdRead10() {
         if(TotalBlocks != 0) {
             BlocksToRead = MIN(MS_DATABUF_SZ / MMCSD_BLOCK_SIZE, TotalBlocks);
             BytesToSend = BlocksToRead * MMCSD_BLOCK_SIZE;
-            Rslt = sdcRead(&SDCD1, BlockAddress, Buf2, BlocksToRead);
+            Rslt = SDRead(BlockAddress, Buf2, BlocksToRead);
             if(Rslt == CH_SUCCESS) {
                 Usb.PEpBulkIn->WaitUntilReady();
                 Usb.PEpBulkIn->StartTransmitBuf(Buf2, BytesToSend);
@@ -312,7 +313,7 @@ bool MassStorage_t::CmdWrite10() {
             Usb.PEpBulkOut->StartReceiveToBuf(Buf2, BytesToReceive2);
         }
         // Write Buf1 to SD
-        Rslt = sdcWrite(&SDCD1, BlockAddress, Buf1, BlocksToWrite1);
+        Rslt = SDWrite(BlockAddress, Buf1, BlocksToWrite1);
         if(Rslt != CH_SUCCESS) {
             Uart.Printf("Wr1 fail\r");
             return false;
@@ -334,7 +335,7 @@ bool MassStorage_t::CmdWrite10() {
             Usb.PEpBulkOut->StartReceiveToBuf(Buf1, BytesToReceive1);
         }
         // Write Buf2 to SD
-        Rslt = sdcWrite(&SDCD1, BlockAddress, Buf2, BlocksToWrite2);
+        Rslt = SDWrite(BlockAddress, Buf2, BlocksToWrite2);
         if(Rslt != CH_SUCCESS) {
             Uart.Printf("Wr2 fail\r");
             return false;

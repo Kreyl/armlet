@@ -35,7 +35,15 @@ DRESULT disk_write (BYTE, const BYTE*, DWORD, BYTE);
 #endif
 DRESULT disk_ioctl (BYTE, BYTE, void*);
 
-
+// ==== KL's semaphored read/write ====
+#ifdef __cplusplus
+extern "C" {
+#endif
+bool SDRead(uint32_t startblk, uint8_t *buffer, uint32_t n);
+bool SDWrite(uint32_t startblk, const uint8_t *buffer, uint32_t n);
+#ifdef __cplusplus
+}
+#endif
 
 /* Disk Status Bits (DSTATUS) */
 
