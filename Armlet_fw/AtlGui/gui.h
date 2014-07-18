@@ -24,6 +24,7 @@
 #define BUTTON_NOT_PRESSED 5    // Button is pressed but can't be used right now (gray)
 #define BUTTON_ERROR       6    // Bad state for a button
 #define BUTTON_NO_REDRAW   7
+
 #define BUTTON_PRESSABLE 1
 #define BUTTON_LOCKED    3
 

@@ -64,7 +64,7 @@ def createTicket(template, fileName, printName):
     x = (ticket.get_width() - textWidth) // 2
     y = TEXT_VERTICAL_POSITION - textHeight
     ticket.blit(text, (x, y), None, BLEND_RGB_MULT)
-    saveImage(ticket, getFileName('Characters', fileName))
+    #saveImage(ticket, getFileName('Characters', fileName))
     return ticket
 
 def createSheets(tickets, template):
