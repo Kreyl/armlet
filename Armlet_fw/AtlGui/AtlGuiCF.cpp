@@ -2,7 +2,7 @@
 #include "atlgui.h"
 #include "cmd_uart.h"
 #include "gui.h"
-#include "..\MusicProcessor\intention.h"
+#include "intention.h"
 #include "sound.h"
 #define SOUND_STEP 25
 #define MAX_VOL_CONST 256
@@ -78,19 +78,25 @@ int bSoundDownChange(int screen_id, int button_id ,int press_mode)
     Uart.Printf("sound down to %d\r", current_volume_lvl);
     return bSoundDownCheck(screen_id,button_id);
 }
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int buttonIsPressable(int screen_id, int button_id)
-{
-    return BUTTON_PRESSABLE;
+    int buttonIsPressable(int screen_id, int button_id)
+    {
+        return BUTTON_PRESSABLE;
+    }
+    int buttonGetState(int screen_id, int button_id)
+    {
+        return 0;
+    }
+    int buttonPress(int screen_id, int button_id, int press_mode)
+    {
+       return 0;
+    }
+#ifdef __cplusplus
 }
-int buttonGetState(int screen_id, int button_id)
-{
-    return 0;
-}
-int buttonPress(int screen_id, int button_id, int press_mode)
-{
-   return 0;
-}
+#endif
 //reason button
 int bReasonCheck(int screen_id, int button_id)
 {

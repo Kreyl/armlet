@@ -7,6 +7,9 @@ void CallMainToReason();
 void CallReasonToMain();
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 //extern int buttonIsPressable(int, int);
 //extern int buttonGetState(int, int);
 //extern int buttonPress(int, int);
@@ -17,6 +20,10 @@ void CallReasonToMain();
 int buttonIsPressable(int, int);
 int buttonGetState(int, int);
 int buttonPress(int, int,int);
+
+#ifdef __cplusplus
+}
+#endif
 //sound buttons
 int bSoundUpCheck(int screen_id, int button_id);
 int bSoundDownCheck(int screen_id, int button_id);

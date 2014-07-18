@@ -22,7 +22,7 @@
 #include "kl_sd.h"
 #include "sound.h"
 #include "ff.h"
-#include "../MusicProcessor/intention.h"
+#include "intention.h"
 #include "SensorTable.h"
 #include "..\AtlGui\atlgui.h"
 #include "energy.h"
@@ -235,7 +235,7 @@ void App_t::Task() {
             //играть музыку по текущей эмоции
             PlayNewEmo(SICD.last_played_emo,1);
         }
-#if 0 //EVTMASK_RADIO on/off
+#if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
 #ifdef       UART_MESH_DEBUG
         Uart.Printf("App TabGet, s=%u, t=%u\r", SnsTable.PTable->Size, chTimeNow());
@@ -300,9 +300,9 @@ void App_t::Task() {
             }
         }
 #endif
-#if 0 // ==== New second ====
+#if 1 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
-           //  Uart.Printf("New_second!");
+            // Uart.Printf("New_second!");
             AtlGui.AddSuspendScreenTimer(1);
             //UPDATE user intentions timers
             if(UpdateUserIntentionsTime(1))

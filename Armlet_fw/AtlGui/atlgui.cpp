@@ -164,18 +164,18 @@ void AtlGui_t::ReactLockedPress()
 }
 void AtlGui_t::ShowSplashscreen()
 {
-
+//TODO summ path to gui and splash
     is_splash_screen_onrun=1;
 #ifdef TEXT_OR_BMP_SCREEN
     Lcd.Printf(11, 11, clGreen, clBlack, "SPLASH SCREEN");
 #else
-   Lcd.DrawBmpFile(0,0,"splash.bmp");
+   Lcd.DrawBmpFile(0,0,"\\GUI\\splash.bmp");
 #endif
-   Sound.Play("splash.wav");
+   Sound.Play("\\GUI\\splash.wav");
 }
 void AtlGui_t::CallStateScreen(int screen_id)
 {
-
+    Uart.Printf("CALL state SCREEN \r");
    // Lcd.Printf(11, 21, clGreen, clBlack, "STATESCREEN %u", screen_id);
    if(current_state==screen_id)
    {
