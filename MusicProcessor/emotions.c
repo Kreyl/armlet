@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-07-15 19:20:04
+ * Generated at 2014-07-18 18:06:59
  */
 #include "emotions.h"
 
@@ -244,21 +244,21 @@ Reason_t reasons[] = {
  /* 129 */ { "TMalone", 0, 0 },
  /* 130 */ { "UMcGee", 0, 0 },
  /* 131 */ { "FMilligan", 0, 0 },
- /* 132 */ { "JOSullivan", 0, 0 },
- /* 133 */ { "MParcs", 0, 0 },
- /* 134 */ { "MReed", 0, 0 },
- /* 135 */ { "CStanfield", 0, 0 },
- /* 136 */ { "DStanley", 0, 0 },
- /* 137 */ { "TSunday", 0, 0 },
- /* 138 */ { "WThomas", 0, 0 },
- /* 139 */ { "EThorp", 0, 0 },
- /* 140 */ { "HWilliams", 0, 0 },
- /* 141 */ { "EWilliams", 0, 0 },
- /* 142 */ { "LYoung", 0, 0 },
+ /* 132 */ { "AMorientes", 0, 0 },
+ /* 133 */ { "JOSullivan", 0, 0 },
+ /* 134 */ { "MParcs", 0, 0 },
+ /* 135 */ { "MReed", 0, 0 },
+ /* 136 */ { "MRose", 0, 0 },
+ /* 137 */ { "JSherman", 0, 0 },
+ /* 138 */ { "CStanfield", 0, 0 },
+ /* 139 */ { "DStanley", 0, 0 },
+ /* 140 */ { "TSunday", 0, 0 },
+ /* 141 */ { "WThomas", 0, 0 },
+ /* 142 */ { "EThorp", 0, 0 },
+ /* 143 */ { "HWilliams", 0, 0 },
+ /* 144 */ { "EWilliams", 0, 0 },
+ /* 145 */ { "LYoung", 0, 0 },
 	// end of characters
- /* 143 */ { "r143", 99, 1 },	/* neverno */
- /* 144 */ { "r144", 99, 1 },	/* neverno */
- /* 145 */ { "r145", 99, 1 },	/* neverno */
  /* 146 */ { "r146", 99, 1 },	/* neverno */
  /* 147 */ { "r147", 99, 1 },	/* neverno */
  /* 148 */ { "r148", 99, 1 },	/* neverno */
