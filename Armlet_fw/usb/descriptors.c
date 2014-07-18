@@ -6,7 +6,6 @@
  */
 
 #include "descriptors.h"
-//#include "buf_sizes.h"
 
 #if 1 // ==== Endpoints config ====
 const EpCfg_t EpCfg[EP_CNT] = {
@@ -65,7 +64,7 @@ static const ConfigDescriptor_t ConfigDescriptor = {
             wTotalLength:       sizeof(ConfigDescriptor_t),
             bNumInterfaces:     1,
             bConfigurationValue:1,
-            iConfiguration:     0,  // No descriptor
+            iConfiguration:     0,      // No descriptor
             bmAttributes:       0x80,   // USB_CONFIG_ATTR_RESERVED
             bMaxPower:          USB_CONFIG_POWER_MA(100)
         },

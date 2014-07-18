@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html lang="ru">
 <head>
-<meta charset="Windows-1251">
+<meta charset="UTF-8">
 <meta name="Author" content="Vasily Zakharov <vmzakhar@gmail.com>">
 <title>Armlet GUI Test</title>
 <style type="Text/CSS">
@@ -10,30 +10,39 @@ html, body {
   padding: 0;
 }
 
-pre {
-  margin: 0;
-  padding: 1px 2px;
+#case {
+  width: 160px;
+  height: 128px;
+  padding: 13px 89px 47px 89px;
+  background: url('ArmletDemo.png');
+  margin: 5em;
 }
 
 #gui {
   width: 160px;
   height: 128px;
   position: relative;
-  border: 1px solid black;
-  margin: 1em;
+  margin: 0;
   padding: 0;
 }
 
 .screen {
   width: 100%;
   height: 100%;
-  font-family: Courier New, monospace;
-  font-weight: bold;
-  font-size: 14px;
-  color: white;
+  background-color: #ffeeaf;
   margin: 0;
   padding: 0;
   display: none;
+}
+
+.screen pre {
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: -3px;
+  font-family: B52, "DS Moster", "Courier New", monospace;
+  font-size: 14px;
+  color: #3c463c;
 }
 
 .button {
@@ -67,7 +76,7 @@ var DISABLED = 5;
 
 var STATES = ['absent', 'normal', 'pressed', 'not', 'enabled', 'disabled'];
 
-var TITLE = 'CharName   23:59 BB';
+var TITLE = 'FLastname   23:59';
 
 var currentScreen = null;
 
@@ -152,7 +161,7 @@ function main() {
         var pre = document.createElement('pre');
         pre.appendChild(document.createTextNode(TITLE));
         screen.insertBefore(pre, screen.firstChild);
-        screen.style.background = 'url(' + IMAGES + screen.id + '/back.bmp)';
+        screen.style.backgroundImage = 'url(' + IMAGES + screen.id + '/back.bmp)';
         if (i == 1) {
             screen.style.display = 'block';
             currentScreen = i - 1;
@@ -179,24 +188,27 @@ function main() {
 </script>
 </head>
 <body onload="main()">
-  <div id="gui">
-    <div id="main" class="screen">
-      <img class="button" key="L" alt="lock" style="bottom: 0; left: 4px">
-      <img class="button" key="E" alt="экран" style="bottom: 0; left: 59px">
-      <img class="button" key="X" alt="музыка" style="bottom: 68px; left: 130px">
-      <img class="button" key="Y" alt="^^" style="bottom: 33px; left: 130px">
-      <img class="button" key="Z" alt="vv" style="bottom: 0; left: 130px">
+  <div id="case">
+    <div id="gui">
+      <div id="main" class="screen">
+        <img class="button" key="B" alt="Р”СЂР°РєР°" style="top: 45px">
+        <img class="button" key="C" alt="РЎРµРєСЃ" style="top: 82px">
+        <img class="button" key="L" alt="lock" style="left: 4px; top: 110px">
+        <img class="button" key="E" alt="СЌРєСЂР°РЅ" style="left: 59px; top: 111px">
+        <img class="button" key="X" alt="M" style="left: 130px; top: 19px">
+        <img class="button" key="Y" alt="^^" style="left: 130px; top: 60px">
+        <img class="button" key="Z" alt="vv" style="left: 130px; top: 95px">
+      </div>
+      <div id="intentions" class="screen">
+        <img class="button" key="B" alt="РЈР±РёР№СЃС‚РІРѕ" style="top: 42px">
+        <img class="button" key="C" alt="Р Р°Р·СЂСѓС€РµРЅРёРµ" style="top: 82px">
+        <img class="button" key="L" alt="lock" style="left: 4px; top: 110px">
+        <img class="button" key="E" alt="СЌРєСЂР°РЅ" style="left: 59px; top: 111px">
+        <img class="button" key="X" alt="РЎРѕР·РёРґР°РЅРёРµ" style="left: 82px; top: 26px">
+        <img class="button" key="Z" alt="РЎРјРµСЂС‚СЊ" style="left: 105px; top: 99px">
+      </div>
+      <img id="lock" style="left: 63px; top: 44px">
     </div>
-    <div id="intentions" class="screen">
-      <img class="button" key="B" alt="Убийство" style="bottom: 56px">
-      <img class="button" key="C" alt="Созидание" style="bottom: 17px">
-      <img class="button" key="L" alt="lock" style="bottom: 0; left: 4px">
-      <img class="button" key="E" alt="экран" style="bottom: 0; left: 59px">
-      <img class="button" key="X" alt="Что-то" style="bottom: 74px; left: 109px">
-      <img class="button" key="Y" alt="Ещё" style="bottom: 35px; left: 125px">
-      <img class="button" key="Z" alt="Разрушение" style="bottom: 1px; left: 103px">
-    </div>
-    <img id="lock" style="bottom: 44px; left: 63px">
   </div>
 </body>
 </html>

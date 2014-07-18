@@ -235,7 +235,7 @@ void App_t::Task() {
             //играть музыку по текущей эмоции
             PlayNewEmo(SICD.last_played_emo,1);
         }
-#if 1 //EVTMASK_RADIO on/off
+#if 0 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
 #ifdef       UART_MESH_DEBUG
         Uart.Printf("App TabGet, s=%u, t=%u\r", SnsTable.PTable->Size, chTimeNow());
@@ -300,7 +300,7 @@ void App_t::Task() {
             }
         }
 #endif
-#if 1 // ==== New second ====
+#if 0 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
            //  Uart.Printf("New_second!");
             AtlGui.AddSuspendScreenTimer(1);

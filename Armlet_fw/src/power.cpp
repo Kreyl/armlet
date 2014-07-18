@@ -9,6 +9,8 @@
 #include "keys.h"
 #include "peripheral.h"
 #include "infrared.h"
+#include "usb_f2.h"
+#include "MassStorage.h"
 
 Pwr_t Power;
 static Thread *PThr;
@@ -46,24 +48,31 @@ uint8_t Pwr_t::mV2Percent(uint16_t mV) {
     return 0;
 }
 
+__attribute__ ((__noreturn__))
 void Pwr_t::Task() {
-    while(1) {
+    while(true) {
         chThdSleepMilliseconds(PWR_MEASUREMENT_INTERVAL_MS);
         // Check if power src changed
         if(WasExternal and !ExternalPwrOn()) {
             WasExternal = false;
-//            chEvtBroadcast(&IEvtSrcPwrChange);
-            Uart.Printf("ExtPwr Disconnected\r");
+            Uart.Printf("\rExtPwr Off");
+            Usb.Shutdown();
+            MassStorage.Reset();
+            Clk.SetFreq12Mhz();
+            Uart.OnAHBFreqChange();
         }
         else if(!WasExternal and ExternalPwrOn()) {
             WasExternal = true;
-//            chEvtBroadcast(&IEvtSrcPwrChange);
-            Uart.Printf("ExtPwr Connected\r");
+            Uart.Printf("\rExtPwr On");
+            Clk.SetFreq48Mhz();
+            Uart.OnAHBFreqChange();
+            Usb.Init();
+            chThdSleepMilliseconds(540);
+            Usb.Connect();
         }
+        //if(IsCharging()) Uart.Printf("\rCharging");
 
-//        if(IsCharging()) Uart.Printf("Charging\r");
-
-        // ==== ADC ====
+#if 0 // ==== ADC ====
         Adc.Measure();
         uint32_t rslt = 0;
         for(uint8_t i=0; i<ADC_BUF_SZ; i++) rslt += Adc.Result[i];
@@ -78,7 +87,8 @@ void Pwr_t::Task() {
             Power.RemainingPercent = tmp;
             Uart.Printf("Adc=%u; U=%u; %=%u\r", rslt, Power.Voltage_mV, Power.RemainingPercent);
         }
-    }
+#endif
+    } // while
 }
 
 void Pwr_t::Init() {
@@ -87,7 +97,6 @@ void Pwr_t::Init() {
     PinSetupIn(PWR_CHARGING_GPIO, PWR_CHARGING_PIN, pudPullUp);
     PinSetupAnalog(PWR_BATTERY_GPIO, PWR_BATTERY_PIN);
 //    Adc.Init();
-    // Event
     // Create and start thread
     PThr = chThdCreateStatic(waPwrThread, sizeof(waPwrThread), LOWPRIO, (tfunc_t)PwrThread, NULL);
 }

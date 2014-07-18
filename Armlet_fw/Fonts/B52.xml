@@ -1,296 +1,296 @@
 <?xml version="1.0" encoding="utf-8"?>
-<data name="B52" type="font">
+<data type="font" name="B52">
     <family>B52</family>
     <size>13</size>
     <style>Normal</style>
     <widthType>monospaced</widthType>
     <antialiasing>true</antialiasing>
     <string> !"#$%&amp;'()*+,-./0123456789:;&lt;=>?\x0040ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~</string>
-    <converted>D:/Dropbox/Atlantis/Armlet/Fonts/LCDImageConverter/B52.c</converted>
+    <converted>B52.c</converted>
     <chars>
-        <char character=" " code="0020">
+        <char code="0020" character=" ">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAFUlEQVQYlWP8//8/AzbAhFV0REsAAInrAxXjqGv1AAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="!" code="0021">
+        <char code="0021" character="!">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAWklEQVQYlWP8//8/AzbAhFUURWJ7OiNj+nZMiTu3rjAwXLl1B8ZngTFU1HQYrLS8VbDrwGaHipoOqu3/4WDbtm0Izn+4xO0JVgwMaQgpuFG3rx1DcRUjyT4HAE0jQWgvnHrTAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="&quot;" code="0022">
+        <char code="0022" character="&quot;">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAV0lEQVQYlWP8//8/AzbAxMDAwMBwZ6I1Y/r27emMjNYT7yBL3L52zIqBQTUgDaGDhYGBgYFBVSstzNtTheGWFZpRKmoM124zMDAwMOioqUAkGPFbPtgkAM4tFHaaUQHzAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="#" code="0023">
-            <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAYklEQVQYlW2OwRWAMAhD/3MWp2AF747APEzDMh0mHsTWanMKHwigrhaGRStH5+mFb8fAxdPBU3xS+gBShhl4Fr6dSGdS3dFWRcsMB+w89pqA5coTWb8M/Y72xvTju7GKkaQLVb+xJ06+7/0AAAAASUVORK5CYII=</picture>
+        <char code="0023" character="#">
+            <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAYAAABfnvydAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAdUlEQVQYlaWQsQ2DUAwFH8ySUERM8JkgXaZw1jFr0OdnkzRml0tjEKJAQTnJ0sl+siw3ADqgPRqeDMyjhuc7dVDqJhAf6XZN7fW4Zx8qJqF9FScAAUDgxagA4RSrLPy4IRzzSDVSAWjXA7uLpFmvKTVp/v7kF/yBa8Fs4wwtAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="$" code="0024">
+        <char code="0024" character="$">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAlUlEQVQYlXWQsQ3CQAxFf5glpEBM4EEY4bIIAzgtHS09lw2YIEoR3y6PglwACX5lydZ7X24A/cquDmUYxq8NAOEmmQdk9wBAQE7mQU6SpJQBYCeVZTp2bVnkQU7TUt6ocDOz7XhDAUS4m2k1vVBj3/RjK82nK+Gao9bdH+xyHtRpjnK/PaqEWmdNFWmzRc7xIW/+veQJ3HeKwmBdw6gAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="%" code="0025">
+        <char code="0025" character="%">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAcElEQVQYlW2OwQ3DMAwDTx1L2YfzKMtoGWcX9mE3NdrwI+BIUAzbPOn1SH+M6zwiIo7zArBH5R5V27ZpoXYLMhOyhqch1HYLVeUnbpvVk9KObeYZlbPqfsONpQT1qAS1sd0ia7TYB7Dwd/Xateb+6w35j3213PLPEgAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="&amp;" code="0026">
+        <char code="0026" character="&amp;">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAb0lEQVQYlZWPwRGDMAwEz9RDBVeQaSJFqBpRAR3kFaeX5WFDmAwf9iXdnaRRAXTHdKtejHUpZVmvDkBW2ZYcjYNJ0vfz1vzasup/gq45Ms450cI9Yo+iJqBwj2Q9pI7Cox0nbDsa6Nz0w9GgPP58B4jHUlml4pGgAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="'" code="0027">
+        <char code="0027" character="'">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAARklEQVQYlWP8//8/AzbABGdtT2dkZEzfjiFx59YVBgaGK7fuoEuoqOkwMDDoqKlgGKWqZYXdDgYGBgYrLVUYk5GwqwZAAgDCYg9iEgBzHAAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="(" code="0028">
+        <char code="0028" character="(">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAYklEQVQYlWP8//8/AzbAhMK7M9E6fTuU/R8Bbk+wStsG4yBJbJsw4TaChzBq+4ZraipY7Lhzi0FLFZvlt68xIGtASKhqMdy6g01CRY1h1dY7WCQYVLVQZVD9YQV3MbIEihcBERNqnxhW4mwAAAAASUVORK5CYII=</picture>
         </char>
-        <char character=")" code="0029">
+        <char code="0029" character=")">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAYUlEQVQYlWP8//8/AzbABKG2T5x4B6uEpzdDN5rUfxi4PWHCtv8IwIDEvn37NoLDhNVmhB14JbZ3x2+9g0Xizi2GMG8VTIk7W1cxqCHEYc69PcGKIQ3ZtVDnbktDE/7/HwCSq2htMT8ibwAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="*" code="002a">
+        <char code="002a" character="*">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAVElEQVQYlcWO0Q3AIBBCuY6F+5zr6DI6zLkL/VBj0jT9LZ88IJgkvOkCgJ4t1YGezVIdi0hS851jCU1BkhSFT4TtkgToTng7jbXHEoqYDft89Re4AT4PRXqiiCdaAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="+" code="002b">
+        <char code="002b" character="+">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAASElEQVQYlWP8//8/AzbAhFWUQok7E9Mn3sEmcfvarGu3cRh15RaSlv//t6WhGZ+27f///wz/YWBbGkQEChBGqWpZIWtjJNnnANtcLLWG3UsBAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="," code="002c">
+        <char code="002c" character=",">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAASElEQVQYlWP8//8/AzbAhFV0sEjcmWjNaD3xDpLM//////+/PcEKwkvb9h8KUI1KC/BE1fH//7Y0BgYGqwm3YRr+M2AX/v8fACIfPHV5DehwAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="-" code="002d">
+        <char code="002d" character="-">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAALklEQVQYlWP8//8/AzbAhFWUThIME6wwhKwm3P7/H1kibcIEK4jo////GengDwDG1hOkeuyikAAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="." code="002e">
+        <char code="002e" character=".">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAO0lEQVQYlWP8//8/AzbAhFV0kEjcmWjNyMiYvh1J5v//////b0uDcKwm3P4PBRAJmEzaNpj4f0aSfQ4AzqUps5obsrYAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="/" code="002f">
+        <char code="002f" character="/">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAATklEQVQYlW3MURXAMAhD0ehCUPSgBjOIyX620qXlk5vzILvOQGQL9i8isiWDIsCSDL6KQWes+Q5bZYcipjLwiw9YfEERl79w1l/gbS7pAQk17/1ZwamdAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="0" code="0030">
+        <char code="0030" character="0">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAcklEQVQYlZWPuw3DMAxEj5klTmF4AnofzSMvIy/iyuIuL4UUBQjU5Kr7ALyjAZrhMXW/QRy7mZnZfkRPAGp2KRWgpE5QU54rDR+hHx9KUirQOrbXc1K+rH7dEecZkhT35evSymv2cWtwMWZ1tFHY35+/AWMTZa6SG5iFAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="1" code="0031">
+        <char code="0031" character="1">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAY0lEQVQYlZWPsQ2AMAwEH2YxFCgTMFDmgTZTUIVNaMwuR4FAiRQhceVLvn93gFr0zVSSIMc6iRlAPOQ4Lw64O0CpCqNJMrOqY9+StnU9i47a9PBeDFNoz/UjHf4991Z2vz+/APSySu9QyMEGAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="2" code="0032">
+        <char code="0032" character="2">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAXElEQVQYlZWPwQ2AMAwDXcYq+5h1yjJhmLKLeTQkReoHvxKfo8hFElbalm6C6yhD+3k7kdRbBWiSZHwnjK22LslDNAeTvhcRBfIUEUwvgDHd+YcRIBkNRqb8bv4Aujt7rDkey84AAAAASUVORK5CYII=</picture>
         </char>
-        <char character="3" code="0033">
+        <char code="0033" character="3">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAcUlEQVQYlZWPsRWEMAxDlczCFB7h6Bkht45qpqByFqHzMKIIycE7GtRZtt6XkyQ8KT+6ACDJy28srqZ8sdzJ/ZO+tSeC1g+DdoagrvBiAIyh28JZ3GkDc8IHM2gtlIG6rVi3OlrYMk8NrqD99U2vPz8AuvpwdfS1kf8AAAAASUVORK5CYII=</picture>
         </char>
-        <char character="4" code="0034">
+        <char code="0034" character="4">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAY0lEQVQYlWP8//8/AzbAhFUUTeLORGtG64l3oLz/MHB7ghUDAwND2jYIlwFVGCEBNWp7dwHDhNv/t6Wh2HFnorXXlQkL81VQbP+PrAwCrCbcRtgBtwjdcmSNVhNu///PSLLPAciLXaJH2v63AAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="5" code="0035">
+        <char code="0035" character="5">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAb0lEQVQYlZWPsRWDMBBDBeNkBGefYx1nDfrgDTwBj8LnXT6NIVfQRN1JpydpAvSE+ZGVJMBzCoRtAMyS/KjjAvzVyuXYTGYW34Eh/JCy30KA5xQyyvL+9Nuytz7q9rbX9dtVSpEfNdSNIVcE09/LT5ioadUTOFkwAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="6" code="0036">
+        <char code="0036" character="6">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAfUlEQVQYlZWPoRFCMRBE96glE5UK8itg8FhcaCdfgqMDVGgERdLLQ+SHifiGdXdv53bPAO3psLudQFsXM7NlbYMA1BwVc6XmKMVcAQSUNKZJ6v5NEx8ZqQA8dLHrawpP5XaUJHc6x/enbcD5cH92m5wPwbtfqymmnwTs78+/d/hZrYAINUoAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="7" code="0037">
+        <char code="0037" character="7">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAaElEQVQYlZWPuxGAMAxDZWbhqJgg7GOvA8vYi1CR7CKK8MlxaVBlv6dGQhK9DF1aRZhYhImIBVC2xQIAyLwmAOp0rWV1kpdQJ8n2ruLibQV84oq05vt7RNtuxZfz3jFOM/ajvDvk9/ITXKV9MiXRx/4AAAAASUVORK5CYII=</picture>
         </char>
-        <char character="8" code="0038">
+        <char code="0038" character="8">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAeUlEQVQYlZWPsQ0CQQwE574WREQF9xWQUYXr8TfjEqgAEeDrZQl8gkf6hI2stTy7bpI40nLofhdjW1tp3UZZktI73VOSFAYWkhYgn3cu5xMA15vxeI26UNiebiFJfPwJC6uJHbaU3runqGwwz5xFsCjUb8ZEtr8/fwPSLWMsKT2AegAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="9" code="0039">
+        <char code="0039" character="9">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAYUlEQVQYlZVPMRKAMAgLPgv/g9/B1Vc4tY+pf0kHSnXoYqaQkHAISaywLdVpPOcugaOmQzZXAFaSwQpJkMVyCCvo4sZ116iaFQPqLaq+aK6hExlQM3fXsT8Sb1XKpPz+vAMHA2Mor1kBhwAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character=":" code="003a">
+        <char code="003a" character=":">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAW0lEQVQYlaWOwQ2AIBRDW2dRD8YJPvvoOrCMDAO71IP5hgPEgz01bZpXSkJPUzf9VdQUyDM3jSSpRAMAHJdcz2JedwCwbXkH/LhbUyAZUh0wLBZnwE2J1uYaMm5qxUVK89WO3QAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character=";" code="003b">
+        <char code="003b" character=";">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAVklEQVQYlWP8//8/AzbAhFWUQok727ffQZb5//////+3J1gxMDAwWE24/R8GUIzSUVOBsxkJOHd7OiMjIyNj+nY0ie0bZmFogdq1LQ3NcmRXpW37jwAATlZEh/u677oAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="&lt;" code="003c">
+        <char code="003c" character="&lt;">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAUUlEQVQYlaWPsQ2AMBDE/Iz1IzBIsk5qBskPE3Y5iggiojQIl7auOJPEim1p/4fIZpZjDpH3AxxOANSpCVLVgEe/ve5Fb3hpc5DUio+hfX5+AXhYVxCjrnwUAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="=" code="003d">
+        <char code="003d" character="=">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAUklEQVQYlbWOwQ3AIBRC+Z2lU7hBF9Gjq7iM/mE+u+DFNGnqseX4gIBJwk7Hlv5h0J0LeLHiACApWnqmUwvZukvyBBi9A0CtF6SRXwN53I0P7k4PsiHntQkAdQAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character=">" code="003e">
+        <char code="003e" character=">">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAASUlEQVQYlaXPwQ0AEBSD4T5jGYh1TMMwhvkdRDyJi+ix36GpAbolXNsfaNkst0MAoJcoSamyInZqcuhhUiz9BFdumBNuAez5+QC9zmYwO8cAcgAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="?" code="003f">
+        <char code="003f" character="?">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAYklEQVQYlZWPsQ3AIAwEn8zCFF6BnhFgHaaBYRjmUlgiRKHJd/bJr3MAdMp13C4wavDUsQjMZlLp9CJJ1iYAwhc+97KI2DKbqXTYwWz21ADsVpZT/OjGlO3t64dutHeF35/fLyVe19V+GkkAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="\x0040" code="0040">
-            <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAhklEQVQYlXWQsRHCUAxDXzILUHBM4A3omMJTMITnoMcjZIIcRZxdRJEQPhyosu5kS3IniZ9I/6CeWtCMkioMsCgJfaPCsChWFeCZjkUpHRx/HVsEnpLSscajwlaSjvV+Oa+B6jHYcQ/M0wj9FnSeRk6HHcz32+BX3ttszhYlvInUVuz+veQJrlV8Or1OR/kAAAAASUVORK5CYII=</picture>
+        <char code="0040" character="\x0040">
+            <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAYAAABfnvydAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAApUlEQVQYlYWQsQ3CUAxE30eMkjQRE5g9aOnMEpQM8DMCQ/CZACaIaH52OQonIlCEk1xY5zufnSSJFWzWyMXAnVNKpEXt+zEoFReYctUCVdkQXoRPZM0mQGByN3mpymYCL1LNMssKkyLHVRSirXUt4+3C7vygmZNZRwvU15Ptb+qxvzAcrjRjz3HIENZFDgJkNmeJNUS4aL4xieKqLJscPhWi9O/Vb8f8kdKQZeZIAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="A" code="0041">
+        <char code="0041" character="A">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAb0lEQVQYlZWPuxGAMAxDBeNwTMAUVIxgFqGjCWvQEzZgghxF4l1EAYRfGl5nPfvOykgiRZ5MH0KHdtCE0LC6NXzF3Hco4fUt1KOpCzdOlyFJWoFY0kplAndw5CfR5ADUu2O2ssQH4rIYU93Ost/NN21tR8UUaHntAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="B" code="0042">
+        <char code="0042" character="B">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAeUlEQVQYlZWPsRUCMQxDHWa5ihE8AjS3AZ3nMS0jUF2VERghjdjlUyQvUKRBlZ4sWXYBbIXTUjUzA6X/ClEBMJAESnfvBk+NQU8Mp9I9BUZHjahQYya+5Y9LKceu9FdTLx8bsk4aqZlQa52877fn+botzh1XlL8//wBfD2ZhfWm6PgAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="C" code="0043">
+        <char code="0043" character="C">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAcklEQVQYlZWPuRXDMAxDIc3iNB6BK3gPeR0uE3mRPDX0Lt+FpUSFm6AieABgAvSE/NiVJIBw68zMzANAQC2SSp2KexBunUB4uQ/IUjStry61bGt7n93jtzUjS9Knxchy7Gk/RqrwEaWW2XzOa1/R9PfnF2kGdOn/QZfYAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="D" code="0044">
+        <char code="0044" character="D">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAdklEQVQYlZWPsRHDMAhFnz1LzkUuEzAQ81B7ilR4EZ0LoV1IYVlq3ITqwz94nyUzear1cQrgOqSIqGcvMjNdQczdVBCLaaTr3YfppVaAVsu8Xc4Y8Nf24YzWZantNlotvGscwPHd+2aHX4ywQWemBZhxl78//wGFRmCfD11OGQAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="E" code="0045">
+        <char code="0045" character="E">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAiElEQVQYlZWPuxHCUAwE167l2YHHFagDMlehlAYo4rkEOiASFdABQ4DcyxHw8zBO2PA0t3NqJLFFu5kCSFkNMHcDr+GGh9RC2V+kGK/DUZo4TYfKfVmpxr4A/bTjRl9AT8Jfdw8pM/VteEjhNnRQSvlZ1Q0jcJ7nZaWymm+p1RQr/Qerqebvzx9leU3bN97qrQAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="F" code="0046">
+        <char code="0046" character="F">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAi0lEQVQYlWP8//8/AzbAhFWUgYGB4f//2xOsUIWsJtz+/5+JgUEl/yhE0mrCttu3/29LQzZKRU2HIa0mX/X27TueATrXbiPbYaWlur275RYDg6oWw607yJavit/AEMbAwKCSPzNfBUlCp+Zoqdaqa7ehXBZk56jkH52J5FyYO+Au/f//////jCT7HABSsDmhsqZypQAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="G" code="0047">
+        <char code="0047" character="G">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAcElEQVQYlZWPuxGFMAwEz9QCRFQAfVCCKYbEtPEKkIsxvSyBbT4DydtIuhvdjRygL5pP9TT2bXKFadsvI66/OYF5SUPf5hMwP4YEQAqjvAGAwELRHzRSJyVJikvtWeI7qo4o7znZvO4dRSlUw/39+QH6l255dpe+9QAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="H" code="0048">
+        <char code="0048" character="H">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAgklEQVQYlZWPsQ3CUAxELyijoBSICTxIRvAUlAxgWkagovIImQBRxOzyaP5XJJQGNz7dyfbzAGivDruuJHnvEdZlAoIK80y3qPRubwEAFWZRADBKku7X22nVpMeieTteb8VFkp6a/TwdWwIV3ufT21L4xX2tn6YapEVV5/UEhr8//wL8XVZTZ52xSQAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="I" code="0049">
+        <char code="0049" character="I">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAYklEQVQYlZWPuw2AMBBDL8yCqJggA2WeTJMRmCCiwNnlUQSkRDoKXNp3/gTAPCwua2YGKMeRSQXAAEkoR0tFKhK8AvS3fvpgzKhXc8LXbfdbtasepz7qTl5Q0jwgZgHh9/Ib05xLIgDe2+IAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="J" code="004a">
+        <char code="004a" character="J">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAc0lEQVQYlWP8//8/AzbAhFUUSeLORGtGGLCeeAchoeIdZgVTrKOmwsDA8B8JbEuzmnAbykaxQ1WL4dptLJbf2bqKQUsVIXFnojXEQhXvMB1kV92+xjDh9tF8FQYGBgYtNRWYzP///7elwThp2+AOYSTZ5wDyiDxqJXv9lgAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="K" code="004b">
+        <char code="004b" character="K">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAdklEQVQYlZWPsQ0CQQwE919U5e+AiCpcjz+kCyJ3QAcf4etlCO4QJ/EJk3hly7vaBdAZ6+lWktzdu4iwLhJAZJhZFFBh8qyqfoB0z+8YXIZj27fH7XmfMoD0yfvDKrXXIYtKXbe9zR8VI5z0IQD5b4EEWP5u/gbVImgCs6sW1AAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="L" code="004c">
+        <char code="004c" character="L">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAX0lEQVQYlWP8//8/AzbAhFWUgYGBYYIVMs9qwu3/EMAApbelpW37jwygRt25dQW7HbevHcNp+awN2xkYGBjuTLRO344iYaWliqwXm3Ov3LrDwMCQhkUmbdv//4wk+xwAxe04aX0Qy0UAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="M" code="004d">
+        <char code="004d" character="M">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAjklEQVQYlZWPuw3CQBBEny1K4Ry4hOsAoosowSnug+QIaYH8TAdUYG2we72sAwSywAkTzmh+jbuzhXaTBRgAiNnc3S1HYJjcfXdz668XEYN9LUKe/Hz4RKWUgGpdOonWd4eJgGrFVGEWW5cHpDyULsD8srQAs9IxHkf5nvu8l5AGYh9WSo6/F2I2b/5+vgCmDz6nG0tkNwAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="N" code="004e">
+        <char code="004e" character="N">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAhElEQVQYlZWPsRGDQAwED8alYAfMV6AW3Ic6cB/XwqfkViUeAkQv54CfNwGJFWlPGu1okISrGi9TAAiaATBm0lpmTKGTk4xwD2WmBEnhfS9pHpKkEdi3DwCzAuy5lvl+lhtrndd3/tw3YHqUBsuG+npOB0hJAzxOjSShmY979D4Z/v78Cy+iTj4cdi32AAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="O" code="004f">
+        <char code="004f" character="O">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAfElEQVQYlXWQsQ2EMBRDncwCFIgJwgY3SG6d0N4guQ0yQprPLo8CEDkp58ryK2zZAerJd9MW7Nvq1m1/CAA5KiQjR0kxAyDAUgjJ4LQ6vX7yhnjJaumXj3Mo1ZpsmQbJS8O06PN6fyVJVkuYx3bVrWsUukrJUXo2gPt3yQEH02ia8vk1TQAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="P" code="0050">
+        <char code="0050" character="P">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAZ0lEQVQYlZVPsQ2AMAxzEa+wcEI/4BHf05VHcknFQPuLGdpUQuoAXqLYVuwESZhhmbIAYGyTJBBTUQckSSUxJhqJIQ7BvUbQJLWMcuV+ud457hsAuM3hMasTNJ3Hp7p8LeZtFX5//gDEgVQ+k8W6qwAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="Q" code="0051">
+        <char code="0051" character="Q">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAfUlEQVQYlW1OuxGFMAyTMwtQcExg9nHWyWvfFFTJBoxA42FEQQhwF1e2PpaEJHoTuuiXKFEklnaSJLO1W5OTJEHSk8JyU1wrPvil0uRkAPzYdR474eOsL8CPfZkGIADDtAD+W0UklrL9q73+BaBm+tTCHXo3NjNYfhGtU/WcQY9uRCl/6cwAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="R" code="0052">
+        <char code="0052" character="R">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAdElEQVQYlZVPsRGDQAwTGYcRtAyda5rsoayRKhWZAIaIsotS8IHjjhRR4bMty5a7JDjD5bQLALVGiSQppwG2RQBVRRKoqRFJrG3UYmMON963YVy+RZJMqiKw79kV/XVO4v71/GH3/tgYsSWUsxqknHR/f/4By9lW4gwVXaUAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="S" code="0053">
+        <char code="0053" character="S">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAd0lEQVQYlZWPsRGEMAwEpa/lhyJUwkdUYTdCAXZKFUR2JySil/1AgyEg4UKt7uZOAXnS5/F6gZ5VNXeRXusxQM+6zcC8qf726Ru/4MVSI9SSFQdAALyYmcnAAwDuTksicnPco66saLUu0eWoy3r2JRKGTrO+Xv4HT/htVqMob7IAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="T" code="0054">
+        <char code="0054" character="T">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAf0lEQVQYlZWPuw0CMRBE350oxXZgXQXu4ERCRAmO6YPEpRD5GkEOWHoZAiM+wgkvHK1m3k6SGDEPUwBJNX8GqZgkzXC/XXOVaiblWgun8wbsXpc+JvBrWBK+b1gjerDGce9YD0uz50bHSu7tnbeVC3Gsu11acN+6VtKv7vT35w9gakbQlGZR/QAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="U" code="0055">
+        <char code="0055" character="U">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAeklEQVQYlZWPsQ3DMAwEz5rFSiFkAg7iETQPa0+RSl4kUGF5l3chyEihJqyefD6OXCQxqzCdArgBYF7cwMwwb5KQSu5SUvM8ZICYttfa463utc0ZluKPUc9rGO8RDtAqvbuOE8ZOgJi+nwNgpe4PA0kq+UGMo7T8/fkNB/dFEYMqEK4AAAAASUVORK5CYII=</picture>
         </char>
-        <char character="V" code="0056">
+        <char code="0056" character="V">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAgklEQVQYlZWPsQ3DMAwE30ZGkVwYnkCDZAS2WSBDaA4PoA2SCQwXpne5FHICJXATNk/8E/hjB+hs+lNXkuzQlLN9vAICPCcr1CVlB6gBxWSlOQDoJSmOadl2+aoxfpWH2/0q7dsyDeEdXKpEzTEq++MXNwyT9Fy9wT26WiAAur8/fwGvC1YapFQ0/QAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="W" code="0057">
+        <char code="0057" character="W">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAn0lEQVQYlZWPsQ3CMBBFvw0L4JI6SYEygTMBHVM4i2SAYw1XNBwFfSawKHLuKRnhKGykFGn4zen/L72vM6qKLdnNFMDu/Tzsjx/Ttq4mOWfnHCDkPYmqkEdg5eADi6pCVZhFf2KiYiyA5XZ/XAdjzDCOU1yPpzhFEIU5JfRdUxoteASupzItgKbrAUBeM8LlvELlJcGfWgBIS66F+fvzL3CpVxsVPpVXAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="X" code="0058">
+        <char code="0058" character="X">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAbklEQVQYlZWPsQ0CUQxDfexCcyOEYejCIgwQRmCJ3DBhl0fx70dC+g1uYsVW7GyAVrgst5JUYYOY+2RRIAAqPApI92RA58zMln8E0qW2Ax1+3W3V6njc9a79eXt9pjKyzc7wPiefDovwpsX29+dfYJFnfaldWcoAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="Y" code="0059">
+        <char code="0059" character="Y">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAaUlEQVQYlZWPsQ3DQAwD6eySxiNoIM2jaTSCJzBcRNnlXLxjq/gmbASQBHFaAM30mrqS5ONYVPrPSkBAumSeRbpFMSQA0i0y7Cq3gDHz9O8A0lsdaFS2vie438++HdVxocI6/rW3/P35CYjkZtdDh/B1AAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="Z" code="005a">
+        <char code="005a" character="Z">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAbUlEQVQYlZVPsQ2AMAxzewsTJ/QDxM4JuScrI0dQHmEi/GKGtipFXfAWO44dRxI9+C4LACQZpc5BjSTpAdzXGdTMzDQ0jigSs7Hsk2CBaUh6K3zoIlQ6Sr7mAeDYsa1TyhyXecjh77K1rvv9+QNoC3l1x8rCrwAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="[" code="005b">
+        <char code="005b" character="[">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAXUlEQVQYlWP8//8/AzbAxMDAwMBwZ6I1IwRYT7wDkWBBqEnb9n+mJ5oOBgYGhrQAhCiKBFY78ElYaamSouP2tWM6aipYJFS1rK7cukOKDgYGhllejIyMjIzp26F8AEvmFefg8+9YAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="\" code="005c">
+        <char code="005c" character="\">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAXUlEQVQYlW3QyQ3AMAhEUZyy3EL6sNshxQQXQ3r5OTiK8DIXDg+JEQmQXQ6RVlNtqwC45mKMkT6szPIBrkV9B2AlR5KwZBokwlBiAHBV2wKuuZ+a4e+XWF/yXPU+X5EK0QJdxlhcAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="]" code="005d">
+        <char code="005d" character="]">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAaUlEQVQYlWP8//8/AzbAxMDAwMBwZ6I1IwRYT7yDLKGSf/T///+3J1ghdLAg6VbxDrO6pqaCrAMKbl87duXWHSwSDAxWYd5YdNy5dQXdVTidS6bEna2rjiHJ/P//////bWkwbtq2/xAAAP7VKDynf6aGAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="^" code="005e">
+        <char code="005e" character="^">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMUlEQVQYlWP4DwHb0hgYrCbc/g8HDDBRCEjbhiSxLQ3GR9bG+P//fwZsgAmr6NCTAADdDzXYM9t8TgAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="_" code="005f">
+        <char code="005f" character="_">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAM0lEQVQYlWP8//8/AzbAhFV0OElsT2dkZEzfDuPfmThxOwPD9okT0RVaTZiQxsDAkLYNAIm1DLxu7KnFAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="`" code="0060">
+        <char code="0060" character="`">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAANUlEQVQYlWP8//8/AzbAxMDAwMCwPZ2R0XriHRSZ/xCwLY3BasLt/wjAgGCiyjHit2PISAAAEVgyMyh4H1kAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="a" code="0061">
+        <char code="0061" character="a">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAWklEQVQYlZ2PuxHAIAxD7Yxl9tE8Zo308QhZAnYRBZ+joEnUWU86n5SknHQd3Z+g5qRTKdcF6nO/5oUkA3uFAXjx4SE4JMVtRMxsB1ixgIgA6OfWmMX+UD8vb4VRQaZXsSk7AAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="b" code="0062">
+        <char code="0062" character="b">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAfUlEQVQYlZWPsQ3DMAwEySCjGCmCTEBPoCnS0evQpReRJ/AGriLtcimUGEagJqwePP4/qID05tLdNrBOqqo6rb8gLZSwftRwe9hd5lFVx7k2AgDZRcQs3EU8A1wPr+dtSVJlf76qpOFwtDsgu0WBDyhhFuUszh3fSAD078/fmmBXtf9zclcAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="c" code="0063">
+        <char code="0063" character="c">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAZElEQVQYlaWPsRHCQBAD990LCSXc9/O0c26DnHcHNPHuZUls48AJg0KtRhoVlStNl+6fYJlrfSxfojoyAFpmEDlURUdG66raGztBeztiJ01wu8f7+VoBWOdatqHTBnA0WX5+/gGU9U+doCb6uwAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="d" code="0064">
+        <char code="0064" character="d">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAbklEQVQYlWP8//8/AzbAhFUUWeLORGtGRkbriXdgAv+Rwba0tG1QJhNcQ/rEOwyqAQGqSDpuT7CCG42s487WVToQLrIKJgaG29eOQTkqajpXbt2BS6hqWUG4dya2zEK4F+IYVD+kbfv/n5FknwMAfMhNaKNrGDkAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="e" code="0065">
+        <char code="0065" character="e">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAX0lEQVQYlaWPsQ2AMAwE35kFUTHBs09YxylZJAwTdnmKJCChNIjr7PfZsknCiDDs/guOzWxN55NIKk4AZCQRsyqQlCNAL22iRehC5RYUgGle6KWWO1K/I7VlL8U+f34Bya5L3TDaGK0AAAAASUVORK5CYII=</picture>
         </char>
-        <char character="f" code="0066">
+        <char code="0066" character="f">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAX0lEQVQYlZWPsRWAQAhDo7vYOMK5D64Dy+AGjmCDu8RCPdF3jb8kgYSOJFr0zelXWMxsnmwHAPDGBeIkXYoGWYVQdSZweiviSbguFY20kcLXLdqtyjjkiu+IJ6X7/fkBLidiFT/Vh7EAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="g" code="0067">
+        <char code="0067" character="g">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAf0lEQVQYlaWOsRGDMBAETx7KoQKpCToge5pwEVLo0Klznl786mUdgAN7yLhwb272EqCz3E7ptaK3kpbWu7altC4NB99WPZnWMicpjyEJALdcAyBqdQAQEDVLViNws4MzSH19jc70LnMa7zy+UsDt91CuAdr5odh9Mt8d/wtz4AOULV744+1gigAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="h" code="0068">
+        <char code="0068" character="h">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAfElEQVQYlZWPuw3DMBBDeYJHiVMYnkA3gReR2wyRAaLSnsLVeREhhaBdmMIGDP+KsCTvwEchiSu5SxeAi6qqGsspIS0gGI9yQN345WbuRfp563g8W+SoIu/kMU5rUgElp/EFI7sStf7uqIINHZbfW9yUV8CPP28IRsrfy38T+zjnErfbewAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="i" code="0069">
+        <char code="0069" character="i">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAWUlEQVQYlWP8//8/AzbAhFUUWeLORGvG9O1YJG5fO4ah485Ea0ZGr1loZv2HgdsTrNK2wXn/EZbfvsagpYrdVceu3cbmqltX0O3YloYqYjXh9v///xlJ9jkAWIEyRI5hpyUAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="j" code="006a">
+        <char code="006a" character="j">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAbklEQVQYlYWPwQ2AMAwDG2ZBvJgg3adZhAHaZcoGTFDxINnFPKqCgEr451jyOQTA9TR0r+/AkiRrBrc0snMhV0M/DEueqmT9VgEamaMCAD6r5mnszy2HdQLdtyfckicSkaVwq6rwHFzI0MjXGzgBndFRS4jv2cAAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="k" code="006b">
+        <char code="006b" character="k">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAgklEQVQYlWP8//8/AzbAhFWUgYGBKd3a2jp9O6YE85l9+758OCFiYSGEbpSKihouO1TV1BgYGO5MtGZkZEyfeOcOAwMDAwMLA8OdrS0b1Dw9GRjCbv8/qgLX8v//7QlWEGbatv8IwIQQ2sbQMvEOwhKYcisrKIPBasLt////M5LscwB2qTYu931KCAAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="l" code="006c">
+        <char code="006c" character="l">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAZUlEQVQYlWP8//8/AzbAhFUUInFnojUjY3p6OqP1xDtIMv8hYNsEK6u0bf8RgAUq7+kdtoFBFZsdKt5a17bewSJxZ+sqBjUVrK7S0cJq1O1rs67dRnbv//+3J1ih+ADiOEaSfQ4A2QEz0YJ+3KgAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="m" code="006d">
+        <char code="006d" character="m">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAgklEQVQYlZ2PoRHCQBREXxhKCYgMFfwOMhgUJfxIWjmbLjB8KqCDm4jL9bKIRETEwMp94u02ktjLYbf9CxAOluZwPBQOeEgSksLBzABLybE0SzpCLdnjMzIMjI++Mr1WR3u+AJy6/HzDTHdtF1BLXnT3W08t0ypPBmDutlnkoebn518uDDWK3IvR0AAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="n" code="006e">
+        <char code="006e" character="n">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAa0lEQVQYlZ2PsQ2AMAwE35kFKCImCBOwiLOOKVkkWQTRhF2eIoEqDXx18kl+vZBEL657/SdyFJGYAVzbIst2PYbFQqVgpkCwQpIEm9FEkkkb0AHDNEPTvgLA6NWPvfJyHg/qC9bK6i/5vPwGkqEzyLeuRXAAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="o" code="006f">
+        <char code="006f" character="o">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAaklEQVQYlaWPsQ3CMBRE388uaRjB7OOs4zno42yQCRBF7F0eBUoAKQ3iuruT7ulC5UzDafpPsUwREddp6UejWjOQq60kUmmqoq2k3Vkz5Ko6QHusn+PpMr4Z623uAH27fzFeEGDfUePn509w80EHmP0S+wAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="p" code="0070">
+        <char code="0070" character="p">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAcklEQVQYlZ2OsQ2AIBRE7zsWTmDnFLAOto5gZaNswATGws8uZwFEE6m88t0l74QkWuma9F8RnIiICwhORPop1YYkd/ssjVeSZAcgXQdg9zyJy5beDjsOX7meEfMaComnVod681EQ2W28qhZUiteh7C+5AQJSVHYwSOsTAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="q" code="0071">
+        <char code="0071" character="q">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAbElEQVQYlbWMsRVAQBBEl1oQeCpYFWhACVSgj5MqQSRBB0qQ7PXyJZzApX42899MAkiMNNr+IPxYJzf16IPY+3xuDdi6z1VVZCLSDE6P04LIS52WXUT8Oh/vBMCchtxtACA8mBnmNCLemTrjAo2lRtePR7wWAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="r" code="0072">
+        <char code="0072" character="r">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAX0lEQVQYlWP8//8/AzbAhFWULAmG////b0tjYGBgSNuGzPrP+P//f4Y7d+7c7lbdwJB2Rav0qPdW63iGhUcZ/kPA7QlWEJUwgGSHlZYqFstV1HQwLIfYCAMw8xhJ9jkApNQ/ui1p36sAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="s" code="0073">
+        <char code="0073" character="s">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAZklEQVQYlZ2PsRWAIBBD79xFC54T4BJOwTw4Aq2VjUxiB7t8C+BZSKOpcpf8IgpIT0P3+ysQIHlbvHXOuggAg0g+97lcwVxixhfRug+RpgCwHqqqy5YbEZ2I9QmKrWANmmoB0M/Lb6lXU4WZtbCrAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="t" code="0074">
+        <char code="0074" character="t">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAZElEQVQYlZWPsRGAIBAEH8vCCjSyiqcdYqswgkaIxF7WAJ0BBgM3vPvbmTeAjJiGaVVEZ1z8WKTzqhsI2jg0ACAUsrdvVKhUui2tCig+DRDU+twtJB1uXvduQfZWROS5B/P78xu8hU/hEavtxwAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="u" code="0075">
+        <char code="0075" character="u">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAZklEQVQYlWP8//8/AzbAhFWUPIl0Rsb07QwMDAx3JlpDWRBwe4IVA0Patv//////f3uCFZT1/z+TSn5NmpWWKkTRtWNY7bhz6wpWy7d3FxxjmLUBZs3//7cnWKG5KG3b//+MJPscAP16LgaVyUksAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="v" code="0076">
+        <char code="0076" character="v">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAaElEQVQYlZ2PsQ2AMAwEP4hRIiom8AgMQEtn1vEKLJERGIHGwzyFlQikNPCNT//SSU4k0cvQbX8N0AZmEiTmJEgWhRaSdJMAxkA3EfN6IiMA5Gk+l22/gPXIVR170SZ/qsL26pk+f34D5mRbbQLNvGEAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="w" code="0077">
+        <char code="0077" character="w">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAeElEQVQYla2PsRGDUAxDZWaxG0bInyCLQBkGoMwA/29CE3sTCswuSgEpckeTu6iTXvFOQhJX6S7Xf4C9FSltB9C1ImMAMcq5DPNDAYD0WpMk3Z1Zq5MkKWRGwJC4I8PMVPV0KBazBQpsW37Jrb8dZZ2erw+Qn5+/AVlvM4RmqYGVAAAAAElFTkSuQmCC</picture>
         </char>
-        <char character="x" code="0078">
+        <char code="0078" character="x">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAaElEQVQYlaWPuw2AMBBDMbtAwQjJEmxAB0swRLIJVdiE5rLLowi/ggbh5iw/6SwLqN5Uv6Z/QY5TzDdYJ0mSj9narhokf1AALDgXwuiCgZkBFACkEl+qy3evpZ+3xj9KxvOmdFtAn5fvSutECLoPzigAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="y" code="0079">
+        <char code="0079" character="y">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAeklEQVQYlZ2OsRHCMAxFP8ziUDCCV6BhCrtkEBp7E5oom1BE3uVRkPjMXSpeI+nrdE8nQEecD9O/F0vOudYmafkWSRJ4iZKkZGBp78SGmQG4mQPQHdP6qq3V5zqFX3m4Xd/zfLk/Qnd0LMXi+7DJY3EvccgZvlKy4fwDvY1r1PSOCiwAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="z" code="007a">
+        <char code="007a" character="z">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAdklEQVQYlZ2QsQ3CQAxFfYhRIqpM4JuARTIFQzglK6TPZQOG4N8uL8WFAFJoeJXtp29ZToAdcTqc/i+WMee0kce6i/qc+hso3Mz7S0uc92ydp4eH7teu9TQUbh5CEQUA47UjBJRhKzAow9c5bwFIQhIfpF8vWQE2qFkWXxf0MgAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="{" code="007b">
+        <char code="007b" character="{">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAcUlEQVQYlXWOwQ2AIAxFf42jEE9OwAYuAkdP7sEKLoEbOIHxAOzyvRBAg+/SNk37vpBEj6F0hxUREXvkmRlvAONZqBfQblt6r3DeseNI4cIVUrMhSUanAe0ivw617k7/xf0w5qqmeYbqy99uVJ03aBI89K5QTvpeWHYAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="|" code="007c">
+        <char code="007c" character="|">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAN0lEQVQYlWP8//8/AzbABGNsnzjxDlYJnDoYrl27TaIO3BJXbt3BLqGjpkIdO1S1tFAkGHEFCQBc8w7GjV6+UgAAAABJRU5ErkJggg==</picture>
         </char>
-        <char character="}" code="007d">
+        <char code="007d" character="}">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAa0lEQVQYlWP8//8/AzbAxMDAwMBwZ6I1IyNj+nZkmf9wsC2NwWrCbRiPBaHEMyBtA4MKqlEwcOXWHawSWmHeWHV4ql1TtZ4I04Niedo2OA9Jh6pWmpYqAzajGK5cu41dAgXAjGdgYEC24j8AMNlMvrZFEvUAAAAASUVORK5CYII=</picture>
         </char>
-        <char character="~" code="007e">
+        <char code="007e" character="~">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAPElEQVQYlb2PMQEAIAzDUmQxP+hhZmaGeSkGuMmZXJFtXoyn/Rg6Q5IU2Z0hRTZg14JVPnsCMPexbX34uK1YGTFWI1TEAAAAAElFTkSuQmCC</picture>
         </char>
     </chars>

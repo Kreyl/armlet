@@ -82,7 +82,11 @@ void Usb_t::Init() {
 }
 
 void Usb_t::Shutdown() {
+    chSysLock();
     OTG_FS->PCGCCTL |= PCGCCTL_STPPCLK | PCGCCTL_GATEHCLK; // Stop PHY clock, gate HCLK
+    rccDisableOTG_FS(FALSE);
+    IsReady = false;
+    chSysUnlock();
 }
 
 void Usb_t::IDeviceReset() {
@@ -286,7 +290,7 @@ EpState_t Usb_t::DefaultReqHandler(uint8_t **PPtr, uint32_t *PLen) {
                 IsReady = true;
                 if(PThread != nullptr) {
                     chSysLockFromIsr();
-                    chEvtSignalI(PThread, EVTMASK_USB_READY);
+                    chEvtSignalI(PThread, EVTMSK_USB_READY);
                     chSysUnlockFromIsr();
                 }
                 return esOutStatus;
@@ -370,9 +374,7 @@ void Usb_t::IIrqHandler() {
     // Enumeration done
     if(irqs & GINTSTS_ENUMDNE) { (void)OTG_FS->DSTS; }
     // RX FIFO not empty
-    if(irqs & GINTSTS_RXFLVL) {
-        IRxHandler();
-    }
+    if(irqs & GINTSTS_RXFLVL) {  IRxHandler(); }
     // OUT & IN event handling
     if(irqs & GINTSTS_IEPINT) {
         uint32_t src = OTG_FS->DAINT;
@@ -514,7 +516,7 @@ void Usb_t::IRxHandler() {
                     Ep[EpID].PtrOut += Len;
                     return;
                 }
-                Uart.Printf("flush\r");
+                Uart.Printf("\rUSB flush");
                 RxFifoFlush();
             }
             break;

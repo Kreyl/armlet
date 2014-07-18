@@ -24,26 +24,30 @@
 #include "mesh_lvl.h"
 
 #include "ff.h"
+#include "MassStorage.h"
+
 #include "flashloader_support.h"
 
 #include "application.h"
 #include "atlantis_music_tree.h"
 #include "..\AtlGui\atlgui.h"
+
 static inline void Init();
 #define CLEAR_SCREEN_FOR_DEBUG
 //#define UART_MESH_DEBUG
 #define UART_EMOTREE_DEBUG
 int main() {
     // ==== Setup clock ====
+    Clk.UpdateFreqValues();
     uint8_t ClkResult = 1;
-    Clk.SetupFlashLatency(16);  // Setup Flash Latency for clock in MHz
+    Clk.SetupFlashLatency(12);  // Setup Flash Latency for clock in MHz
     // 12 MHz/6 = 2; 2*192 = 384; 384/8 = 48 (preAHB divider); 384/8 = 48 (USB clock)
     Clk.SetupPLLDividers(6, 192, pllSysDiv8, 8);
     // 48/4 = 12 MHz core clock. APB1 & APB2 clock derive on AHB clock
     Clk.SetupBusDividers(ahbDiv4, apbDiv1, apbDiv1);
     if((ClkResult = Clk.SwitchToPLL()) == 0) Clk.HSIDisable();
     Clk.UpdateFreqValues();
-    Clk.LSIEnable();        // To allow RTC to run
+    Clk.LSIEnable();        // To allow RTC to run //FIXME is it required?
 
     // ==== Init OS ====
     halInit();
@@ -61,15 +65,22 @@ int main() {
 
 void Init() {
     Uart.Init(256000);
-    Uart.Printf("\rAtlantis Armlet");
+    Uart.Printf("\rAtlantis   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
+//    Uart.Printf("\r%X", clAtlFront);
+
 
     SD.Init();
     // Read config
     iniReadUint32("Radio", "ID", "settings.ini", &App.ID);
     Uart.Printf("\rID=%u", App.ID);
 
-//    Lcd.Init();
-#ifndef CLEAR_SCREEN_FOR_DEBUG
+    Lcd.Init();
+    Lcd.Cls(clAtlBack);
+//    Lcd.Printf(Impact, 45, 54, clAtlFront, clAtlBack, "Aiya Feanaro!");
+//    Lcd.Printf(Impact, 45, 65, clGreen, clBlack, "Aiya Feanaro!");
+//    Lcd.Printf(Impact, 45, 76, clBlue, clBlack, "Aiya Feanaro!");
+
+    #ifndef CLEAR_SCREEN_FOR_DEBUG
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
 #endif
 //    Lcd.DrawBmpFile(0, 0, "splash.bmp");
@@ -84,26 +95,20 @@ void Init() {
 
 //    IR.TxInit();
 //    IR.RxInit();
+    MassStorage.Init();
     Power.Init();
-    //Power.Task();
 
 //    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
 
     Sound.Init();
     Sound.SetVolume(START_VOL_CONST);
 
-    Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
-
 //    PillMgr.Init();
+//    Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
 
     App.Init();
 //    AtlGui.Init();
 
 //    rLevel1.Init(ID);
 //    Mesh.Init(ID);
-
-    // Common Timers
-//    chSysLock();
-//    chVTSetI(&App.TmrPillCheck, MS2ST(T_PILL_CHECK_MS),    TmrPillCheckCallback, nullptr);
-//    chSysUnlock();
 }
