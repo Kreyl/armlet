@@ -80,7 +80,7 @@ void Init() {
     #ifndef CLEAR_SCREEN_FOR_DEBUG
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
 #endif
-//    Lcd.DrawBmpFile(0, 0, "\\GUI\\splash.bmp");
+//    Lcd.DrawBmpFile(0, 0, "splash.bmp");
 //    Lcd.DrawBmpFile(100, 18, "GUI/intentions/enabled/X.bmp");
 
  //   Init_emotionTreeMusicNodeFiles_FromFile(filename);
@@ -102,7 +102,7 @@ void Init() {
 
 //    PillMgr.Init();
 //    Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
-
+#if 1
     Init_emotionTreeMusicNodeFiles_FromFileIterrator();
     App.Init();
     AtlGui.Init();
@@ -110,5 +110,10 @@ void Init() {
     rLevel1.Init(App.ID);
     Mesh.Init(App.ID);
 
+<<<<<<< HEAD
     Uart.Printf("\rInit done");
+=======
+    Uart.Printf("mAIN INIT DONE\r");
+#endif
+>>>>>>> 6defb1ce2e15b926a2cc70d158a1275fbdc3db3a
 }

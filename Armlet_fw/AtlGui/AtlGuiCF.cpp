@@ -92,7 +92,9 @@ extern "C" {
     }
     int buttonPress(int screen_id, int button_id, int press_mode)
     {
-       return 0;
+        if(press_mode!=0)
+            return BUTTON_NO_REDRAW;
+       return BUTTON_NORMAL;
     }
 #ifdef __cplusplus
 }
