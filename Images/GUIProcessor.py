@@ -73,11 +73,11 @@ def cButton(node):
     index = BUTTONS.index(key)
     styles = dict(split(' *: *', pair) for pair in split(' *; *', str(node.attrs['style'])))
     left = getInt(styles.get('left'))
-    bottom = getInt(styles.get('bottom'))
+    top = getInt(styles.get('top'))
     isPressable = node.attrs.get('isPressable')
     getState = node.attrs.get('getState')
     press = node.attrs.get('press')
-    return (index, '/* %s */ { %s, %d, %d, %s, %s, %s }' % (key, cString(name), left, bottom, isPressable or 'buttonIsPressable', getState or 'buttonGetState', press or 'buttonPress'))
+    return (index, '/* %s */ { %s, %d, %d, %s, %s, %s }' % (key, cString(name), left, top, isPressable or 'buttonIsPressable', getState or 'buttonGetState', press or 'buttonPress'))
 
 def cScreen(node, indent = ''):
     name = str(node.attrs['id'])
