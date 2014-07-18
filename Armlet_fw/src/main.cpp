@@ -76,9 +76,6 @@ void Init() {
 
     Lcd.Init();
     Lcd.Cls(clAtlBack);
-//    Lcd.Printf(Impact, 45, 54, clAtlFront, clAtlBack, "Aiya Feanaro!");
-//    Lcd.Printf(Impact, 45, 65, clGreen, clBlack, "Aiya Feanaro!");
-//    Lcd.Printf(Impact, 45, 76, clBlue, clBlack, "Aiya Feanaro!");
 
     #ifndef CLEAR_SCREEN_FOR_DEBUG
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);

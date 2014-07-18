@@ -30,6 +30,8 @@ extern SDCDriver SDCD1;
 extern RTCDriver RTCD1;
 #endif
 
+
+
 /*-----------------------------------------------------------------------*/
 /* Correspondence between physical drive number and physical drive.      */
 
@@ -37,6 +39,28 @@ extern RTCDriver RTCD1;
 #define SDC     0
 
 
+// ====================== KL's semaphored read/write ===========================
+static Semaphore semSDRW;
+
+bool SDRead(uint32_t startblk, uint8_t *buffer, uint32_t n) {
+    msg_t msg = chSemWaitTimeout(&semSDRW, (systime_t)_FS_TIMEOUT);
+    if(msg == RDY_OK) {
+        bool rslt = sdcRead(&SDCD1, startblk, buffer, n);
+        chSemSignal(&semSDRW);
+        return rslt;
+    }
+    else return false;
+}
+
+bool SDWrite(uint32_t startblk, const uint8_t *buffer, uint32_t n) {
+    msg_t msg = chSemWaitTimeout(&semSDRW, (systime_t)_FS_TIMEOUT);
+    if(msg == RDY_OK) {
+        bool rslt = sdcWrite(&SDCD1, startblk, buffer, n);
+        chSemSignal(&semSDRW);
+        return rslt;
+    }
+    else return false;
+}
 
 /*-----------------------------------------------------------------------*/
 /* Inidialize a Drive                                                    */
@@ -45,6 +69,9 @@ DSTATUS disk_initialize (
     BYTE drv                /* Physical drive nmuber (0..) */
 )
 {
+    // Init RW semaphore
+    chSemInit(&semSDRW, 1);
+
   DSTATUS stat;
 
   switch (drv) {
@@ -136,10 +163,8 @@ DRESULT disk_read (
     return RES_OK;
 #else
   case SDC:
-    if (blkGetDriverState(&SDCD1) != BLK_READY)
-      return RES_NOTRDY;
-    if (sdcRead(&SDCD1, sector, buff, count))
-      return RES_ERROR;
+    if (blkGetDriverState(&SDCD1) != BLK_READY) return RES_NOTRDY;
+    if (SDRead(sector, buff, count)) return RES_ERROR;
     return RES_OK;
 #endif
   }
@@ -179,10 +204,8 @@ DRESULT disk_write (
     return RES_OK;
 #else
   case SDC:
-    if (blkGetDriverState(&SDCD1) != BLK_READY)
-      return RES_NOTRDY;
-    if (sdcWrite(&SDCD1, sector, buff, count))
-      return RES_ERROR;
+    if (blkGetDriverState(&SDCD1) != BLK_READY) return RES_NOTRDY;
+    if (SDWrite(sector, buff, count))  return RES_ERROR;
     return RES_OK;
 #endif
   }
@@ -252,6 +275,3 @@ DWORD get_fattime(void) {
     return ((uint32_t)0 | (1 << 16)) | (1 << 21); /* wrong but valid time */
 #endif
 }
-
-
-
