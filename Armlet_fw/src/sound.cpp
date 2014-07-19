@@ -46,38 +46,41 @@ static WORKING_AREA(waSoundThread, 512);
 __attribute__((noreturn))
 static void SoundThread(void *arg) {
     chRegSetThreadName("Sound");
-    while(1) Sound.ITask();
+    Sound.ITask();
 }
 
+__attribute__((noreturn))
 void Sound_t::ITask() {
-    eventmask_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
-    // Play new request
-    if(EvtMsk & VS_EVT_COMPLETED) {
-//        Uart.Printf("\rcmp");
-        AddCmd(VS_REG_MODE, 0x0004);    // Soft reset
-        if(IFilename != NULL) IPlayNew();
-        else if(IPThd != nullptr) chEvtSignal(IPThd, EVTMASK_PLAY_ENDS);  // Raise event if nothing to play
-    }
-    // Stop request
-    else if(EvtMsk & VS_EVT_STOP) {
-//        Uart.Printf("\rStop");
-        PrepareToStop();
-    }
-    // Data read request
-    else if(EvtMsk & VS_EVT_READ_NEXT) {
-        FRESULT rslt = FR_NO_FILE;
-        bool EofAtStart = f_eof(&IFile);
-        // Read next if not EOF
-        if(!EofAtStart) {
-            if     (Buf1.DataSz == 0) { /*Uart.Printf("1"); */rslt = Buf1.ReadFromFile(&IFile); }
-            else if(Buf2.DataSz == 0) { /*Uart.Printf("2"); */rslt = Buf2.ReadFromFile(&IFile); }
+    while(true) {
+        eventmask_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+        // Play new request
+        if(EvtMsk & VS_EVT_COMPLETED) {
+    //        Uart.Printf("\rcmp");
+            AddCmd(VS_REG_MODE, 0x0004);    // Soft reset
+            if(IFilename != NULL) IPlayNew();
+            else if(IPThd != nullptr) chEvtSignal(IPThd, EVTMASK_PLAY_ENDS);  // Raise event if nothing to play
         }
-        // Check if was EOF or if error occured during reading. Do not do it if EOF occured during reading.
-        if((rslt != FR_OK) or EofAtStart) {
+        // Stop request
+        else if(EvtMsk & VS_EVT_STOP) {
+    //        Uart.Printf("\rStop");
             PrepareToStop();
         }
-        else StartTransmissionIfNotBusy();
-    }
+        // Data read request
+        else if(EvtMsk & VS_EVT_READ_NEXT) {
+            FRESULT rslt = FR_NO_FILE;
+            bool EofAtStart = f_eof(&IFile);
+            // Read next if not EOF
+            if(!EofAtStart) {
+                if     (Buf1.DataSz == 0) { /*Uart.Printf("1"); */rslt = Buf1.ReadFromFile(&IFile); }
+                else if(Buf2.DataSz == 0) { /*Uart.Printf("2"); */rslt = Buf2.ReadFromFile(&IFile); }
+            }
+            // Check if was EOF or if error occured during reading. Do not do it if EOF occured during reading.
+            if((rslt != FR_OK) or EofAtStart) {
+                PrepareToStop();
+            }
+            else StartTransmissionIfNotBusy();
+        }
+    } // while true
 }
 
 void Sound_t::Init() {

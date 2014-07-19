@@ -125,11 +125,11 @@ void AtlGui_t::TurnOnScreen()
 {
     if(!is_screen_suspended)
     {
-        Uart.Printf("AtlGui_t::TurnOffScreen already turned on \r");
+        Uart.Printf("\rAtlGui_t::TurnOffScreen already turned on");
         return;
     }
     is_screen_suspended=false;
-    Uart.Printf("AtlGui_t::TurnOffScreen  turn on \r");
+    Uart.Printf("\rAtlGui_t::TurnOffScreen  turn on");
     Lcd.SetBrightness(100);
     screen_suspend_timer=0;
 }
@@ -137,11 +137,11 @@ void AtlGui_t::TurnOffScreen()
 {
     if(is_screen_suspended)
     {
-        Uart.Printf("AtlGui_t::TurnOffScreen already turned off \r");
+        Uart.Printf("\rAtlGui_t::TurnOffScreen already turned off");
         return;
     }
     is_screen_suspended=true;
-    Uart.Printf("AtlGui_t::TurnOffScreen  turn off \r");
+    Uart.Printf("\rAtlGui_t::TurnOffScreen  turn off");
     Lcd.SetBrightness(0);
 }
 void AtlGui_t::AddSuspendScreenTimer(int sec_to_add)
@@ -160,7 +160,7 @@ void AtlGui_t::AddSuspendScreenTimer(int sec_to_add)
 };
 void AtlGui_t::ReactLockedPress()
 {
-    Uart.Printf("CALL ON LOCKED SCREEN \r");
+    Uart.Printf("\rCALL ON LOCKED SCREEN");
 }
 void AtlGui_t::ShowSplashscreen()
 {
@@ -201,14 +201,10 @@ void AtlGui_t::RenderFullScreen(int screen_id)
     Uart.Printf("\rRenderFullScreen %s", bmp_filename);
     // render it
     Lcd.DrawBmpFile(0,0,bmp_filename);
-<<<<<<< HEAD
-    /*strncpy (char_name,"char_name",10);
-    time1=11;time2=22,bat=Power.RemainingPercent;
-=======
-   // strncpy (char_name,"char_name",10);
-   // time1=11;time2=22,
+    strncpy (char_name,"char_name",10);
+    time1=11;
+    time2=22;
     bat=Power.RemainingPercent;
->>>>>>> 6defb1ce2e15b926a2cc70d158a1275fbdc3db3a
     //strncpy( time,"22_11",5);
     //strncpy( bat,"100%",4);
     RenderNameTimeBat();
@@ -218,11 +214,10 @@ void AtlGui_t::RenderFullScreen(int screen_id)
         if(screens[screen_id].buttons[i].isPressable!=nullptr)
         {
             int state1=screens[screen_id].buttons[i].isPressable(screen_id,i);
-            Uart.Printf("button_state_val2 %d\r",state1);
+            Uart.Printf("\rbutton_state_val2 %d",state1);
             RenderSingleButton(screen_id,i,state1);
         }//не рисовать кнопки, которых нет
     }
-    */
 }
 void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
 {
@@ -249,7 +244,7 @@ void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
         if( screens[current_state].buttons[button_id].isPressable!= nullptr)
         {
             int button_state_val=screens[current_state].buttons[button_id].isPressable(current_state,button_id);//sptr_button_state[button_id]->fptr_on_press());
-            Uart.Printf("button_state_val %d\r",button_state_val);
+            Uart.Printf("\rbutton_state_val %d",button_state_val);
             if(button_state_val==BUTTON_PRESSABLE)
             {
                 //вызываем функцию кнопки, если есть
@@ -265,20 +260,20 @@ void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
                 }
                 else
                 {
-                    Uart.Printf("ButtonIsClicked render func absent\r");
+                    Uart.Printf("\rButtonIsClicked render func absent");
                 }
                 //вызываем смену крана,если есть
-                Uart.Printf("CallStateScreen %d \r",screens[current_state].screen_switch[button_id]);
+                Uart.Printf("\rCallStateScreen %d",screens[current_state].screen_switch[button_id]);
                   if( screens[current_state].screen_switch[button_id]!=nullptr  )
                   {
-                      Uart.Printf("!!!!CallStateScreen %s \r",screens[current_state].screen_switch[button_id]);
+                      Uart.Printf("\r!!!!CallStateScreen %s",screens[current_state].screen_switch[button_id]);
                       // вызываем новое состояние экрана, отрисовываем
                       int new_scrid=AtlGui.GetScreenIndxFromName((char*)screens[current_state].screen_switch[button_id]);
                       if(new_scrid>=0)
                           CallStateScreen(new_scrid);
                       else
                       {
-                          Uart.Printf("ERROR in AtlGui_t::ButtonIsReleased on GetScreenIndxFromName\r");
+                          Uart.Printf("\rERROR in AtlGui_t::ButtonIsReleased on GetScreenIndxFromName");
                           return;
                       }
                       //вызываем фуркцию логики смены крана
@@ -308,16 +303,16 @@ void AtlGui_t::ButtonIsClicked(int button_id)
     if(is_locked && button_id!=6)
         return;
     //вызываем геттер кнопки
-    Uart.Printf("current_state %d screens_number %d button id %d \r",current_state,screens_number,button_id);
+    Uart.Printf("\rcurrent_state %d screens_number %d button id %d",current_state,screens_number,button_id);
     if(current_state>=0 && current_state<screens_number)
     {
         if( screens[current_state].buttons[button_id].isPressable!= nullptr)
         {
            int button_state_val=screens[current_state].buttons[button_id].isPressable(current_state,button_id);//sptr_button_state[button_id]->fptr_on_press());
-           Uart.Printf("button_state_val3 %d\r",button_state_val);
+           Uart.Printf("\rbutton_state_val3 %d",button_state_val);
            if(button_state_val==BUTTON_PRESSABLE)
            {
-               Uart.Printf("button%d on screen %d is pressable %d\r",button_id,current_state );
+               Uart.Printf("\rbutton%d on screen %d is pressable %d",button_id,current_state );
                RenderSingleButton(current_state,button_id,BUTTON_PRESSED);
                //on red andgreenchange state
            }
@@ -376,7 +371,7 @@ void AtlGui_t::RenderNameTimeBat()
         strcpy(timechar,"00.00");
 
     Lcd.Printf(0, 5, clGreen, clBlack, "%s %s %u",char_name,timechar,Power.RemainingPercent);
-    Uart.Printf("T!!!!!!!!!!!!!!!!!! %d",Power.RemainingPercent);
+    Uart.Printf("\rRemainingPercent=%d",Power.RemainingPercent);
 
 }
 void AtlGui_t::GetCharname()
@@ -458,7 +453,7 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
 
       // strchr(BUTTONS,'B');
         strcat(bmp_filename,GUI_PATH_EXT);
-        Uart.Printf("RenderSingleButton %s left %d Bot %d \r",bmp_filename,screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom);
+        Uart.Printf("\rRenderSingleButton %s left %d Bot %d",bmp_filename,screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom);
         // render it
         Lcd.DrawBmpFile(screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom,bmp_filename);
 }

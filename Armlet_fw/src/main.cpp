@@ -66,8 +66,6 @@ int main() {
 void Init() {
     Uart.Init(256000);
     Uart.Printf("\rAtlantis   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
-//    Uart.Printf("\r%X", clAtlFront);
-
 
     SD.Init();
     // Read config
@@ -95,8 +93,6 @@ void Init() {
     MassStorage.Init();
     Power.Init();
 
-
-
     Sound.Init();
     Sound.SetVolume(START_VOL_CONST);
 
@@ -110,10 +106,6 @@ void Init() {
     rLevel1.Init(App.ID);
     Mesh.Init(App.ID);
 
-<<<<<<< HEAD
     Uart.Printf("\rInit done");
-=======
-    Uart.Printf("mAIN INIT DONE\r");
 #endif
->>>>>>> 6defb1ce2e15b926a2cc70d158a1275fbdc3db3a
 }

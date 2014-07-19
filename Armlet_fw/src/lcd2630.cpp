@@ -317,14 +317,13 @@ struct BmpInfo_t {
 #define BMP_INFO_SZ   sizeof(BmpInfo_t)
 
 void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
-    Uart.Printf("\r%S %S", __func__, Filename);
+//    Uart.Printf("\r%S %S", __func__, Filename);
     // Open file
     FRESULT rslt = f_open(&IFile, Filename, FA_READ+FA_OPEN_EXISTING);
-    Uart.Printf("\r%u", rslt);
+//    Uart.Printf("\r%u; fsz=%u", rslt, IFile.fsize);
     if(rslt != FR_OK) {
         if (rslt == FR_NO_FILE) Uart.Printf("\r%S: not found", Filename);
         else Uart.Printf("\rOpenFile error: %u", rslt);
-//        f_close(&IFile);
         return;
     }
     // Check if zero file
@@ -348,8 +347,7 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
     // Get struct size => version
     if((PInfo->Size == 40) or (PInfo->Size == 52) or (PInfo->Size == 56)) {  // V3 or V4 adobe
         if(PInfo->Height < 0) PInfo->Height = -PInfo->Height;
-        uint32_t Sz = PInfo->SzImage;
-        Uart.Printf("\rSz=%u", Sz);
+        int32_t Sz = PInfo->SzImage;
 //        Uart.Printf("W=%u; H=%u; BitCnt=%u; Cmp=%u; Sz=%u;  MskR=%X; MskG=%X; MskB=%X; MskA=%X\r",
 //                PInfo->Width, PInfo->Height, PInfo->BitCnt, PInfo->Compression,
 //                PInfo->SzImage, PInfo->RedMsk, PInfo->GreenMsk, PInfo->BlueMsk, PInfo->AlphaMsk);
@@ -359,18 +357,15 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
         WriteByte(0x2C); // Memory write
         DC_Hi();
         // First, write piece currently in memory
-        Uart.Printf("\rH");
         for(uint32_t i=PHdr->bfOffBits; i<RCnt; i+=2) {
             WriteByte(IFileBuf[i+1]);
             WriteByte(IFileBuf[i]);
         }
         Sz -= (RCnt - PHdr->bfOffBits);
-        Uart.Printf("\rSz=%u", Sz);
         // Read remainder
-        Uart.Printf("\rI");
-        while(Sz) {
-            if((rslt = f_read(&IFile, IFileBuf, LCD_FILE_BUF_SZ, &RCnt)) != 0) break;
-            Uart.Printf("\rA %u %u %u", rslt, Sz, RCnt);
+        while(Sz > 0) {
+            rslt = f_read(&IFile, IFileBuf, LCD_FILE_BUF_SZ, &RCnt);
+            if((rslt != 0) or (RCnt == 0)) break; // if error or eof
             for(uint32_t i=0; i<RCnt; i+=2) {
                 WriteByte(IFileBuf[i+1]);
                 WriteByte(IFileBuf[i]);
@@ -378,11 +373,7 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
             Sz -= RCnt;
         }
         DC_Lo();
-        Uart.Printf("\rJ");
     }
-//    else Uart.Printf("Core, V4 or V5");
-    Uart.Printf("\rK");
     f_close(&IFile);
-//    Uart.Printf("Done\r");
 }
 #endif
