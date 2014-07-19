@@ -43,23 +43,23 @@ extern RTCDriver RTCD1;
 static Semaphore semSDRW;
 
 bool SDRead(uint32_t startblk, uint8_t *buffer, uint32_t n) {
-//    msg_t msg = chSemWaitTimeout(&semSDRW, (systime_t)_FS_TIMEOUT);
-//    if(msg == RDY_OK) {
+    msg_t msg = chSemWaitTimeout(&semSDRW, (systime_t)_FS_TIMEOUT);
+    if(msg == RDY_OK) {
         bool rslt = sdcRead(&SDCD1, startblk, buffer, n);
-//        chSemSignal(&semSDRW);
+        chSemSignal(&semSDRW);
         return rslt;
-//    }
-//    else return false;
+    }
+    else return false;
 }
 
 bool SDWrite(uint32_t startblk, const uint8_t *buffer, uint32_t n) {
-//    msg_t msg = chSemWaitTimeout(&semSDRW, (systime_t)_FS_TIMEOUT);
-//    if(msg == RDY_OK) {
+    msg_t msg = chSemWaitTimeout(&semSDRW, (systime_t)_FS_TIMEOUT);
+    if(msg == RDY_OK) {
         bool rslt = sdcWrite(&SDCD1, startblk, buffer, n);
-//        chSemSignal(&semSDRW);
+        chSemSignal(&semSDRW);
         return rslt;
-//    }
-//    else return false;
+    }
+    else return false;
 }
 
 /*-----------------------------------------------------------------------*/
