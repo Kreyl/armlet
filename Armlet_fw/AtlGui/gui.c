@@ -20,8 +20,7 @@ Screen_t screens[] = {
         { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr },
         {
         /* A */ NO_BUTTON,
-//        /* B */ { "\xc4\xf0\xe0\xea\xe0" /* Драка */, 0, 45, buttonIsPressable, buttonGetState, buttonPress },
-        /* B */ { "\xc4\xf0\xe0\xea\xe0" /* Драка */, 4, 45, buttonIsPressable, buttonGetState, buttonPress },
+        /* B */ { "\xc4\xf0\xe0\xea\xe0" /* Драка */, 0, 45, buttonIsPressable, buttonGetState, buttonPress },
         /* C */ { "\xd1\xe5\xea\xf1" /* Секс */, 0, 82, buttonIsPressable, buttonGetState, buttonPress },
         /* X */ { "M", 130, 19, buttonIsPressable, buttonGetState, buttonPress },
         /* Y */ { "^^", 130, 60, buttonIsPressable, buttonGetState, buttonPress },

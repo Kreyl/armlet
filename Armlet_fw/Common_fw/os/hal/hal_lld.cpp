@@ -104,11 +104,7 @@ void hal_lld_init(void) {
   rccResetAPB2(~0);
 
   /* SysTick initialization using the system clock.*/
-  SysTick->LOAD = Clk.AHBFreqHz / CH_FREQUENCY - 1; // @KL changed to Clk.etc
-  SysTick->VAL = 0;
-  SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk |
-                  SysTick_CTRL_ENABLE_Msk |
-                  SysTick_CTRL_TICKINT_Msk;
+  Clk.InitSysTick();
 
   /* DWT cycle counter enable.*/
   SCS_DEMCR |= SCS_DEMCR_TRCENA;

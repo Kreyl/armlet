@@ -317,7 +317,7 @@ struct BmpInfo_t {
 #define BMP_INFO_SZ   sizeof(BmpInfo_t)
 
 void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
-    Uart.Printf("\r%S %S x=%d y=%d", __func__, Filename, x0, y0);
+    //Uart.Printf("\r%S %S x=%d y=%d", __func__, Filename, x0, y0);
     // Open file
     FRESULT rslt = f_open(&IFile, Filename, FA_READ+FA_OPEN_EXISTING);
 //    Uart.Printf("\r%u; fsz=%u", rslt, IFile.fsize);
@@ -347,17 +347,21 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
     // Get struct size => version
     if((PInfo->Size == 40) or (PInfo->Size == 52) or (PInfo->Size == 56)) {  // V3 or V4 adobe
         if(PInfo->Height < 0) PInfo->Height = -PInfo->Height;
-        int32_t Sz = PInfo->SzImage;
-        Uart.Printf("\rW=%u; H=%u; BitCnt=%u; Cmp=%u; Sz=%u;  MskR=%X; MskG=%X; MskB=%X; MskA=%X",
-                PInfo->Width, PInfo->Height, PInfo->BitCnt, PInfo->Compression,
-                PInfo->SzImage, PInfo->RedMsk, PInfo->GreenMsk, PInfo->BlueMsk, PInfo->AlphaMsk);
+        //Uart.Printf("\rW=%u; H=%u; BitCnt=%u; Cmp=%u; Sz=%u;  MskR=%X; MskG=%X; MskB=%X; MskA=%X", PInfo->Width, PInfo->Height, PInfo->BitCnt, PInfo->Compression, PInfo->SzImage, PInfo->RedMsk, PInfo->GreenMsk, PInfo->BlueMsk, PInfo->AlphaMsk);
         SetBounds(x0, PInfo->Width, y0, PInfo->Height);
 
         // ==== Write RAM ====
+        int32_t Sz = PInfo->SzImage;
+        bool WidthIsOdd = PInfo->Width % 2; // Odd-widthed images require special action
+        uint32_t NPixel=0, W = PInfo->Width+1, Edge = W;
         WriteByte(0x2C); // Memory write
         DC_Hi();
         // First, write piece currently in memory
         for(uint32_t i=PHdr->bfOffBits; i<RCnt; i+=2) {
+            if(WidthIsOdd) if(++NPixel == Edge) {   // Ignore last pixel in a row in case of odd width
+                Edge += W;
+                continue;
+            }
             WriteByte(IFileBuf[i+1]);
             WriteByte(IFileBuf[i]);
         }
@@ -367,6 +371,10 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
             rslt = f_read(&IFile, IFileBuf, LCD_FILE_BUF_SZ, &RCnt);
             if((rslt != 0) or (RCnt == 0)) break; // if error or eof
             for(uint32_t i=0; i<RCnt; i+=2) {
+                if(WidthIsOdd) if(++NPixel == Edge) {   // Ignore last pixel in a row in case of odd width
+                    Edge += W;
+                    continue;
+                }
                 WriteByte(IFileBuf[i+1]);
                 WriteByte(IFileBuf[i]);
             }

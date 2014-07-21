@@ -61,16 +61,22 @@ void Pwr_t::Task() {
             Uart.Printf("\rExtPwr Off");
             Usb.Shutdown();
             MassStorage.Reset();
+            chSysLock();
             Clk.SetFreq12Mhz();
+            Clk.InitSysTick();
             Uart.OnAHBFreqChange();
+            chSysUnlock();
 #endif
         }
         else if(!WasExternal and ExternalPwrOn()) {
             WasExternal = true;
 #ifdef USB_ENABLED
             Uart.Printf("\rExtPwr On");
+            chSysLock();
             Clk.SetFreq48Mhz();
+            Clk.InitSysTick();
             Uart.OnAHBFreqChange();
+            chSysUnlock();
             Usb.Init();
             chThdSleepMilliseconds(540);
             Usb.Connect();
