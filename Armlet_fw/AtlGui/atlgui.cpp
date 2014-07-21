@@ -171,7 +171,7 @@ void AtlGui_t::ShowSplashscreen()
 #else
    Lcd.DrawBmpFile(0,0,"splash.bmp");
 #endif
-   Sound.Play("splash.wav");
+   Sound.Play("splash.mp3");
 }
 void AtlGui_t::CallStateScreen(int screen_id)
 {
