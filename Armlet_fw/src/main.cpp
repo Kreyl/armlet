@@ -78,7 +78,7 @@ void Init() {
     #ifndef CLEAR_SCREEN_FOR_DEBUG
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
 #endif
-//    Lcd.DrawBmpFile(0, 0, "splash.bmp");
+    Lcd.DrawBmpFile(4, 4, "\\GUI\\main\\normal\\B.bmp");
 //    Lcd.DrawBmpFile(100, 18, "GUI/intentions/enabled/X.bmp");
 
  //   Init_emotionTreeMusicNodeFiles_FromFile(filename);

@@ -101,7 +101,7 @@ void rLevel1_t::Init(uint32_t ASelfID) {
 #endif
 
     if(ASelfID == 0) {
-        Uart.Printf("rLvl1 WrongID\r");
+        Uart.Printf("\rrLvl1 WrongID");
         return;
     }
 
