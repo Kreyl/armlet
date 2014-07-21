@@ -296,13 +296,16 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
                 if dumpToErrors:
                     createDir(errorDir)
                     newFullName = join(errorDir, newFileName)
-                e = processFile(fullName, newFullName, number, name, '%d/%d' % (trackNumber, len(files)), emotion, artist, title, tail)
+                if match:
+                    e = processFile(fullName, newFullName, number, name, '%d/%d' % (trackNumber, len(files)), emotion, artist, title, tail)
+                else:
+                    e = True
                 if e:
-                    log(True, fileName, "Error processing: %s" % e)
+                    if e != True:
+                        log(True, fileName, "Error processing: %s" % e)
                     createDir(errorDir)
                     copy(fullName, errorDir)
             print
-            assert len(files) == len(newFileNameSet)
             obsoleteFiles = tuple(f for f in listdir(musicDir) if f not in newFileNameSet)
             if obsoleteFiles:
                 print "Obsolete files found (%d), removing" % len(obsoleteFiles)
