@@ -122,14 +122,14 @@ uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileN
     rslt = f_open(&File, AFileName, FA_READ+FA_OPEN_EXISTING);
     if(rslt != FR_OK) {
         Uart.Printf(AFileName);
-        if (rslt == FR_NO_FILE) Uart.Printf(": file not found\r");
-        else Uart.Printf(": openFile error: %u", rslt);
+        if (rslt == FR_NO_FILE) Uart.Printf("\r: file not found");
+        else Uart.Printf("\r: openFile error: %u", rslt);
         return FAILURE;
     }
     // Check if zero file
     if(File.fsize == 0) {
         f_close(&File);
-        Uart.Printf("Empty file\r");
+        Uart.Printf("\rEmpty file");
         return FAILURE;
     }
     //Uart.Printf("%S\r", FBuf);
@@ -137,8 +137,8 @@ uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileN
     char *StartP, *EndP;
     uint32_t len = strlen(ASection);
     do {
-        if (!f_gets(IBuf, INI_BUF_SIZE, &File)) {
-            Uart.Printf("Section Read Err\r");
+        if(f_gets(IBuf, INI_BUF_SIZE, &File) == nullptr) {
+            Uart.Printf("\riniNoSection %S", ASection);
             f_close(&File);
             return FAILURE;
         }
@@ -150,7 +150,7 @@ uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileN
     len = strlen(AKey);
     do {
         if (!f_gets(IBuf, INI_BUF_SIZE, &File) or *(StartP = skipleading(IBuf)) == '[') {
-            Uart.Printf("Key Read Err\r");
+            Uart.Printf("\rKey Read Err");
             f_close(&File);
             return FAILURE;
         }

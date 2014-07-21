@@ -317,7 +317,7 @@ struct BmpInfo_t {
 #define BMP_INFO_SZ   sizeof(BmpInfo_t)
 
 void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
-//    Uart.Printf("\r%S %S", __func__, Filename);
+    Uart.Printf("\r%S %S x=%d y=%d", __func__, Filename, x0, y0);
     // Open file
     FRESULT rslt = f_open(&IFile, Filename, FA_READ+FA_OPEN_EXISTING);
 //    Uart.Printf("\r%u; fsz=%u", rslt, IFile.fsize);
@@ -348,9 +348,9 @@ void Lcd_t::DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename) {
     if((PInfo->Size == 40) or (PInfo->Size == 52) or (PInfo->Size == 56)) {  // V3 or V4 adobe
         if(PInfo->Height < 0) PInfo->Height = -PInfo->Height;
         int32_t Sz = PInfo->SzImage;
-//        Uart.Printf("W=%u; H=%u; BitCnt=%u; Cmp=%u; Sz=%u;  MskR=%X; MskG=%X; MskB=%X; MskA=%X\r",
-//                PInfo->Width, PInfo->Height, PInfo->BitCnt, PInfo->Compression,
-//                PInfo->SzImage, PInfo->RedMsk, PInfo->GreenMsk, PInfo->BlueMsk, PInfo->AlphaMsk);
+        Uart.Printf("\rW=%u; H=%u; BitCnt=%u; Cmp=%u; Sz=%u;  MskR=%X; MskG=%X; MskB=%X; MskA=%X",
+                PInfo->Width, PInfo->Height, PInfo->BitCnt, PInfo->Compression,
+                PInfo->SzImage, PInfo->RedMsk, PInfo->GreenMsk, PInfo->BlueMsk, PInfo->AlphaMsk);
         SetBounds(x0, PInfo->Width, y0, PInfo->Height);
 
         // ==== Write RAM ====
