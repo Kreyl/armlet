@@ -299,10 +299,10 @@ void App_t::Task() {
             }
         }
 #endif
-#if 0 // ==== New second ====
+#if 1 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
             Uart.Printf("\rNewSecond");
-// @KL            AtlGui.AddSuspendScreenTimer(1);
+            AtlGui.AddSuspendScreenTimer(1);
             //UPDATE user intentions timers
             if(UpdateUserIntentionsTime(1))
                 CheckAndRedrawFinishedReasons();
