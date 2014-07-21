@@ -58,7 +58,7 @@ int main() {
     if(ClkResult) Uart.Printf("Clock failure\r");
 
     while(TRUE) {
-        chThdSleepMilliseconds(2700);
+        chThdSleep(TIME_INFINITE);
 //        Uart.Printf("\r_abW");
     }
 }

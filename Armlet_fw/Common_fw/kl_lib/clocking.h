@@ -9,6 +9,7 @@
 #define CLOCKING_H_
 
 #include "stm32f2xx.h"
+#include "ch.h"
 
 /*
  * Right after reset, CPU works on internal (HSI) source.
@@ -72,6 +73,14 @@ public:
     uint8_t SetupPLLDividers(uint8_t InputDiv_M, uint16_t Multi_N, PllSysDiv_P_t SysDiv_P, uint8_t UsbDiv_Q);
     void UpdateFreqValues();
     uint8_t SetupFlashLatency(uint8_t AHBClk_MHz, uint16_t Voltage_mV=3300);
+    // Systick init: the timer is required for OS
+    void InitSysTick() {
+        __disable_irq();
+        SysTick->LOAD = AHBFreqHz / CH_FREQUENCY - 1;
+        SysTick->VAL = 0;
+        SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk | SysTick_CTRL_TICKINT_Msk;
+        __enable_irq();
+    }
     // Special frequencies
     void SetFreq12Mhz() {
         if(AHBFreqHz < 12000000) SetupFlashLatency(12); // Rise flash latency now if current freq > required
