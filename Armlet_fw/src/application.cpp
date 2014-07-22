@@ -314,7 +314,7 @@ void App_t::Task() {
 #if 1 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
 //            Uart.Printf("\rNewSecond");
-            AtlGui.AddSuspendScreenTimer(1);
+// @KL           AtlGui.AddSuspendScreenTimer(1);
             //UPDATE user intentions timers
             if(UpdateUserIntentionsTime(1))
                 CheckAndRedrawFinishedReasons();
@@ -368,6 +368,11 @@ void App_t::Task() {
         } // if EVTMSK_PILL_CHECK
 #endif
 
+#if 1 // ==== New battery state ====
+        if(EvtMsk & EVTMSK_NEW_POWER_STATE) {
+            Lcd.DrawBatteryState();
+        }
+#endif
 
 #if 1 // == Uart Rx ==
 #if UART_RX_ENABLED
@@ -395,7 +400,6 @@ void App_t::Init() {
 //    InitArrayOfUserIntentions();
 }
 
-
 #if 1 // ======================= Command processing ============================
 #if UART_RX_ENABLED
 void App_t::OnUartCmd(Cmd_t *PCmd) {
@@ -416,6 +420,15 @@ void App_t::OnUartCmd(Cmd_t *PCmd) {
         boot_jump(SYSTEM_MEMORY_ADDR);
         while(1);
         chSysUnlock();
+    }
+
+    // DEBUG
+    else if(PCmd->NameIs("#Cap")) {
+        if(PCmd->TryConvertTokenToNumber(&dw32) == OK) {  // Next token is number
+            Power.CapacityPercent = dw32;
+            Uart.Ack(OK);
+        }
+        else Uart.Ack(CMD_ERROR);
     }
 
     else if(*PCmd->Name == '#') Uart.Ack(CMD_UNKNOWN);  // reply only #-started stuff
