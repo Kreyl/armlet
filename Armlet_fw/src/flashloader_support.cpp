@@ -9,35 +9,45 @@
 
 Btldr_t Bootloader;
 
-// ===================== Implementation ==================================== //
-void Btldr_t::JumpToAddr(uint32_t Addr){
-//    typedef void (*pFunction)(void);
-//    pFunction Jump_To_Application;
-//    vu32* JumpAddr;          // variable that will be loaded with the start address of the application
-//    const vu32* AppAddr = (vu32*) Addr;
-//    JumpAddr = (vu32*) AppAddr[1]; // get jump address from application vector table
-//    Jump_To_Application = (pFunction) JumpAddr; // load this address into function pointer
-//    SCB_ICSR = ICSR_PENDSVCLR;     // Clear pending interrupts just to be on the safe side
-//
-//    /* Disable all interrupts */
-//    for(uint8_t i=0; i<8; i++) NVIC->ICER[i] = NVIC->IABR[i];
-//
-//    /* set stack pointer as in application's vector table */
-//    __set_MSP((u32) (AppAddr[0]));
-//    Jump_To_Application();
-
-
-
-    uint32_t bootaddr = Addr;     // Set start adress in System Memory
-    volatile uint32_t jumpaddr;
-    void (*boot_fn)(void) = 0;                      // Initialize jump function
-
-    jumpaddr = *(__IO uint32_t*) (bootaddr + 4);    // prepare jump address
-    boot_fn = (void (*)(void)) jumpaddr;            // prepare jumping function
-    __set_MSP(*(__IO uint32_t*) bootaddr);          // initialize user application's stack pointer
-    // jump
-    boot_fn();
+void boot_jump(uint32_t Address) {
+    __ASM("LDR SP, [R0]");
+    __ASM("LDR PC, [R0, #4]");
 }
 
+void GoToDFU(){
+    if(Clk.SwitchToHSI() == OK) {
+        __disable_irq();
+        SysTick->CTRL = 0;
+        SCB->VTOR = 0x17FF0000;
+        __enable_irq();
+        boot_jump(SYSTEM_MEMORY_ADDR);
+        while(1);
+    }
+}
+
+
+// ===================== Implementation ==================================== //
+void Btldr_t::JumpIn() {
+//    if(IwdgStatus == Iwdg_ON) Iwdt_enable();
+//    JumpToAddr(SYSTEM_MEMORY_ADDR);
+    Clk.SwitchToHSI();
+    __disable_irq();
+    SysTick->CTRL = 0;
+    SCB->VTOR = 0x17FF0000;
+    __enable_irq();
+    boot_jump(SYSTEM_MEMORY_ADDR);
+    while(1);
+}
+
+
+void Btldr_t::JumpToAddr(uint32_t Addr){
+    Clk.SwitchToHSI();
+    __disable_irq();
+    SysTick->CTRL = 0;
+    SCB->VTOR = 0x17FF0000;
+    __enable_irq();
+    boot_jump(SYSTEM_MEMORY_ADDR);
+    while(1);
+}
 
 

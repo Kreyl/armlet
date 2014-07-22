@@ -11,13 +11,17 @@
 
 #include "kl_lib_f2xx.h"
 
-#define SYSTEM_MEMORY_ADDR      (uint32_t)0x1FF00000 // System memory Information Block
+#define SYSTEM_MEMORY_ADDR      (uint32_t)0x1FFF0000 // System memory Information Block
 
+void GoToDFU();
+void boot_jump(uint32_t Address);
+
+enum Iwdg_t {
+    Iwdg_ON, Iwdg_OFF
+};
 
 class Btldr_t {
 private:
-public:
-    uint8_t CheckUserCode(uint32_t Addr);
     void JumpToAddr(uint32_t Addr);
     void Iwdt_enable() {
         const uint32_t LsiFreq = 42000;
@@ -26,6 +30,8 @@ public:
         IWDG->RLR = LsiFreq/128;                // set preload
         IWDG->KR = 0xCCCC;                      // enable wdtg
     }
+public:
+    void JumpIn();
 };
 
 extern Btldr_t Bootloader;
