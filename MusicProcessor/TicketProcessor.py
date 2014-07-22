@@ -45,6 +45,13 @@ MAX_FONT_SIZE = 40
 NCOLS = 4
 NROWS = 4
 
+NUM_NAMED_TICKETS = 2
+NUM_TICKETS_TO = 150
+NUM_TICKETS_FROM = 100
+
+NUM_SHEETS_TO = NUM_TICKETS_TO // (NCOLS * NROWS)
+NUM_SHEETS_FROM = NUM_TICKETS_FROM // (NCOLS * NROWS)
+
 def getFileName(dirName, fileName):
     return join(TARGET_DIR, dirName, '%s.%s' % (fileName, EXTENSION))
 
@@ -81,11 +88,16 @@ def createSheets(tickets, template):
         for y in xrange(0, sheetHeight, ticketHeight):
             for x in xrange(0, sheetWidth, ticketWidth):
                 t = next(tickets, template)
+                if t is template:
+                    if x or y:
+                        lastSheet = True
+                    else:
+                        return nSheets - 1
                 sheet.blit(t, (x, y))
-                lastSheet = t is template
-        targetName = 'TicketsA%d' % nSheets
+        targetName = 'TicketsA%d-%d' % (nSheets, NUM_NAMED_TICKETS)
         print "Sheet %s" % targetName
         saveImage(sheet, getFileName('A3', targetName))
+    return nSheets
 
 def createCopiedSheet(fileName, targetName):
     print "Sheet %s" % targetName
@@ -105,10 +117,10 @@ def generateTickets(characters):
     template = loadImage(TEMPLATE)
     names = sorted(characters, key = lambda (shortName, (rid, longName)): longName.split()[-1])
     tickets = (createTicket(template, shortName, longName) for (shortName, (_rid, longName)) in names)
-    createSheets(tickets, template)
-    createCopiedSheet('TicketA', 'TicketsA')
-    createCopiedSheet('TicketFromA', 'TicketsFromA')
-    createCopiedSheet('TicketR', 'TicketsR')
+    nNamedSheets = createSheets(tickets, template)
+    createCopiedSheet('TicketA', 'TicketsA-%d' % NUM_SHEETS_TO)
+    createCopiedSheet('TicketFromA', 'TicketsFromA-%d' % NUM_SHEETS_FROM)
+    createCopiedSheet('TicketR', 'TicketsR-%d' % (NUM_SHEETS_TO + NUM_SHEETS_FROM + NUM_NAMED_TICKETS * nNamedSheets))
 
 def main():
     from CharacterProcessor import readCharacters
