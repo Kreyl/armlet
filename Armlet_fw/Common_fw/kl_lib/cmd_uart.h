@@ -17,7 +17,7 @@
 #include "main.h"
 
 // Set to true if RX needed
-#define UART_RX_ENABLED     FALSE
+#define UART_RX_ENABLED     TRUE
 
 // UART
 #define UART_TXBUF_SIZE     1800
