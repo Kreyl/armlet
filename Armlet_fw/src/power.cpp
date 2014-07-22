@@ -89,21 +89,21 @@ void Pwr_t::Task() {
         //if(IsCharging()) Uart.Printf("\rCharging");
 
 #if 1 // ==== ADC ====
-//        Adc.Measure();
-//        uint32_t rslt = 1024;
-//        for(uint8_t i=0; i<ADC_BUF_SZ; i++) rslt += Adc.Result[i];
-//        rslt /= ADC_BUF_SZ;    // Calc average
+        Adc.Measure();
+        uint32_t rslt = 0;
+        for(uint8_t i=0; i<ADC_BUF_SZ; i++) rslt += Adc.Result[i];
+        rslt /= ADC_BUF_SZ;    // Calc average
 
         // Calculate voltage
-//        uint32_t U = (2 * rslt * ADC_VREF_MV) / 4095;   // 2 because of resistor divider
+        uint32_t U = (2 * rslt * ADC_VREF_MV) / 4095;   // 2 because of resistor divider
         // Calculate percent
-//        uint32_t NewPercent = mV2Percent(U);
+        uint32_t NewPercent = mV2Percent(U);
         // Indicate if has changed
-//        if(NewPercent != CapacityPercent) {
-//            CapacityPercent = NewPercent;
+        if(NewPercent != CapacityPercent) {
+            CapacityPercent = NewPercent;
 //            Uart.Printf("\rAdc=%u; U=%u; %=%u", rslt, U, CapacityPercent);
             if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
-//        }
+        }
 #endif
     } // while
 }
@@ -113,7 +113,7 @@ void Pwr_t::Init() {
     PinSetupIn(PWR_EXTERNAL_GPIO, PWR_EXTERNAL_PIN, pudPullDown);
     PinSetupIn(PWR_CHARGING_GPIO, PWR_CHARGING_PIN, pudPullUp);
     PinSetupAnalog(PWR_BATTERY_GPIO, PWR_BATTERY_PIN);
-//    Adc.Init();
+    Adc.Init();
     // Create and start thread
     PThr = chThdCreateStatic(waPwrThread, sizeof(waPwrThread), LOWPRIO, (tfunc_t)PwrThread, NULL);
 }

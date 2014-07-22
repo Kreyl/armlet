@@ -215,6 +215,8 @@ void AtlGui_t::RenderFullScreen(int screen_id)
             RenderSingleButton(screen_id,i,state1);
         }//не рисовать кнопки, которых нет
     }
+    // Draw battery
+    Lcd.DrawBatteryState();
 }
 void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
 {

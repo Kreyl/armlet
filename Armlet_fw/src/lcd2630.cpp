@@ -293,7 +293,7 @@ void Lcd_t::Printf(const tFont &Font, uint8_t x, uint8_t y, Color_t ForeClr, Col
 #endif
 
 void Lcd_t::DrawBatteryState() {
-    Uart.Printf("\rCapacity=%u", Power.CapacityPercent);
+//    Uart.Printf("\rCapacity=%u", Power.CapacityPercent);
     // Colors' components
     uint8_t clr1bHi = (BAT_RECT_FORE_CLR >> 8) & 0x00FF;
     uint8_t clr1bLo = BAT_RECT_FORE_CLR & 0x00FF;

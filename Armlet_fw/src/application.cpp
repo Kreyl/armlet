@@ -422,15 +422,6 @@ void App_t::OnUartCmd(Cmd_t *PCmd) {
         chSysUnlock();
     }
 
-    // DEBUG
-    else if(PCmd->NameIs("#Cap")) {
-        if(PCmd->TryConvertTokenToNumber(&dw32) == OK) {  // Next token is number
-            Power.CapacityPercent = dw32;
-            Uart.Ack(OK);
-        }
-        else Uart.Ack(CMD_ERROR);
-    }
-
     else if(*PCmd->Name == '#') Uart.Ack(CMD_UNKNOWN);  // reply only #-started stuff
 }
 #endif
