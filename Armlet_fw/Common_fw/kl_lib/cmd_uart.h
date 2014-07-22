@@ -17,7 +17,7 @@
 #include "main.h"
 
 // Set to true if RX needed
-#define UART_RX_ENABLED     FALSE
+#define UART_RX_ENABLED     TRUE
 
 // UART
 #define UART_TXBUF_SIZE     1800
@@ -38,15 +38,45 @@
                             STM32_DMA_CR_TCIE         /* Enable Transmission Complete IRQ */
 
 #if UART_RX_ENABLED
+#define UART_RXBUF_SZ       72 // unprocessed bytes
+#define UART_CMD_BUF_SZ     54 // payload bytes
 #define UART_RX_PIN         6
 #define UART_RX_REG         UART->DR
-#define UART_RX_IRQ_ENABLE() nvicEnableVector(STM32_USART2_NUMBER, CORTEX_PRIORITY_MASK(STM32_SERIAL_USART2_PRIORITY))
-#define UART_RX_IRQ         STM32_USART2_HANDLER
 
-#define UART_RXBUF_SZ       2700    // unprocessed bytes
-#define UART_CMDDATA_SZ     252     // payload bytes
+#define UART_RX_POLLING_MS  299
+#define UART_DMA_RX         STM32_DMA1_STREAM5
+#define UART_DMA_RX_MODE    STM32_DMA_CR_CHSEL(UART_DMA_CHNL) | \
+                            DMA_PRIORITY_LOW | \
+                            STM32_DMA_CR_MSIZE_BYTE | \
+                            STM32_DMA_CR_PSIZE_BYTE | \
+                            STM32_DMA_CR_MINC |       /* Memory pointer increase */ \
+                            STM32_DMA_CR_DIR_P2M |    /* Direction is peripheral to memory */ \
+                            STM32_DMA_CR_CIRC         /* Circular buffer enable */
+#define DELIMITERS      " ,"
 
-enum RcvState_t {rsStart, rsCmdCode1, rsCmdCode2, rsData1, rsData2};
+class Cmd_t {
+private:
+    void Finalize() {
+        for(uint32_t i=Cnt; i < UART_CMD_BUF_SZ; i++) IString[i] = 0;
+        Name = strtok(IString, DELIMITERS);
+        GetNextToken();
+    }
+    void Backspace() { if(Cnt > 0) Cnt--; }
+    char IString[UART_CMD_BUF_SZ];
+    uint32_t Cnt;
+public:
+    char *Name, *Token;
+    void PutChar(char c) { if(Cnt < UART_CMD_BUF_SZ-1) IString[Cnt++] = c; }
+    bool IsEmpty() { return (Cnt == 0); }
+    uint8_t GetNextToken() {
+        Token = strtok(NULL, DELIMITERS);
+        return (*Token == '\0')? 1 : 0;
+    }
+    uint8_t TryConvertTokenToNumber(uint32_t *POutput) { return Convert::TryStrToUInt32(Token, POutput); }
+    uint8_t TryConvertTokenToNumber( int32_t *POutput) { return Convert::TryStrToInt32(Token, POutput); }
+    bool NameIs(const char *SCmd) { return (strcasecmp(Name, SCmd) == 0); }
+    friend class CmdUart_t;
+};
 #endif
 
 class CmdUart_t {
@@ -57,10 +87,10 @@ private:
     uint32_t IFullSlotsCount, ITransSize;
     void ISendViaDMA();
 #if UART_RX_ENABLED
-    RcvState_t RxState;
+    int32_t SzOld=0, RIndx=0;
     uint8_t IRxBuf[UART_RXBUF_SZ];
-    uint8_t CmdCode;
-    uint8_t CmdData[UART_CMDDATA_SZ], *PCmdWrite;
+    Cmd_t ICmd[2], *PCmdWrite = &ICmd[0], *PCmdRead = &ICmd[1];
+    void CompleteCmd();
 #endif
     void IPrintf(const char *format, va_list args);
     uint32_t IBaudrate;
@@ -78,22 +108,17 @@ public:
     void Init(uint32_t ABaudrate);
     void OnAHBFreqChange();
     void DeInit() { UART->CR1 &= ~USART_CR1_UE; /* UART Disable*/  }
-    void Cmd(uint8_t CmdCode, uint8_t *PData, uint32_t Length) { Printf("#%X,%A\r\n", CmdCode, PData, Length, 0); }
+    void Cmd(uint8_t CmdCode, uint8_t *PData, uint32_t Length) { Printf("\r\n#%X,%A", CmdCode, PData, Length, 0); }
     // Inner use
     void IRQDmaTxHandler();
     void IPutChar(char c);
 #if UART_RX_ENABLED
-    // Inner use
-    InputQueue iqueue;
-    void IProcessByte(uint8_t b);
-    void IResetCmd() { RxState = rsStart; PCmdWrite = CmdData; }
+    void PollRx();
+    // Command and reply
+    void Ack(int32_t Result) { Printf("\r\n#Ack %d", Result); }
 #endif
 };
 
 extern CmdUart_t Uart;
-
-#if UART_RX_ENABLED
-extern void UartCmdCallback(uint8_t CmdCode, uint8_t *PData, uint32_t Length);
-#endif
 
 #endif /* CMD_UART_H_ */

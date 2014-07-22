@@ -14,7 +14,7 @@
 #include "hal.h"
 #include "clocking.h"
 #include "string.h"     // for memcpy
-#include "cmd_uart.h"
+#include <cstdlib>      // for strtoul
 
 // =============================== General =====================================
 #define PACKED __attribute__ ((__packed__))
@@ -42,6 +42,10 @@ typedef void (*ftVoidVoid)(void);
 #define IN_PROGRESS     5
 #define LAST            6
 #define CMD_ERROR       7
+#define WRITE_PROTECT   8
+#define CMD_UNKNOWN     9
+#define EMPTY_STRING    10
+#define NOT_A_NUMBER    11
 
 // Binary semaphores
 #define NOT_TAKEN       false
@@ -79,6 +83,53 @@ static inline uint32_t BuildUint32(uint8_t Lo, uint8_t MidLo, uint8_t MidHi, uin
     r |= Lo;
     return r;
 }
+
+// Convert
+class Convert {
+public:
+    static void U16ToArrAsBE(uint8_t *PArr, uint16_t N) {
+        uint8_t *p8 = (uint8_t*)&N;
+        *PArr++ = *(p8 + 1);
+        *PArr   = *p8;
+    }
+    static void U32ToArrAsBE(uint8_t *PArr, uint32_t N) {
+        uint8_t *p8 = (uint8_t*)&N;
+        *PArr++ = *(p8 + 3);
+        *PArr++ = *(p8 + 2);
+        *PArr++ = *(p8 + 1);
+        *PArr   = *p8;
+    }
+    static uint16_t ArrToU16AsBE(uint8_t *PArr) {
+        uint16_t N;
+        uint8_t *p8 = (uint8_t*)&N;
+        *p8++ = *(PArr + 1);
+        *p8 = *PArr;
+        return N;
+    }
+    static uint32_t ArrToU32AsBE(uint8_t *PArr) {
+        uint32_t N;
+        uint8_t *p8 = (uint8_t*)&N;
+        *p8++ = *(PArr + 3);
+        *p8++ = *(PArr + 2);
+        *p8++ = *(PArr + 1);
+        *p8 = *PArr;
+        return N;
+    }
+    static void U16ChangeEndianness(uint16_t *p) { *p = __REV16(*p); }
+    static void U32ChangeEndianness(uint32_t *p) { *p = __REV(*p); }
+    static inline uint8_t TryStrToUInt32(char* S, uint32_t *POutput) {
+        if(*S == '\0') return EMPTY_STRING;
+        char *p;
+        *POutput = strtoul(S, &p, 0);
+        return (*p == 0)? OK : NOT_A_NUMBER;
+    }
+    static inline uint8_t TryStrToInt32(char* S, int32_t *POutput) {
+        if(*S == '\0') return EMPTY_STRING;
+        char *p;
+        *POutput = strtol(S, &p, 0);
+        return (*p == '\0')? OK : NOT_A_NUMBER;
+    }
+};
 
 // IRQ priorities
 #define IRQ_PRIO_LOW            15  // Minimum

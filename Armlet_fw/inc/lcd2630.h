@@ -10,6 +10,7 @@
 
 #include "stm32f2xx.h"
 #include "kl_lib_f2xx.h"
+#include "cmd_uart.h"
 #include <string.h>
 #include "ff.h"
 #include "Fonts.h"

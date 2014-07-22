@@ -15,6 +15,7 @@
 #include "kl_sd.h"
 #include <stdint.h>
 #include "kl_lib_f2xx.h"
+#include "cmd_uart.h"
 
 // ==== Defines ====
 #define VS_GPIO         GPIOB
