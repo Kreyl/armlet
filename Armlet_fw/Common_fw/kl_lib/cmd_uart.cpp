@@ -88,6 +88,7 @@ void CmdUart_t::Init(uint32_t ABaudrate) {
     PRead = TXBuf;
     IDmaIsIdle = true;
     IFullSlotsCount = 0;
+    IBaudrate = ABaudrate;
     PinSetupAlterFunc(UART_GPIO, UART_TX_PIN, omPushPull, pudNone, UART_AF);
 
     // ==== USART configuration ====
