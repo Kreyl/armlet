@@ -17,7 +17,7 @@
 #include "main.h"
 
 // Set to true if RX needed
-#define UART_RX_ENABLED     TRUE
+#define UART_RX_ENABLED     FALSE
 
 // UART
 #define UART_TXBUF_SIZE     1800
@@ -43,7 +43,7 @@
 #define UART_RX_PIN         6
 #define UART_RX_REG         UART->DR
 
-#define UART_RX_POLLING_MS  199
+#define UART_RX_POLLING_MS  299
 #define UART_DMA_RX         STM32_DMA1_STREAM5
 #define UART_DMA_RX_MODE    STM32_DMA_CR_CHSEL(UART_DMA_CHNL) | \
                             DMA_PRIORITY_LOW | \

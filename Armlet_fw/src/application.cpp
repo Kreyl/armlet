@@ -27,6 +27,8 @@
 #include "..\AtlGui\atlgui.h"
 #include "energy.h"
 
+#include "flashloader_support.h"
+
 App_t App;
 
 #if 1 // ============================ Timers ===================================
@@ -400,6 +402,22 @@ void App_t::OnUartCmd(Cmd_t *PCmd) {
 //    Uart.Printf("%S\r", PCmd->Name);
     uint32_t dw32 __attribute__((unused));  // May be unused in some cofigurations
     if(PCmd->NameIs("#Ping")) Uart.Ack(OK);
+
+    else if(PCmd->NameIs("#Boot")) {
+        Uart.Ack(OK);
+        Uart.DeInit();
+        Uart.FlushTx();
+        chSysLock();
+        Clk.SwitchToHSI();
+        __disable_irq();
+        SysTick->CTRL = 0;
+        SCB->VTOR = 0x17FF0000;
+        __enable_irq();
+        boot_jump(SYSTEM_MEMORY_ADDR);
+        while(1);
+        chSysUnlock();
+    }
+
     else if(*PCmd->Name == '#') Uart.Ack(CMD_UNKNOWN);  // reply only #-started stuff
 }
 #endif
