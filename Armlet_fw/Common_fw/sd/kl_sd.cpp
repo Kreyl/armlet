@@ -10,6 +10,7 @@
 #include "sdc_lld.h"
 #include <string.h>
 #include "kl_lib_f2xx.h"
+#include "cmd_uart.h"
 
 sd_t SD;
 

@@ -6,6 +6,7 @@
  */
 
 #include "kl_lib_f2xx.h"
+#include "cmd_uart.h"
 #include <stdarg.h>
 #include <string.h>
 

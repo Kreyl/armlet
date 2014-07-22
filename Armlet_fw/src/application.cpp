@@ -37,6 +37,16 @@ void TmrPillCheckCallback(void *p) {
     chVTSetI(&App.TmrPillCheck, MS2ST(T_PILL_CHECK_MS), TmrPillCheckCallback, nullptr);
     chSysUnlockFromIsr();
 }
+#if UART_RX_ENABLED
+// Uart Rx
+void TmrUartRxCallback(void *p) {
+    chSysLockFromIsr();
+    chEvtSignalI(App.PThd, EVTMSK_UART_RX_POLL);
+    chVTSetI(&App.TmrUartRx, MS2ST(UART_RX_POLLING_MS), TmrUartRxCallback, nullptr);
+    chSysUnlockFromIsr();
+}
+#endif
+
 #endif
 
 #if 1 // ================================ Time =================================
@@ -355,6 +365,15 @@ void App_t::Task() {
             else if(!IsNowConnected and PillWasConnected) PillWasConnected = false;
         } // if EVTMSK_PILL_CHECK
 #endif
+
+
+#if 1 // == Uart Rx ==
+#if UART_RX_ENABLED
+        if(EvtMsk & EVTMSK_UART_RX_POLL) {
+            Uart.PollRx(); // Check if new cmd received
+        }
+#endif
+#endif
     } // while true
 }
 
@@ -365,6 +384,10 @@ void App_t::Init() {
     Sound.RegisterAppThd(PThd);
     on_run=0;
 
+#if UART_RX_ENABLED
+    chVTSet(&TmrUartRx,    MS2ST(UART_RX_POLLING_MS), TmrUartRxCallback, nullptr);
+#endif
+
     Time.Init();
     Time.Reset();
 //    InitArrayOfUserIntentions();
@@ -372,14 +395,12 @@ void App_t::Init() {
 
 
 #if 1 // ======================= Command processing ============================
-void UartCmdCallback(uint8_t CmdCode, uint8_t *PData, uint32_t Length) {
-    uint8_t b;
-    switch(CmdCode) {
-        case 0x01:
-            b = OK;
-            Uart.Cmd(0x90, &b, 1);
-            break;
-        default: break;
-    } // switch
+#if UART_RX_ENABLED
+void App_t::OnUartCmd(Cmd_t *PCmd) {
+//    Uart.Printf("%S\r", PCmd->Name);
+    uint32_t dw32 __attribute__((unused));  // May be unused in some cofigurations
+    if(PCmd->NameIs("#Ping")) Uart.Ack(OK);
+    else if(*PCmd->Name == '#') Uart.Ack(CMD_UNKNOWN);  // reply only #-started stuff
 }
+#endif
 #endif

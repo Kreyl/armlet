@@ -16,6 +16,7 @@
 #define EVTMSK_TIMER            EVENT_MASK(4)
 #define EVTMSK_NEWSECOND        EVENT_MASK(5)
 #define EVTMSK_PILL_CHECK       EVENT_MASK(6)
+#define EVTMSK_UART_RX_POLL     EVENT_MASK(7)
 
 #define EVTMSK_USB_READY        EVENT_MASK(10)
 

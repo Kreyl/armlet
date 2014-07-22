@@ -7,6 +7,7 @@
 
 #include "usb_f2.h"
 #include "evt_mask.h"
+#include "cmd_uart.h"
 
 #define TRDT        0xF  // AHB clock = 24, => TRDT = 4 * (24/48) +1
 

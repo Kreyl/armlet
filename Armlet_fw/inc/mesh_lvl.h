@@ -9,6 +9,7 @@
 #define MESH_LVL_H_
 
 #include "kl_lib_f2xx.h"
+#include "cmd_uart.h"
 #include "evt_mask.h"
 #include "radio_lvl1.h"
 #include "msg_box.h"

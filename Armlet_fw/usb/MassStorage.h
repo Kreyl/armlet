@@ -11,6 +11,7 @@
 #include "usb_f2.h"
 #include "hal.h"
 #include "scsi.h"
+#include "cmd_uart.h"
 
 // Config
 #define READ_ONLY       FALSE

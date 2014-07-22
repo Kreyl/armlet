@@ -12,6 +12,7 @@ void AppInit();
 */
 #include "atlantis_music_tree.h"
 #include "kl_lib_f2xx.h"
+#include "cmd_uart.h"
 
 #if 1 // ==== Timings ====
 #define T_PILL_CHECK_MS         360  // Check if pill connected every TM_PILL_CHECK
@@ -31,6 +32,10 @@ struct Pill_t {
 #define PILL_CHARGECNT_ADDR     4
 #endif
 
+#if UART_RX_ENABLED
+void TmrUartRxCallback(void *p);
+#endif
+
 enum AppState_t {asIdle, asCurrent};
 
 class App_t {
@@ -40,10 +45,15 @@ public:
     Thread *PThd;
     AppState_t State;
     // Timers
-    VirtualTimer TmrPillCheck;
+    VirtualTimer TmrPillCheck, TmrUartRx;
     void Init();
     void Task();
     void StopEverything();
+
+#if UART_RX_ENABLED
+    void OnUartCmd(Cmd_t *PCmd);
+#endif
+
     int on_run;
 };
 
