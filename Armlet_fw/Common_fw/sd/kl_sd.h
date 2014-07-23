@@ -16,23 +16,6 @@
 
 // See SDIO clock divider in halconf.h
 
-class sd_t {
-private:
-    FATFS SDC_FS;
-    char LongFileName[MAX_NAME_LEN];
-    FILINFO FileInfo;
-public:
-    char* Filename;
-    DIR Directory;
-    FRESULT GetFirst(const char* DirPath);  // Put first file info into FileInfo field
-    FRESULT GetNext();
-    uint8_t GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName);
-    bool IsReady;
-    void Init();
-};
-
-extern sd_t SD;
-
 // =========================== ini file operations =============================
 /*
  * ini file has the following structure:
@@ -41,8 +24,8 @@ extern sd_t SD;
  * ; This is Comment too
  *
  * [Section]    ; This is name of section
- * Count=6      ; This is key with value of uint
- * Volume=-1    ; int
+ * Count=6      ; This is key with value of int32
+ * Volume=-1    ; int32
  * SoundFileName=phrase01.wav   ; string
  *
  * [Section2]
@@ -50,13 +33,30 @@ extern sd_t SD;
  * ...
  */
 
-#define USE_INI_FILES
+#define SD_STRING_SZ    256 // for operations with strings
+#define LOG_NAME        "log.txt"
 
-#ifdef USE_INI_FILES
-uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileName, char *AOutput, uint32_t AMaxLen);
-uint8_t iniReadInt32 (const char *ASection, const char *AKey, const char *AFileName, int32_t *AOutput);
-uint8_t iniReadUint32(const char *ASection, const char *AKey, const char *AFileName, uint32_t *AOutput);
-#endif
+class sd_t {
+private:
+    FATFS SDC_FS;
+    char LongFileName[MAX_NAME_LEN];
+    FILINFO FileInfo;
+    FIL IFile;  // Open and close inside one function, do not leave it opened
+    char IStr[SD_STRING_SZ];
+public:
+    char* Filename;
+    DIR Directory;
+    FRESULT GetFirst(const char* DirPath);  // Put first file info into FileInfo field
+    FRESULT GetNext();
+    uint8_t GetNthFileByPrefix(const char* DirPath, const char* Prefix, uint32_t N, char* PName);
+    bool IsReady;
+    void Init();
+    void PutToLog(const char *S, ...);
+    // ini file operations
+    uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileName, char *POutput);
+    uint8_t iniReadInt32 (const char *ASection, const char *AKey, const char *AFileName, int32_t *POutput);
+};
 
+extern sd_t SD;
 
 #endif /* SD_H_ */

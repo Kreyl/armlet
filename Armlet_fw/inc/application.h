@@ -40,7 +40,7 @@ enum AppState_t {asIdle, asCurrent};
 
 class App_t {
 public:
-    uint32_t ID=0;
+    int32_t ID=0;
     Pill_t Pill;
     Thread *PThd;
     AppState_t State;

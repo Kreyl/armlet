@@ -9,6 +9,7 @@
 #include "sdc.h"
 #include "sdc_lld.h"
 #include <string.h>
+#include <stdlib.h>
 #include "kl_lib_f2xx.h"
 #include "cmd_uart.h"
 
@@ -16,7 +17,6 @@ sd_t SD;
 
 void sd_t::Init() {
     IsReady = FALSE;
-
     // Bus pins
     PinSetupAlterFunc(GPIOC,  8, omPushPull, pudPullUp, AF12, ps50MHz); // DAT0
     PinSetupAlterFunc(GPIOC,  9, omPushPull, pudPullUp, AF12, ps50MHz); // DAT1
@@ -48,6 +48,7 @@ void sd_t::Init() {
     IsReady = TRUE;
 }
 
+#if 1 // ====================== Get Filename In Folder =========================
 // Get first file in folder
 FRESULT sd_t::GetFirst(const char* DirPath) {
     FRESULT r = f_opendir(&Directory, DirPath); // Try to open the folder
@@ -75,9 +76,9 @@ FRESULT sd_t::GetNext() {
     return FR_INT_ERR;
 }
 
-uint8_t sd_t::GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName) {
+uint8_t sd_t::GetNthFileByPrefix(const char* DirPath, const char* Prefix, uint32_t N, char* PName) {
     uint32_t Len = strlen(Prefix);
-    FRESULT r = GetFirst("/");
+    FRESULT r = GetFirst(DirPath);
     while(r == FR_OK) {
         // Check if name begins with prefix
         if(strncmp(Filename, Prefix, Len) == 0) {   // Prefix found
@@ -91,79 +92,112 @@ uint8_t sd_t::GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName) {
     }
     return FAILURE;
 }
+#endif
 
-// ========================== ini files operations =============================
-#ifdef USE_INI_FILES
-#include <stdlib.h>
+#if 1 // ============================ Log File =================================
+static char *FPC;
+static inline void FLogPutChar(char c) {
+    if(FPC != nullptr) *FPC++ = c;
+}
 
-#define INI_BUF_SIZE    512
-static char IBuf[INI_BUF_SIZE];
-static char FBuf[64];
-static FIL File;
+static inline uint32_t FPrintf(const char *S, ...) {
+    va_list args;
+    va_start(args, S);
+    uint32_t Sz = kl_vsprintf(FLogPutChar, SD_STRING_SZ, S, args);
+    va_end(args);
+    return Sz;
+}
 
+void sd_t::PutToLog(const char *S, ...) {
+    FRESULT rslt;
+    rslt = f_open(&IFile, LOG_NAME, FA_WRITE+FA_OPEN_ALWAYS);
+    if(rslt != FR_OK) { Uart.Printf("\rLogfile open error: %u", rslt); return; }
+    // Move to end of the file to append data
+    rslt = f_lseek(&IFile, f_size(&IFile));
+    if(rslt != FR_OK) { Uart.Printf("\rLogfile seek error: %u", rslt); return; }
+    FPC = IStr;
+    // Print systime
+    uint32_t Sz = FPrintf("\r\n%u ", chTimeNow());
+    // Print to buf
+    va_list args;
+    va_start(args, S);
+    Sz += kl_vsprintf(FLogPutChar, SD_STRING_SZ , S, args);
+    va_end(args);
+    IStr[Sz] = 0;
+    Uart.Printf("\r\nLog: %S", IStr);
+    // Write data
+    UINT Dummy=0;
+    f_write(&IFile, IStr, Sz, &Dummy);
+    f_close(&IFile);
+}
+#endif
+
+#if 1 // ======================= ini file operations ===========================
 // ==== Inner use ====
 static inline char* skipleading(char *S) {
     while (*S != '\0' && *S <= ' ') S++;
-    return (char*)S;
+    return S;
 }
 static inline char* skiptrailing(char *S, const char *base) {
     while ((S > base) && (*(S-1) <= ' ')) S--;
-    return (char*)S;
+    return S;
 }
 static inline char* striptrailing(char *S) {
     char *ptr = skiptrailing(strchr(S, '\0'), S);
     *ptr='\0';
-    return (char*)S;
+    return S;
 }
 
-// ======================== Implementation =====================================
-uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileName, char *POutput, uint32_t AMaxLen) {
+uint8_t sd_t::iniReadString(const char *ASection, const char *AKey, const char *AFileName, char *POutput) {
     FRESULT rslt;
     // Open file
-    rslt = f_open(&File, AFileName, FA_READ+FA_OPEN_EXISTING);
+    rslt = f_open(&IFile, AFileName, FA_READ+FA_OPEN_EXISTING);
     if(rslt != FR_OK) {
-        Uart.Printf(AFileName);
-        if (rslt == FR_NO_FILE) Uart.Printf("\r: file not found");
-        else Uart.Printf("\r: openFile error: %u", rslt);
+        if (rslt == FR_NO_FILE) Uart.Printf("\r%S: not found", AFileName);
+        else Uart.Printf("\r%S: openFile error: %u", AFileName, rslt);
         return FAILURE;
     }
     // Check if zero file
-    if(File.fsize == 0) {
-        f_close(&File);
+    if(IFile.fsize == 0) {
+        f_close(&IFile);
         Uart.Printf("\rEmpty file");
         return FAILURE;
     }
-    //Uart.Printf("%S\r", FBuf);
     // Move through file one line at a time until a section is matched or EOF.
-    char *StartP, *EndP;
-    uint32_t len = strlen(ASection);
+    char *StartP, *EndP = nullptr;
+    int32_t len = strlen(ASection);
     do {
-        if(f_gets(IBuf, INI_BUF_SIZE, &File) == nullptr) {
+        if(f_gets(IStr, SD_STRING_SZ, &IFile) == nullptr) {
             Uart.Printf("\riniNoSection %S", ASection);
-            f_close(&File);
+            f_close(&IFile);
             return FAILURE;
         }
-        StartP = skipleading(IBuf);
+        StartP = skipleading(IStr);
+        if((*StartP != '[') or (*StartP == ';') or (*StartP == '#')) continue;
         EndP = strchr(StartP, ']');
-    } while ((*StartP != '[') or (EndP == NULL) or ((uint32_t)(EndP-StartP-1) != len or strnicmp(StartP+1, ASection, len) != 0));
+        if((EndP == NULL) or ((int32_t)(EndP-StartP-1) != len)) continue;
+    } while (strnicmp(StartP+1, ASection, len) != 0);
 
     // Section found, find the key
     len = strlen(AKey);
     do {
-        if (!f_gets(IBuf, INI_BUF_SIZE, &File) or *(StartP = skipleading(IBuf)) == '[') {
-            Uart.Printf("\rKey Read Err");
-            f_close(&File);
+        if (!f_gets(IStr, SD_STRING_SZ, &IFile) or *(StartP = skipleading(IStr)) == '[') {
+            Uart.Printf("\riniNoKey");
+            f_close(&IFile);
             return FAILURE;
         }
-        StartP = skipleading(IBuf);
-        EndP = strchr(StartP, '='); /* Parse out the equal sign */
-    } while ((*StartP == ';') or (*StartP == '#') or (EndP == NULL) or ((uint32_t)(skiptrailing(EndP, StartP)-StartP) != len or strnicmp(StartP, AKey, len) != 0));
+        StartP = skipleading(IStr);
+        if((*StartP == ';') or (*StartP == '#')) continue;
+        EndP = strchr(StartP, '=');
+        if(EndP == NULL) continue;
+    } while(((int32_t)(skiptrailing(EndP, StartP)-StartP) != len or strnicmp(StartP, AKey, len) != 0));
+    f_close(&IFile);
 
-    // Copy up to ALength chars to AOutput
+    // Process Key's value
     StartP = skipleading(EndP + 1);
     // Remove a trailing comment
     uint8_t isstring = 0;
-    for (EndP = StartP; (*EndP != '\0') and (((*EndP != ';') and (*EndP != '#')) or isstring) and ((uint32_t)(EndP - StartP) < AMaxLen); EndP++) {
+    for(EndP = StartP; (*EndP != '\0') and (((*EndP != ';') and (*EndP != '#')) or isstring) and ((uint32_t)(EndP - StartP) < SD_STRING_SZ); EndP++) {
         if (*EndP == '"') {
             if (*(EndP + 1) == '"') EndP++;     // skip "" (both quotes)
             else isstring = !isstring; // single quote, toggle isstring
@@ -172,26 +206,18 @@ uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileN
     } // for
     *EndP = '\0';   // Terminate at a comment
     striptrailing(StartP);
-    strcpy(POutput, StartP);
-    f_close(&File);
+    POutput = StartP;
     return OK;
 }
 
-uint8_t iniReadInt32(const char *ASection, const char *AKey, const char *AFileName, int32_t *POutput) {
-    if(iniReadString(ASection, AKey, AFileName, FBuf, 64) == OK) {
-        *POutput = strtol(FBuf, NULL, 10);
+uint8_t sd_t::iniReadInt32(const char *ASection, const char *AKey, const char *AFileName, int32_t *POutput) {
+    char *S = nullptr;
+    if(iniReadString(ASection, AKey, AFileName, S) == OK) {
+        *POutput = strtol(S, NULL, 10);
         return OK;
     }
     else return FAILURE;
 }
-uint8_t iniReadUint32(const char *ASection, const char *AKey, const char *AFileName, uint32_t *POutput) {
-    if(iniReadString(ASection, AKey, AFileName, FBuf, 64) == OK) {
-        *POutput = strtol(FBuf, NULL, 10);
-        return OK;
-    }
-    else return FAILURE;
-}
-
 #endif
 
 // ============================== Hardware =====================================
