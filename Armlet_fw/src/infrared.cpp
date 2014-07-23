@@ -90,7 +90,7 @@ void Infrared_t::IRxTask() {
 
 void Infrared_t::TxInit() {
     // ==== Carrier timer ====
-    Carrier.Init();
+    Carrier.Init(IR_CARRIER_TMR);
     Carrier.Enable();
     Carrier.PwmInit(IR_CARRIER_GPIO, IR_CARRIER_PIN, IR_CARRIER_CHNL, invNotInverted);
     Carrier.SetUpdateFrequency(IR_CARRIER_HZ);
@@ -103,7 +103,7 @@ void Infrared_t::TxInit() {
     //Carrier.PwmSet(MaxPower);   // Debug
 
     // ==== Modulation timer ====
-    Modulator.Init();
+    Modulator.Init(IR_MODULATION_TMR);
     Modulator.Enable();
     Modulator.SetTopValue(IR_TICK_US-1);    // Delay in us
     Modulator.MasterModeSelect(mmUpdate);   // Master mode: Update is used as TRGO
@@ -142,7 +142,7 @@ void Infrared_t::RxInit() {
     PinSet(IR_RX_PWR_GPIO, IR_RX_PWR_PIN);                  // } Power
     PinSetupIn(IR_RX_IN_GPIO, IR_RX_IN_PIN, pudNone);       // Input
     // ==== Timer ====
-    RxTimer.Init();
+    RxTimer.Init(IR_RX_TIMER);
     RxTimer.Enable();
     RxTimer.SetTopValue(0xFFFF);        // Maximum
     RxTimer.SetupPrescaler(1000000);    // Input Freq: 1 MHz => one tick = 1 uS

@@ -10,6 +10,20 @@
 
 #include <inttypes.h>
 
+// =================================== Power ===================================
+#define CC_PwrMinus30dBm       0x03
+#define CC_PwrMinus27dBm       0x08
+#define CC_PwrMinus25dBm       0x0D
+#define CC_PwrMinus20dBm       0x17
+#define CC_PwrMinus15dBm       0x1D
+#define CC_PwrMinus10dBm       0x26
+#define CC_PwrMinus6dBm        0x37
+#define CC_Pwr0dBm             0x50
+#define CC_PwrPlus5dBm         0x86
+#define CC_PwrPlus7dBm         0xCD
+#define CC_PwrPlus10dBm        0xC5
+#define CC_PwrPlus12dBm        0xC0
+
 // ======================= Registers, strobes etc. =============================
 // Flags
 #define CC_BURST_FLAG   0b01000000

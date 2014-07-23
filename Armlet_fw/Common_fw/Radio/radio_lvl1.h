@@ -1,71 +1,31 @@
 /*
- * lvl1_assym.h
+ * radio_lvl1.h
  *
- *  Created on: 28.03.2013
+ *  Created on: Nov 17, 2013
  *      Author: kreyl
  */
 
-/*
- * Level 1 is responsible to sync rpkt exchange and therefore has
- * high priority.
- */
-
-#ifndef LVL1_ASSYM_H_
-#define LVL1_ASSYM_H_
+#ifndef RADIO_LVL1_H_
+#define RADIO_LVL1_H_
 
 #include "ch.h"
-#include "hal.h"
 #include "kl_lib_f2xx.h"
-
-//#define INTERNAL_MESH
-
-// ============================== Pkt_t ========================================
-struct rPkt_t {
-    uint8_t ID;
-    uint32_t CycleN;
-    uint8_t TimeOwnerID;
-    uint8_t TimeAge;
-} __attribute__ ((__packed__));
-#define RPKT_SZ     sizeof(rPkt_t)
-
-// =========================== Address space ===================================
-#define R_NO_ID                 0xFF
-// Emanators
-#define R_EMANATOR_BOTTOM_ID    120
-#define R_EMANATOR_TOP_ID       122
-#define R_EMANATOR_CNT          ((1+R_EMANATOR_TOP_ID)-R_EMANATOR_BOTTOM_ID)
-
-
-#if 1 //============================ Level1 ====================================
+#include "cc1101.h"
+#include "mesh_params.h"
 
 class rLevel1_t {
 private:
-    Thread *PAppThd;
-    rPkt_t PktRx;       // Local rPkt to receive
-    rPkt_t PktTx;       // Local rPkt to transmit
-
-    // Mesh needed
-    uint32_t RxTmt, RxStartTime, Time;
-    VirtualTimer MeshRxVT;
-
+    uint32_t LastTime;
 public:
-    Thread *PrThd;
-
-    void Init(uint32_t ASelfID);
-    void Shutdown();
-    void RegisterAppThd(Thread *PThd) { PAppThd = PThd; }
-
-    // Mesh needed
-    void ResetTimeAge(uint8_t ID)     { PktTx.TimeAge = 0; PktTx.TimeOwnerID = ID; }
-    uint8_t GetTimeAge()              { return PktTx.TimeAge;     }
-    uint8_t GetTimeOwner()            { return PktTx.TimeOwnerID; }
+    void Init();
     // Inner use
+    Thread *rThd;
+    meshradio_t Valets; /* private for mesh */
     void ITask();
-    bool IMeshRx;
+    void IMeshRx();
+    void IIterateChannels();
 };
 
-extern rLevel1_t rLevel1;
+extern rLevel1_t Radio;
 
-#endif
-
-#endif /* LVL1_ASSYM_H_ */
+#endif /* RADIO_LVL1_H_ */

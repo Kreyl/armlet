@@ -23,7 +23,7 @@
 #include "sound.h"
 #include "ff.h"
 #include "intention.h"
-#include "SensorTable.h"
+#include "RxTable.h"
 #include "..\AtlGui\atlgui.h"
 #include "energy.h"
 
@@ -388,7 +388,7 @@ void App_t::Task() {
 void App_t::Init() {
     State = asIdle;
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
-    SnsTable.RegisterAppThd(PThd);
+    RxTable.RegisterAppThd(PThd);
     Sound.RegisterAppThd(PThd);
     on_run=0;
 

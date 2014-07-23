@@ -11,12 +11,14 @@
 #include <string.h>
 
 // ================================ Timer ======================================
-void Timer_t::Init() {
+void Timer_t::Init(TIM_TypeDef *Tmr) {
+    ITmr = Tmr;
     if     (ITmr == TIM1)  { rccEnableTIM1(FALSE); }
     else if(ITmr == TIM2)  { rccEnableTIM2(FALSE); }
     else if(ITmr == TIM3)  { rccEnableTIM3(FALSE); }
     else if(ITmr == TIM4)  { rccEnableTIM4(FALSE); }
     else if(ITmr == TIM5)  { rccEnableTIM5(FALSE); }
+    else if(ITmr == TIM7)  { rccEnableTIM7(FALSE); }
     else if(ITmr == TIM8)  { rccEnableTIM8(FALSE); }
     else if(ITmr == TIM9)  { rccEnableAPB2(RCC_APB2ENR_TIM9EN, FALSE); }
     else if(ITmr == TIM10) { rccEnableAPB2(RCC_APB2ENR_TIM10EN, FALSE); }

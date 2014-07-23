@@ -117,8 +117,8 @@ void Init() {
     App.Init();
     AtlGui.Init();
 
-    rLevel1.Init(App.ID);
-    Mesh.Init(App.ID);
+    Radio.Init();
+    Mesh.Init();
 
     Uart.Printf("\rInit done");
     SD.PutToLog("Init done");
