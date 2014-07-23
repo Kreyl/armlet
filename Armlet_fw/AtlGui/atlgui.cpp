@@ -293,14 +293,14 @@ int AtlGui_t::GetScreenIndxFromName(char* name)
     return -1;
 }
 
-void AtlGui_t::ButtonIsClicked(int button_id)
+bool AtlGui_t::ButtonIsClicked(int button_id)
 {
     if(is_screen_suspended)
-        return;
+        return false;
     is_suspend_timer_run=true;
 
     if(is_locked && button_id!=6)
-        return;
+        return false;
     //вызываем геттер кнопки
     Uart.Printf("\rcurrent_state %d screens_number %d button id %d",current_state,screens_number,button_id);
     if(current_state>=0 && current_state<screens_number)
@@ -314,15 +314,18 @@ void AtlGui_t::ButtonIsClicked(int button_id)
                Uart.Printf("\rbutton%d on screen %d is pressable %d",button_id,current_state );
                RenderSingleButton(current_state,button_id,BUTTON_PRESSED);
                //on red andgreenchange state
+               return true;
            }
-           else
+           else {
                RenderSingleButton(current_state,button_id,BUTTON_DISABLED);
+               return true;
+           }
         }
-        else return;
+        else return false;
       // else return; // если нет действия на кнопке - ничего не делаем
 
     }
-    else return; // если мы вне автомата состояний - ошибка!
+    else return false; // если мы вне автомата состояний - ошибка!
 
 
     // если есть изменение экрана, меняем экран??

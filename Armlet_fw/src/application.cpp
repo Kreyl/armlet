@@ -134,16 +134,17 @@ static inline void KeysHandler() { // FIXME
     uint8_t rslt;
     KeyEvtInfo_t Evt;
 
-
     while((rslt = Keys.EvtBuf.Get(&Evt)) == OK) {
-        //key debug info
-        Uart.Printf("KeyEvtType=%u; Keys: ", Evt.Type);
+        // Debug
+        Uart.Printf("\rKeyEvtType=%u; Keys: ", Evt.Type);
         for(uint8_t i=0; i<Evt.NKeys; i++) Uart.Printf("%u ", Evt.KeyID[i]);
-        Uart.Printf("\r\n");
 
-        if(Evt.Type==kePress)
-        {
-            AtlGui.ButtonIsClicked(Evt.KeyID[0]);
+        if(Evt.Type==kePress) {
+            // Beep/Vibrate if click succeeded
+            if(AtlGui.ButtonIsClicked(Evt.KeyID[0])) {
+//                Beeper.Beep(ShortBeep);
+                Vibro.Vibrate(ShortBrr);
+            }
         }
         else if(Evt.Type==keRelease)
         {
@@ -237,7 +238,7 @@ void App_t::Task() {
         EvtMsk = chEvtWaitAny(ALL_EVENTS);
 
         if(EvtMsk & EVTMSK_KEYS) {
-            Uart.Printf("\rApp Keys");
+//            Uart.Printf("\rApp Keys");
             KeysHandler();
         }
 

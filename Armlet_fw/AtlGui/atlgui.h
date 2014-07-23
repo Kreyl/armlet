@@ -76,7 +76,7 @@ public:
     void ShowSplashscreen();
     void CallStateScreen(int screen_id);
     //основная очередь событий по клику кнопки
-    void ButtonIsClicked(int button_id);
+    bool ButtonIsClicked(int button_id);
     void ButtonIsReleased(int button_id ,KeyEvt_t Type);
     void RenderFullScreen(int screen_id);
     void RenderSingleButton(int screen_id,int button_id,int button_state);

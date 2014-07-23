@@ -84,7 +84,7 @@ void Init() {
 
     Keys.Init();
     Beeper.Init();
-//    Vibro.Init();
+    Vibro.Init();
 
 //    IR.TxInit();
 //    IR.RxInit();
@@ -94,8 +94,7 @@ void Init() {
     Sound.Init();
     Sound.SetVolume(START_VOL_CONST);
 
-//    PillMgr.Init();
-//    Sound.Play("fon-WhiteTower.mp3", 1000000);//"alive.wav");
+    PillMgr.Init();
 #if 1
     Init_emotionTreeMusicNodeFiles_FromFileIterrator();
     App.Init();
