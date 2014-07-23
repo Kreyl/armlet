@@ -75,9 +75,9 @@ FRESULT sd_t::GetNext() {
     return FR_INT_ERR;
 }
 
-uint8_t sd_t::GetNthFileByPrefix(const char* Prefix, uint32_t N, char* PName) {
+uint8_t sd_t::GetNthFileByPrefix(const char* DirPath, const char* Prefix, uint32_t N, char* PName) {
     uint32_t Len = strlen(Prefix);
-    FRESULT r = GetFirst("/");
+    FRESULT r = GetFirst(DirPath);
     while(r == FR_OK) {
         // Check if name begins with prefix
         if(strncmp(Filename, Prefix, Len) == 0) {   // Prefix found

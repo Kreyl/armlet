@@ -86,7 +86,7 @@ void Init() {
     Uart.Printf("\rAtlantis   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
 
     SD.Init();
-//     Read config
+    // Read config
     iniReadUint32("Radio", "ID", "settings.ini", &App.ID);
     Uart.Printf("\rID=%u", App.ID);
 
