@@ -86,6 +86,7 @@ void Usb_t::Shutdown() {
     chSysLock();
     OTG_FS->PCGCCTL |= PCGCCTL_STPPCLK | PCGCCTL_GATEHCLK; // Stop PHY clock, gate HCLK
     rccDisableOTG_FS(FALSE);
+    nvicDisableVector(STM32_OTG1_NUMBER);
     IsReady = false;
     chSysUnlock();
 }

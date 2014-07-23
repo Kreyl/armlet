@@ -62,13 +62,12 @@ int main() {
         uint32_t EvtMsk;
         EvtMsk = chEvtWaitAny(ALL_EVENTS);
         if(EvtMsk & EVTMSK_DFU_REQUEST) {
-//            Usb.Shutdown();
-//            MassStorage.Reset();
+            Usb.Shutdown();
+            MassStorage.Reset();
             // execute boot
-            chSysLock();
-            chThdSleepMilliseconds(9);
-            Clk.SwitchToHSI();
             __disable_irq();
+            chSysLock();
+            Clk.SwitchToHSI();
             SysTick->CTRL = 0;
             SCB->VTOR = 0x17FF0000;
             __enable_irq();
