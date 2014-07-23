@@ -57,7 +57,7 @@ char * GetMusicFileNameFromList(int emo_id, int file_num)
   //  Uart.Printf("GetMusicFileNameFromList3\r");
    // Uart.Printf("emonamebuffer %s , emotions[emo_id].name  %s \r",emonamebuffer,emotions[emo_id].name);
     //SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer);
-    if(SD.GetNthFileByPrefix("\\", emonamebuffer,file_num,GMFNFLbuffer)==FR_OK)
+    if(SD.GetNthFileByPrefix(MUSIC_ROOT_DIR, emonamebuffer,file_num,GMFNFLbuffer)==FR_OK)
     {
         Uart.Printf("GetNthFileByPrefix prefix: %s,fnum %d result: %s \r",emonamebuffer,file_num,GMFNFLbuffer);
         return GMFNFLbuffer;
@@ -265,7 +265,7 @@ int Init_emotionTreeMusicNodeFiles_FromFileIterrator()
     {
         emotions[i].numTracks=0;
     }
-    if(SD.GetFirst("/")==FR_OK)
+    if(SD.GetFirst(MUSIC_ROOT_DIR)==FR_OK) // @KL: dir '/' switched to 'music'
     {
         int emo_id=GetEmoIndxFromFileString(SD.Filename);
       //

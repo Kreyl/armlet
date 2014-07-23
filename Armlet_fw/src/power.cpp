@@ -14,6 +14,8 @@
 #include "evt_mask.h"
 #include "application.h"
 
+#include "kl_sd.h"
+
 #define USB_ENABLED
 
 Pwr_t Power;
@@ -40,7 +42,7 @@ static const mVPercent_t mVPercentTable[] = {
 #define mVPercentTableSz    countof(mVPercentTable)
 
 // ============================== Implementation ===============================
-static WORKING_AREA(waPwrThread, 128);
+static WORKING_AREA(waPwrThread, 1024);
 static void PwrThread(void *arg) {
     chRegSetThreadName("Pwr");
     Power.Task();
@@ -54,8 +56,12 @@ uint8_t Pwr_t::mV2Percent(uint16_t mV) {
 
 __attribute__ ((__noreturn__))
 void Pwr_t::Task() {
+    uint32_t N=0;
     while(true) {
         chThdSleepMilliseconds(PWR_MEASUREMENT_INTERVAL_MS);
+
+        SD.PutToLog("My Precious Stone %u", N++);
+
         // Check if power src changed
         if(WasExternal and !ExternalPwrOn()) {
             WasExternal = false;

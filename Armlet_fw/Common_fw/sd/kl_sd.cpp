@@ -124,7 +124,7 @@ void sd_t::PutToLog(const char *S, ...) {
     Sz += kl_vsprintf(FLogPutChar, SD_STRING_SZ , S, args);
     va_end(args);
     IStr[Sz] = 0;
-    Uart.Printf("\r\nLog: %S", IStr);
+//    Uart.Printf("\r\nLog: %S", IStr);
     // Write data
     UINT Dummy=0;
     f_write(&IFile, IStr, Sz, &Dummy);

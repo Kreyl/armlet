@@ -35,7 +35,6 @@
 static inline void Init();
 #define CLEAR_SCREEN_FOR_DEBUG
 //#define UART_MESH_DEBUG
-#define UART_EMOTREE_DEBUG
 int main() {
     // ==== Setup clock ====
     Clk.UpdateFreqValues();

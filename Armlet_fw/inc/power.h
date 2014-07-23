@@ -18,7 +18,7 @@
 #define PWR_BATTERY_PIN     0
 #define PWR_BATTERY_GPIO    GPIOC
 
-#define PWR_MEASUREMENT_INTERVAL_MS    999
+#define PWR_MEASUREMENT_INTERVAL_MS    99
 
 // Adc
 #define ADC_CHNL            10

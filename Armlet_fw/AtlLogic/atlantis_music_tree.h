@@ -7,12 +7,17 @@
 
 #ifndef ATLANTIS_MUSIC_TREE_H_
 #define ATLANTIS_MUSIC_TREE_H_
+
 #include "emotions.h"
 #include "integer.h"
+
 //#define emotion_number_fix 5
 #define ROOT_ELEMENT_INDX -1
 #define MAX_MUSIC_FILENAME_CHAR_SIZE 40
 #define MAX_NUMBER_MUSIC_FILES_ON_NODE 30
+
+#define MUSIC_ROOT_DIR      "music"
+
 //структура определяющая всю музыку под один нод, если таковой имеется
 //float1000 - используется инк как флоат, с точностью 1/1000
 //music_array_size = music_array_size
