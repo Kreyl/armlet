@@ -100,7 +100,6 @@ private:
 public:
     Infrared_t():
         MaxPower(0),
-        Carrier(IR_CARRIER_TMR), Modulator(IR_MODULATION_TMR), RxTimer(IR_RX_TIMER),
         IWaitingEdge(Falling),
         IRxW(0), IBitCnt(0), IReceivingData(false), IBitDelay(TIME_INFINITE),
         IsBusy(false), RxWord(0) { }

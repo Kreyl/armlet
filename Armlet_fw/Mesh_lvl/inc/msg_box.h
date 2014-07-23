@@ -10,12 +10,13 @@
 
 #include "kl_lib_f2xx.h"
 #include "radio_lvl1.h"
+#include "string.h"
 
 #if 1 // =============================== Message Box =================================
 struct mshMsg_t {
     uint32_t Timestamp;
-    rPkt_t PktRx;
     int8_t RSSI;
+    MeshPkt_t* pRadioPkt;
 };
 
 template <typename T, int32_t Sz>
