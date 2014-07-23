@@ -43,7 +43,7 @@
 #define UART_RX_PIN         6
 #define UART_RX_REG         UART->DR
 
-#define UART_RX_POLLING_MS  299
+#define UART_RX_POLLING_MS  99
 #define UART_DMA_RX         STM32_DMA1_STREAM5
 #define UART_DMA_RX_MODE    STM32_DMA_CR_CHSEL(UART_DMA_CHNL) | \
                             DMA_PRIORITY_LOW | \

@@ -10,6 +10,7 @@
 
 
 #include "kl_lib_f2xx.h"
+#include "evt_mask.h"
 
 #define SYSTEM_MEMORY_ADDR      (uint32_t)0x1FFF0000 // System memory Information Block
 
@@ -22,6 +23,7 @@ enum Iwdg_t {
 
 class Btldr_t {
 private:
+
     void JumpToAddr(uint32_t Addr);
     void Iwdt_enable() {
         const uint32_t LsiFreq = 42000;
@@ -31,6 +33,10 @@ private:
         IWDG->KR = 0xCCCC;                      // enable wdtg
     }
 public:
+    Thread* TerminatorThd;
+    void DFU_request() {
+        if(TerminatorThd != nullptr) chEvtSignal(TerminatorThd, EVTMSK_DFU_REQUEST);
+    }
     void JumpIn();
 };
 
