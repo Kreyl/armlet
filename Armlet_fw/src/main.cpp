@@ -86,8 +86,9 @@ void Init() {
 
     SD.Init();
     // Read config
-    iniReadUint32("Radio", "ID", "settings.ini", &App.ID);
+    SD.iniReadInt32("Radio", "ID", "settings.ini", &App.ID);
     Uart.Printf("\rID=%u", App.ID);
+    SD.PutToLog("Start; ID=%u", App.ID);
 
     Lcd.Init();
     Lcd.Cls(clAtlBack);
@@ -121,5 +122,6 @@ void Init() {
     Mesh.Init(App.ID);
 
     Uart.Printf("\rInit done");
+    SD.PutToLog("Init done");
 #endif
 }
