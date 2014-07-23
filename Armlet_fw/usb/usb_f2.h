@@ -131,6 +131,12 @@ public:
     void Connect()    { OTG_FS->GCCFG |=  GCCFG_VBUSBSEN | GCCFG_NOVBUSSENS; }
     void Disconnect() { OTG_FS->GCCFG &= ~GCCFG_VBUSBSEN; }
     void Shutdown();
+    void DeInit() {
+        Disconnect();
+        Shutdown();
+        IDeviceReset();
+        IEndpointsDisable();
+    }
     Ep_t *PEpBulkOut, *PEpBulkIn;
     // Data operations
     EpState_t NonStandardControlRequestHandler(uint8_t **PPtr, uint32_t *PLen);

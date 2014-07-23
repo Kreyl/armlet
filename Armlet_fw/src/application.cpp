@@ -28,7 +28,7 @@
 #include "energy.h"
 
 #include "flashloader_support.h"
-
+#include "usb_f2.h"
 App_t App;
 
 #if 1 // ============================ Timers ===================================
@@ -409,18 +409,8 @@ void App_t::OnUartCmd(Cmd_t *PCmd) {
     if(PCmd->NameIs("#Ping")) Uart.Ack(OK);
 
     else if(PCmd->NameIs("#Boot")) {
-        Uart.Ack(OK);
-        Uart.DeInit();
-        Uart.FlushTx();
-        chSysLock();
-        Clk.SwitchToHSI();
-        __disable_irq();
-        SysTick->CTRL = 0;
-        SCB->VTOR = 0x17FF0000;
-        __enable_irq();
-        boot_jump(SYSTEM_MEMORY_ADDR);
-        while(1);
-        chSysUnlock();
+        Uart.Printf("\rDFU request");
+        Bootloader.DFU_request();
     }
 
     else if(*PCmd->Name == '#') Uart.Ack(CMD_UNKNOWN);  // reply only #-started stuff

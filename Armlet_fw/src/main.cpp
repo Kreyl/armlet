@@ -52,13 +52,31 @@ int main() {
     // ==== Init OS ====
     halInit();
     chSysInit();
+    Bootloader.TerminatorThd = chThdSelf();
     // ==== Init Hard & Soft ====
     Init();
     // Report problem with clock if any
     if(ClkResult) Uart.Printf("Clock failure\r");
 
     while(TRUE) {
-        chThdSleep(TIME_INFINITE);
+        uint32_t EvtMsk;
+        EvtMsk = chEvtWaitAny(ALL_EVENTS);
+        if(EvtMsk & EVTMSK_DFU_REQUEST) {
+//            Usb.Shutdown();
+//            MassStorage.Reset();
+            // execute boot
+            chSysLock();
+            chThdSleepMilliseconds(9);
+            Clk.SwitchToHSI();
+            __disable_irq();
+            SysTick->CTRL = 0;
+            SCB->VTOR = 0x17FF0000;
+            __enable_irq();
+            boot_jump(SYSTEM_MEMORY_ADDR);
+            while(1);
+            chSysUnlock();
+        }
+
 //        Uart.Printf("\r_abW");
     }
 }
@@ -68,7 +86,7 @@ void Init() {
     Uart.Printf("\rAtlantis   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
 
     SD.Init();
-    // Read config
+//     Read config
     iniReadUint32("Radio", "ID", "settings.ini", &App.ID);
     Uart.Printf("\rID=%u", App.ID);
 

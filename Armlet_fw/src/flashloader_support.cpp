@@ -14,22 +14,8 @@ void boot_jump(uint32_t Address) {
     __ASM("LDR PC, [R0, #4]");
 }
 
-void GoToDFU(){
-    if(Clk.SwitchToHSI() == OK) {
-        __disable_irq();
-        SysTick->CTRL = 0;
-        SCB->VTOR = 0x17FF0000;
-        __enable_irq();
-        boot_jump(SYSTEM_MEMORY_ADDR);
-        while(1);
-    }
-}
-
-
 // ===================== Implementation ==================================== //
 void Btldr_t::JumpIn() {
-//    if(IwdgStatus == Iwdg_ON) Iwdt_enable();
-//    JumpToAddr(SYSTEM_MEMORY_ADDR);
     Clk.SwitchToHSI();
     __disable_irq();
     SysTick->CTRL = 0;
@@ -44,9 +30,9 @@ void Btldr_t::JumpToAddr(uint32_t Addr){
     Clk.SwitchToHSI();
     __disable_irq();
     SysTick->CTRL = 0;
-    SCB->VTOR = 0x17FF0000;
+    SCB->VTOR = Addr - 0x08000000;
     __enable_irq();
-    boot_jump(SYSTEM_MEMORY_ADDR);
+    boot_jump(Addr);
     while(1);
 }
 
