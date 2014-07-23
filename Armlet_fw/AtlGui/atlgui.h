@@ -85,7 +85,7 @@ public:
     void GetCharname();//getname by id
     char char_name[11];
     char timechar[5];
-    int time1,  time2,  bat;
+    int time1, time2;
 
 
     int on_run;

@@ -204,9 +204,6 @@ void AtlGui_t::RenderFullScreen(int screen_id)
     strncpy (char_name,"char_name",10);
     time1=11;
     time2=22;
-    bat=Power.RemainingPercent;
-    //strncpy( time,"22_11",5);
-    //strncpy( bat,"100%",4);
     RenderNameTimeBat();
     //and all buttons
     for(int i=0;i<9;i++)
@@ -218,6 +215,8 @@ void AtlGui_t::RenderFullScreen(int screen_id)
             RenderSingleButton(screen_id,i,state1);
         }//не рисовать кнопки, которых нет
     }
+    // Draw battery
+    Lcd.DrawBatteryState();
 }
 void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
 {
@@ -370,8 +369,7 @@ void AtlGui_t::RenderNameTimeBat()
     if(Mesh.GetAstronomicTime(timechar)==FAILURE)
         strcpy(timechar,"00.00");
 
-    Lcd.Printf(0, 5, clGreen, clBlack, "%s %s %u",char_name,timechar,Power.RemainingPercent);
-    Uart.Printf("\rRemainingPercent=%d",Power.RemainingPercent);
+    Lcd.Printf(0, 5, clGreen, clBlack, "%s %s",char_name,timechar);
 
 }
 void AtlGui_t::GetCharname()

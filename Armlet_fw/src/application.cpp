@@ -314,7 +314,7 @@ void App_t::Task() {
 #if 1 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
 //            Uart.Printf("\rNewSecond");
-            AtlGui.AddSuspendScreenTimer(1);
+// @KL           AtlGui.AddSuspendScreenTimer(1);
             //UPDATE user intentions timers
             if(UpdateUserIntentionsTime(1))
                 CheckAndRedrawFinishedReasons();
@@ -368,6 +368,11 @@ void App_t::Task() {
         } // if EVTMSK_PILL_CHECK
 #endif
 
+#if 1 // ==== New battery state ====
+        if(EvtMsk & EVTMSK_NEW_POWER_STATE) {
+            Lcd.DrawBatteryState();
+        }
+#endif
 
 #if 1 // == Uart Rx ==
 #if UART_RX_ENABLED
@@ -394,7 +399,6 @@ void App_t::Init() {
     Time.Reset();
 //    InitArrayOfUserIntentions();
 }
-
 
 #if 1 // ======================= Command processing ============================
 #if UART_RX_ENABLED

@@ -59,6 +59,14 @@ struct FontParams_t {
     uint16_t X, Y;
 };
 
+// Battery capacity rectangle
+#define BAT_RECT_LEFT       147
+#define BAT_RECT_TOP        4
+#define BAT_RECT_WIDTH      9
+#define BAT_RECT_HEIGHT     4
+#define BAT_RECT_FORE_CLR   COLOR_RGB_TO_565(0x61, 0x3E, 0x10)
+#define BAT_RECT_BACK_CLR   COLOR_RGB_TO_565(0xFF, 0xEE, 0xAF)
+
 class Lcd_t {
 private:
     FontParams_t Fnt;
@@ -85,6 +93,7 @@ public:
 //    void DrawImage(const uint8_t x, const uint8_t y, const uint8_t *Img);
 //    void DrawSymbol(const uint8_t x, const uint8_t y, const uint8_t ACode);
     void DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename);
+    void DrawBatteryState();
 };
 
 extern Lcd_t Lcd;

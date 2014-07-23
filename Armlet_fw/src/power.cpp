@@ -11,6 +11,8 @@
 #include "infrared.h"
 #include "usb_f2.h"
 #include "MassStorage.h"
+#include "evt_mask.h"
+#include "application.h"
 
 #define USB_ENABLED
 
@@ -58,7 +60,6 @@ void Pwr_t::Task() {
         if(WasExternal and !ExternalPwrOn()) {
             WasExternal = false;
 #ifdef USB_ENABLED
-            Uart.Printf("\rExtPwr Off");
             Usb.Shutdown();
             MassStorage.Reset();
             chSysLock();
@@ -67,6 +68,8 @@ void Pwr_t::Task() {
             Uart.OnAHBFreqChange();
             chSysUnlock();
 #endif
+            Uart.Printf("\rExtPwr Off");
+            if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
         }
         else if(!WasExternal and ExternalPwrOn()) {
             WasExternal = true;
@@ -76,28 +79,30 @@ void Pwr_t::Task() {
             Clk.InitSysTick();
             Uart.OnAHBFreqChange();
             chSysUnlock();
-            Uart.Printf("\rExtPwr On");
             Usb.Init();
             chThdSleepMilliseconds(540);
             Usb.Connect();
 #endif
+            Uart.Printf("\rExtPwr On");
+            if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
         }
         //if(IsCharging()) Uart.Printf("\rCharging");
 
-#if 0 // ==== ADC ====
+#if 1 // ==== ADC ====
         Adc.Measure();
         uint32_t rslt = 0;
         for(uint8_t i=0; i<ADC_BUF_SZ; i++) rslt += Adc.Result[i];
         rslt /= ADC_BUF_SZ;    // Calc average
 
         // Calculate voltage
-        uint32_t tmp = 2 * rslt * ADC_VREF_MV / 4095;   // 2 because of resistor divider
-        Power.Voltage_mV = (uint16_t)tmp;
+        uint32_t U = (2 * rslt * ADC_VREF_MV) / 4095;   // 2 because of resistor divider
         // Calculate percent
-        tmp = mV2Percent(tmp);
-        if(tmp != Power.RemainingPercent) {
-            Power.RemainingPercent = tmp;
-            Uart.Printf("Adc=%u; U=%u; %=%u\r", rslt, Power.Voltage_mV, Power.RemainingPercent);
+        uint32_t NewPercent = mV2Percent(U);
+        // Indicate if has changed
+        if(NewPercent != CapacityPercent) {
+            CapacityPercent = NewPercent;
+//            Uart.Printf("\rAdc=%u; U=%u; %=%u", rslt, U, CapacityPercent);
+            if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
         }
 #endif
     } // while
@@ -108,7 +113,7 @@ void Pwr_t::Init() {
     PinSetupIn(PWR_EXTERNAL_GPIO, PWR_EXTERNAL_PIN, pudPullDown);
     PinSetupIn(PWR_CHARGING_GPIO, PWR_CHARGING_PIN, pudPullUp);
     PinSetupAnalog(PWR_BATTERY_GPIO, PWR_BATTERY_PIN);
-//    Adc.Init();
+    Adc.Init();
     // Create and start thread
     PThr = chThdCreateStatic(waPwrThread, sizeof(waPwrThread), LOWPRIO, (tfunc_t)PwrThread, NULL);
 }

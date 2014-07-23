@@ -28,15 +28,12 @@ class Pwr_t {
 private:
     Adc_t Adc;
     bool WasExternal;
-//    EventSource IEvtSrcPwrChange;
     uint8_t mV2Percent(uint16_t mV);
 public:
+    uint32_t CapacityPercent;
     void Task();
     bool ExternalPwrOn() { return  PinIsSet(PWR_EXTERNAL_GPIO, PWR_EXTERNAL_PIN); }
     bool IsCharging()    { return !PinIsSet(PWR_CHARGING_GPIO, PWR_CHARGING_PIN); }
-    uint16_t Voltage_mV;
-    uint8_t RemainingPercent;
-//    void RegisterEvtChange(EventListener *PEvtLstnr, uint8_t EvtMask) { chEvtRegisterMask(&IEvtSrcPwrChange, PEvtLstnr, EvtMask); }
     void Init();
     void EnterStandby();
 };

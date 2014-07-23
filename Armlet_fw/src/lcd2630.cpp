@@ -7,6 +7,8 @@
 #include "lcdFont8x8.h"
 #include <string.h>
 
+#include "power.h"  // for battery state
+
 // Variables
 Lcd_t Lcd;
 
@@ -288,9 +290,35 @@ void Lcd_t::Printf(const tFont &Font, uint8_t x, uint8_t y, Color_t ForeClr, Col
     kl_vsprintf(FLcdPutFontChar, 20, S, args);
     va_end(args);
 }
-
-
 #endif
+
+void Lcd_t::DrawBatteryState() {
+//    Uart.Printf("\rCapacity=%u", Power.CapacityPercent);
+    // Colors' components
+    uint8_t clr1bHi = (BAT_RECT_FORE_CLR >> 8) & 0x00FF;
+    uint8_t clr1bLo = BAT_RECT_FORE_CLR & 0x00FF;
+    uint8_t clr2bHi = (BAT_RECT_BACK_CLR >> 8) & 0x00FF;
+    uint8_t clr2bLo = BAT_RECT_BACK_CLR & 0x00FF;
+    // Edge of color
+    int Edge = BAT_RECT_WIDTH - (Power.CapacityPercent / (BAT_RECT_WIDTH + 1));
+    // Draw the rectangle
+    SetBounds(BAT_RECT_LEFT, BAT_RECT_WIDTH, BAT_RECT_TOP, BAT_RECT_HEIGHT);
+    WriteByte(0x2C); // Memory write
+    DC_Hi();
+    for(int y=0; y < BAT_RECT_HEIGHT; y++) {
+        for(int x=1; x <= BAT_RECT_WIDTH; x++) {
+            if(x > Edge) {
+                WriteByte(clr1bHi);
+                WriteByte(clr1bLo);
+            }
+            else {
+                WriteByte(clr2bHi);
+                WriteByte(clr2bLo);
+            }
+        } // x
+    } // y
+    DC_Lo();
+}
 
 #if 1 // ============================= BMP =====================================
 struct BmpHeader_t {
