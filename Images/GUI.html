@@ -53,6 +53,10 @@ html, body {
   position: absolute;
   display: none;
 }
+
+#mark {
+  position: absolute;
+}
 </style>
 <script type="Text/JavaScript">
 var IMAGES = '../SD/GUI/';
@@ -123,6 +127,7 @@ function mouseUp() {
         break;
     case E:
         newScreen = (currentScreen + 1) % screens.length;
+        mark.style.display = currentScreen ? 'block' : 'none';
         break;
     case B:
     case C:
@@ -184,6 +189,8 @@ function main() {
     }
     lock = document.getElementById('lock');
     lock.src = IMAGES + 'lock.bmp';
+    mark = document.getElementById('mark');
+    mark.src = IMAGES + 'main/mark.bmp';
 }
 </script>
 </head>
@@ -208,6 +215,7 @@ function main() {
         <img class="button" key="Z" alt="Смерть" style="left: 105px; top: 99px">
       </div>
       <img id="lock" style="left: 63px; top: 44px">
+      <img id="mark" style="left: 157px; top: 113px">
     </div>
   </div>
 </body>
