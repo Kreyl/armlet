@@ -80,6 +80,7 @@ public:
     void ButtonIsReleased(int button_id ,KeyEvt_t Type);
     void RenderFullScreen(int screen_id);
     void RenderSingleButton(int screen_id,int button_id,int button_state);
+    void RenderSingleButtonStateCheck(int screen_id,int button_id);
 
     void RenderNameTimeBat();
     void GetCharname();//getname by id

@@ -66,6 +66,13 @@ int bSoundUpChange(int screen_id, int button_id ,int press_mode)
     current_volume_lvl+=SOUND_STEP;
     Sound.SetVolume(current_volume_lvl);
     Uart.Printf("sound up to %d \r", current_volume_lvl);
+    //если рядом есть звук , проверить его и перерисовать!
+    for(int i=0;i<9;i++)
+    if(screens[screen_id].buttons[i].press==bSoundDownChange)
+    {
+        AtlGui.RenderSingleButton(screen_id,i,BUTTON_NORMAL);
+        break;//только 2 кнопкизвука на экране!
+    }
     return bSoundUpCheck(screen_id,button_id);
 }
 int bSoundDownChange(int screen_id, int button_id ,int press_mode)
@@ -76,6 +83,13 @@ int bSoundDownChange(int screen_id, int button_id ,int press_mode)
     current_volume_lvl-=SOUND_STEP;
     Sound.SetVolume(current_volume_lvl);
     Uart.Printf("sound down to %d\r", current_volume_lvl);
+    //если рядом есть звук , проверить его и перерисовать!
+    for(int i=0;i<9;i++)
+    if(screens[screen_id].buttons[i].press==bSoundUpChange)
+    {
+        AtlGui.RenderSingleButton(screen_id,i,BUTTON_NORMAL);
+        break;//только 2 кнопкизвука на экране!
+    }
     return bSoundDownCheck(screen_id,button_id);
 }
 #ifdef __cplusplus
