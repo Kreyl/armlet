@@ -94,44 +94,6 @@ uint8_t sd_t::GetNthFileByPrefix(const char* DirPath, const char* Prefix, uint32
 }
 #endif
 
-#if 1 // ============================ Log File =================================
-static char *FPC;
-static inline void FLogPutChar(char c) {
-    if(FPC != nullptr) *FPC++ = c;
-}
-
-static inline uint32_t FPrintf(const char *S, ...) {
-    va_list args;
-    va_start(args, S);
-    uint32_t Sz = kl_vsprintf(FLogPutChar, SD_STRING_SZ, S, args);
-    va_end(args);
-    return Sz;
-}
-
-void sd_t::PutToLog(const char *S, ...) {
-    FRESULT rslt;
-    rslt = f_open(&IFile, LOG_NAME, FA_WRITE+FA_OPEN_ALWAYS);
-    if(rslt != FR_OK) { Uart.Printf("\rLogfile open error: %u", rslt); return; }
-    // Move to end of the file to append data
-    rslt = f_lseek(&IFile, f_size(&IFile));
-    if(rslt != FR_OK) { Uart.Printf("\rLogfile seek error: %u", rslt); return; }
-    FPC = IStr;
-    // Print systime
-    uint32_t Sz = FPrintf("\r\n%u ", chTimeNow());
-    // Print to buf
-    va_list args;
-    va_start(args, S);
-    Sz += kl_vsprintf(FLogPutChar, SD_STRING_SZ , S, args);
-    va_end(args);
-    IStr[Sz] = 0;
-//    Uart.Printf("\r\nLog: %S", IStr);
-    // Write data
-    UINT Dummy=0;
-    f_write(&IFile, IStr, Sz, &Dummy);
-    f_close(&IFile);
-}
-#endif
-
 #if 1 // ======================= ini file operations ===========================
 // ==== Inner use ====
 static inline char* skipleading(char *S) {

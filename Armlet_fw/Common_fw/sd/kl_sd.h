@@ -34,7 +34,6 @@
  */
 
 #define SD_STRING_SZ    256 // for operations with strings
-#define LOG_NAME        "log.txt"
 
 class sd_t {
 private:
@@ -51,7 +50,6 @@ public:
     uint8_t GetNthFileByPrefix(const char* DirPath, const char* Prefix, uint32_t N, char* PName);
     bool IsReady;
     void Init();
-    void PutToLog(const char *S, ...);
     // ini file operations
     uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileName, char *POutput);
     uint8_t iniReadInt32 (const char *ASection, const char *AKey, const char *AFileName, int32_t *POutput);

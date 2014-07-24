@@ -15,6 +15,7 @@
 #include "application.h"
 
 #include "kl_sd.h"
+#include "sd_log.h"
 
 #define USB_ENABLED
 
@@ -56,12 +57,8 @@ uint8_t Pwr_t::mV2Percent(uint16_t mV) {
 
 __attribute__ ((__noreturn__))
 void Pwr_t::Task() {
-    uint32_t N=0;
     while(true) {
         chThdSleepMilliseconds(PWR_MEASUREMENT_INTERVAL_MS);
-
-        SD.PutToLog("My Precious Stone %u", N++);
-
         // Check if power src changed
         if(WasExternal and !ExternalPwrOn()) {
             WasExternal = false;
