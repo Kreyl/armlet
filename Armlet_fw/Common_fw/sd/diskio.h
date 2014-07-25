@@ -81,6 +81,5 @@ bool SDWrite(uint32_t startblk, const uint8_t *buffer, uint32_t n);
 /* NAND specific ioctl command */
 #define NAND_FORMAT			30	/* Create physical format */
 
-
 #define _DISKIO
 #endif

@@ -92,7 +92,6 @@ private:
     Cmd_t ICmd[2], *PCmdWrite = &ICmd[0], *PCmdRead = &ICmd[1];
     void CompleteCmd();
 #endif
-    void IPrintf(const char *format, va_list args);
     uint32_t IBaudrate;
 public:
     void Printf(const char *S, ...);
@@ -110,6 +109,7 @@ public:
     void DeInit() { UART->CR1 &= ~USART_CR1_UE; /* UART Disable*/  }
     void Cmd(uint8_t CmdCode, uint8_t *PData, uint32_t Length) { Printf("\r\n#%X,%A", CmdCode, PData, Length, 0); }
     // Inner use
+    void IPrintf(const char *format, va_list args);
     void IRQDmaTxHandler();
     void IPutChar(char c);
 #if UART_RX_ENABLED

@@ -12,6 +12,17 @@
 
 CmdUart_t Uart;
 
+extern "C" {
+void PrintfC(const char *format, ...) {
+    chSysLock();
+    va_list args;
+    va_start(args, format);
+    Uart.IPrintf(format, args);
+    va_end(args);
+    chSysUnlock();
+}
+}
+
 static inline void FPutChar(char c) { Uart.IPutChar(c); }
 
 void CmdUart_t::IPutChar(char c) {

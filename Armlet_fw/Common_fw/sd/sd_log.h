@@ -18,25 +18,24 @@
 class SdLog_t {
 private:
     FRESULT IError = FR_NOT_ENABLED;
-    FIL IFile;
-    char Data[LOG_BUF_SZ];
-    UINT Cnt = 0;
+//    char Data[LOG_BUF_SZ];
     void IPrintf(const char *S, ...);
 public:
     void Init();
     void Printf(const char *S, ...);
-    void Flush() {
-        UINT dummy=0;
-        IError = f_write(&IFile, Data, Cnt, &dummy);
-        if(IError != FR_OK) Uart.Printf("\rLogfile w error: %u", IError);
-        else {
-            IError = f_sync(&IFile);
-            if(IError != FR_OK) Uart.Printf("\rLogfile sync error: %u", IError);
-        }
-        Cnt = 0;
-    }
+//    void Flush() {
+//        UINT dummy=0;
+//        IError = f_write(&IFile, Data, Cnt, &dummy);
+//        if(IError != FR_OK) Uart.Printf("\rLogfile w error: %u", IError);
+//        else {
+//            IError = f_sync(&IFile);
+//            if(IError != FR_OK) Uart.Printf("\rLogfile sync error: %u", IError);
+//        }
+//        Cnt = 0;
+//    }
     // Inner use
-    void IPutchar(char c);
+//    void IPutchar(char c);
+    FIL IFile;
 };
 
 
