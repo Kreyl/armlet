@@ -29,16 +29,17 @@ struct mVPercent_t {
 };
 
 static const mVPercent_t mVPercentTable[] = {
-        {4100, 100},
-        {4000, 90},
-        {3900, 80},
-        {3850, 70},
-        {3800, 60},
-        {3780, 50},
-        {3740, 40},
-        {3700, 30},
+        {0,     0},
+        {3640, 10},
         {3670, 20},
-        {3640, 10}
+        {3700, 30},
+        {3740, 40},
+        {3780, 50},
+        {3800, 60},
+        {3850, 70},
+        {3900, 80},
+        {4000, 90},
+        {4100, 100},
 };
 #define mVPercentTableSz    countof(mVPercentTable)
 
@@ -50,9 +51,16 @@ static void PwrThread(void *arg) {
 }
 
 uint8_t Pwr_t::mV2Percent(uint16_t mV) {
-    for(uint8_t i=0; i<mVPercentTableSz; i++)
-        if(mV >= mVPercentTable[i].mV) return mVPercentTable[i].Percent;
-    return 0;
+    static uint16_t PrevVoltage = 0;
+    uint8_t rslt = 0;
+    for(uint8_t i=1; i<mVPercentTableSz; i++) {
+        if(mV < mVPercentTable[i].mV) {
+            if(mV >= PrevVoltage) rslt = mVPercentTable[i-1].Percent;
+            else                  rslt = mVPercentTable[i  ].Percent;
+        }
+    } // for
+    PrevVoltage = mV;
+    return rslt;
 }
 
 __attribute__ ((__noreturn__))
