@@ -12,29 +12,33 @@
 #include "ff.h"
 #include "cmd_uart.h"
 
-#define LOG_BUF_SZ      512     // Multiple of 512
+#define LOG_BUF_SZ      256
 #define LOG_NAME        "log.txt"
+
+struct LogBuf_t {
+    char Buf[LOG_BUF_SZ];
+    int Cnt=0;
+};
 
 class SdLog_t {
 private:
     FRESULT IError = FR_NOT_ENABLED;
-//    char Data[LOG_BUF_SZ];
+    LogBuf_t Buf1, Buf2, *PBuf=&Buf1;
     void IPrintf(const char *S, ...);
+    Thread *PThd;
+    void Flush(LogBuf_t *p) {
+        if(p->Cnt == 0) return;
+        UINT dummy=0;
+        IError = f_write(&IFile, p->Buf, p->Cnt, &dummy);
+        if(IError != FR_OK) Uart.Printf("\rLogfile w error: %u", IError);
+        p->Cnt = 0;
+    }
 public:
     void Init();
     void Printf(const char *S, ...);
-//    void Flush() {
-//        UINT dummy=0;
-//        IError = f_write(&IFile, Data, Cnt, &dummy);
-//        if(IError != FR_OK) Uart.Printf("\rLogfile w error: %u", IError);
-//        else {
-//            IError = f_sync(&IFile);
-//            if(IError != FR_OK) Uart.Printf("\rLogfile sync error: %u", IError);
-//        }
-//        Cnt = 0;
-//    }
     // Inner use
-//    void IPutchar(char c);
+    void ITask();
+    void IPutchar(char c);
     FIL IFile;
 };
 

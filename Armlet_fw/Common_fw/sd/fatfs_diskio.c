@@ -30,8 +30,6 @@ extern SDCDriver SDCD1;
 extern RTCDriver RTCD1;
 #endif
 
-extern void PrintfC(const char *format, ...);
-
 /*-----------------------------------------------------------------------*/
 /* Correspondence between physical drive number and physical drive.      */
 
@@ -43,12 +41,9 @@ extern void PrintfC(const char *format, ...);
 static Semaphore semSDRW;
 
 bool SDRead(uint32_t startblk, uint8_t *buffer, uint32_t n) {
-    msg_t msg = chSemWaitTimeout(&semSDRW, (systime_t)_FS_TIMEOUT);
+    msg_t msg = chSemWaitTimeout(&semSDRW, MS2ST(3600));
     if(msg == RDY_OK) {
-        uint32_t t = chTimeNow();
         bool rslt = sdcRead(&SDCD1, startblk, buffer, n);
-        t = chTimeNow() - t;
-        PrintfC("\r%u", t);
         chSemSignal(&semSDRW);
         return rslt;
     }
@@ -56,12 +51,9 @@ bool SDRead(uint32_t startblk, uint8_t *buffer, uint32_t n) {
 }
 
 bool SDWrite(uint32_t startblk, const uint8_t *buffer, uint32_t n) {
-    msg_t msg = chSemWaitTimeout(&semSDRW, (systime_t)_FS_TIMEOUT);
+    msg_t msg = chSemWaitTimeout(&semSDRW, MS2ST(3600));
     if(msg == RDY_OK) {
-        uint32_t t = chTimeNow();
         bool rslt = sdcWrite(&SDCD1, startblk, buffer, n);
-        t = chTimeNow() - t;
-        PrintfC("\rw=%u", t);
         chSemSignal(&semSDRW);
         return rslt;
     }

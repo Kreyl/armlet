@@ -7,24 +7,53 @@
 
 #include "sd_log.h"
 #include "kl_sprintf.h"
+#include "evt_mask.h"
+#include "usb_f2.h"
 
 SdLog_t Log;
 
-static inline void FLogPutChar(char c) { f_putc(c, &Log.IFile); }
+static inline void FLogPutChar(char c) { Log.IPutchar(c); }
 
-//static WORKING_AREA(waLogThread, 1024);
-//static void LogThread(void *arg) {
-//    chRegSetThreadName("Log");
-//}
+static WORKING_AREA(waLogThread, 512);
+__attribute__((__noreturn__))
+static void LogThread(void *arg) {
+    chRegSetThreadName("Log");
+    Log.ITask();
+}
+
+__attribute__((__noreturn__))
+void SdLog_t::ITask() {
+    while(true) {
+        uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+        if(EvtMsk & EVTMSK_LOGFILE) {
+//            Uart.Printf("\rT");
+            if(Usb.IsReady) continue;
+            Flush(&Buf1);
+            Flush(&Buf2);
+            if(IError == FR_OK) {
+                IError = f_sync(&IFile);
+                if(IError != FR_OK) Uart.Printf("\rLogfile sync error: %u", IError);
+            }
+            PBuf = &Buf1;
+        }
+    } // while 1
+}
 
 void SdLog_t::Init() {
     IError = f_open(&IFile, LOG_NAME, FA_WRITE+FA_OPEN_ALWAYS);
     if(IError != FR_OK) { Uart.Printf("\rLogfile open error: %u", IError); return; }
     IError = f_lseek(&IFile, f_size(&IFile));
     if(IError != FR_OK) { Uart.Printf("\rLogfile seek error: %u", IError); return; }
-    IPrintf("\r\n%u ==== Log Start ==== ", chTimeNow());
-    f_sync(&IFile);
-//    Flush();
+    PThd = chThdCreateStatic(waLogThread, sizeof(waLogThread), LOWPRIO, (tfunc_t)LogThread, NULL);
+    Printf("==== Log Start ====");
+}
+
+void SdLog_t::IPutchar(char c) {
+    if(PBuf->Cnt == LOG_BUF_SZ) {
+        if(PBuf == &Buf2) return;   // Both buffers are full
+        else PBuf = &Buf2;
+    }
+    PBuf->Buf[PBuf->Cnt++] = c;
 }
 
 void SdLog_t::IPrintf(const char *S, ...) {
@@ -36,6 +65,7 @@ void SdLog_t::IPrintf(const char *S, ...) {
 
 void SdLog_t::Printf(const char *S, ...) {
     if(IError != FR_OK) return;
+    chSysLock();
     // Print systime
     IPrintf("\r\n%u ", chTimeNow());
     // Print to buf
@@ -43,6 +73,7 @@ void SdLog_t::Printf(const char *S, ...) {
     va_start(args, S);
     kl_vsprintf(FLogPutChar, LOG_BUF_SZ , S, args);
     va_end(args);
+    chEvtSignalI(PThd, EVTMSK_LOGFILE);
+    chSysUnlock();
 //    Uart.Printf("L");
-    f_sync(&IFile);
 }

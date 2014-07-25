@@ -57,12 +57,8 @@ uint8_t Pwr_t::mV2Percent(uint16_t mV) {
 
 __attribute__ ((__noreturn__))
 void Pwr_t::Task() {
-    uint32_t N=0;
     while(true) {
         chThdSleepMilliseconds(PWR_MEASUREMENT_INTERVAL_MS);
-
-//        Log.Printf("My Precious Stone %u", N++);
-
         // Check if power src changed
         if(WasExternal and !ExternalPwrOn()) {
             WasExternal = false;
