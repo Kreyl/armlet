@@ -28,13 +28,16 @@ void SdLog_t::ITask() {
         if(EvtMsk & EVTMSK_LOGFILE) {
 //            Uart.Printf("\rT");
             if(Usb.IsReady) continue;
-            Flush(&Buf1);
-            Flush(&Buf2);
+            chSysLock();
+            LogBuf_t *PBufToFlush = PBuf;
+            if(PBuf == &Buf1) PBuf = &Buf2; // }
+            else PBuf = &Buf1;              // } switch buf for printing
+            chSysUnlock();
+            Flush(PBufToFlush);
             if(IError == FR_OK) {
                 IError = f_sync(&IFile);
                 if(IError != FR_OK) Uart.Printf("\rLogfile sync error: %u", IError);
             }
-            PBuf = &Buf1;
         }
     } // while 1
 }
@@ -49,11 +52,8 @@ void SdLog_t::Init() {
 }
 
 void SdLog_t::IPutchar(char c) {
-    if(PBuf->Cnt == LOG_BUF_SZ) {
-        if(PBuf == &Buf2) return;   // Both buffers are full
-        else PBuf = &Buf2;
-    }
-    PBuf->Buf[PBuf->Cnt++] = c;
+    if(PBuf->Cnt < LOG_BUF_SZ)  // Write if buffer is not full
+        PBuf->Buf[PBuf->Cnt++] = c;
 }
 
 void SdLog_t::IPrintf(const char *S, ...) {
