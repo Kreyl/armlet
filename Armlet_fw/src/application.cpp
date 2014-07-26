@@ -144,7 +144,10 @@ static inline void KeysHandler() { // FIXME
             if(AtlGui.ButtonIsClicked(Evt.KeyID[0])) {
 //                Beeper.Beep(ShortBeep);
                 Vibro.Vibrate(ShortBrr);
+                Uart.Printf("\rAtlGui.ButtonIsClicked(Evt.KeyID[0]) TRUE ");
             }
+            else
+                Uart.Printf("\rAtlGui.ButtonIsClicked(Evt.KeyID[0]) FALSE ");
         }
         else if(Evt.Type==keRelease)
         {
@@ -173,52 +176,6 @@ static inline void KeysHandler() { // FIXME
         //                    Uart.Printf(" !!!AtlGui.ButtonIsClicked\r");
         //key debug info end
     }
-
-//    Keylock.TimerReset();   // Reset timer as Any key pressed or released
-//    if(Keylock.Locked) {
-//        // Just unlock, do not handle pressed keys
-//        //if(Keys.AnyPressed()) Keylock.Unlock();   // Check if any key pressed, not released, not holded
-//        if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
-//            Keylock.Unlock();
-//            Keylock.TimerSet();     // Start autolock timer
-//            Vibro.Vibrate(ShortBrr);	//doesnt work?!
-//        }
-//    }
-//    // Check if lock
-//    else if((KEYLOCKER1.State == ksPressed) and (KEYLOCKER2.State == ksPressed)) {
-//        Keylock.Lock();
-//    }
-//    // Not locked, not lock pressed
-//    else {
-//        for(uint8_t i=0; i<KEYS_CNT; i++) {
-//            if(Keys.Status[i].HasChanged) {
-
-//                    //KEY PRESS
-////                    Beeper.Beep(ShortBeep);
-//    /*            	if(i==0)
-//                	{
-//                		Sound.Stop();
-//                		Uart.Printf("sound stop");
-//                	}
-//                	if(i==1)
-//                	{
-//                		Sound.Play("church_bells.wav");
-//                		Uart.Printf("church_bells.wav");
-//                	}
-//                	if(i==2)
-//                	{
-//                		Sound.Play("techview.wav");
-//                		Uart.Printf("techview.wav");
-//                	}
-//                	*/
-//                    Vibro.Vibrate(ShortBrr);
-//                    //ArmletApi::OnButtonPress(i);
-//                }
-//            }
-//        } // for
-//        Keylock.TimerSet(); // Start autolock timer
-//    } // if not locked
-//    Keys.Reset();
 }
 #endif
 

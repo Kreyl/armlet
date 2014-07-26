@@ -5,7 +5,8 @@
 
 void CallMainToReason();
 void CallReasonToMain();
-
+//init array-button to reason converts
+void InitButtonsToUserReasons();
 
 #ifdef __cplusplus
 extern "C" {

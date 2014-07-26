@@ -62,6 +62,11 @@ char * GetMusicFileNameFromList(int emo_id, int file_num)
         Uart.Printf("GetNthFileByPrefix prefix: %s,fnum %d result: %s \r",emonamebuffer,file_num,GMFNFLbuffer);
         return GMFNFLbuffer;
     }
+    if(SD.GetNthFileByPrefix(COMMON_MUSIC_DIR, emonamebuffer,file_num,GMFNFLbuffer)==FR_OK)
+    {
+        Uart.Printf("GetNthFileByPrefix prefix: %s,fnum %d result: %s \r",emonamebuffer,file_num,GMFNFLbuffer);
+        return GMFNFLbuffer;
+    }
     //TODO error!
     return nullptr;
 }
@@ -257,7 +262,43 @@ int Init_emotionTreeMusicNodeFiles_FromFile(const char * filename)
 	 f_close(&file);
 	 return 0;
 }
+int Init_emotionTreeMusicNodeFromDir(char * dir)
+{
+    if(SD.GetFirst(dir)==FR_OK) // @KL: dir '/' switched to 'music'
+     {
+         int emo_id=GetEmoIndxFromFileString(SD.Filename);
+       //
+         if(emo_id>=0)
+                  {  //собственно инициализация
+                      //увеличиваем счетчик файлов
+ #ifdef UART_EMOTREE_DEBUG
+                     Uart.Printf("emo id found2: %d \r",emo_id);
+ #endif
+                      emotions[emo_id].numTracks++;
+                  }
+ #ifdef UART_EMOTREE_DEBUG
+         else Uart.Printf("cannot find emotion for file1 %s \r",SD.Filename);//MusicFileNamebuffer);
+ #endif
+     }
 
+     while(SD.GetNext()==FR_OK)
+     {
+         int emo_id=GetEmoIndxFromFileString(SD.Filename);
+
+         if(emo_id>=0)
+         {  //собственно инициализация
+             //увеличиваем счетчик файлов
+ #ifdef UART_EMOTREE_DEBUG
+             Uart.Printf("emo id found3: %d, filename %s \r",emo_id,SD.Filename);
+ #endif
+             emotions[emo_id].numTracks++;
+         }
+ #ifdef UART_EMOTREE_DEBUG
+         else Uart.Printf("cannot find emotion for file2 %s \r",SD.Filename);//MusicFileNamebuffer);
+ #endif
+}
+     return 0;
+}
 int Init_emotionTreeMusicNodeFiles_FromFileIterrator()
 {
     //init zero state
@@ -265,6 +306,11 @@ int Init_emotionTreeMusicNodeFiles_FromFileIterrator()
     {
         emotions[i].numTracks=0;
     }
+    Init_emotionTreeMusicNodeFromDir(const_cast<char *>(MUSIC_ROOT_DIR));
+    Init_emotionTreeMusicNodeFromDir(const_cast<char *>(COMMON_MUSIC_DIR));
+
+
+#if 0
     if(SD.GetFirst(MUSIC_ROOT_DIR)==FR_OK) // @KL: dir '/' switched to 'music'
     {
         int emo_id=GetEmoIndxFromFileString(SD.Filename);
@@ -298,6 +344,9 @@ int Init_emotionTreeMusicNodeFiles_FromFileIterrator()
         else Uart.Printf("cannot find emotion for file2 %s \r",SD.Filename);//MusicFileNamebuffer);
 #endif
     }
+
+#endif
+
     //TODO critical error, stop working
 
     // while(f_eof(&file)==0)

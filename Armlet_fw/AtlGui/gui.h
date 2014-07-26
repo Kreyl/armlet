@@ -28,6 +28,13 @@
 #define BUTTON_PRESSABLE 1
 #define BUTTON_LOCKED    3
 
+#define RNAME_FIGHT  "\xc4\xf0\xe0\xea\xe0"
+#define RNAME_SEX    "\xd1\xe5\xea\xf1"
+#define RNAME_MURDER "\xd3\xe1\xe8\xe9\xf1\xf2\xe2\xee"
+#define RNAME_DESTR  "\xd0\xe0\xe7\xf0\xf3\xf8\xe5\xed\xe8\xe5"
+#define RNAME_CREATION "\xd1\xee\xe7\xe8\xe4\xe0\xed\xe8\xe5"
+#define RNAME_DEATH "\xd1\xec\xe5\xf0\xf2\xfc"
+
 #define BUTTONS "ABCXYZLER"
 #define NUM_BUTTONS (sizeof(BUTTONS) - 1)
 

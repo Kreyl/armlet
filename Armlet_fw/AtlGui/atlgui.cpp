@@ -19,26 +19,6 @@ AtlGui_t AtlGui;
 #define PATH_TO_GUI "\\GUI\\"
 #define GUI_PATH_EXT ".bmp"
 char bmp_filename[128];
-//#define TEXT_OR_BMP_SCREEN
-//gui_state gui_states[]={
-//        {
-//                {-1,-1,-1,-1,-1,-1,-1,1,-1},
-//                {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},
-//                {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL}
-//        },
-//        {
-//                {-1,-1,-1,-1,-1,-1,-1,0,-1},
-//                {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},
-//                {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL}
-//        }
-//};
-
-
-
-
-//const int gui_states_number = countof(gui_states);
-
-
 void AtlGui_t::Init()
 {
     is_splash_screen_onrun=0;
@@ -52,8 +32,8 @@ void AtlGui_t::Init()
     //init gui pos andfunc arrays
 
     //get screen ptrs
-    char * ptr_main;
-    char *ptr_intentions;
+    char * ptr_main=NULL;
+    char *ptr_intentions=NULL;
     for(int i=0;i<screens_number;i++)
     {
         if(strcmp("main",screens[i].name)==0)
@@ -90,6 +70,14 @@ void AtlGui_t::Init()
             screens[i].buttons[6].isPressable=bLockCheck;
             screens[i].buttons[6].press=bLockChange;
 
+            //sex
+            screens[i].buttons[2].isPressable=bReasonCheck;
+            screens[i].buttons[2].getState=bReasonGetState;
+            screens[i].buttons[2].press=bReasonChange;
+            //fight
+            screens[i].buttons[1].isPressable=bReasonCheck;
+            screens[i].buttons[1].getState=bReasonGetState;
+            screens[i].buttons[1].press=bReasonChange;
         }
         if(strcmp("intentions",screens[i].name)==0)
         {
@@ -98,22 +86,23 @@ void AtlGui_t::Init()
             screens[i].buttons[1].getState=bReasonGetState;
             screens[i].buttons[1].press=bReasonChange;
             //create
-            screens[i].buttons[2].isPressable=bReasonCheck;
-            screens[i].buttons[2].getState=bReasonGetState;
-            screens[i].buttons[2].press=bReasonChange;
-            //fight
             screens[i].buttons[3].isPressable=bReasonCheck;
             screens[i].buttons[3].getState=bReasonGetState;
             screens[i].buttons[3].press=bReasonChange;
-            //sex
-            screens[i].buttons[4].isPressable=bReasonCheck;
-            screens[i].buttons[4].getState=bReasonGetState;
-            screens[i].buttons[4].press=bReasonChange;
+
+
             //destroy
+            screens[i].buttons[2].isPressable=bReasonCheck;
+            screens[i].buttons[2].getState=bReasonGetState;
+            screens[i].buttons[2].press=bReasonChange;
+
+            //death
             screens[i].buttons[5].isPressable=bReasonCheck;
             screens[i].buttons[5].getState=bReasonGetState;
             screens[i].buttons[5].press=bReasonChange;
 
+
+            //lock
             screens[i].buttons[6].isPressable=bLockCheck;
             screens[i].buttons[6].press=bLockChange;
 
@@ -387,9 +376,9 @@ void AtlGui_t::RenderNameTimeBat()
 {
     //timechar
     if(Mesh.GetAstronomicTime(timechar)==FAILURE)
-        strcpy(timechar,"00.00");
+        strcpy(timechar,"TM.FL");
 
-    Lcd.Printf(0, 5, clGreen, clBlack, "%s %s",char_name,timechar);
+    Lcd.Printf(Impact,1, 1, clAtlFront, clAtlBack, "%s %s",char_name,timechar);
 
 }
 void AtlGui_t::GetCharname()

@@ -8,7 +8,7 @@
 #define MAX_VOL_CONST 256
 #define MIN_VOL_CONST 0
 
-#define SCREENS_WITH_REASONS 1
+#define SCREENS_WITH_REASONS 2
 typedef struct t_scrbtoarr
 {   int scr_id;//TODO change to screen name later
     int BtoR[9];
@@ -23,10 +23,23 @@ typedef struct t_scrbtoarr
     }t_scrbtoarr;
 
 t_scrbtoarr ButtonsToUserReasons[SCREENS_WITH_REASONS]=
+
+{
     {1,
         {-1,0,1,3,4,2,-1,-1,-1},
         "intentions"
-    };
+    },
+    {0,
+        {-1,-1,-1,-1,-1,-1,-1,-1,-1},
+        "main"
+    },
+};
+void InitButtonsToUserReasons()
+{
+
+
+
+}
 int current_volume_lvl=START_VOL_CONST;
 void CallMainToReason()
 {
@@ -120,10 +133,8 @@ int bReasonCheck(int screen_id, int button_id)
     //если есть соответствие кнопке и резону, то можно нажимать?
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
     {
-        //int scr_id=ButtonsToUserReasons[0].is_this_screen_with_reasons("haha");
         for(int i=0;i<SCREENS_WITH_REASONS;i++)
             if(ButtonsToUserReasons[i].is_this_screen_with_reasons(screens[screen_id].name))
-       // if(screen_id==ButtonsToUserReasons[i].scr_id)
         {
             if(ButtonsToUserReasons[i].BtoR[button_id]>=0)
             {
@@ -145,7 +156,6 @@ int bReasonGetState(int screen_id, int button_id)
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
        {
            if(ButtonsToUserReasons[i].is_this_screen_with_reasons(screens[screen_id].name))
-         //  if(screen_id==ButtonsToUserReasons[i].scr_id)
            {
                if(ButtonsToUserReasons[i].BtoR[button_id]>=0)
                {

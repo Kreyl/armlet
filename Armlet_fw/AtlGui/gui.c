@@ -20,8 +20,8 @@ Screen_t screens[] = {
         { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr },
         {
         /* A */ NO_BUTTON,
-        /* B */ { "\xc4\xf0\xe0\xea\xe0" /* Драка */, 0, 45, buttonIsPressable, buttonGetState, buttonPress },
-        /* C */ { "\xd1\xe5\xea\xf1" /* Секс */, 0, 82, buttonIsPressable, buttonGetState, buttonPress },
+        /* B */ { RNAME_FIGHT /* Драка */, 0, 45, buttonIsPressable, buttonGetState, buttonPress },
+        /* C */ { RNAME_SEX /* Секс */, 0, 82, buttonIsPressable, buttonGetState, buttonPress },
         /* X */ { "M", 130, 19, buttonIsPressable, buttonGetState, buttonPress },
         /* Y */ { "^^", 127, 60, buttonIsPressable, buttonGetState, buttonPress },
         /* Z */ { "vv", 127, 95, buttonIsPressable, buttonGetState, buttonPress },
@@ -34,11 +34,11 @@ Screen_t screens[] = {
         { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr },
         {
         /* A */ NO_BUTTON,
-        /* B */ { "\xd3\xe1\xe8\xe9\xf1\xf2\xe2\xee" /* Убийство */, 0, 42, buttonIsPressable, buttonGetState, buttonPress },
-        /* C */ { "\xd0\xe0\xe7\xf0\xf3\xf8\xe5\xed\xe8\xe5" /* Разрушение */, 0, 82, buttonIsPressable, buttonGetState, buttonPress },
-        /* X */ { "\xd1\xee\xe7\xe8\xe4\xe0\xed\xe8\xe5" /* Созидание */, 82, 26, buttonIsPressable, buttonGetState, buttonPress },
+        /* B */ { RNAME_MURDER /* Убийство */, 0, 42, buttonIsPressable, buttonGetState, buttonPress },
+        /* C */ { RNAME_DESTR /* Разрушение */, 0, 82, buttonIsPressable, buttonGetState, buttonPress },
+        /* X */ { RNAME_CREATION /* Созидание */, 82, 26, buttonIsPressable, buttonGetState, buttonPress },
         /* Y */ NO_BUTTON,
-        /* Z */ { "\xd1\xec\xe5\xf0\xf2\xfc" /* Смерть */, 105, 99, buttonIsPressable, buttonGetState, buttonPress },
+        /* Z */ { RNAME_DEATH /* Смерть */, 105, 99, buttonIsPressable, buttonGetState, buttonPress },
         /* L */ { "lock", 4, 110, buttonIsPressable, buttonGetState, buttonPress },
         /* E */ { "\xfd\xea\xf0\xe0\xed" /* экран */, 59, 111, buttonIsPressable, buttonGetState, buttonPress },
         /* R */ NO_BUTTON

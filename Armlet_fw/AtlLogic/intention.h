@@ -44,6 +44,7 @@ typedef struct UserIntentions {
     //storage for data from radiochannel, recalc every radio_in
     int human_support_number;
     int process_type;
+    char * p_int_name;
     void TurnOff()
     {
         current_time=-1;

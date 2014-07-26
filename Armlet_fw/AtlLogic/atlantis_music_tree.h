@@ -17,6 +17,7 @@
 #define MAX_NUMBER_MUSIC_FILES_ON_NODE 30
 
 #define MUSIC_ROOT_DIR      "music"
+#define COMMON_MUSIC_DIR    "music\\common"
 
 //структура определяющая всю музыку под один нод, если таковой имеется
 //float1000 - используется инк как флоат, с точностью 1/1000
@@ -56,6 +57,7 @@ extern struct emotionMusicNodeFiles emotionTreeMusicNodeFiles[music_array_size];
 void Print_emotionTreeMusicNodeFiles_ToUART();
 int Init_emotionTreeMusicNodeFiles_FromFile(const char * filename);
 int Init_emotionTreeMusicNodeFiles_FromFileIterrator();
+int Init_emotionTreeMusicNodeFromDir();
 void CreateFileWithString(char* filename, char * filestring,int string_size, BYTE open_mode);
 void CreateFileWithStringArray(char* filename, int string_size, BYTE open_mode );
 int PrintFileToUART(char* filename);
