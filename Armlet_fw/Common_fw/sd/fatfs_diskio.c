@@ -25,6 +25,8 @@ extern SDCDriver SDCD1;
 // KL
 #undef HAL_USE_RTC
 
+extern void PrintfC(const char *format, ...);
+
 #if HAL_USE_RTC
 #include "chrtclib.h"
 extern RTCDriver RTCD1;
@@ -41,13 +43,19 @@ extern RTCDriver RTCD1;
 static Semaphore semSDRW;
 
 bool SDRead(uint32_t startblk, uint8_t *buffer, uint32_t n) {
+//    PrintfC("\r*%S ", chThdSelf()->p_name);
     msg_t msg = chSemWaitTimeout(&semSDRW, MS2ST(3600));
     if(msg == RDY_OK) {
+//        PrintfC(" +%S ", chThdSelf()->p_name);
         bool rslt = sdcRead(&SDCD1, startblk, buffer, n);
         chSemSignal(&semSDRW);
+//        PrintfC(" =%S ", chThdSelf()->p_name);
         return rslt;
     }
-    else return false;
+    else {
+        PrintfC("sm%d ", msg);
+        return false;
+    }
 }
 
 bool SDWrite(uint32_t startblk, const uint8_t *buffer, uint32_t n) {
@@ -88,8 +96,8 @@ DSTATUS disk_initialize (
     /* It is initialized externally, just reads the status.*/
     if (blkGetDriverState(&SDCD1) != BLK_READY)
       stat |= STA_NOINIT;
-    if (sdcIsWriteProtected(&SDCD1))
-      stat |=  STA_PROTECT;
+//    if (sdcIsWriteProtected(&SDCD1))
+//      stat |=  STA_PROTECT;
     return stat;
 #endif
   }
@@ -107,7 +115,7 @@ DSTATUS disk_status (
 {
   DSTATUS stat;
 
-  switch (drv) {
+//  switch (drv) {
 #if HAL_USE_MMC_SPI
   case MMC:
     stat = 0;
@@ -118,17 +126,17 @@ DSTATUS disk_status (
       stat |= STA_PROTECT;
     return stat;
 #else
-  case SDC:
+//  case SDC:
     stat = 0;
     /* It is initialized externally, just reads the status.*/
-    if (blkGetDriverState(&SDCD1) != BLK_READY)
-      stat |= STA_NOINIT;
-    if (sdcIsWriteProtected(&SDCD1))
-      stat |= STA_PROTECT;
+//    if (blkGetDriverState(&SDCD1) != BLK_READY)
+//      stat |= STA_NOINIT;
+//    if (sdcIsWriteProtected(&SDCD1))
+//      stat |= STA_PROTECT;
     return stat;
 #endif
-  }
-  return STA_NODISK;
+//  }
+//  return STA_NODISK;
 }
 
 
@@ -161,12 +169,12 @@ DRESULT disk_read (
     return RES_OK;
 #else
 //  case SDC:
-    if (blkGetDriverState(&SDCD1) != BLK_READY) return RES_NOTRDY;
+//    if (blkGetDriverState(&SDCD1) != BLK_READY) return RES_NOTRDY;
     if (SDRead(sector, buff, count)) return RES_ERROR;
     return RES_OK;
 #endif
 //  }
-  return RES_PARERR;
+//  return RES_PARERR;
 }
 
 
@@ -203,8 +211,7 @@ DRESULT disk_write (
   case SDC:
 #else
 //    PrintfC("\r__DiskW");
-    if (blkGetDriverState(&SDCD1) != BLK_READY) return RES_NOTRDY;
-//    PrintfC("\rdw");
+//    if (blkGetDriverState(&SDCD1) != BLK_READY) return RES_NOTRDY;
     if (SDWrite(sector, buff, count)) return RES_ERROR;
     return RES_OK;
 #endif

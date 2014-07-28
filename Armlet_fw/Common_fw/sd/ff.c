@@ -2365,7 +2365,7 @@ FRESULT f_open (
 
 
 
-
+//extern void PrintfC(const char *format, ...);
 /*-----------------------------------------------------------------------*/
 /* Read File                                                             */
 /*-----------------------------------------------------------------------*/
@@ -2382,18 +2382,15 @@ FRESULT f_read (
 	UINT rcnt, cc;
 	BYTE csect, *rbuff = buff;
 
-
 	*br = 0;	/* Initialize byte counter */
-
 	res = validate(fp->fs, fp->id);				/* Check validity */
 	if (res != FR_OK) LEAVE_FF(fp->fs, res);
-	if (fp->flag & FA__ERROR)					/* Aborted file? */
+    if (fp->flag & FA__ERROR)					/* Aborted file? */
 		LEAVE_FF(fp->fs, FR_INT_ERR);
 	if (!(fp->flag & FA_READ)) 					/* Check access mode */
 		LEAVE_FF(fp->fs, FR_DENIED);
 	remain = fp->fsize - fp->fptr;
 	if (btr > remain) btr = (UINT)remain;		/* Truncate btr by remaining bytes */
-
 	for ( ;  btr;								/* Repeat until all data read */
 		rbuff += rcnt, fp->fptr += rcnt, *br += rcnt, btr -= rcnt) {
 		if ((fp->fptr % SS(fp->fs)) == 0) {		/* On the sector boundary? */
