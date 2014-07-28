@@ -36,6 +36,7 @@ private:
 public:
     void Init();
     void Printf(const char *S, ...);
+    void Shutdown() { f_close(&IFile); }
     // Inner use
     void ITask();
     void IPutchar(char c);

@@ -230,7 +230,9 @@ bool MassStorage_t::CmdRead10() {
         // Fill first buffer
         BlocksToRead = MIN(MS_DATABUF_SZ / MMCSD_BLOCK_SIZE, TotalBlocks);
         BytesToSend = BlocksToRead * MMCSD_BLOCK_SIZE;
+//        Uart.Printf("\rR1");
         Rslt = SDRead(BlockAddress, Buf1, BlocksToRead);
+//        Uart.Printf("R2");
 //        Uart.Printf("%A\r", Buf1, 50, ' ');
         if(Rslt == CH_SUCCESS) {
             Usb.PEpBulkIn->WaitUntilReady();
@@ -248,7 +250,9 @@ bool MassStorage_t::CmdRead10() {
         if(TotalBlocks != 0) {
             BlocksToRead = MIN(MS_DATABUF_SZ / MMCSD_BLOCK_SIZE, TotalBlocks);
             BytesToSend = BlocksToRead * MMCSD_BLOCK_SIZE;
+//            Uart.Printf("\rR3");
             Rslt = SDRead(BlockAddress, Buf2, BlocksToRead);
+//            Uart.Printf("R4");
             if(Rslt == CH_SUCCESS) {
                 Usb.PEpBulkIn->WaitUntilReady();
                 Usb.PEpBulkIn->StartTransmitBuf(Buf2, BytesToSend);

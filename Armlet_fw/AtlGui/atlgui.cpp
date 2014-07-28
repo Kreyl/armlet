@@ -201,7 +201,7 @@ void AtlGui_t::RenderFullScreen(int screen_id)
         if(screens[screen_id].buttons[i].isPressable!=nullptr)
         {
             int state1=screens[screen_id].buttons[i].isPressable(screen_id,i);
-            Uart.Printf("\rbutton_state_val2 %d",state1);
+//            Uart.Printf("\rbutton_state_val2 %d",state1);
             RenderSingleButton(screen_id,i,state1);
         }//не рисовать кнопки, которых нет
     }
@@ -462,7 +462,7 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
 
       // strchr(BUTTONS,'B');
         strcat(bmp_filename,GUI_PATH_EXT);
-        Uart.Printf("\rRenderSingleButton %s left %d Bot %d",bmp_filename,screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom);
+//        Uart.Printf("\rRenderSingleButton %s left %d Bot %d",bmp_filename,screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom);
         // render it
         Lcd.DrawBmpFile(screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom,bmp_filename);
 }
