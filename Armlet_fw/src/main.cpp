@@ -83,7 +83,20 @@ int main() {
 void Init() {
     Uart.Init(256000);
     Uart.Printf("\rAtlantis   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
+    //in case uart not working 0
+#if 0 //const_cast for defines test
+#define DSTRING "GAGAGA"
+#define DSTRING2 "GAGAGA2"
+    char * str1 =const_cast<char *> ("GAGAGA");
+    char * str2;
+    str2= const_cast<char *> (DSTRING2);
 
+    if(strcmp(str1,const_cast<char *> (DSTRING))==0)
+        Uart.Printf("\r DSTRING  str %s OK\r",str1);
+    if(strcmp(str2,const_cast<char *> (DSTRING2))==0)
+        Uart.Printf("\r DSTRING2  str %s OK\r",str2);
+#endif
+#if 1
     SD.Init();
     Log.Init();
     // Read config
@@ -125,5 +138,5 @@ void Init() {
     Uart.Printf("\rInit done");
     Log.Printf("Init done");
 #endif
-
+#endif
 }

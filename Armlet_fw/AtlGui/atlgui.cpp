@@ -121,6 +121,7 @@ void AtlGui_t::TurnOnScreen()
     Uart.Printf("\rAtlGui_t::TurnOffScreen  turn on");
     Lcd.SetBrightness(100);
     screen_suspend_timer=0;
+    RenderFullScreen(current_state);
 }
 void AtlGui_t::TurnOffScreen()
 {

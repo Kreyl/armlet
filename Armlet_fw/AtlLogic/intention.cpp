@@ -3,6 +3,7 @@
 #include "cmd_uart.h"
 #include "Sound.h"
 #include "energy.h"
+#include "gui.h"
 //TODO move it right
 int CurrentIntentionArraySize=2;
 /*Intention intentionArray[INTENTIONS_ARRAY_SIZE]={
@@ -38,14 +39,36 @@ struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRA
 		{1,2},{4,3}
 };
 //int CurrentUserIntentionsArraySize=6;
+#if 0
+#define RNAME_FIGHT  "\xc4\xf0\xe0\xea\xe0"
+#define RNAME_SEX    "\xd1\xe5\xea\xf1"
+#define RNAME_MURDER "\xd3\xe1\xe8\xe9\xf1\xf2\xe2\xee"
+#define RNAME_DESTR  "\xd0\xe0\xe7\xf0\xf3\xf8\xe5\xed\xe8\xe5"
+#define RNAME_CREATION "\xd1\xee\xe7\xe8\xe4\xe0\xed\xe8\xe5"
+#define RNAME_DEATH "\xd1\xec\xe5\xf0\xf2\xfc"
+
+int reason_indx;    //индекс из стандартного массива
+int power256_plateau; //[power256] сила сигнала наплато 0-256 если включено.
+int time_to_plateau;//[sec]
+int time_on_plateau;//sec
+int time_after_plateau;//[sec]
+int current_time;//[sec] -1 если не включено, 0,+int если включено
+//если уже музыка играла, true. - нужно для поддержки переподключений
+bool was_winning;
+//storage for data from radiochannel, recalc every radio_in
+int human_support_number;
+int process_type;
+char * p_int_name;//button name if available
+
+#endif
 //STATIC ARRAY, inits inside, all external are in InitArrayOfUserIntentions
 struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
-        {-1,25,120,300,120,-1,false,0,PROCESS_NORMAL},//murder 0
-        {-1,25,3,10,2,-1,false,0,PROCESS_NORMAL},//creation 1
-        {-1,25,3,10,2,-1,false,0,PROCESS_NORMAL},//destruction 2
-        {-1,250,1,300,120,-1,false,0,PROCESS_NORMAL},//sex 3
-        {-1,250,1,60,120,-1,false,0,PROCESS_FIGHT},//fight 4
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO},//narco 5
+        {-1,25,120,300,120,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_MURDER)},//murder 0
+        {-1,25,3,10,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_CREATION)},//creation 1
+        {-1,25,3,10,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_DESTR)},//destruction 2
+        {-1,250,1,300,120,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_SEX)},//sex 3
+        {-1,250,1,60,120,-1,false,0,PROCESS_FIGHT,const_cast<char *> (RNAME_FIGHT)},//fight 4
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 5
 };
 
 void InitArrayOfUserIntentions()

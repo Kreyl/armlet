@@ -11,7 +11,7 @@
 #define SCREENS_WITH_REASONS 2
 typedef struct t_scrbtoarr
 {   int scr_id;//TODO change to screen name later
-    int BtoR[9];
+    int BtoR[NUM_BUTTONS];
     const char * scr_name;
     //-1 if no, indx in ButtonsToUserReasons if yes
     bool is_this_screen_with_reasons(const char * screen_name)
@@ -26,7 +26,8 @@ t_scrbtoarr ButtonsToUserReasons[SCREENS_WITH_REASONS]=
 
 {
     {1,
-        {-1,0,1,3,4,2,-1,-1,-1},
+        {-1,-1,-1,-1,-1,-1,-1,-1,-1},
+        //{-1,0,1,3,4,2,-1,-1,-1},
         "intentions"
     },
     {0,
@@ -34,11 +35,31 @@ t_scrbtoarr ButtonsToUserReasons[SCREENS_WITH_REASONS]=
         "main"
     },
 };
+#if 0
+#define RNAME_FIGHT  "\xc4\xf0\xe0\xea\xe0"
+#define RNAME_SEX    "\xd1\xe5\xea\xf1"
+#define RNAME_MURDER "\xd3\xe1\xe8\xe9\xf1\xf2\xe2\xee"
+#define RNAME_DESTR  "\xd0\xe0\xe7\xf0\xf3\xf8\xe5\xed\xe8\xe5"
+#define RNAME_CREATION "\xd1\xee\xe7\xe8\xe4\xe0\xed\xe8\xe5"
+#define RNAME_DEATH "\xd1\xec\xe5\xf0\xf2\xfc"
+#endif
 void InitButtonsToUserReasons()
 {
+    for(int i=0;i<SCREENS_WITH_REASONS;i++)
+    {
+        for(int j=0;j<screens_number;j++)
+        //if screen with reasons
+        if(strcmp(ButtonsToUserReasons[i].scr_name,screens[j].name)==0)
+        {
+            Uart.Printf("InitButtonsToUserReasons found user reason button i %d, j %d\r",i,j);
+            for(unsigned int k=0;k<NUM_BUTTONS;k++)
+            {
+                 //   if(strcmp(RNAME_FIGHT,
+            }
 
+        }
 
-
+    }
 }
 int current_volume_lvl=START_VOL_CONST;
 void CallMainToReason()
@@ -135,16 +156,16 @@ int bReasonCheck(int screen_id, int button_id)
     {
         for(int i=0;i<SCREENS_WITH_REASONS;i++)
             if(ButtonsToUserReasons[i].is_this_screen_with_reasons(screens[screen_id].name))
-        {
-            if(ButtonsToUserReasons[i].BtoR[button_id]>=0)
             {
-               // if(ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time>=0)
-               //     return BUTTON_ENABLED; //on the run!
-                //TODO сюда надо вставлять проверку на неотключаемые резоны???
-                Uart.Printf("CALL bReasonCheck return %d \r",BUTTON_PRESSABLE);
-                return BUTTON_PRESSABLE;
+                if(ButtonsToUserReasons[i].BtoR[button_id]>=0)
+                {
+                   // if(ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time>=0)
+                   //     return BUTTON_ENABLED; //on the run!
+                    //TODO сюда надо вставлять проверку на неотключаемые резоны???
+                    Uart.Printf("CALL bReasonCheck return %d \r",BUTTON_PRESSABLE);
+                    return BUTTON_PRESSABLE;
+                }
             }
-        }
 
     }
     Uart.Printf("CALL bReasonCheck return %d \r",BUTTON_LOCKED);
