@@ -49,9 +49,21 @@ void sd_t::Init() {
 }
 
 #if 1 // ====================== Get Filename In Folder =========================
+//const char* PList[2] = { "asd", "axcdgdfg"};
+
+const MusList_t MusList = {
+        2,
+        {"asd", "axcdgdfg"}
+};
+
+
 // Get first file in folder
-//FRESULT sd_t::GetFirst(const MusList_t* MusList, char* PName) {
-//    for(uint32_t i=0; i<
+FRESULT sd_t::GetFirst(const MusList_t* PList, char* PName) {
+    Uart.Printf("\rCnt=%u", PList->Cnt);
+
+    for(uint32_t i=0; i<PList->Cnt; i++) {
+//        Uart.Printf("\r %S", PList->Dir[i]);
+    }
 //
 //
 //    FRESULT r = f_opendir(&Directory, DirPath); // Try to open the folder
@@ -65,8 +77,8 @@ void sd_t::Init() {
 //        if(Filename[0] == 0) return FR_NO_FILE;
 //        if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
 //    }
-//    return FR_INT_ERR;
-//}
+    return FR_INT_ERR;
+}
 
 FRESULT sd_t::GetNext(char* PName) {
 //    while(true) {

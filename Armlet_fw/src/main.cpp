@@ -104,6 +104,11 @@ void Init() {
     Uart.Printf("\rID=%u", App.ID);
     Log.Printf("ID=%u", App.ID);
 
+    char *S=nullptr;
+    SD.GetFirst(&MusList, S);
+
+
+
     Lcd.Init();
     Lcd.Cls(clAtlBack);
 

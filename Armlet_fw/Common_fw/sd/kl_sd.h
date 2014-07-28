@@ -36,10 +36,12 @@
 #define SD_STRING_SZ    256 // for operations with strings
 
 // ==== Music dir list ====
-//struct MusList_t {
-//    uint32_t Cnt = 2;
-//    const char* Dir[2] = {"ga", "axc"};
-//};
+struct MusList_t {
+    uint32_t Cnt;
+    const char* PDir[];
+};
+
+extern const MusList_t MusList;
 
 class sd_t {
 private:
@@ -50,7 +52,7 @@ private:
     char IStr[SD_STRING_SZ];
 public:
     DIR Directory;
-//    FRESULT GetFirst(const MusList_t* MusList, char* PName); // Returns pointer to first filename (w/o path)
+    FRESULT GetFirst(const MusList_t* PList, char* PName); // Returns pointer to first filename (w/o path)
     FRESULT GetNext(char* PName);                       // Returns pointer to first filename (w/o path)
     // Returns pointer to Nth filename (WITH path)
 //    uint8_t GetNthFileByPrefix(const MusList_t* MusList, const char* Prefix, uint32_t N, char* PName);

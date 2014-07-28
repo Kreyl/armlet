@@ -52,7 +52,7 @@ static void MeshPktHandlerThd(void *arg) {
 
 void Mesh_t::Init() {
     if(App.ID == 0) {
-        Uart.Printf("Msh: WrongID\r");
+        Uart.Printf("\rMsh: WrongID");
         return;
     }
 
