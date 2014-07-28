@@ -40,6 +40,7 @@ static const mVPercent_t mVPercentTable[] = {
         {3900, 80},
         {4000, 90},
         {4100, 100},
+        {4101, 100},
 };
 #define mVPercentTableSz    countof(mVPercentTable)
 
@@ -108,15 +109,17 @@ void Pwr_t::Task() {
 #if 1 // ==== ADC ====
         Adc.Measure();
         uint32_t rslt = 0;
+        // Calculate average
         for(uint8_t i=0; i<ADC_BUF_SZ; i++) rslt += Adc.Result[i];
-        rslt /= ADC_BUF_SZ;    // Calc average
-
+        rslt /= ADC_BUF_SZ;
         // Calculate voltage
         uint32_t U = (2 * rslt * ADC_VREF_MV) / 4095;   // 2 because of resistor divider
         // Calculate percent
-        if(mV2PercentHasChanged(U)) {
+        mV2PercentHasChanged(U);
+        {
             // Indicate if has changed
-//            Uart.Printf("\rAdc=%u; U=%u; %=%u", rslt, U, CapacityPercent);
+            Uart.Printf("\rAdc=%u; U=%u; %=%u", rslt, U, CapacityPercent);
+//            Uart.Printf("\r%u", U);
             if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
         }
 #endif
