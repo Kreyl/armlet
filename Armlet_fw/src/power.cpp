@@ -43,6 +43,7 @@ static const mVPercent_t mVPercentTable[] = {
         {4101, 100},
 };
 #define mVPercentTableSz    countof(mVPercentTable)
+#define ADC_DEVIATION       11  // Sigma=5
 
 // ============================== Implementation ===============================
 static WORKING_AREA(waPwrThread, 128);
@@ -115,10 +116,9 @@ void Pwr_t::Task() {
         // Calculate voltage
         uint32_t U = (2 * rslt * ADC_VREF_MV) / 4095;   // 2 because of resistor divider
         // Calculate percent
-        mV2PercentHasChanged(U);
-        {
+        if(mV2PercentHasChanged(U)) {
             // Indicate if has changed
-            Uart.Printf("\rAdc=%u; U=%u; %=%u", rslt, U, CapacityPercent);
+//            Uart.Printf("\rAdc=%u; U=%u; %=%u", rslt, U, CapacityPercent);
 //            Uart.Printf("\r%u", U);
             if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
         }
