@@ -84,7 +84,6 @@ void Pwr_t::Task() {
             chSysLock();
             Clk.SetFreq12Mhz();
             Clk.InitSysTick();
-            Uart.OnAHBFreqChange();
             chSysUnlock();
 #endif
             Uart.Printf("\rExtPwr Off");
@@ -96,7 +95,6 @@ void Pwr_t::Task() {
             chSysLock();
             Clk.SetFreq48Mhz();
             Clk.InitSysTick();
-            Uart.OnAHBFreqChange();
             chSysUnlock();
             Usb.Init();
             chThdSleepMilliseconds(540);
