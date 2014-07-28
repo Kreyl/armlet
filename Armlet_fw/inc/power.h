@@ -18,7 +18,7 @@
 #define PWR_BATTERY_PIN     0
 #define PWR_BATTERY_GPIO    GPIOC
 
-#define PWR_MEASUREMENT_INTERVAL_MS    99
+#define PWR_MEASUREMENT_INTERVAL_MS    999
 
 // Adc
 #define ADC_CHNL            10
@@ -28,9 +28,9 @@ class Pwr_t {
 private:
     Adc_t Adc;
     bool WasExternal;
-    uint8_t mV2Percent(uint16_t mV);
+    bool mV2PercentHasChanged(uint16_t mV);
 public:
-    uint32_t CapacityPercent;
+    uint8_t CapacityPercent;
     void Task();
     bool ExternalPwrOn() { return  PinIsSet(PWR_EXTERNAL_GPIO, PWR_EXTERNAL_PIN); }
     bool IsCharging()    { return !PinIsSet(PWR_CHARGING_GPIO, PWR_CHARGING_PIN); }

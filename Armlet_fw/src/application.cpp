@@ -130,7 +130,7 @@ void Keylock_t::Unlock() {
 #endif
 
 #if 1 // =========================== Key handler ===============================
-static inline void KeysHandler() { // FIXME
+static inline void KeysHandler() {
     uint8_t rslt;
     KeyEvtInfo_t Evt;
 

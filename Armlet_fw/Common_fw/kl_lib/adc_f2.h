@@ -49,6 +49,14 @@ const AdcChnl_t AdcChannels[] = {
         {10, ADC_SampleTime_55_5Cycles, 6},
         {10, ADC_SampleTime_55_5Cycles, 7},
         {10, ADC_SampleTime_55_5Cycles, 8},
+        {10, ADC_SampleTime_55_5Cycles, 9},
+        {10, ADC_SampleTime_55_5Cycles, 10},
+        {10, ADC_SampleTime_55_5Cycles, 11},
+        {10, ADC_SampleTime_55_5Cycles, 12},
+        {10, ADC_SampleTime_55_5Cycles, 13},
+        {10, ADC_SampleTime_55_5Cycles, 14},
+        {10, ADC_SampleTime_55_5Cycles, 15},
+        {10, ADC_SampleTime_55_5Cycles, 16},
 };
 
 #define ADC_CHANNEL_CNT     countof(AdcChannels)

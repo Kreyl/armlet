@@ -15,6 +15,7 @@
 #include "application.h"
 
 #include "kl_sd.h"
+#include "sd_log.h"
 
 #define USB_ENABLED
 
@@ -28,40 +29,51 @@ struct mVPercent_t {
 };
 
 static const mVPercent_t mVPercentTable[] = {
-        {4100, 100},
-        {4000, 90},
-        {3900, 80},
-        {3850, 70},
-        {3800, 60},
-        {3780, 50},
-        {3740, 40},
-        {3700, 30},
+        {0,     0},
+        {3640, 10},
         {3670, 20},
-        {3640, 10}
+        {3700, 30},
+        {3740, 40},
+        {3780, 50},
+        {3800, 60},
+        {3850, 70},
+        {3900, 80},
+        {4000, 90},
+        {4100, 100},
+        {4101, 100},
 };
 #define mVPercentTableSz    countof(mVPercentTable)
 
 // ============================== Implementation ===============================
-static WORKING_AREA(waPwrThread, 1024);
+static WORKING_AREA(waPwrThread, 128);
 static void PwrThread(void *arg) {
     chRegSetThreadName("Pwr");
     Power.Task();
 }
 
-uint8_t Pwr_t::mV2Percent(uint16_t mV) {
-    for(uint8_t i=0; i<mVPercentTableSz; i++)
-        if(mV >= mVPercentTable[i].mV) return mVPercentTable[i].Percent;
-    return 0;
+bool Pwr_t::mV2PercentHasChanged(uint16_t mV) {
+    // Get pair of capacity values out of voltage
+    uint8_t rTop    = mVPercentTable[mVPercentTableSz-1].Percent;
+    uint8_t rBottom = mVPercentTable[mVPercentTableSz-2].Percent;
+    for(uint8_t i=1; i<mVPercentTableSz-1; i++) {
+        if(mV < mVPercentTable[i].mV) {
+            rBottom = mVPercentTable[i-1].Percent;
+            rTop    = mVPercentTable[i  ].Percent;
+            break;
+        }
+    } // for
+    // Calculate result
+    if((CapacityPercent == rTop) or (CapacityPercent == rBottom)) return false; // no change
+    else {
+        CapacityPercent = (rTop < CapacityPercent)? rTop : rBottom;
+        return true;
+    }
 }
 
 __attribute__ ((__noreturn__))
 void Pwr_t::Task() {
-    uint32_t N=0;
     while(true) {
         chThdSleepMilliseconds(PWR_MEASUREMENT_INTERVAL_MS);
-
-        SD.PutToLog("My Precious Stone %u", N++);
-
         // Check if power src changed
         if(WasExternal and !ExternalPwrOn()) {
             WasExternal = false;
@@ -97,17 +109,17 @@ void Pwr_t::Task() {
 #if 1 // ==== ADC ====
         Adc.Measure();
         uint32_t rslt = 0;
+        // Calculate average
         for(uint8_t i=0; i<ADC_BUF_SZ; i++) rslt += Adc.Result[i];
-        rslt /= ADC_BUF_SZ;    // Calc average
-
+        rslt /= ADC_BUF_SZ;
         // Calculate voltage
         uint32_t U = (2 * rslt * ADC_VREF_MV) / 4095;   // 2 because of resistor divider
         // Calculate percent
-        uint32_t NewPercent = mV2Percent(U);
-        // Indicate if has changed
-        if(NewPercent != CapacityPercent) {
-            CapacityPercent = NewPercent;
-//            Uart.Printf("\rAdc=%u; U=%u; %=%u", rslt, U, CapacityPercent);
+        mV2PercentHasChanged(U);
+        {
+            // Indicate if has changed
+            Uart.Printf("\rAdc=%u; U=%u; %=%u", rslt, U, CapacityPercent);
+//            Uart.Printf("\r%u", U);
             if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
         }
 #endif

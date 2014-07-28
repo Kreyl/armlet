@@ -30,8 +30,6 @@ extern SDCDriver SDCD1;
 extern RTCDriver RTCD1;
 #endif
 
-
-
 /*-----------------------------------------------------------------------*/
 /* Correspondence between physical drive number and physical drive.      */
 
@@ -43,7 +41,7 @@ extern RTCDriver RTCD1;
 static Semaphore semSDRW;
 
 bool SDRead(uint32_t startblk, uint8_t *buffer, uint32_t n) {
-    msg_t msg = chSemWaitTimeout(&semSDRW, (systime_t)_FS_TIMEOUT);
+    msg_t msg = chSemWaitTimeout(&semSDRW, MS2ST(3600));
     if(msg == RDY_OK) {
         bool rslt = sdcRead(&SDCD1, startblk, buffer, n);
         chSemSignal(&semSDRW);
@@ -53,7 +51,7 @@ bool SDRead(uint32_t startblk, uint8_t *buffer, uint32_t n) {
 }
 
 bool SDWrite(uint32_t startblk, const uint8_t *buffer, uint32_t n) {
-    msg_t msg = chSemWaitTimeout(&semSDRW, (systime_t)_FS_TIMEOUT);
+    msg_t msg = chSemWaitTimeout(&semSDRW, MS2ST(3600));
     if(msg == RDY_OK) {
         bool rslt = sdcWrite(&SDCD1, startblk, buffer, n);
         chSemSignal(&semSDRW);
@@ -145,7 +143,7 @@ DRESULT disk_read (
     BYTE count        /* Number of sectors to read (1..255) */
 )
 {
-  switch (drv) {
+//  switch (drv) {
 #if HAL_USE_MMC_SPI
   case MMC:
     if (blkGetDriverState(&MMCD1) != BLK_READY)
@@ -162,12 +160,12 @@ DRESULT disk_read (
         return RES_ERROR;
     return RES_OK;
 #else
-  case SDC:
+//  case SDC:
     if (blkGetDriverState(&SDCD1) != BLK_READY) return RES_NOTRDY;
     if (SDRead(sector, buff, count)) return RES_ERROR;
     return RES_OK;
 #endif
-  }
+//  }
   return RES_PARERR;
 }
 
@@ -184,8 +182,8 @@ DRESULT disk_write (
     BYTE count            /* Number of sectors to write (1..255) */
 )
 {
-  switch (drv) {
 #if HAL_USE_MMC_SPI
+    switch (drv) {
   case MMC:
     if (blkGetDriverState(&MMCD1) != BLK_READY)
         return RES_NOTRDY;
@@ -202,14 +200,16 @@ DRESULT disk_write (
     if (mmcStopSequentialWrite(&MMCD1))
         return RES_ERROR;
     return RES_OK;
-#else
   case SDC:
+#else
+//    PrintfC("\r__DiskW");
     if (blkGetDriverState(&SDCD1) != BLK_READY) return RES_NOTRDY;
-    if (SDWrite(sector, buff, count))  return RES_ERROR;
+//    PrintfC("\rdw");
+    if (SDWrite(sector, buff, count)) return RES_ERROR;
     return RES_OK;
 #endif
-  }
-  return RES_PARERR;
+//  }
+//  return RES_PARERR;
 }
 #endif /* _READONLY */
 

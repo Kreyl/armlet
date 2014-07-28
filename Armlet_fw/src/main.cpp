@@ -25,6 +25,7 @@
 
 #include "ff.h"
 #include "MassStorage.h"
+#include "sd_log.h"
 
 #include "flashloader_support.h"
 
@@ -84,10 +85,11 @@ void Init() {
     Uart.Printf("\rAtlantis   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
 
     SD.Init();
+    Log.Init();
     // Read config
     SD.iniReadInt32("Radio", "ID", "settings.ini", &App.ID);
     Uart.Printf("\rID=%u", App.ID);
-    SD.PutToLog("Start; ID=%u", App.ID);
+    Log.Printf("ID=%u", App.ID);
 
     Lcd.Init();
     Lcd.Cls(clAtlBack);
@@ -121,7 +123,7 @@ void Init() {
     Mesh.Init();
 
     Uart.Printf("\rInit done");
-    SD.PutToLog("Init done");
+    Log.Printf("Init done");
 #endif
 
 }
