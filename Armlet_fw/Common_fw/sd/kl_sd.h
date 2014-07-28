@@ -35,6 +35,12 @@
 
 #define SD_STRING_SZ    256 // for operations with strings
 
+// ==== Music dir list ====
+//struct MusList_t {
+//    uint32_t Cnt = 2;
+//    const char* Dir[2] = {"ga", "axc"};
+//};
+
 class sd_t {
 private:
     FATFS SDC_FS;
@@ -43,11 +49,11 @@ private:
     FIL IFile;  // Open and close inside one function, do not leave it opened
     char IStr[SD_STRING_SZ];
 public:
-    char* Filename;
     DIR Directory;
-    FRESULT GetFirst(const char* DirPath);  // Put first file info into FileInfo field
-    FRESULT GetNext();
-    uint8_t GetNthFileByPrefix(const char* DirPath, const char* Prefix, uint32_t N, char* PName);
+//    FRESULT GetFirst(const MusList_t* MusList, char* PName); // Returns pointer to first filename (w/o path)
+    FRESULT GetNext(char* PName);                       // Returns pointer to first filename (w/o path)
+    // Returns pointer to Nth filename (WITH path)
+//    uint8_t GetNthFileByPrefix(const MusList_t* MusList, const char* Prefix, uint32_t N, char* PName);
     bool IsReady;
     void Init();
     // ini file operations

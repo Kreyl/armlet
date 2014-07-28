@@ -50,48 +50,51 @@ void sd_t::Init() {
 
 #if 1 // ====================== Get Filename In Folder =========================
 // Get first file in folder
-FRESULT sd_t::GetFirst(const char* DirPath) {
-    FRESULT r = f_opendir(&Directory, DirPath); // Try to open the folder
-    if(r != FR_OK) return r;
-    FileInfo.lfname = LongFileName;
-    FileInfo.lfsize = MAX_NAME_LEN;
-    while(true) {   // Read everything until file found
-        r = f_readdir(&Directory, &FileInfo);
-        if(r != FR_OK) return r;
-        Filename = (FileInfo.lfname[0] == 0)? FileInfo.fname : FileInfo.lfname;
-        if(Filename[0] == 0) return FR_NO_FILE;
-        if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
-    }
+//FRESULT sd_t::GetFirst(const MusList_t* MusList, char* PName) {
+//    for(uint32_t i=0; i<
+//
+//
+//    FRESULT r = f_opendir(&Directory, DirPath); // Try to open the folder
+//    if(r != FR_OK) return r;
+//    FileInfo.lfname = LongFileName;
+//    FileInfo.lfsize = MAX_NAME_LEN;
+//    while(true) {   // Read everything until file found
+//        r = f_readdir(&Directory, &FileInfo);
+//        if(r != FR_OK) return r;
+//        Filename = (FileInfo.lfname[0] == 0)? FileInfo.fname : FileInfo.lfname;
+//        if(Filename[0] == 0) return FR_NO_FILE;
+//        if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
+//    }
+//    return FR_INT_ERR;
+//}
+
+FRESULT sd_t::GetNext(char* PName) {
+//    while(true) {
+//        FRESULT r = f_readdir(&Directory, &FileInfo);
+//        if(r != FR_OK) return r;
+//        Filename = (FileInfo.lfname[0] == 0)? FileInfo.fname : FileInfo.lfname;
+//        if(Filename[0] == 0) return FR_NO_FILE;
+//        if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
+//    }
     return FR_INT_ERR;
 }
 
-FRESULT sd_t::GetNext() {
-    while(true) {
-        FRESULT r = f_readdir(&Directory, &FileInfo);
-        if(r != FR_OK) return r;
-        Filename = (FileInfo.lfname[0] == 0)? FileInfo.fname : FileInfo.lfname;
-        if(Filename[0] == 0) return FR_NO_FILE;
-        if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
-    }
-    return FR_INT_ERR;
-}
-
-uint8_t sd_t::GetNthFileByPrefix(const char* DirPath, const char* Prefix, uint32_t N, char* PName) {
-    uint32_t Len = strlen(Prefix);
-    FRESULT r = GetFirst(DirPath);
-    while(r == FR_OK) {
-        // Check if name begins with prefix
-        if(strncmp(Filename, Prefix, Len) == 0) {   // Prefix found
-            if(N == 0) {                            // Required number of files found
-                strcpy(PName, Filename);            // Copy name
-                return OK;
-            }
-            else N--;
-        }
-        r = GetNext();  // Find next file
-    }
-    return FAILURE;
-}
+//uint8_t sd_t::GetNthFileByPrefix(const MusList_t* MusList, const char* Prefix, uint32_t N, char* PName) {
+//    uint32_t Len = strlen(Prefix);
+//    FRESULT r = GetFirst(DirPath);
+//    while(r == FR_OK) {
+//        // Check if name begins with prefix
+//        if(strncmp(Filename, Prefix, Len) == 0) {   // Prefix found
+//            if(N == 0) {                            // Required number of files found
+//                strcpy(PName, Filename);            // Copy name
+//                return OK;
+//            }
+//            else N--;
+//        }
+//        r = GetNext();  // Find next file
+//    }
+//    return FAILURE;
+//}
 #endif
 
 #if 1 // ======================= ini file operations ===========================
