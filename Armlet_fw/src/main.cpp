@@ -105,9 +105,15 @@ void Init() {
     Log.Printf("ID=%u", App.ID);
 
     char *S=nullptr;
-    SD.GetFirst(&MusList, S);
+    if(SD.PrepareToReadDirs(&MusList) == FR_OK) {
+        while(SD.GetNext(&S) == FR_OK) Uart.Printf("\rRslt: %S", S);
+    }
 
-
+    if(SD.GetNthFileByPrefix(&MusList, "draka", 0, &S) == OK) Uart.Printf("\rNth: %S", S);
+    if(SD.GetNthFileByPrefix(&MusList, "draka", 1, &S) == OK) Uart.Printf("\rNth: %S", S);
+    if(SD.GetNthFileByPrefix(&MusList, "draka", 2, &S) == OK) Uart.Printf("\rNth: %S", S);
+    if(SD.GetNthFileByPrefix(&MusList, "draka", 3, &S) == OK) Uart.Printf("\rNth: %S", S);
+//    if(SD.GetNthFileByPrefix(&MusList, "draka", 4, &S) == OK) Uart.Printf("\rNth: %S", S);
 
     Lcd.Init();
     Lcd.Cls(clAtlBack);
@@ -130,6 +136,9 @@ void Init() {
 
     Sound.Init();
     Sound.SetVolume(START_VOL_CONST);
+
+    Sound.Play(S);
+    chThdSleepSeconds(27);
 
     PillMgr.Init();
 #if 1

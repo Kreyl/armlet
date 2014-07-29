@@ -49,64 +49,87 @@ void sd_t::Init() {
 }
 
 #if 1 // ====================== Get Filename In Folder =========================
-//const char* PList[2] = { "asd", "axcdgdfg"};
+static const char* FDirList[] = {
+        "music",
+        "music/common",
+};
 
-const MusList_t MusList = {
-        2,
-        {"asd", "axcdgdfg"}
+MusList_t MusList = {
+        sizeof(FDirList)/sizeof(FDirList[0]),
+        0,
+        FDirList
 };
 
 
 // Get first file in folder
-FRESULT sd_t::GetFirst(const MusList_t* PList, char* PName) {
-    Uart.Printf("\rCnt=%u", PList->Cnt);
-
-    for(uint32_t i=0; i<PList->Cnt; i++) {
-//        Uart.Printf("\r %S", PList->Dir[i]);
+FRESULT sd_t::PrepareToReadDirs(MusList_t *PList) {
+    // Setup variables
+    IPList = PList;
+    IPList->N = 0;
+    // Open first dir
+    char* DirPath = nullptr;
+    if(IPList->GetCurrentDir(&DirPath) == OK) {
+//        Uart.Printf("\r %S", DirPath);
+        int i = strlen(DirPath) + 1;        // } Put filename in middle of buffer,
+        FileInfo.lfname = &LongFileName[i]; // } saving space to copy path from beginning
+        FileInfo.lfsize = MAX_NAME_LEN - i;
+        return f_opendir(&Directory, DirPath); // Try to open the folder
     }
-//
-//
-//    FRESULT r = f_opendir(&Directory, DirPath); // Try to open the folder
-//    if(r != FR_OK) return r;
-//    FileInfo.lfname = LongFileName;
-//    FileInfo.lfsize = MAX_NAME_LEN;
-//    while(true) {   // Read everything until file found
-//        r = f_readdir(&Directory, &FileInfo);
-//        if(r != FR_OK) return r;
-//        Filename = (FileInfo.lfname[0] == 0)? FileInfo.fname : FileInfo.lfname;
-//        if(Filename[0] == 0) return FR_NO_FILE;
-//        if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
-//    }
-    return FR_INT_ERR;
+    else return FR_NO_FILE;
 }
 
-FRESULT sd_t::GetNext(char* PName) {
-//    while(true) {
-//        FRESULT r = f_readdir(&Directory, &FileInfo);
-//        if(r != FR_OK) return r;
-//        Filename = (FileInfo.lfname[0] == 0)? FileInfo.fname : FileInfo.lfname;
-//        if(Filename[0] == 0) return FR_NO_FILE;
-//        if(!(FileInfo.fattrib & AM_DIR)) return FR_OK;
-//    }
-    return FR_INT_ERR;
+FRESULT sd_t::GetNext(char** PPName) {
+    while(true) {   // Read everything within current dir until file found
+        FRESULT r = f_readdir(&Directory, &FileInfo);
+        if(r != FR_OK) return r;
+        if((FileInfo.fname[0] == 0) and (FileInfo.lfname[0] == 0)) {
+            // No files left, get next dir
+            if(IPList == nullptr) return FR_INVALID_OBJECT;
+            char* DirPath = nullptr;
+            if(IPList->GetNextDir(&DirPath) == OK) {
+//                Uart.Printf("\r %S", DirPath);
+                int i = strlen(DirPath) + 1;
+                FileInfo.lfname = &LongFileName[i];
+                FileInfo.lfsize = MAX_NAME_LEN - i;
+                r = f_opendir(&Directory, DirPath); // Try to open the folder
+                if(r != FR_OK) return r;
+            }
+            else return FR_NO_FILE; // no more dirs left
+        }
+        else { // Filename ok, check if not dir
+            *PPName = (FileInfo.lfname[0] == 0)? FileInfo.fname : FileInfo.lfname;
+            if(!(FileInfo.fattrib & AM_DIR)) break;
+        }
+    } // while
+    return FR_OK;
 }
 
-//uint8_t sd_t::GetNthFileByPrefix(const MusList_t* MusList, const char* Prefix, uint32_t N, char* PName) {
-//    uint32_t Len = strlen(Prefix);
-//    FRESULT r = GetFirst(DirPath);
-//    while(r == FR_OK) {
-//        // Check if name begins with prefix
-//        if(strncmp(Filename, Prefix, Len) == 0) {   // Prefix found
-//            if(N == 0) {                            // Required number of files found
-//                strcpy(PName, Filename);            // Copy name
-//                return OK;
-//            }
-//            else N--;
-//        }
-//        r = GetNext();  // Find next file
-//    }
-//    return FAILURE;
-//}
+uint8_t sd_t::GetNthFileByPrefix(MusList_t* PList, const char* Prefix, uint32_t N, char** PPName) {
+    uint32_t Len = strlen(Prefix);
+    FRESULT r = PrepareToReadDirs(PList);
+    if(r != FR_OK) return r;
+    char *S = nullptr;
+    while(GetNext(&S) == FR_OK) {
+        // Check if name begins with prefix
+        if(strncmp(S, Prefix, Len) == 0) {  // Prefix found
+            if(N == 0) {                    // Required number of files found
+                // if filename is short (==stored in short charbuf), copy it
+                if(S == FileInfo.fname) strcpy(FileInfo.lfname, S);    // Copy short filename to long buf
+                // Copy dir path
+                char *DirPath = nullptr;
+                IPList->GetCurrentDir(&DirPath);
+                strcpy(LongFileName, DirPath);
+                // Add '/' between path and name
+                int Len = strlen(DirPath);
+                LongFileName[Len] = '/';
+                *PPName = LongFileName; // return Path + Filename
+                return OK;
+            }
+            else N--;
+        } // if prefix
+    } // while
+    return FAILURE;
+}
 #endif
 
 #if 1 // ======================= ini file operations ===========================

@@ -11,6 +11,7 @@
 #include "ff.h"
 #include "ch.h"
 #include "hal.h"
+#include "kl_lib_f2xx.h"
 
 #define MAX_NAME_LEN    128
 
@@ -37,11 +38,26 @@
 
 // ==== Music dir list ====
 struct MusList_t {
-    uint32_t Cnt;
-    const char* PDir[];
+    uint32_t Cnt, N;
+    const char** Dir;
+    uint8_t GetCurrentDir(char** PPDir) {
+        if(N >= Cnt) return FAILURE;
+        else {
+            *PPDir = (char*)Dir[N];
+            return OK;
+        }
+    }
+    uint8_t GetNextDir(char** PPDir) {
+        if(N+1 >= Cnt) return FAILURE;
+        else {
+            N++;
+            *PPDir = (char*)Dir[N];
+            return OK;
+        }
+    }
 };
 
-extern const MusList_t MusList;
+extern MusList_t MusList;
 
 class sd_t {
 private:
@@ -50,12 +66,13 @@ private:
     FILINFO FileInfo;
     FIL IFile;  // Open and close inside one function, do not leave it opened
     char IStr[SD_STRING_SZ];
+    MusList_t *IPList;
 public:
     DIR Directory;
-    FRESULT GetFirst(const MusList_t* PList, char* PName); // Returns pointer to first filename (w/o path)
-    FRESULT GetNext(char* PName);                       // Returns pointer to first filename (w/o path)
+    FRESULT PrepareToReadDirs(MusList_t *PList);
+    FRESULT GetNext(char** PPName); // Returns pointer to first filename (w/o path)
     // Returns pointer to Nth filename (WITH path)
-//    uint8_t GetNthFileByPrefix(const MusList_t* MusList, const char* Prefix, uint32_t N, char* PName);
+    uint8_t GetNthFileByPrefix(MusList_t* PList, const char* Prefix, uint32_t N, char** PPName);
     bool IsReady;
     void Init();
     // ini file operations
