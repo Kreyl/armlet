@@ -14,12 +14,18 @@
 #include "evt_mask.h"
 #include "application.h"
 
+// Entering standby, shutdown everything
+#include "cc1101.h"
+#include "lcd2630.h"
+#include "sound.h"
+
 #include "kl_sd.h"
 #include "sd_log.h"
 
 #define USB_ENABLED
 
 Pwr_t Power;
+IWDG_t Iwdg;
 static Thread *PThr;
 
 // Table of charge
@@ -137,26 +143,16 @@ void Pwr_t::Init() {
 //static RTCWakeup wakeupspec;
 
 void Pwr_t::EnterStandby() {
-//    // Clear flags to setup wakeup. Will not work without this.
-//    RTC->ISR &= ~(RTC_ISR_ALRBF | RTC_ISR_ALRAF | RTC_ISR_WUTF | RTC_ISR_TAMP1F | RTC_ISR_TSOVF | RTC_ISR_TSF);
-//    wakeupspec.wakeup = ((uint32_t)4) << 16;    // select 1 Hz clock source
-//    wakeupspec.wakeup |= 9;                     // set counter value to 9. Period will be 9+1 seconds
-//    rtcSetPeriodicWakeup_v2(&RTCD1, &wakeupspec);
-//    //Uart.Printf("%06X, %06X, %06X, %06X\r", RTC->CR, RTC->ISR, RTC->PRER, RTC->WUTR);
-//    // Enter standby
-//    chSysLock();
-//    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;  // Set DEEPSLEEP bit
-//    // Flash stopped in stop mode, Enter Standby mode
-//    PWR->CR = PWR_CR_FPDS | PWR_CR_PDDS | PWR_CR_LPDS | PWR_CR_CSBF | PWR_CR_CWUF;
-//    RTC->ISR &= ~(RTC_ISR_ALRBF | RTC_ISR_ALRAF | RTC_ISR_WUTF | RTC_ISR_TAMP1F | RTC_ISR_TSOVF | RTC_ISR_TSF);
-//    __WFI();
-//    chSysUnlock();
-}
-
-void ShutdownPeriphery() {
-    // Shutdown periphery
-    Keys.Shutdown();
-    Beeper.Shutdown();
-    Vibro.Shutdown();
-    IR.Shutdown();
+    chSysLock();
+    __disable_irq();
+    // Setup IWDG to reset after a while
+    Clk.LsiEnable();
+    Iwdg.SetTimeout(4500);
+    Iwdg.Enable();
+    // Enter standby
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;  // Set DEEPSLEEP bit
+    // Flash stopped in stop mode, Enter Standby mode
+    PWR->CR = PWR_CR_FPDS | PWR_CR_PDDS | PWR_CR_LPDS | PWR_CR_CSBF | PWR_CR_CWUF; // FIXME
+    __WFI();
+    chSysUnlock();
 }

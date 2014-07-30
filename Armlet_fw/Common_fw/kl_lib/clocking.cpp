@@ -45,7 +45,7 @@ uint8_t Clk_t::PLLEnable() {
     return 1; // Timeout
 }
 
-void Clk_t::LSIEnable() {
+void Clk_t::LsiEnable() {
     RCC->CSR |= RCC_CSR_LSION;
     while ((RCC->CSR & RCC_CSR_LSIRDY) == 0);
 }
@@ -201,6 +201,11 @@ void Clk_t::MCO1Enable(Mco1Src_t Src, McoDiv_t Div) {
     PinSetupAlterFunc(GPIOA, 8, omPushPull, pudNone, AF0, ps50MHz);
     RCC->CFGR &= ~(RCC_CFGR_MCO1 | RCC_CFGR_MCO1PRE);   // First, disable output and clear settings
     RCC->CFGR |= ((uint32_t)Src) | ((uint32_t)Div);
+}
+
+void Clk_t::MCO1Disable() {
+    PinSetupAnalog(GPIOA, 8);
+    RCC->CFGR &= ~(RCC_CFGR_MCO1 | RCC_CFGR_MCO1PRE);
 }
 
 /*

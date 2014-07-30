@@ -127,6 +127,11 @@ void Sound_t::Init() {
     //StartTransmissionIfNotBusy();   // Send init commands
 }
 
+void Sound_t::Shutdown() {
+    Clk.MCO1Disable();  // Switch clk off as XTALI & XTALO grounded in reset
+    Rst_Lo();           // enter shutdown mode
+}
+
 void Sound_t::IPlayNew() {
     AddCmd(VS_REG_MODE, VS_MODE_REG_VALUE);
     AddCmd(VS_REG_CLOCKF, (0x8000 + (12000000/2000)));

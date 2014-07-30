@@ -36,9 +36,10 @@ public:
     bool IsCharging()    { return !PinIsSet(PWR_CHARGING_GPIO, PWR_CHARGING_PIN); }
     void Init();
     void EnterStandby();
+    void Reset() { REBOOT(); }
 };
 extern Pwr_t Power;
 
-void ShutdownPeriphery();
+extern IWDG_t Iwdg;
 
 #endif /* POWER_H_ */

@@ -36,7 +36,18 @@
 static inline void Init();
 #define CLEAR_SCREEN_FOR_DEBUG
 //#define UART_MESH_DEBUG
+
 int main() {
+    // Check if IWDG reset occured => power-off occured
+    if(Iwdg.ResetOccured()) {
+        // Setup key input
+        PinSetupIn(KEY_PWRON_GPIO, KEY_PWRON_PIN, pudPullUp);
+        // Wait a little
+        for(volatile uint32_t i=0; i<2700; i++);
+        // If key still not pressed, enter sleep again
+        if(PinIsSet(KEY_PWRON_GPIO, KEY_PWRON_PIN)) Power.EnterStandby();
+    }
+
     // ==== Setup clock ====
     Clk.UpdateFreqValues();
     uint8_t ClkResult = 1;
@@ -47,7 +58,6 @@ int main() {
     Clk.SetupBusDividers(ahbDiv4, apbDiv1, apbDiv1);
     if((ClkResult = Clk.SwitchToPLL()) == 0) Clk.HSIDisable();
     Clk.UpdateFreqValues();
-    Clk.LSIEnable();        // To allow RTC to run //FIXME is it required?
 
     // ==== Init OS ====
     halInit();
@@ -104,17 +114,6 @@ void Init() {
     Uart.Printf("\rID=%u", App.ID);
     Log.Printf("ID=%u", App.ID);
 
-    char *S=nullptr;
-    if(SD.PrepareToReadDirs(&MusList) == FR_OK) {
-        while(SD.GetNext(&S) == FR_OK) Uart.Printf("\rRslt: %S", S);
-    }
-
-    if(SD.GetNthFileByPrefix(&MusList, "draka", 0, &S) == OK) Uart.Printf("\rNth: %S", S);
-    if(SD.GetNthFileByPrefix(&MusList, "draka", 1, &S) == OK) Uart.Printf("\rNth: %S", S);
-    if(SD.GetNthFileByPrefix(&MusList, "draka", 2, &S) == OK) Uart.Printf("\rNth: %S", S);
-    if(SD.GetNthFileByPrefix(&MusList, "draka", 3, &S) == OK) Uart.Printf("\rNth: %S", S);
-//    if(SD.GetNthFileByPrefix(&MusList, "draka", 4, &S) == OK) Uart.Printf("\rNth: %S", S);
-
     Lcd.Init();
     Lcd.Cls(clAtlBack);
 
@@ -129,7 +128,6 @@ void Init() {
     Beeper.Init();
     Vibro.Init();
 
-//    IR.TxInit();
 //    IR.RxInit();
     MassStorage.Init();
     Power.Init();
@@ -137,12 +135,9 @@ void Init() {
     Sound.Init();
     Sound.SetVolume(START_VOL_CONST);
 
-    Sound.Play(S);
-    chThdSleepSeconds(27);
-
     PillMgr.Init();
 #if 1
-    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
+//    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
     App.Init();
     AtlGui.Init();
 
@@ -153,4 +148,10 @@ void Init() {
     Log.Printf("Init done");
 #endif
 #endif
+
+    char *S = nullptr;
+    SD.GetNthFileByPrefix(&MusList, "fon", 0, &S);
+
+    Sound.Play(S);
+    chThdSleepS(45);
 }
