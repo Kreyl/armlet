@@ -148,10 +148,4 @@ void Init() {
     Log.Printf("Init done");
 #endif
 #endif
-
-    char *S = nullptr;
-    SD.GetNthFileByPrefix(&MusList, "fon", 0, &S);
-
-    Sound.Play(S);
-    chThdSleepS(45);
 }
