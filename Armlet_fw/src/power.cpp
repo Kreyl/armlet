@@ -151,8 +151,8 @@ void Pwr_t::EnterStandby() {
     Iwdg.Enable();
     // Enter standby
     SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;  // Set DEEPSLEEP bit
-    // Flash stopped in stop mode, Enter Standby mode
-    PWR->CR = PWR_CR_FPDS | PWR_CR_PDDS | PWR_CR_LPDS | PWR_CR_CSBF | PWR_CR_CWUF; // FIXME
+    // Flash stopped in stop mode, Enter Standby mode, power regulator in low-power mode when stopped, clear WakeUp and Standby flags
+    PWR->CR = PWR_CR_FPDS | PWR_CR_PDDS | PWR_CR_LPDS | PWR_CR_CSBF | PWR_CR_CWUF;
     __WFI();
     chSysUnlock();
 }
