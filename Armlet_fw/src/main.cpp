@@ -74,6 +74,7 @@ int main() {
         if(EvtMsk & EVTMSK_DFU_REQUEST) {
             Usb.Shutdown();
             MassStorage.Reset();
+            Log.Shutdown();
             // execute boot
             __disable_irq();
             chSysLock();
