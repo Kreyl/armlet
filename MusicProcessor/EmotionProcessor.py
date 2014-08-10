@@ -147,6 +147,8 @@ TRANSLIFY_PATCHES = {
     u'ё': u'е',
     u'Ё': u'Е',
     u'Ü': u'U',
+    u'и\u0306': u'й', # й on Mac
+    u'\xc9': 'E',
     u'\xa0': u' ' # non-breaking space
 }
 

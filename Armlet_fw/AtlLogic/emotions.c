@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-05 02:05:53
+ * Generated at 2014-08-10 22:23:10
  */
 #include "emotions.h"
 
@@ -262,8 +262,8 @@ Reason_t reasons[] = {
  /* 147 */ { "EWilliams", 0, 0 },
  /* 148 */ { "LYoung", 0, 0 },
  /* 149 */ { "SKendall", 0, 0 },
+ /* 150 */ { "ABrown", 0, 0 },
 	// end of characters
- /* 150 */ { "r150", 99, 1 },	/* neverno */
  /* 151 */ { "r151", 99, 1 },	/* neverno */
  /* 152 */ { "r152", 99, 1 },	/* neverno */
  /* 153 */ { "r153", 99, 1 },	/* neverno */
