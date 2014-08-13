@@ -22,6 +22,7 @@ void RxTable_t::ISwitchTable() {
 }
 
 RESULT RxTable_t::PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P) {
+    chSemWait(&WriteFlag);
     if(ID == App.ID) return OK; //
     /* Get Level (in %) from RSSI (in dBm) */
     uint8_t Level = 0;
@@ -40,6 +41,7 @@ RESULT RxTable_t::PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P) {
     PCurrTbl->Row[PCurrTbl->Size].Level = Level;
     PCurrTbl->Row[PCurrTbl->Size].State = *P;
     PCurrTbl->Size++;
+    chSemSignal(&WriteFlag);
     return OK;
 }
 

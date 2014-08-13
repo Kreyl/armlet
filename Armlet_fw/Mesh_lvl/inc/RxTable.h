@@ -59,9 +59,12 @@ class RxTable_t {
 private:
     Table_t ITbl[2], *PCurrTbl;
     Thread *IPThd;
+    Semaphore WriteFlag;
     void ISwitchTable();
 public:
-    RxTable_t(): PCurrTbl(&ITbl[0]), IPThd(nullptr), PTable(&ITbl[1]) {}
+    RxTable_t(): PCurrTbl(&ITbl[0]), IPThd(nullptr), PTable(&ITbl[1]) {
+        chSemInit(&WriteFlag, 1);
+    }
     Table_t *PTable;
     void RegisterAppThd(Thread *PThd) { IPThd = PThd; }
     RESULT PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P);
