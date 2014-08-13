@@ -14,10 +14,13 @@
 #include "cmd_uart.h"
 #include "application.h"
 
+// IR
+#define MAX_IR_LUSTRA_CNT       50
+// Radio
 #define BOTTOM_TRSHHLD_RSSI     -100
 #define TOP_TRSHLD_RSSI         -35
 #define RX_TABLE_READY_EVT      EVTMSK_SENS_TABLE_READY
-#define RX_TABLE_SZ             MAX_ABONENTS
+#define RX_TABLE_SZ             (MAX_ABONENTS + MAX_IR_LUSTRA_CNT)
 
 //pyton translation for db
 //[22:19:36] Jolaf: str(tuple(1 + int(sqrt(float(i) / 65) * 99) for i in xrange(0, 65 + 1)))
