@@ -23,26 +23,33 @@ void RxTable_t::ISwitchTable() {
 
 RESULT RxTable_t::PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P) {
     chSemWait(&WriteFlag);
-    if(ID == App.ID) return OK; //
-    /* Get Level (in %) from RSSI (in dBm) */
+    RESULT rslt = OK;
     uint8_t Level = 0;
+    if(ID == App.ID) goto lblPutRxEnd;
+    /* Get Level (in %) from RSSI (in dBm) */
     RSSI::Cut(RSSI, &RSSI);
     RSSI::ToPercent(RSSI, &Level);
 //    Uart.Printf("[RxTable.cpp] Put:%u,%d,%u\r\n", ID, RSSI, Level);
-    if(ID >= RX_TABLE_SZ) return FAILURE;
+    if(ID >= RX_TABLE_SZ) {
+        rslt = FAILURE;
+        goto lblPutRxEnd;
+    }
+    // Iterate IDs
     for(uint32_t i=0; i<PCurrTbl->Size; i++) {
         if(PCurrTbl->Row[i].ID == ID) {
             PCurrTbl->Row[i].Level   = MAX(PCurrTbl->Row[i].Level, Level);
             PCurrTbl->Row[i].State  = *P;
-            return OK;
+            goto lblPutRxEnd;
         }
     }
+    // No such ID found, append table
     PCurrTbl->Row[PCurrTbl->Size].ID = ID;
     PCurrTbl->Row[PCurrTbl->Size].Level = Level;
     PCurrTbl->Row[PCurrTbl->Size].State = *P;
     PCurrTbl->Size++;
+    lblPutRxEnd:
     chSemSignal(&WriteFlag);
-    return OK;
+    return rslt;
 }
 
 void RxTable_t::SendEvtReady() {
