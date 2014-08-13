@@ -19,6 +19,8 @@
 #define RX_TABLE_READY_EVT      EVTMSK_SENS_TABLE_READY
 #define RX_TABLE_SZ             MAX_ABONENTS
 
+#define RESULT                  uint8_t
+
 //pyton translation for db
 //[22:19:36] Jolaf: str(tuple(1 + int(sqrt(float(i) / 65) * 99) for i in xrange(0, 65 + 1)))
 const int DbTranslate[66] ={1, 13, 18, 22, 25, 28, 31, 33, 35, 37, 39, 41, 43, 45, 46, 48, 50, 51, 53, 54, 55, 57, 58, 59, 61, 62, 63, 64, 65, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 86, 87, 88, 89, 90, 91, 92, 92, 93, 94, 95, 96, 96, 97, 98, 99, 100};
@@ -59,7 +61,7 @@ public:
     RxTable_t(): PCurrTbl(&ITbl[0]), IPThd(nullptr), PTable(&ITbl[1]) {}
     Table_t *PTable;
     void RegisterAppThd(Thread *PThd) { IPThd = PThd; }
-    void PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P);
+    RESULT PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P);
     void SendEvtReady();
 };
 
