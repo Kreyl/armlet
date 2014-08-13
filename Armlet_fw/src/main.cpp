@@ -86,7 +86,6 @@ int main() {
             while(1);
             chSysUnlock();
         }
-
 //        Uart.Printf("\r_abW");
     }
 }
@@ -129,7 +128,7 @@ void Init() {
     Beeper.Init();
     Vibro.Init();
 
-//    IR.RxInit();
+    IR.RxInit();
     MassStorage.Init();
     Power.Init();
 
@@ -146,7 +145,7 @@ void Init() {
     Mesh.Init();
 
     Uart.Printf("\rInit done");
-    Log.Printf("Init done");
+//    Log.Printf("Init done");
 #endif
 #endif
 }

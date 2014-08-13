@@ -83,7 +83,6 @@ private:
     msg_t IRxBuf[IR_RXBUF_SZ];
     Mailbox imailbox;
     // Rx Level1
-    EventSource IEvtSrcIrRx;
     uint16_t IRxW;
     uint8_t IBitCnt;
     bool IReceivingData;
@@ -109,7 +108,6 @@ public:
     void RxInit();
     void Shutdown();
     uint8_t TransmitWord(uint16_t wData, uint8_t PwrPercent);
-    void RegisterEvt(EventListener *PEvtLstnr, uint8_t EvtMask) { chEvtRegisterMask(&IEvtSrcIrRx, PEvtLstnr, EvtMask); }
     // Inner use
     void IStopModulator() { Modulator.Disable(); }
     void IRxEdgeIrq();

@@ -115,7 +115,7 @@ def generateTickets(characters):
     pyGameInit()
     set_mode((1, 1), NOFRAME)
     template = loadImage(TEMPLATE)
-    names = sorted(characters, key = lambda (shortName, (rid, longName)): longName.split()[-1])
+    names = sorted(characters, key = lambda (shortName, (rid, longName)): rid)
     tickets = (createTicket(template, shortName, longName) for (shortName, (_rid, longName)) in names)
     nNamedSheets = createSheets(tickets, template)
     createCopiedSheet('TicketA', 'TicketsA-%d' % NUM_SHEETS_TO)
