@@ -155,7 +155,7 @@ static inline void KeysHandler() {
         }
         else if(Evt.Type==keLongPress)
         {
-            if(Evt.KeyID[0] == keyL) Power.EnterStandby();  // FIXME: is this correct?
+            if(Evt.KeyID[0] == KEY_PWRON) Power.EnterStandby();
             AtlGui.ButtonIsReleased(Evt.KeyID[0],keLongPress);
         }
         else if(Evt.Type==keRepeat)

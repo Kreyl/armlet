@@ -44,8 +44,21 @@ int main() {
         PinSetupIn(KEY_PWRON_GPIO, KEY_PWRON_PIN, pudPullUp);
         // Wait a little
         for(volatile uint32_t i=0; i<2700; i++);
-        // If key still not pressed, enter sleep again
-        if(PinIsSet(KEY_PWRON_GPIO, KEY_PWRON_PIN)) Power.EnterStandby();
+        // Check if key is pressed
+        if(!PinIsSet(KEY_PWRON_GPIO, KEY_PWRON_PIN)) {
+            // If not enough time passed, increase timer and enter standby
+            if(!Power.BtnPressTimerDone()) {
+                Power.IncreaseBtnPressTimer();
+                Power.EnterStandby();
+            }
+        }
+        else { // If key not pressed, enter sleep again
+            Power.ResetBtnPressTimer();
+            Power.EnterStandby();
+        }
+        // Time to wake
+        Power.ResetBtnPressTimer();
+        DisableBackupAccess();
     }
 
     // ==== Setup clock ====
@@ -93,6 +106,7 @@ int main() {
 void Init() {
     Uart.Init(256000);
     Uart.Printf("\rAtlantis   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
+
     //in case uart not working 0
 #if 0 //const_cast for defines test
 #define DSTRING "GAGAGA"

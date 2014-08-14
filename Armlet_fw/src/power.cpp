@@ -147,7 +147,7 @@ void Pwr_t::EnterStandby() {
     __disable_irq();
     // Setup IWDG to reset after a while
     Clk.LsiEnable();
-    Iwdg.SetTimeout(4500);
+    Iwdg.SetTimeout(STANDBY_TIMEOUT_MS);
     Iwdg.Enable();
     // Enter standby
     SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;  // Set DEEPSLEEP bit
@@ -155,4 +155,23 @@ void Pwr_t::EnterStandby() {
     PWR->CR = PWR_CR_FPDS | PWR_CR_PDDS | PWR_CR_LPDS | PWR_CR_CSBF | PWR_CR_CWUF;
     __WFI();
     chSysUnlock();
+}
+
+// Btn Timer
+bool Pwr_t::BtnPressTimerDone() {
+    EnableBackupAccess();
+    uint32_t cnt = ReadBackupRegister(BTN_TIMER_REG_NUM);
+    return (cnt >= BTN_TIMER_WAKE_CNT);
+}
+
+void Pwr_t::IncreaseBtnPressTimer() {
+    EnableBackupAccess();
+    uint32_t cnt = ReadBackupRegister(BTN_TIMER_REG_NUM);
+    cnt++;
+    WriteBackupRegister(BTN_TIMER_REG_NUM, cnt);
+}
+
+void Pwr_t::ResetBtnPressTimer() {
+    EnableBackupAccess();
+    WriteBackupRegister(BTN_TIMER_REG_NUM, 0);
 }
