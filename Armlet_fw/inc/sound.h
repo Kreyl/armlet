@@ -125,6 +125,7 @@ private:
 public:
     sndState_t State;
     void Init();
+    void Shutdown();
     void Play(const char* AFilename, uint32_t StartPosition = 0) {
         IFilename = AFilename;
         IStartPosition = StartPosition;

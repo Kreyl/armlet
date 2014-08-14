@@ -20,6 +20,7 @@ from itertools import chain
 from os.path import join
 from platform import system
 from subprocess import Popen, PIPE, STDOUT
+from sys import stdout
 
 try:
     from pytils.translit import translify
@@ -37,6 +38,11 @@ from Settings import LOCATION_ID_START, LOCATION_IDS, MIST_ID_START, MIST_IDS, C
 from CharacterProcessor import CHARACTERS_CSV, currentTime, getFileName, updateCharacters
 
 isWindows = system().lower().startswith('win')
+
+CONSOLE_ENCODING = stdout.encoding or ('cp866' if isWindows else 'UTF-8')
+
+def encodeForConsole(s):
+    return s.encode(CONSOLE_ENCODING, 'replace')
 
 EMOTIONS_CSV = 'Emotions.csv'
 LOCATIONS_CSV = 'Locations.csv'
@@ -140,6 +146,9 @@ TEST_COMMAND = 'gcc -I "%s" -o test "%s" test.c && ./test && rm test' % (C_PATH,
 TRANSLIFY_PATCHES = {
     u'ё': u'е',
     u'Ё': u'Е',
+    u'Ü': u'U',
+    u'и\u0306': u'й', # й on Mac
+    u'\xc9': 'E',
     u'\xa0': u' ' # non-breaking space
 }
 
@@ -157,7 +166,10 @@ def width(array):
 def convert(s):
     for (f, t) in TRANSLIFY_PATCHES.iteritems():
         s = s.replace(f, t)
-    return translify(s)
+    try:
+        return translify(s)
+    except ValueError, e:
+        raise ValueError("Translify failed for %s: %s" % (encodeForConsole(s), e))
 
 def convertTitle(s):
     return convert(s.strip())

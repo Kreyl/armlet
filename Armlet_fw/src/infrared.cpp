@@ -6,6 +6,9 @@
  */
 
 #include "infrared.h"
+#include "evt_mask.h"
+#include "cmd_uart.h"
+#include "RxTable.h"
 
 Infrared_t IR;
 
@@ -45,6 +48,7 @@ void Infrared_t::IRxEdgeIrq() {
 
 // =============================== Implementation ==============================
 static WORKING_AREA(waIRRxThread, 128);
+__attribute__ ((__noreturn__))
 static void IRRxThread(void *arg) {
     chRegSetThreadName("IRRx");
     IR.IRxTask();
@@ -57,9 +61,10 @@ void Infrared_t::IStartPkt() {
     IBitDelay = IR_TIMEOUT_MS;
 }
 
+__attribute__ ((__noreturn__))
 void Infrared_t::IRxTask() {
     msg_t Msg;
-    while(1) {
+    while(true) {
         // Fetch byte from queue
         if(chMBFetch(&imailbox, &Msg, IBitDelay) == RDY_OK) {
             //Uart.Printf("%u\r", Msg);
@@ -82,7 +87,17 @@ void Infrared_t::IRxTask() {
             if(IBitCnt == 14) {
                 ICancelPkt();
                 RxWord = IRxW << 2;
-                chEvtBroadcast(&IEvtSrcIrRx);
+                // Leave only ID: 0xxx xxxx 0000 01**, xxx is ID
+                RxWord >>= 8;
+                //Uart.Printf("\rIR: %u", RxWord);
+                // Add ID to table; increase to fit in address space
+                RxTable.PutRxInfo(RxWord + MAX_ABONENTS, 0, nullptr);
+                // Rise evt
+//                if(App.PThd != nullptr) {
+//                    chSysLock();
+//                    chEvtSignalI(App.PThd, 0);
+//                    chSysUnlock();
+//                }
             } // if completed
         } // if msg
     } // while 1
@@ -136,7 +151,6 @@ void Infrared_t::TxInit() {
 }
 
 void Infrared_t::RxInit() {
-    chEvtInit(&IEvtSrcIrRx);
     // GPIO
     PinSetupOut(IR_RX_PWR_GPIO, IR_RX_PWR_PIN, omPushPull); // }
     PinSet(IR_RX_PWR_GPIO, IR_RX_PWR_PIN);                  // } Power

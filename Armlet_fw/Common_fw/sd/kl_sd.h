@@ -11,6 +11,7 @@
 #include "ff.h"
 #include "ch.h"
 #include "hal.h"
+#include "kl_lib_f2xx.h"
 
 #define MAX_NAME_LEN    128
 
@@ -35,6 +36,29 @@
 
 #define SD_STRING_SZ    256 // for operations with strings
 
+// ==== Music dir list ====
+struct MusList_t {
+    uint32_t Cnt, N;
+    const char** Dir;
+    uint8_t GetCurrentDir(char** PPDir) {
+        if(N >= Cnt) return FAILURE;
+        else {
+            *PPDir = (char*)Dir[N];
+            return OK;
+        }
+    }
+    uint8_t GetNextDir(char** PPDir) {
+        if(N+1 >= Cnt) return FAILURE;
+        else {
+            N++;
+            *PPDir = (char*)Dir[N];
+            return OK;
+        }
+    }
+};
+
+extern MusList_t MusList;
+
 class sd_t {
 private:
     FATFS SDC_FS;
@@ -42,12 +66,13 @@ private:
     FILINFO FileInfo;
     FIL IFile;  // Open and close inside one function, do not leave it opened
     char IStr[SD_STRING_SZ];
+    MusList_t *IPList;
 public:
-    char* Filename;
     DIR Directory;
-    FRESULT GetFirst(const char* DirPath);  // Put first file info into FileInfo field
-    FRESULT GetNext();
-    uint8_t GetNthFileByPrefix(const char* DirPath, const char* Prefix, uint32_t N, char* PName);
+    FRESULT PrepareToReadDirs(MusList_t *PList);
+    FRESULT GetNext(char** PPName); // Returns pointer to first filename (w/o path)
+    // Returns pointer to Nth filename (WITH path)
+    uint8_t GetNthFileByPrefix(MusList_t* PList, const char* Prefix, uint32_t N, char** PPName);
     bool IsReady;
     void Init();
     // ini file operations

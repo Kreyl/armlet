@@ -156,6 +156,7 @@ static inline void KeysHandler() {
         }
         else if(Evt.Type==keLongPress)
         {
+            if(Evt.KeyID[0] == KEY_PWRON) Power.EnterStandby();
             AtlGui.ButtonIsReleased(Evt.KeyID[0],keLongPress);
         }
         else if(Evt.Type==keRepeat)
@@ -273,7 +274,7 @@ void App_t::Task() {
 #if 1 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
 //            Uart.Printf("\rNewSecond");
-// @KL           AtlGui.AddSuspendScreenTimer(1);
+// @KL            AtlGui.AddSuspendScreenTimer(1);
             //UPDATE user intentions timers
             if(UpdateUserIntentionsTime(1))
                 CheckAndRedrawFinishedReasons();

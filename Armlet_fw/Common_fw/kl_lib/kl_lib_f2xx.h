@@ -16,7 +16,7 @@
 #include "string.h"     // for memcpy
 #include <cstdlib>      // for strtoul
 
-// =============================== General =====================================
+#if 1 // ============================ General ==================================
 #define PACKED __attribute__ ((__packed__))
 #ifndef countof
 #define countof(A)  (sizeof(A)/sizeof(A[0]))
@@ -143,7 +143,33 @@ public:
 #define DMA_PRIORITY_HIGH       STM32_DMA_CR_PL(0b10)
 #define DMA_PRIORITY_VERYHIGH   STM32_DMA_CR_PL(0b11)
 
-#define REBOOT()                SCB_AIRCR = AIRCR_VECTKEY | 0x04
+#endif
+
+#if 1 // ============================== Power ==================================
+#define REBOOT()                SCB_AIRCR = (AIRCR_VECTKEY | 0x04)
+
+static inline void EnableBackupAccess() {
+    rccEnablePWRInterface(FALSE);
+    PWR->CR |= PWR_CR_DBP;
+}
+static inline void DisableBackupAccess() {
+    PWR->CR &= ~PWR_CR_DBP;
+    rccDisablePWRInterface(FALSE);
+}
+
+// RegN = 0...19
+static inline uint32_t ReadBackupRegister(uint32_t RegN) {
+    volatile uint32_t tmp = RTC_BASE + 0x50 + (RegN * 4);
+    return (*(volatile uint32_t *)tmp);
+}
+
+static inline void WriteBackupRegister(uint32_t RegN, uint32_t Data) {
+    volatile uint32_t tmp = RTC_BASE + 0x50 + (RegN * 4);
+    *(volatile uint32_t *)tmp = Data;
+}
+
+
+#endif
 
 #if 1 // =========================== Time ======================================
 static inline bool TimeElapsed(systime_t *PSince, uint32_t Delay_ms) {
@@ -155,7 +181,7 @@ static inline bool TimeElapsed(systime_t *PSince, uint32_t Delay_ms) {
 }
 #endif
 
-// ===================== Single pin manipulations ==============================
+#if 1 // ================== Single pin manipulations ===========================
 enum PinOutMode_t {
     omPushPull  = 0,
     omOpenDrain = 1
@@ -280,6 +306,7 @@ public:
     void Set(uint16_t Value) { *PCCR = Value; }
     void Off() { *PCCR = 0; }
 };
+#endif
 
 #if 1 // ==== External IRQ ====
 enum ExtiTrigType_t {ttRising, ttFalling, ttRisingFalling};
@@ -344,7 +371,7 @@ public:
 // Returns [0; TopValue]
 uint32_t Random(uint32_t TopValue);
 
-// ================================= Timers ====================================
+#if 1 // ============================== Timers =================================
 enum TmrTrigInput_t {tiITR0=0x00, tiITR1=0x10, tiITR2=0x20, tiITR3=0x30, tiTIED=0x40, tiTI1FP1=0x50, tiTI2FP2=0x60, tiETRF=0x70};
 enum TmrMasterMode_t {mmReset=0x00, mmEnable=0x10, mmUpdate=0x20, mmComparePulse=0x30, mmCompare1=0x40, mmCompare2=0x50, mmCompare3=0x60, mmCompare4=0x70};
 enum TmrSlaveMode_t {smDisable=0, smEncoder1=1, smEncoder2=2, smEncoder3=3, smReset=4, smGated=5, smTrigger=6, smExternal=7};
@@ -395,6 +422,44 @@ public:
     void PwmInit(GPIO_TypeDef *GPIO, uint16_t N, uint8_t Chnl, Inverted_t Inverted);
     void PwmSet(uint16_t Value) { *PCCR = Value; }
 };
+#endif
+
+#if 1 // =============================== IWDG ==================================
+enum IwdgPre_t {
+    iwdgPre4 = 0b000,
+    iwdgPre8 = 0b001,
+    iwdgPre16 = 0b010,
+    iwdgPre32 = 0b011,
+    iwdgPre64 = 0b100,
+    iwdgPre128 = 0b101,
+    iwdgPre256 = 0b110
+};
+
+class IWDG_t {
+private:
+    void EnableAccess() { IWDG->KR = 0x5555; }
+    void SetPrescaler(IwdgPre_t Prescaler) { IWDG->PR = (uint32_t)Prescaler; }
+    void SetReload(uint16_t Reload) { IWDG->RLR = Reload; }
+public:
+    void Reload() { IWDG->KR = 0xAAAA; }
+    void Enable() { IWDG->KR = 0xCCCC; }
+    void SetTimeout(uint32_t ms) {
+        EnableAccess();
+        SetPrescaler(iwdgPre256);
+        uint32_t Count = (ms * (LSI_FREQ_HZ/1000)) / 256;
+        TRIM_VALUE(Count, 0xFFF);
+        SetReload(Count);
+        Reload();
+    }
+    bool ResetOccured() {
+        if(RCC->CSR & RCC_CSR_WDGRSTF) {
+            RCC->CSR |= RCC_CSR_RMVF;   // Clear flags
+            return true;
+        }
+        else return false;
+    }
+};
+#endif
 
 #if 1 // ============================== SPI ====================================
 enum CPHA_t {cphaFirstEdge, cphaSecondEdge};
@@ -456,8 +521,7 @@ public:
 };
 #endif
 
-
-// =============================== I2C =========================================
+#if 1 // ============================== I2C ====================================
 #define I2C_DMATX_MODE  STM32_DMA_CR_CHSEL(DmaChnl) |   \
                         DMA_PRIORITY_LOW | \
                         STM32_DMA_CR_MSIZE_BYTE | \
@@ -514,5 +578,6 @@ public:
     uint8_t CmdWriteRead(uint8_t Addr, uint8_t *WPtr, uint8_t WLength, uint8_t *RPtr, uint8_t RLength);
     uint8_t CmdWriteWrite(uint8_t Addr, uint8_t *WPtr1, uint8_t WLength1, uint8_t *WPtr2, uint8_t WLength2);
 };
+#endif
 
 #endif /* KL_LIB_F2XX_H_ */

@@ -36,7 +36,31 @@
 static inline void Init();
 #define CLEAR_SCREEN_FOR_DEBUG
 //#define UART_MESH_DEBUG
+
 int main() {
+    // Check if IWDG reset occured => power-off occured
+    if(Iwdg.ResetOccured()) {
+        // Setup key input
+        PinSetupIn(KEY_PWRON_GPIO, KEY_PWRON_PIN, pudPullUp);
+        // Wait a little
+        for(volatile uint32_t i=0; i<2700; i++);
+        // Check if key is pressed
+        if(!PinIsSet(KEY_PWRON_GPIO, KEY_PWRON_PIN)) {
+            // If not enough time passed, increase timer and enter standby
+            if(!Power.BtnPressTimerDone()) {
+                Power.IncreaseBtnPressTimer();
+                Power.EnterStandby();
+            }
+        }
+        else { // If key not pressed, enter sleep again
+            Power.ResetBtnPressTimer();
+            Power.EnterStandby();
+        }
+        // Time to wake
+        Power.ResetBtnPressTimer();
+        DisableBackupAccess();
+    }
+
     // ==== Setup clock ====
     Clk.UpdateFreqValues();
     uint8_t ClkResult = 1;
@@ -47,7 +71,6 @@ int main() {
     Clk.SetupBusDividers(ahbDiv4, apbDiv1, apbDiv1);
     if((ClkResult = Clk.SwitchToPLL()) == 0) Clk.HSIDisable();
     Clk.UpdateFreqValues();
-    Clk.LSIEnable();        // To allow RTC to run //FIXME is it required?
 
     // ==== Init OS ====
     halInit();
@@ -64,6 +87,7 @@ int main() {
         if(EvtMsk & EVTMSK_DFU_REQUEST) {
             Usb.Shutdown();
             MassStorage.Reset();
+            Log.Shutdown();
             // execute boot
             __disable_irq();
             chSysLock();
@@ -75,7 +99,6 @@ int main() {
             while(1);
             chSysUnlock();
         }
-
 //        Uart.Printf("\r_abW");
     }
 }
@@ -83,6 +106,7 @@ int main() {
 void Init() {
     Uart.Init(256000);
     Uart.Printf("\rAtlantis   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
+
     //in case uart not working 0
 #if 0 //const_cast for defines test
 #define DSTRING "GAGAGA"
@@ -118,8 +142,7 @@ void Init() {
     Beeper.Init();
     Vibro.Init();
 
-//    IR.TxInit();
-//    IR.RxInit();
+    IR.RxInit();
     MassStorage.Init();
     Power.Init();
 
@@ -128,7 +151,7 @@ void Init() {
 
     PillMgr.Init();
 #if 1
-    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
+   Init_emotionTreeMusicNodeFiles_FromFileIterrator();
     App.Init();
     AtlGui.Init();
 

@@ -39,6 +39,11 @@ const KeyData_t KeyData[] = {
 
 enum KeyName_t {keyA=0, keyB=1, keyC=2, keyX=3, keyY=4, keyZ=5, keyL=6, keyE=7, keyR=8};
 
+// Switch-on key
+#define KEY_PWRON       keyA
+#define KEY_PWRON_GPIO  KeyData[KEY_PWRON].PGpio
+#define KEY_PWRON_PIN   KeyData[KEY_PWRON].Pin
+
 // Key status
 struct Key_t {
     bool IsPressed, IsRepeating, IsLongPress;

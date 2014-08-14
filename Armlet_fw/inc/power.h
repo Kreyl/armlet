@@ -20,6 +20,10 @@
 
 #define PWR_MEASUREMENT_INTERVAL_MS    999
 
+#define BTN_TIMER_WAKE_CNT  4
+#define BTN_TIMER_REG_NUM   1
+#define STANDBY_TIMEOUT_MS  1008
+
 // Adc
 #define ADC_CHNL            10
 #define ADC_VREF_MV         3300
@@ -36,9 +40,14 @@ public:
     bool IsCharging()    { return !PinIsSet(PWR_CHARGING_GPIO, PWR_CHARGING_PIN); }
     void Init();
     void EnterStandby();
+    void Reset() { REBOOT(); }
+    // BtnPress timer
+    void IncreaseBtnPressTimer();
+    bool BtnPressTimerDone();
+    void ResetBtnPressTimer();
 };
 extern Pwr_t Power;
 
-void ShutdownPeriphery();
+extern IWDG_t Iwdg;
 
 #endif /* POWER_H_ */
