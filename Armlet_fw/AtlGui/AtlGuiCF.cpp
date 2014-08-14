@@ -60,7 +60,7 @@ void InitButtonsToUserReasons()
                         {
                             //если строка названия в ArrayOfUserIntentions  совпадает со строкой названия на кнопке - привязываем!
                             ButtonsToUserReasons[i].BtoR[k]=lm;
-                            Uart.Printf("InitButtonsToUserReasons connected user_reason %s to screen %s button %d ",ArrayOfUserIntentions[lm].p_int_name,ButtonsToUserReasons[i].scr_name,k);
+                            Uart.Printf("InitButtonsToUserReasons connected user_reason %s to screen %s button %d \r",ArrayOfUserIntentions[lm].p_int_name,ButtonsToUserReasons[i].scr_name,k);
                         }
                  //if(strcmp(RNAME_FIGHT,
             }

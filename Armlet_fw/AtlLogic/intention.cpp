@@ -85,7 +85,7 @@ void InitArrayOfUserIntentions()
              ArrayOfUserIntentions[3].reason_indx=i;
          if(strcmp(reasons[i].name,"fight")==0)
              ArrayOfUserIntentions[4].reason_indx=i;
-         if(strcmp(reasons[i].name,"narco")==0)
+         if(strcmp(reasons[i].name,"drug")==0)
              ArrayOfUserIntentions[5].reason_indx=i;
     }
     //if any is not inited, panic!!
