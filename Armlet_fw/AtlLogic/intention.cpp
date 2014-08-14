@@ -96,13 +96,7 @@ void InitArrayOfUserIntentions()
     }
     Uart.Printf("InitArrayOfUserIntentions done\r");
 }
-//typedef struct UserIntentions {
-//    int reason_indx;    //индекс из стандартного массива
-//    int power256_plateau; //[power256] сила сигнала наплато -1 если не включено, 0-256 если включено.
-//    int time_to_plateau;//[sec]
-//    int time_after_plateau;//[sec]
-//    int current_time;//[sec]
-//} UserIntentions;
+
 
 struct IntentionCalculationData SICD=
 {
@@ -126,14 +120,6 @@ struct IntentionCalculationData SICD=
 		0,//	int winning_integral;
 		10//int winning_integral_top_limit_normalizer;*/
 };
-/*
-int Intention_weight_cost;
-int Signal_power_weight_cost;
-int Normalizer;
-int last_intention_power_winner;//NOT NORMALIZED
-int last_intention_index_winner;
-int winning_integral;//NORMALIZED
-int winning_integral_top_limit_normalizer;*/
 
 
 void SeekRecentlyPlayedFilesEmo::OnCallStopPlay(int emo_id,int file_id, int pos)
@@ -316,7 +302,6 @@ void PushPlayerReasonToArrayOfIntentions()
             }
         }
     }
-
 }
 void UserReasonFlagRecalc(int reason_id)
 {
@@ -327,8 +312,6 @@ void UserReasonFlagRecalc(int reason_id)
        }
 }
 int MainCalculateReasons() {
-
-
     //return valie:
     //-1; low winner intergral to play new
     //-2??? still enough interalto play,dont switch??

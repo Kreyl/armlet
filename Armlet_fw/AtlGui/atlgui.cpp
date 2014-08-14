@@ -191,9 +191,9 @@ void AtlGui_t::RenderFullScreen(int screen_id)
     Uart.Printf("\rRenderFullScreen %s", bmp_filename);
     // render it
     Lcd.DrawBmpFile(0,0,bmp_filename);
-    strncpy (char_name,"char_name",10);
-    time1=11;
-    time2=22;
+    //strncpy (char_name,"char_name",10);
+    //time1=11;
+    //time2=22;
     RenderNameTimeBat();
     //and all buttons
     for(int i=0;i<9;i++)
@@ -379,7 +379,8 @@ void AtlGui_t::RenderNameTimeBat()
     if(Mesh.GetAstronomicTime(timechar)==FAILURE)
         strcpy(timechar,"TM.FL");
 
-    Lcd.Printf(Impact,1, 1, clAtlFront, clAtlBack, "%s %s",char_name,timechar);
+    Lcd.Printf(B52,0, 0, clAtlFront, clAtlBack, "%s",char_name);
+    Lcd.Printf(B52,96, 0, clAtlFront, clAtlBack, " %s",timechar);
 
 }
 void AtlGui_t::GetCharname()

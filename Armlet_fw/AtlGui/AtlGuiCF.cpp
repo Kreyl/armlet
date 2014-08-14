@@ -48,15 +48,22 @@ void InitButtonsToUserReasons()
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
     {
         for(int j=0;j<screens_number;j++)
-        //if screen with reasons
+        //if screen is with reasons
         if(strcmp(ButtonsToUserReasons[i].scr_name,screens[j].name)==0)
         {
             Uart.Printf("InitButtonsToUserReasons found user reason button i %d, j %d\r",i,j);
             for(unsigned int k=0;k<NUM_BUTTONS;k++)
             {
-                 //   if(strcmp(RNAME_FIGHT,
+                for(int lm=0;lm<MAX_USER_INTENTIONS_ARRAY_SIZE;lm++)
+                    if(ArrayOfUserIntentions[lm].p_int_name!=nullptr)
+                        if(strcmp(ArrayOfUserIntentions[lm].p_int_name,screens[j].buttons[k].name)==0)
+                        {
+                            //если строка названия в ArrayOfUserIntentions  совпадает со строкой названия на кнопке - привязываем!
+                            ButtonsToUserReasons[i].BtoR[k]=lm;
+                            Uart.Printf("InitButtonsToUserReasons connected user_reason %s to screen %s button %d ",ArrayOfUserIntentions[lm].p_int_name,ButtonsToUserReasons[i].scr_name,k);
+                        }
+                 //if(strcmp(RNAME_FIGHT,
             }
-
         }
 
     }

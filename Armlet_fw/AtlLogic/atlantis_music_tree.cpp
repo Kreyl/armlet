@@ -49,22 +49,16 @@ Emotion * EmotionTreeGetParent2(int tree_node_indx)
 
 char * GetMusicFileNameFromList(int emo_id, int file_num)
 {
-    //strcpy(emonamebuffer,strcat((char*)emotions[emo_id].name,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING));
-   // Uart.Printf("GetMusicFileNameFromList1\r");
+    uint8_t return_val;
+
     strcpy(emonamebuffer,(char*)emotions[emo_id].name);
-   // Uart.Printf("GetMusicFileNameFromList2\r");
     strcat(emonamebuffer,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING);
-  //  Uart.Printf("GetMusicFileNameFromList3\r");
-   // Uart.Printf("emonamebuffer %s , emotions[emo_id].name  %s \r",emonamebuffer,emotions[emo_id].name);
-    //SD.GetNthFileByPrefix(emonamebuffer,file_num,GMFNFLbuffer);
-    if(SD.GetNthFileByPrefix(MUSIC_ROOT_DIR, emonamebuffer,file_num,GMFNFLbuffer)==FR_OK)
+
+    return_val= SD.GetNthFileByPrefix(MUSIC_ROOT_DIR, emonamebuffer,file_num,GMFNFLbuffer);
+    //separation for uart print
+    if(return_val!=FR_OK)
     {
-        Uart.Printf("GetNthFileByPrefix prefix: %s,fnum %d result: %s \r",emonamebuffer,file_num,GMFNFLbuffer);
-        return GMFNFLbuffer;
-    }
-    if(SD.GetNthFileByPrefix(COMMON_MUSIC_DIR, emonamebuffer,file_num,GMFNFLbuffer)==FR_OK)
-    {
-        Uart.Printf("GetNthFileByPrefix prefix: %s,fnum %d result: %s \r",emonamebuffer,file_num,GMFNFLbuffer);
+        Uart.Printf("GetNthFileByPrefix prefix: %s,fnum %d result: %s \r",emonamebuffer,file_num);
         return GMFNFLbuffer;
     }
     //TODO error!
@@ -210,6 +204,9 @@ void PlayNewEmo(int emo_id,int err_id)
     if(fname != nullptr)
     {
        strcpy(PlayEmoBuffTmp,fname);
+
+
+
        Sound.Play(PlayEmoBuffTmp);
        Uart.Printf(PlayEmoBuffTmp);
        Uart.Printf("\r");
