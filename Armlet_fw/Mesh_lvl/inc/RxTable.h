@@ -14,10 +14,15 @@
 #include "cmd_uart.h"
 #include "application.h"
 
+// IR
+#define MAX_IR_LUSTRA_CNT       50
+// Radio
 #define BOTTOM_TRSHHLD_RSSI     -100
 #define TOP_TRSHLD_RSSI         -35
 #define RX_TABLE_READY_EVT      EVTMSK_SENS_TABLE_READY
-#define RX_TABLE_SZ             MAX_ABONENTS
+#define RX_TABLE_SZ             (MAX_ABONENTS + MAX_IR_LUSTRA_CNT)
+
+#define RESULT                  uint8_t
 
 //pyton translation for db
 //[22:19:36] Jolaf: str(tuple(1 + int(sqrt(float(i) / 65) * 99) for i in xrange(0, 65 + 1)))
@@ -54,12 +59,15 @@ class RxTable_t {
 private:
     Table_t ITbl[2], *PCurrTbl;
     Thread *IPThd;
+    Semaphore WriteFlag;
     void ISwitchTable();
 public:
-    RxTable_t(): PCurrTbl(&ITbl[0]), IPThd(nullptr), PTable(&ITbl[1]) {}
+    RxTable_t(): PCurrTbl(&ITbl[0]), IPThd(nullptr), PTable(&ITbl[1]) {
+        chSemInit(&WriteFlag, 1);
+    }
     Table_t *PTable;
     void RegisterAppThd(Thread *PThd) { IPThd = PThd; }
-    void PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P);
+    RESULT PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P);
     void SendEvtReady();
 };
 

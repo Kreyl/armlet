@@ -150,18 +150,17 @@ void Mesh_t::IPktHandler(){
         RxTable.PutRxInfo(MeshMsg.RadioPkt.AlienID, STATIONARY_MIN_LEVEL, &MeshMsg.RadioPkt.AlienInfo.State);
 
         /* Dispatch Pkt */
-       sender_mesh_t *pSM = &MeshMsg.RadioPkt.SenderInfo.Mesh;
-       if( (pSM->TimeOwnerID < PriorityID) ||
+        sender_mesh_t *pSM = &MeshMsg.RadioPkt.SenderInfo.Mesh;
+        if( (pSM->TimeOwnerID < PriorityID) ||
                ((pSM->TimeOwnerID == PriorityID) &&
                    (pSM->TimeAge < IGetTimeAge())) ) {  /* compare TimeAge */
-           CycleTmr.Disable();
-           GetPrimaryPkt = true;                        // received privilege pkt
-           PriorityID = pSM->TimeOwnerID;
-           IResetTimeAge(PriorityID, pSM->TimeAge);
-           *PNewCycleN = pSM->CycleN + 1;   // TODO: cycle number increment: nedeed of not? Seems to be needed.
-           *PTimeToWakeUp = MeshMsg.Timestamp - MESH_PKT_TIME - (SLOT_TIME*(PriorityID-1)) + CYCLE_TIME;
-//           *PTimeToWakeUp = (CYCLE_TIME - (SLOT_TIME * PriorityID)) + MeshMsg.Timestamp;
-       }
+            CycleTmr.Disable();
+            GetPrimaryPkt = true;                        // received privilege pkt
+            PriorityID = pSM->TimeOwnerID;
+            IResetTimeAge(PriorityID, pSM->TimeAge);
+            *PNewCycleN = pSM->CycleN + 1;   // TODO: cycle number increment: nedeed of not? Seems to be needed.
+            *PTimeToWakeUp = MeshMsg.Timestamp - MESH_PKT_TIME - (SLOT_TIME*(PriorityID-1)) + CYCLE_TIME;
+        }
 
        if(pSM->SelfID <= STATIONARY_ID) { /* if pkt received from lustra */
            if(MeshMsg.RSSI > PreliminaryRSSI) {

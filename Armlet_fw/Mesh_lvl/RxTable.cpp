@@ -21,25 +21,35 @@ void RxTable_t::ISwitchTable() {
     PCurrTbl->Size = 0; // Reset table
 }
 
-void RxTable_t::PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P) {
-    if(ID == App.ID) return; //
-    /* Get Level (in %) from RSSI (in dBm) */
+RESULT RxTable_t::PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P) {
+    chSemWait(&WriteFlag);
+    RESULT rslt = OK;
     uint8_t Level = 0;
+    if(ID == App.ID) goto lblPutRxEnd;
+    /* Get Level (in %) from RSSI (in dBm) */
     RSSI::Cut(RSSI, &RSSI);
     RSSI::ToPercent(RSSI, &Level);
 //    Uart.Printf("[RxTable.cpp] Put:%u,%d,%u\r\n", ID, RSSI, Level);
-    if(PCurrTbl->Size >= RX_TABLE_SZ) return;
+    if(ID >= RX_TABLE_SZ) {
+        rslt = FAILURE;
+        goto lblPutRxEnd;
+    }
+    // Iterate IDs
     for(uint32_t i=0; i<PCurrTbl->Size; i++) {
         if(PCurrTbl->Row[i].ID == ID) {
             PCurrTbl->Row[i].Level   = MAX(PCurrTbl->Row[i].Level, Level);
             PCurrTbl->Row[i].State  = *P;
-            return;
+            goto lblPutRxEnd;
         }
     }
+    // No such ID found, append table
     PCurrTbl->Row[PCurrTbl->Size].ID = ID;
     PCurrTbl->Row[PCurrTbl->Size].Level = Level;
     PCurrTbl->Row[PCurrTbl->Size].State = *P;
     PCurrTbl->Size++;
+    lblPutRxEnd:
+    chSemSignal(&WriteFlag);
+    return rslt;
 }
 
 void RxTable_t::SendEvtReady() {

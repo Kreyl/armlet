@@ -143,7 +143,32 @@ public:
 #define DMA_PRIORITY_HIGH       STM32_DMA_CR_PL(0b10)
 #define DMA_PRIORITY_VERYHIGH   STM32_DMA_CR_PL(0b11)
 
-#define REBOOT()                SCB_AIRCR = AIRCR_VECTKEY | 0x04
+#endif
+
+#if 1 // ============================== Power ==================================
+#define REBOOT()                SCB_AIRCR = (AIRCR_VECTKEY | 0x04)
+
+static inline void EnableBackupAccess() {
+    rccEnablePWRInterface(FALSE);
+    PWR->CR |= PWR_CR_DBP;
+}
+static inline void DisableBackupAccess() {
+    PWR->CR &= ~PWR_CR_DBP;
+    rccDisablePWRInterface(FALSE);
+}
+
+// RegN = 0...19
+static inline uint32_t ReadBackupRegister(uint32_t RegN) {
+    volatile uint32_t tmp = RTC_BASE + 0x50 + (RegN * 4);
+    return (*(volatile uint32_t *)tmp);
+}
+
+static inline void WriteBackupRegister(uint32_t RegN, uint32_t Data) {
+    volatile uint32_t tmp = RTC_BASE + 0x50 + (RegN * 4);
+    *(volatile uint32_t *)tmp = Data;
+}
+
+
 #endif
 
 #if 1 // =========================== Time ======================================

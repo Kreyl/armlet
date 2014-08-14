@@ -30,6 +30,7 @@
 //#define INI_BUF_SIZE    512
 //static char IBuf2[512];
 static char PrintFileToUARTbuffer[512];
+static char GMFNFLbuffer[512];
 static char emonamebuffer[129];
 static char EmoNamebuffer[MAX_EMO_NAME_CHAR];
 static char MusicFileNamebuffer[MAX_MUSIC_FILENAME_CHAR_SIZE];

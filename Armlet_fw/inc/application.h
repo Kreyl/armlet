@@ -49,6 +49,10 @@ public:
     void Init();
     void Task();
     void StopEverything();
+    void LoadData();
+    void SaveData();
+    //void GetDataFileName();
+   char DataFileBuff[33];
 
 #if UART_RX_ENABLED
     void OnUartCmd(Cmd_t *PCmd);

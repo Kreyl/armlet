@@ -29,6 +29,7 @@
 
 #include "flashloader_support.h"
 #include "usb_f2.h"
+#include "kl_lib_f2xx.h"
 App_t App;
 
 #if 1 // ============================ Timers ===================================
@@ -155,7 +156,7 @@ static inline void KeysHandler() {
         }
         else if(Evt.Type==keLongPress)
         {
-            if(Evt.KeyID[0] == keyL) Power.EnterStandby();  // FIXME: is this correct?
+            if(Evt.KeyID[0] == KEY_PWRON) Power.EnterStandby();
             AtlGui.ButtonIsReleased(Evt.KeyID[0],keLongPress);
         }
         else if(Evt.Type==keRepeat)
@@ -356,8 +357,53 @@ void App_t::Init() {
 
     Time.Init();
     Time.Reset();
-//    InitArrayOfUserIntentions();
+    InitArrayOfUserIntentions();
+    InitButtonsToUserReasons();
 }
+
+void App_t::SaveData()
+{
+    FIL file;
+    int open_code= f_open (
+            &file,
+       "\appdata.sav",
+       FA_WRITE
+    );
+    if(open_code!=0)
+        return;
+    UINT bw;
+    int buff_size;
+
+
+    //energy to buff
+    //energy to file
+    f_write(&file, DataFileBuff, buff_size, &bw);
+    f_close(&file);
+}
+void App_t::LoadData()
+{
+    FIL file;
+       int open_code= f_open (
+               &file,
+          "\appdata.sav",
+          FA_READ
+       );
+       if(open_code!=0)
+           return;
+     //  UINT bw;
+     //  int buff_size;
+       //energy to buff
+       //f_read(
+
+       //energy to data
+
+       f_close(&file);
+
+}
+//void App_t::GetDataFileName()
+//{
+//
+//}
 
 #if 1 // ======================= Command processing ============================
 #if UART_RX_ENABLED
