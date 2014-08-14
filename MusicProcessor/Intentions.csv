@@ -11,7 +11,10 @@ destruction,5,razrushenie
 sex,9,seks
 fight,50,draka
 heartbeat,50,serdtsebienie
-drug,20,zavisimost'
+weed,20,pozitiv
+heroin,20,negativ
+lsd,20,trip
+krayk,20,fon
 death,50,smert'
 mist,50,tuman
 fear,40,strah

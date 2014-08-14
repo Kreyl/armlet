@@ -154,7 +154,9 @@ TRANSLIFY_PATCHES = {
 
 EMOTION_PATCHES = {
     'somneniya': 'somnenie',
-    'sex': 'seks'
+    'sex': 'seks',
+    'napryazhenie': 'napryazhennost\'',
+    'udovletvorennost': 'udovletvorenie'
 }
 
 def firstCapital(s):
@@ -185,7 +187,8 @@ TUMAN = convertEmotion(u'туман')
 SMERT = convertEmotion(u'смерть')
 MERTV = convertEmotion(u'мертвяк')
 HEARTBEAT = convertEmotion(u'сердцебиение')
-ADDITIONAL_EMOTIONS = (WRONG, MASTER, SILENCE, TUMAN, SMERT, MERTV, HEARTBEAT)
+TRIP = convertEmotion(u'трип')
+ADDITIONAL_EMOTIONS = (WRONG, MASTER, SILENCE, TUMAN, SMERT, MERTV, HEARTBEAT, TRIP)
 
 EMOTION_GUESS_RANGE = 3
 EMOTION_GUESS_MAX_PROPOSALS = 9

@@ -68,18 +68,16 @@ void Sound_t::ITask() {
         // Data read request
         else if(EvtMsk & VS_EVT_READ_NEXT) {
 //            Uart.Printf("\rreadNext");
-            FRESULT rslt = FR_NO_FILE;
+            FRESULT rslt = FR_OK;
             bool EofAtStart = f_eof(&IFile);
             // Read next if not EOF
             if(!EofAtStart) {
-                if     (Buf1.DataSz == 0) { /*Uart.Printf("1"); */rslt = Buf1.ReadFromFile(&IFile); }
-                else if(Buf2.DataSz == 0) { /*Uart.Printf("2"); */rslt = Buf2.ReadFromFile(&IFile); }
+                if     (Buf1.DataSz == 0) { /*Uart.Printf("1");*/ rslt = Buf1.ReadFromFile(&IFile); }
+                else if(Buf2.DataSz == 0) { /*Uart.Printf("2");*/ rslt = Buf2.ReadFromFile(&IFile); }
             }
             // Check if was EOF or if error occured during reading. Do not do it if EOF occured during reading.
-            if((rslt != FR_OK) or EofAtStart) {
-                Uart.Printf("\rReadErr=%u", rslt);
-                PrepareToStop();
-            }
+            if(rslt != FR_OK) Uart.Printf("\rsndReadErr=%u", rslt);
+            if((rslt != FR_OK) or EofAtStart) PrepareToStop();
             else StartTransmissionIfNotBusy();
         }
     } // while true
