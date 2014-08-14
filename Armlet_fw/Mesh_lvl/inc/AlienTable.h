@@ -48,7 +48,7 @@ public:
             PNext++;
             if(PNext >= (Buf + ALIEN_BUF_SIZE)) {
                 if(Cnt++ > FINDER_COUNTER) {
-                    Uart.Printf("[AlienTable.h] EmptyBuf\r\n");
+//                    Uart.Printf("\rAlienTable EmptyBuf");
                     return 0;
                 }
                 PNext = Buf;

@@ -49,18 +49,6 @@ void sd_t::Init() {
 }
 
 #if 1 // ====================== Get Filename In Folder =========================
-static const char* FDirList[] = {
-        "music",
-        "music/common",
-};
-
-MusList_t MusList = {
-        sizeof(FDirList)/sizeof(FDirList[0]),
-        0,
-        FDirList
-};
-
-
 // Get first file in folder
 FRESULT sd_t::PrepareToReadDirs(MusList_t *PList) {
     // Setup variables
@@ -148,7 +136,7 @@ static inline char* striptrailing(char *S) {
     return S;
 }
 
-uint8_t sd_t::iniReadString(const char *ASection, const char *AKey, const char *AFileName, char *POutput) {
+uint8_t sd_t::iniReadString(const char *ASection, const char *AKey, const char *AFileName, char **PPOutput) {
     FRESULT rslt;
     // Open file
     rslt = f_open(&IFile, AFileName, FA_READ+FA_OPEN_EXISTING);
@@ -206,13 +194,13 @@ uint8_t sd_t::iniReadString(const char *ASection, const char *AKey, const char *
     } // for
     *EndP = '\0';   // Terminate at a comment
     striptrailing(StartP);
-    POutput = StartP;
+    *PPOutput = StartP;
     return OK;
 }
 
 uint8_t sd_t::iniReadInt32(const char *ASection, const char *AKey, const char *AFileName, int32_t *POutput) {
     char *S = nullptr;
-    if(iniReadString(ASection, AKey, AFileName, S) == OK) {
+    if(iniReadString(ASection, AKey, AFileName, &S) == OK) {
         *POutput = strtol(S, NULL, 10);
         return OK;
     }
