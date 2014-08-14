@@ -156,7 +156,12 @@ static inline void KeysHandler() {
         }
         else if(Evt.Type==keLongPress)
         {
-            if(Evt.KeyID[0] == KEY_PWRON) Power.EnterStandby();
+            if(Evt.KeyID[0] == KEY_PWRON)
+            {
+                Log.Shutdown( );
+                chThdSleepMilliseconds(250);
+                Power.EnterStandby();
+            }
             AtlGui.ButtonIsReleased(Evt.KeyID[0],keLongPress);
         }
         else if(Evt.Type==keRepeat)
