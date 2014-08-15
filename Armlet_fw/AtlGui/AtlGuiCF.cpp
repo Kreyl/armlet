@@ -51,7 +51,7 @@ void InitButtonsToUserReasons()
         //if screen is with reasons
         if(strcmp(ButtonsToUserReasons[i].scr_name,screens[j].name)==0)
         {
-            Uart.Printf("InitButtonsToUserReasons found user reason button i %d, j %d\r",i,j);
+//            Uart.Printf("InitButtonsToUserReasons found user reason button i %d, j %d\r",i,j);
             for(unsigned int k=0;k<NUM_BUTTONS;k++)
             {
                 for(int lm=0;lm<MAX_USER_INTENTIONS_ARRAY_SIZE;lm++)
@@ -60,7 +60,7 @@ void InitButtonsToUserReasons()
                         {
                             //если строка названия в ArrayOfUserIntentions  совпадает со строкой названия на кнопке - привязываем!
                             ButtonsToUserReasons[i].BtoR[k]=lm;
-                            Uart.Printf("InitButtonsToUserReasons connected user_reason %s to screen %s button %d ",ArrayOfUserIntentions[lm].p_int_name,ButtonsToUserReasons[i].scr_name,k);
+//                            Uart.Printf("InitButtonsToUserReasons connected user_reason %s to screen %s button %d ",ArrayOfUserIntentions[lm].p_int_name,ButtonsToUserReasons[i].scr_name,k);
                         }
                  //if(strcmp(RNAME_FIGHT,
             }
@@ -83,12 +83,12 @@ int bSoundUpCheck(int screen_id, int button_id)
     //int max_vol= 250;
     if(current_volume_lvl+SOUND_STEP<MAX_VOL_CONST)
     {
-        Uart.Printf("UP vol %d ss%d mvc%d \r", current_volume_lvl,SOUND_STEP,MAX_VOL_CONST);
+        Uart.Printf("\rUP vol %d ss%d mvc%d", current_volume_lvl,SOUND_STEP,MAX_VOL_CONST);
         return BUTTON_PRESSABLE;
     }
     else
     {
-        Uart.Printf("sound up LOCKED \r", current_volume_lvl);
+        Uart.Printf("\rsound up LOCKED", current_volume_lvl);
         return BUTTON_LOCKED;
     }
 }
@@ -157,7 +157,7 @@ extern "C" {
 //reason button
 int bReasonCheck(int screen_id, int button_id)
 {
-    Uart.Printf("CALL bReasonCheck \r");
+    Uart.Printf("\rCALL bReasonCheck");
     //если есть соответствие кнопке и резону, то можно нажимать?
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
     {
@@ -169,18 +169,18 @@ int bReasonCheck(int screen_id, int button_id)
                    // if(ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time>=0)
                    //     return BUTTON_ENABLED; //on the run!
                     //TODO сюда надо вставлять проверку на неотключаемые резоны???
-                    Uart.Printf("CALL bReasonCheck return %d \r",BUTTON_PRESSABLE);
+                    Uart.Printf("\rCALL bReasonCheck return %d",BUTTON_PRESSABLE);
                     return BUTTON_PRESSABLE;
                 }
             }
 
     }
-    Uart.Printf("CALL bReasonCheck return %d \r",BUTTON_LOCKED);
+    Uart.Printf("\rCALL bReasonCheck return %d",BUTTON_LOCKED);
     return BUTTON_LOCKED; //error??
 }
 int bReasonGetState(int screen_id, int button_id)
 {
-    Uart.Printf("CALL bReasonGetState \r");
+    Uart.Printf("\rCALL bReasonGetState");
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
        {
            if(ButtonsToUserReasons[i].is_this_screen_with_reasons(screens[screen_id].name))
@@ -189,7 +189,7 @@ int bReasonGetState(int screen_id, int button_id)
                {
                   if(ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time>=0)
                   {
-                      Uart.Printf("bReasonGetState ENABLED, time %d , B%d\r",ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time,button_id);
+                      Uart.Printf("\rbReasonGetState ENABLED, time %d , B%d",ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time,button_id);
                       return BUTTON_ENABLED;
                   }
                    //TODO сюда надо вставлять проверку на неотключаемые резоны???
@@ -214,7 +214,7 @@ int bReasonChange(int screen_id, int button_id ,int press_mode)
                int reason_id=ButtonsToUserReasons[i].BtoR[button_id];
                if(reason_id<0)
                {
-                   Uart.Printf("CALL bReasonChange REASON ERROR \r");
+                   Uart.Printf("\rCALL bReasonChange REASON ERROR");
                    return BUTTON_ERROR;
                }
                int user_reason_indx=ButtonsToUserReasons[i].BtoR[button_id];
@@ -223,7 +223,7 @@ int bReasonChange(int screen_id, int button_id ,int press_mode)
                {
                    //setup reason
                    ArrayOfUserIntentions[user_reason_indx].current_time=0;
-                   Uart.Printf("CALL bReasonChange REASON IS ON THE RUN \r");
+                   Uart.Printf("\rCALL bReasonChange REASON IS ON THE RUN");
                    //return red
                    return BUTTON_ENABLED;
                }
@@ -234,7 +234,7 @@ int bReasonChange(int screen_id, int button_id ,int press_mode)
                    if(ArrayOfUserIntentions[user_reason_indx].was_winning &&
                            SICD.last_intention_index_winner==ArrayOfUserIntentions[user_reason_indx].reason_indx)
                    {
-                       Uart.Printf("CALL bReasonChange RESTART \r");
+                       Uart.Printf("\rCALL bReasonChange RESTART");
                        ArrayOfUserIntentions[user_reason_indx].current_time=0;
                        //теперь продолжение можно выключить!
                        ArrayOfUserIntentions[user_reason_indx].was_winning=false;
@@ -246,7 +246,7 @@ int bReasonChange(int screen_id, int button_id ,int press_mode)
                    CallReasonSuccess(user_reason_indx);
                    ArrayOfUserIntentions[user_reason_indx].was_winning=false;
                    //retrn normal??
-                   Uart.Printf("CALL bReasonChange TURNED OFF \r");
+                   Uart.Printf("\rCALL bReasonChange TURNED OFF");
                    return BUTTON_NORMAL;
                }
            }
@@ -265,7 +265,7 @@ void CheckAndRedrawFinishedReasons()
        // if(AtlGui.current_state==ButtonsToUserReasons[i].scr_id)
             for(int j=0;j<9;j++)
             {
-                Uart.Printf("CheckAndRedrawFinishedReasons CURRENT STATE%d, bttr %d \r",AtlGui.current_state,ButtonsToUserReasons[i].BtoR[j]);
+                Uart.Printf("\rCheckAndRedrawFinishedReasons CURRENT STATE%d, bttr %d",AtlGui.current_state,ButtonsToUserReasons[i].BtoR[j]);
                 if(ButtonsToUserReasons[i].BtoR[j]>=0)
                     if(bReasonGetState(scr_id,j)!=BUTTON_ENABLED)
                         AtlGui.RenderSingleButton(scr_id,j,BUTTON_NORMAL);

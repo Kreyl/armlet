@@ -76,7 +76,7 @@ public:
     bool IsReady;
     void Init();
     // ini file operations
-    uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileName, char *POutput);
+    uint8_t iniReadString(const char *ASection, const char *AKey, const char *AFileName, char **PPOutput);
     uint8_t iniReadInt32 (const char *ASection, const char *AKey, const char *AFileName, int32_t *POutput);
 };
 

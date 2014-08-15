@@ -289,12 +289,9 @@ void App_t::Task() {
                 //Sound.SetVolume(0);
               ///  Sound.Stop();
             }
-            if(on_run==0)
-            {
+            if(on_run==0) {
                 on_run=1;
-                // включить сплеш скрин
                 AtlGui.ShowSplashscreen();
-    //            Sound.Play("church_bells.wav");
             }
             else if(AtlGui.is_splash_screen_onrun==1 )
             {
