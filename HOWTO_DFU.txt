@@ -1,0 +1,26 @@
+Generating DFU file from HEX
+
+1. Open DFU File Manager
+2. Choose "I want to GENERATE a DFU file from S19,HEX or BIN files", then press OK;
+3. Insert Target ID "00";
+4. Insert in Target Name "Internal Flash";
+5. Press "Generate...";
+6. Write down name of dfu file and press OK.
+
+Now we have a dfu file.
+
+Upgrate firmware
+
+1. Launch DfuSe Demo v.3.0.2 (or later);
+2. Set device to the bootloader mode;
+3. After successfull entering to the boot mode device will appearing automatically in "Available DFU and compatible HID device";
+4. Choose the dfu file whitch was created by "Choose" in part "Upgrade and Verify Action";
+5. Mark "Verify After Download";
+6. Press button "Upgrade".
+
+Check everything is OK and verify successfull.
+
+Download and install DfuSe Demo:  http://www.st.com/web/en/catalog/tools/PF257916#
+
+OstrannaBBS
+15/08/2014 RJ
