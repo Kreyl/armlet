@@ -30,6 +30,9 @@
 #include "flashloader_support.h"
 #include "usb_f2.h"
 #include "kl_lib_f2xx.h"
+
+#include "sd_log.h"
+
 App_t App;
 
 #if 1 // ============================ Timers ===================================
