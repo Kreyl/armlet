@@ -393,7 +393,7 @@ void AtlGui_t::GetCharname()
 }
 void AtlGui_t::DrawSondLvlMark()
 {
-    Lcd.DrawBmpFile(157,125 - (6 * current_volume_lvl/25),"SD/GUI/main/mark.bmp");
+    Lcd.DrawBmpFile(157,125 - (6 * current_volume_lvl/25),"GUI/main/mark.bmp");
 }
 void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
 {
@@ -471,6 +471,9 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
         Lcd.DrawBmpFile(screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom,bmp_filename);
 
         if(screens[screen_id].buttons[button_id].press==bSoundUpChange || screens[screen_id].buttons[button_id].press==bSoundDownChange)
+        {
             DrawSondLvlMark();
+           // RenderFullScreen(screen_id);
 
+        }
 }
