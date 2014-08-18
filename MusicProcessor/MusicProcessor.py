@@ -115,8 +115,10 @@ def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion
 def verifyFile(fullName):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
-        if sourceAudio.duration_seconds < 40:
+        if sourceAudio.duration_seconds < 20:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
+        if sourceAudio.duration_seconds < 60:
+            print "\nWARNING: %s: Audio too short: %d seconds" % (basename(fullName), sourceAudio.duration_seconds)
         processedAudio = sourceAudio.normalize() # pylint: disable=E1103
         if processedAudio.duration_seconds != sourceAudio.duration_seconds:
             return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
@@ -287,9 +289,9 @@ def processCharacter(name, number, power, emotions, baseDir = '.', verifyFiles =
                     newFileNamePrefix = newFileNamePrefix[:MAX_FILE_NAME]
                     for i in count():
                         newFileName = '%s%s%s' % (newFileNamePrefix, i or '', NEW_EXTENSION)
-                        if newFileName not in newFileNameSet:
+                        if newFileName.lower() not in newFileNameSet:
                             break
-                    newFileNameSet.add(newFileName)
+                    newFileNameSet.add(newFileName.lower())
                     newFullName = join(musicDir, newFileName)
                 else:
                     log(True, fileName, "Bad file name")
@@ -308,7 +310,7 @@ def processCharacter(name, number, power, emotions, baseDir = '.', verifyFiles =
                     createDir(errorDir)
                     copy(fullName, errorDir)
             print
-            obsoleteFiles = tuple(f for f in listdir(musicDir) if f not in newFileNameSet)
+            obsoleteFiles = tuple(f for f in listdir(musicDir) if f.lower() not in newFileNameSet)
             if obsoleteFiles:
                 print "Obsolete files found (%d), removing" % len(obsoleteFiles)
                 for fileName in obsoleteFiles:

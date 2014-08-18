@@ -144,11 +144,12 @@ EMOTION_FIX_WEIGHT = 5
 TEST_COMMAND = 'gcc -I "%s" -o test "%s" test.c && ./test && rm test' % (C_PATH, C_TARGET)
 
 TRANSLIFY_PATCHES = {
-    u'ё': u'е',
+    u'ä': u'a',
+    u'ё': u'e',
     u'Ё': u'Е',
     u'Ü': u'U',
     u'и\u0306': u'й', # й on Mac
-    u'\xc9': 'E',
+    u'\xc9': u'E',
     u'\xa0': u' ' # non-breaking space
 }
 
