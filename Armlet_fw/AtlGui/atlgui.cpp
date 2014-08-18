@@ -391,7 +391,11 @@ void AtlGui_t::GetCharname()
         chsize=11;
     strncpy(char_name,reasons[App.ID].name,chsize);
 }
-
+void AtlGui_t::DrawSondLvlMark()
+{
+    Lcd.DrawBmpFile(155,60,"/GUI/main/volume.bmp");
+    Lcd.DrawBmpFile(157,125 - (6 * current_volume_lvl/25),"GUI/main/mark.bmp");
+}
 void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
 {
     //getfilename
@@ -466,4 +470,11 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
 //        Uart.Printf("\rRenderSingleButton %s left %d Bot %d",bmp_filename,screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom);
         // render it
         Lcd.DrawBmpFile(screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom,bmp_filename);
+
+        if(screens[screen_id].buttons[button_id].press==bSoundUpChange || screens[screen_id].buttons[button_id].press==bSoundDownChange)
+        {
+            DrawSondLvlMark();
+           // RenderFullScreen(screen_id);
+
+        }
 }

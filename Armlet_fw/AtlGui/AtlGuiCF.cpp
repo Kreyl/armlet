@@ -78,6 +78,8 @@ void CallReasonToMain()
     Uart.Printf("ReasonToMain\r");
 }
 
+
+
 int bSoundUpCheck(int screen_id, int button_id)
 {
     //int max_vol= 250;
