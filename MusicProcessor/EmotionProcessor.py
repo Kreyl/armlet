@@ -144,11 +144,12 @@ EMOTION_FIX_WEIGHT = 5
 TEST_COMMAND = 'gcc -I "%s" -o test "%s" test.c && ./test && rm test' % (C_PATH, C_TARGET)
 
 TRANSLIFY_PATCHES = {
-    u'ё': u'е',
+    u'ä': u'a',
+    u'ё': u'e',
     u'Ё': u'Е',
     u'Ü': u'U',
     u'и\u0306': u'й', # й on Mac
-    u'\xc9': 'E',
+    u'\xc9': u'E',
     u'\xa0': u' ' # non-breaking space
 }
 
@@ -156,6 +157,8 @@ EMOTION_PATCHES = {
     'somneniya': 'somnenie',
     'sex': 'seks',
     'napryazhenie': 'napryazhennost\'',
+    'nastol\'giya': 'nostal\'giya',
+    'sostrodanie': 'sostradanie',
     'udovletvorennost': 'udovletvorenie'
 }
 
@@ -275,8 +278,8 @@ def processIntentions(emotions, fileName = getFileName(INTENTIONS_CSV)):
 def processCharacters(fileName = getFileName(CHARACTERS_CSV)):
     reasons = []
     for row in readCSV(fileName):
-        assert len(row) == 3, "Bad characters file format"
-        (rid, reason, _longName) = row
+        assert len(row) == 4, "Bad characters file format"
+        (rid, reason, _longName, _power) = row
         addReason(reasons, int(rid), reason, 0, 0, '')
     assert len(reasons) <= len(CHARACTER_IDS)
     return tuple(reasons)

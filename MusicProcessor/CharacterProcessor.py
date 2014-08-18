@@ -24,6 +24,7 @@ GAME_ID = 584
 SHORT_NAME_COLUMN_TITLE = u'Имя на браслете'
 LONG_NAME_COLUMN_TITLE = u'Имя и фамилия латиницей'
 SEX_COLUMN_TITLE = u'Пол персонажа'
+POWER_COLUMN_TITLE = u'Крутость в драке'
 
 SEXES = {u'мужчина': 'Mr', u'женщина': 'Ms'}
 
@@ -60,7 +61,7 @@ def readCSV(csv): # generator
 def verifyCharacters(characters):
     assert characters
     assert len(characters) <= len(CHARACTER_IDS)
-    assert tuple(sorted(number for (number, longName) in characters.itervalues())) == tuple(xrange(CHARACTER_ID_START, CHARACTER_ID_START + len(characters))), "Damaged %s file" % CHARACTERS_CSV
+    assert tuple(sorted(number for (number, longName, power) in characters.itervalues())) == tuple(xrange(CHARACTER_ID_START, CHARACTER_ID_START + len(characters))), "Damaged %s file" % CHARACTERS_CSV
 
 def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
     if not isfile(fileName):
@@ -70,21 +71,22 @@ def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
     shortNames = set()
     longNames = set()
     ret = {}
-    for (number, shortName, longName) in readCSV(fileName):
+    for (number, shortName, longName, power) in data:
         assert number not in numbers, "Duplicate character ID %s" % number
         assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
         assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
+        assert 1 <= int(power) <= 9, "Bad power %s" % power
         numbers.add(number)
         shortNames.add(shortName.lower())
         longNames.add(longName.lower())
-    ret = dict((shortName, (int(number), longName)) for (number, shortName, longName) in data)
+    ret = dict((shortName, (int(number), longName, int(power))) for (number, shortName, longName, power) in data)
     verifyCharacters(ret)
     return ret
 
 def writeCharacters(characters, fileName = getFileName(CHARACTERS_CSV), header = CHARACTERS_CSV_HEADER):
     with open(fileName, 'wb') as f:
         f.writelines(s + '\r\n' for s in (header % currentTime()).splitlines())
-        CSVWriter(f).writerows((number, shortName, longName) for (shortName, (number, longName)) in sorted(characters.iteritems(), key = lambda (shortName, (number, longName)): number))
+        CSVWriter(f).writerows((number, shortName, longName, power) for (shortName, (number, longName, power)) in sorted(characters.iteritems(), key = lambda (shortName, (number, longName, power)): number))
 
 def loadCharacters():
     #print "Fetching allrpg.info library..."
@@ -109,19 +111,28 @@ def loadCharacters():
         shortNameColumnID = header.index(SHORT_NAME_COLUMN_TITLE)
         longNameColumnID = header.index(LONG_NAME_COLUMN_TITLE)
         sexColumnID = header.index(SEX_COLUMN_TITLE)
+        powerColumnID = header.index(POWER_COLUMN_TITLE)
         allRoles = sorted(allRoles[1:])
-        data = ((row[shortNameColumnID], row[longNameColumnID], row[sexColumnID]) for row in allRoles[1:])
-        data = sorted(data, key = lambda (shortName, longName, sex): longName.split()[-1:])
+        data = ((row[shortNameColumnID], row[longNameColumnID], row[sexColumnID], row[powerColumnID]) for row in allRoles[1:])
+        data = sorted(data, key = lambda (shortName, longName, sex, power): longName.split()[-1:])
         ret = []
         shortNames = set()
         longNames = set()
-        for (shortName, longName, sex) in data:
+        for (shortName, longName, sex, power) in data:
             if not shortName:
                 continue
-            shortName = str(shortName.strip())
+            try:
+                shortName = str(shortName.strip())
+            except UnicodeError:
+                print "UNICODE ERROR:", repr(shortName)
+                raise
             sex = sex.strip()
             assert sex in SEXES, "%s: unknown sex: %s" % (shortName, repr(sex))
-            words = str(longName.strip()).split()
+            try:
+                words = str(longName.strip()).split()
+            except UnicodeError:
+                print "UNICODE ERROR:", repr(longName)
+                raise
             prefix = words[0]
             if prefix.lower() == 'no.':
                 longName = ' '.join(words[1:])
@@ -133,7 +144,9 @@ def loadCharacters():
             assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
             shortNames.add(shortName.lower())
             longNames.add(longName.lower())
-            ret.append((shortName, longName))
+            power = int(power)
+            assert 1 <= power <= 9
+            ret.append((shortName, longName, power))
         return tuple(ret)
     except Exception, e:
         print format_exc()
@@ -144,15 +157,15 @@ def updateCharacters():
     print "Processing characters..."
     characters = readCharacters()
     changed = False
-    for (shortName, longName) in loadCharacters():
-        (rid, oldLongName) = characters.get(shortName, (None, None))
+    for (shortName, longName, power) in loadCharacters():
+        (rid, oldLongName, oldPower) = characters.get(shortName, (None, None, None))
         if not rid: # new character
             characterID = len(characters) + CHARACTER_ID_START
             assert characterID in CHARACTER_IDS
-            characters[shortName] = (characterID, longName)
+            characters[shortName] = (characterID, longName, power)
             changed = True
-        elif longName != oldLongName: # changed character
-            characters[shortName] = (rid, longName)
+        elif longName != oldLongName or power != oldPower: # changed character
+            characters[shortName] = (rid, longName, power)
             changed = True
     verifyCharacters(characters)
     if changed:

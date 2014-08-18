@@ -46,8 +46,10 @@ NCOLS = 4
 NROWS = 4
 
 NUM_NAMED_TICKETS = 2
-NUM_TICKETS_TO = 150
-NUM_TICKETS_FROM = 100
+NUM_TICKETS_TO = 0 # 150
+NUM_TICKETS_FROM = 0 # 100
+
+ALREADY_PRINTED_SHEETS = 3
 
 NUM_SHEETS_TO = NUM_TICKETS_TO // (NCOLS * NROWS)
 NUM_SHEETS_FROM = NUM_TICKETS_FROM // (NCOLS * NROWS)
@@ -59,6 +61,8 @@ def createTicket(template, fileName, printName):
     print '%s: %s' % (fileName, printName)
     ticket = template.copy()
     fontSize = MAX_FONT_SIZE
+    words = printName.split()
+    printName = ' '.join('%s.' % w[0] if i > 1 and i < len(words) - 1 and w[0] <= 'Z' else w for (i, w) in enumerate(words))
     while True:
         assert fontSize
         font = SysFont(FONT_NAME, fontSize)
@@ -115,12 +119,13 @@ def generateTickets(characters):
     pyGameInit()
     set_mode((1, 1), NOFRAME)
     template = loadImage(TEMPLATE)
-    names = sorted(characters, key = lambda (shortName, (rid, longName)): rid)
-    tickets = (createTicket(template, shortName, longName) for (shortName, (_rid, longName)) in names)
+    names = sorted(characters, key = lambda (shortName, (rid, _longName, _power)): rid)
+    tickets = (createTicket(template, shortName, longName) for (shortName, (_rid, longName, _power)) in names)
     nNamedSheets = createSheets(tickets, template)
+    assert nNamedSheets >= ALREADY_PRINTED_SHEETS
     createCopiedSheet('TicketA', 'TicketsA-%d' % NUM_SHEETS_TO)
     createCopiedSheet('TicketFromA', 'TicketsFromA-%d' % NUM_SHEETS_FROM)
-    createCopiedSheet('TicketR', 'TicketsR-%d' % (NUM_SHEETS_TO + NUM_SHEETS_FROM + NUM_NAMED_TICKETS * nNamedSheets))
+    createCopiedSheet('TicketR', 'TicketsR-%d' % (NUM_SHEETS_TO + NUM_SHEETS_FROM + NUM_NAMED_TICKETS * (nNamedSheets - ALREADY_PRINTED_SHEETS)))
 
 def main():
     from CharacterProcessor import readCharacters

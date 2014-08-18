@@ -18,7 +18,7 @@ from errno import ENOENT
 from getopt import getopt
 from itertools import chain, count
 from os import getenv, listdir, makedirs, remove, rmdir, walk
-from os.path import expanduser, getmtime, getsize, isdir, isfile, islink, join
+from os.path import basename, expanduser, getmtime, getsize, isdir, isfile, islink, join
 from re import compile as reCompile
 from shutil import copy, copytree, rmtree
 from sys import argv, stdout
@@ -41,7 +41,7 @@ SD_DIR = '_SD'
 EXCLUDE_DIRS = (SD_DIR,)
 
 INI_FILE = 'settings.ini'
-INI_ID_LINE = 'id=%d\r\n'
+INI_CONTENT = '[radio]\r\nid=%d\r\n\r\n[character]\r\npower=%d\r\n'
 
 CHARACTER_CSV = 'character.csv'
 
@@ -97,8 +97,10 @@ def deepGetFiles(dirName):
 def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion, artist, title, tail):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
-        if sourceAudio.duration_seconds < 40:
+        if sourceAudio.duration_seconds < 20:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
+        if sourceAudio.duration_seconds < 60:
+            print "\nWARNING: %s: Audio too short: %d seconds" % (basename(fullName), sourceAudio.duration_seconds)
         processedAudio = sourceAudio.normalize() # pylint: disable=E1103
         if processedAudio.duration_seconds != sourceAudio.duration_seconds:
             return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
@@ -113,8 +115,10 @@ def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion
 def verifyFile(fullName):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
-        if sourceAudio.duration_seconds < 40:
+        if sourceAudio.duration_seconds < 20:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
+        if sourceAudio.duration_seconds < 60:
+            print "\nWARNING: %s: Audio too short: %d seconds" % (basename(fullName), sourceAudio.duration_seconds)
         processedAudio = sourceAudio.normalize() # pylint: disable=E1103
         if processedAudio.duration_seconds != sourceAudio.duration_seconds:
             return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
@@ -152,7 +156,7 @@ def checkResultMark(targetDir):
             errorText = f.read()
     return (bool(errorDate), max(okDate, errorDate), okNum, okSize, errorText)
 
-def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False):
+def processCharacter(name, number, power, emotions, baseDir = '.', verifyFiles = False):
     class ProcessException(Exception):
         pass
     def log(error, fileName, message):
@@ -193,7 +197,7 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
     # Creating settings.ini
     if number > 0:
         with open(join(armletDir, INI_FILE), 'wb') as f:
-            f.write(INI_ID_LINE % number)
+            f.write(INI_CONTENT % (number, power))
     # Processing character.csv
     characterFile = join(armletDir, CHARACTER_CSV)
     if isfile(characterFile):
@@ -285,9 +289,9 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
                     newFileNamePrefix = newFileNamePrefix[:MAX_FILE_NAME]
                     for i in count():
                         newFileName = '%s%s%s' % (newFileNamePrefix, i or '', NEW_EXTENSION)
-                        if newFileName not in newFileNameSet:
+                        if newFileName.lower() not in newFileNameSet:
                             break
-                    newFileNameSet.add(newFileName)
+                    newFileNameSet.add(newFileName.lower())
                     newFullName = join(musicDir, newFileName)
                 else:
                     log(True, fileName, "Bad file name")
@@ -306,7 +310,7 @@ def processCharacter(name, number, emotions, baseDir = '.', verifyFiles = False)
                     createDir(errorDir)
                     copy(fullName, errorDir)
             print
-            obsoleteFiles = tuple(f for f in listdir(musicDir) if f not in newFileNameSet)
+            obsoleteFiles = tuple(f for f in listdir(musicDir) if f.lower() not in newFileNameSet)
             if obsoleteFiles:
                 print "Obsolete files found (%d), removing" % len(obsoleteFiles)
                 for fileName in obsoleteFiles:
@@ -344,7 +348,8 @@ def updateMusic(sourceDir = '.', verifyFiles = False):
     noMusicCharacters = []
     errorCharacters = []
     for d in characterDirs:
-        (hasMusic, hasErrors) = processCharacter(d, characters.get(d, (-1, None))[0], emotions, sourceDir, verifyFiles)
+        (number, _longName, power) = characters.get(d, (-1, None, None))
+        (hasMusic, hasErrors) = processCharacter(d, number, power, emotions, sourceDir, verifyFiles)
         if hasMusic:
             if not hasErrors:
                 okCharacters.append(d)
