@@ -91,7 +91,7 @@ void Infrared_t::IRxTask() {
                 RxWord >>= 8;
                 //Uart.Printf("\rIR: %u", RxWord);
                 // Add ID to table; increase to fit in address space
-                RxTable.PutRxInfo(RxWord + MAX_ABONENTS, 0, nullptr);
+                RxTable.PutRxInfo(RxWord - IR_ADDR_CONST, 0, nullptr);
                 // Rise evt
 //                if(App.PThd != nullptr) {
 //                    chSysLock();
