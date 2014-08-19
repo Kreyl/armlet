@@ -19,7 +19,8 @@
 #include "application.h"
 
 #if 1 // ======================== Circ Buf of Pkt ==============================
-#define CIRC_PKT_BUF_SZ     5 // MAX_ABONENTS FIXME: 5 size set to debug only
+//#define CIRC_PKT_BUF_SZ     5 // 5 size set to debug only
+#define CIRC_PKT_BUF_SZ     MAX_ABONENTS
 
 struct CircBufString_t {
     uint32_t Timestamp;
@@ -93,8 +94,6 @@ private:
     uint32_t CurrCycle;
     uint32_t RxCycleN;
     uint32_t SleepTime;
-    int8_t PreliminaryRSSI;
-
     // Synchronization
     bool GetPrimaryPkt;
     // Time Specific
@@ -151,7 +150,6 @@ public:
                 CurrCycle(0),
                 RxCycleN(*PRndTable),
                 SleepTime(0),
-                PreliminaryRSSI(STATIONARY_MIN_LEVEL),
                 GetPrimaryPkt(false),
                 TimeSeparator(':'),
                 PriorityID(0),
