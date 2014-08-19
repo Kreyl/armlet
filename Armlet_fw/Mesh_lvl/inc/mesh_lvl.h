@@ -72,7 +72,8 @@ public:
         char digit;
         digit = HH/10;
         digit = (digit < 10)? '0'+digit : 'A'+digit-10;
-        PStr[0] = digit;
+        if(digit != '0') { PStr[0] = digit; }
+        else PStr[0] = ' ';
         digit = HH%10;
         PStr[1] = digit = (digit < 10)? '0'+digit : 'A'+digit-10;
         PStr[2] = Sep;
