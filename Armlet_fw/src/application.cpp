@@ -300,6 +300,7 @@ void App_t::Task() {
                 Energy.AddEnergy(-1);
             if(Time.S_total % 6 ==0)
             {
+                AtlGui.RenderNameTimeBat();
                 //CalculateIntentionsRadioChange();
                 //PrintSCIDToUart();
                 //Uart.Printf("every 4 sec\r");

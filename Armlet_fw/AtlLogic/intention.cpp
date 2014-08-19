@@ -68,25 +68,58 @@ struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
         {-1,25,3,10,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_DESTR)},//destruction 2
         {-1,250,1,300,120,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_SEX)},//sex 3
         {-1,250,1,60,120,-1,false,0,PROCESS_FIGHT,const_cast<char *> (RNAME_FIGHT)},//fight 4
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 5
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 5 weed
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 6 heroin
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 7 lsd
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_KRAYK,nullptr},//narco 8 krayk
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_DEATH,const_cast<char *> (RNAME_DEATH)},//death 9
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_MANIAC,nullptr},//maniac 10
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//tuman 11
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//strah 12
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mSource 13
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mProject 14
 };
-
+/* 188 */ //{ "lsd", 20, 8 },    /* trip */+
+/* 189 */ //{ "krayk", 20, 0 },  /* fon */+
+/* 190 */// { "death", 50, 5 },  /* smert' */
+/* 191 */// { "mist", 50, 4 },   /* tuman */
+/* 192 */// { "fear", 40, 28 },  /* strah */
+/* 193 */// { "mSource", 9, 1 }, /* neverno */
+/* 194 */// { "mProject", 9, 1 },    /* neverno */
 void InitArrayOfUserIntentions()
 {
     for(int i=0;i<reasons_number;i++)
     {
          if(strcmp(reasons[i].name,"murder")==0)
              ArrayOfUserIntentions[0].reason_indx=i;
-         if(strcmp(reasons[i].name,"creation")==0)
+         else if(strcmp(reasons[i].name,"creation")==0)
              ArrayOfUserIntentions[1].reason_indx=i;
-         if(strcmp(reasons[i].name,"destruction")==0)
+         else if(strcmp(reasons[i].name,"destruction")==0)
              ArrayOfUserIntentions[2].reason_indx=i;
-         if(strcmp(reasons[i].name,"sex")==0)
+         else if(strcmp(reasons[i].name,"sex")==0)
              ArrayOfUserIntentions[3].reason_indx=i;
-         if(strcmp(reasons[i].name,"fight")==0)
+         else if(strcmp(reasons[i].name,"fight")==0)
              ArrayOfUserIntentions[4].reason_indx=i;
-         if(strcmp(reasons[i].name,"drug")==0)
+         else if(strcmp(reasons[i].name,"weed")==0)//grass
              ArrayOfUserIntentions[5].reason_indx=i;
+         else if(strcmp(reasons[i].name,"heroin")==0) //hero
+             ArrayOfUserIntentions[6].reason_indx=i;
+         else if(strcmp(reasons[i].name,"lsd")==0)//lsd
+             ArrayOfUserIntentions[7].reason_indx=i;
+         else if(strcmp(reasons[i].name,"krayk")==0)//krayk
+             ArrayOfUserIntentions[8].reason_indx=i;
+         else if(strcmp(reasons[i].name,"death")==0)//death
+             ArrayOfUserIntentions[9].reason_indx=i;
+         else if(strcmp(reasons[i].name,"azart")==0)//maniac
+             ArrayOfUserIntentions[10].reason_indx=i;
+         else if(strcmp(reasons[i].name,"mist")==0)//tuman
+             ArrayOfUserIntentions[11].reason_indx=i;
+         else if(strcmp(reasons[i].name,"fear")==0)//strah
+             ArrayOfUserIntentions[12].reason_indx=i;
+         else if(strcmp(reasons[i].name,"mSource")==0)//mSource
+             ArrayOfUserIntentions[13].reason_indx=i;
+         else if(strcmp(reasons[i].name,"mProject")==0)//mProject
+             ArrayOfUserIntentions[14].reason_indx=i;
     }
     //if any is not inited, panic!!
     for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)

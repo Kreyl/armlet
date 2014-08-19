@@ -386,10 +386,10 @@ void AtlGui_t::RenderNameTimeBat()
 void AtlGui_t::GetCharname()
 {
     //ID
-    int chsize=sizeof(reasons[App.ID])/sizeof(char);
+    int chsize=sizeof(reasons[App.ID+100])/sizeof(char);
     if(chsize>11)
         chsize=11;
-    strncpy(char_name,reasons[App.ID].name,chsize);
+    strncpy(char_name,reasons[App.ID+100].name,chsize);
 }
 void AtlGui_t::DrawSondLvlMark()
 {

@@ -3,7 +3,7 @@
 //#include "emotions.h"
 #include "atlantis_music_tree.h"
 #define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 10
-#define MAX_USER_INTENTIONS_ARRAY_SIZE 6
+#define MAX_USER_INTENTIONS_ARRAY_SIZE 15
 #define INTENTIONS_ARRAY_SIZE 5
 #define WINING_INTEGRAL_SWITCH_LIMIT 50
 #define FON_RELAX_SPEED 50
@@ -14,6 +14,8 @@
 #define PROCESS_FIGHT  2
 #define PROCESS_DEATH  3
 #define PROCESS_TUMAN  4
+#define PROCESS_MANIAC  5
+#define PROCESS_KRAYK  6
 /*typedef struct Intention {
 	int weight1000;	//константа, определяющая степень и время роста
 	//int last_measure_weight;//
