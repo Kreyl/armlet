@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-18 04:11:01
+ * Generated at 2014-08-19 05:45:48
  */
 #include "emotions.h"
 
@@ -229,7 +229,7 @@ Reason_t reasons[] = {
  /* 113 */ { "GDay", 0, 0 },
  /* 114 */ { "CDeLorean", 0, 0 },
  /* 115 */ { "ADecker", 0, 0 },
- /* 116 */ { "MDurden", 0, 0 },
+ /* 116 */ { "ZDurden", 0, 0 },
  /* 117 */ { "NEpstein", 0, 0 },
  /* 118 */ { "CFranklin", 0, 0 },
  /* 119 */ { "AGraywood", 0, 0 },
@@ -288,11 +288,11 @@ Reason_t reasons[] = {
  /* 172 */ { "AGrissom", 0, 0 },
  /* 173 */ { "CHonzo", 0, 0 },
  /* 174 */ { "AJones", 0, 0 },
+ /* 175 */ { "VCollins", 0, 0 },
+ /* 176 */ { "ALee", 0, 0 },
+ /* 177 */ { "MDurden", 0, 0 },
+ /* 178 */ { "SSummer", 0, 0 },
 	// end of characters
- /* 175 */ { "r175", 99, 1 },	/* neverno */
- /* 176 */ { "r176", 99, 1 },	/* neverno */
- /* 177 */ { "r177", 99, 1 },	/* neverno */
- /* 178 */ { "r178", 99, 1 },	/* neverno */
  /* 179 */ { "r179", 99, 1 },	/* neverno */
 	// Intentions
  /* 180 */ { "murder", 1, 42 },	/* ubijstvo */
