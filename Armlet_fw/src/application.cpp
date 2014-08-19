@@ -30,6 +30,9 @@
 #include "flashloader_support.h"
 #include "usb_f2.h"
 #include "kl_lib_f2xx.h"
+
+#include "sd_log.h"
+
 App_t App;
 
 #if 1 // ============================ Timers ===================================
@@ -156,12 +159,25 @@ static inline void KeysHandler() {
         }
         else if(Evt.Type==keLongPress)
         {
-            if(Evt.KeyID[0] == KEY_PWRON) Power.EnterStandby();
+            if(Evt.KeyID[0] == KEY_PWRON)
+            {
+                Log.Shutdown( );
+                chThdSleepMilliseconds(250);
+                Power.EnterStandby();
+            }
             AtlGui.ButtonIsReleased(Evt.KeyID[0],keLongPress);
         }
         else if(Evt.Type==keRepeat)
         {
             AtlGui.ButtonIsReleased(Evt.KeyID[0],keRepeat);
+        }
+        else if(Evt.Type==keCombo)
+        {
+               if(Evt.NKeys==3 && Evt.KeyID[0]==1 && Evt.KeyID[1]==3 && Evt.KeyID[2]==4)
+               {
+                   Uart.Printf(" GO BOOTLOADER %d\r", Evt.NKeys);
+                   Bootloader.DFU_request();
+               }
         }
 
         //                if(Keys.Status[i].State == ksReleased) {
@@ -206,7 +222,7 @@ void App_t::Task() {
             //играть музыку по текущей эмоции
             PlayNewEmo(SICD.last_played_emo,1);
         }
-#if 0 //EVTMASK_RADIO on/off
+#if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
 #ifdef       UART_MESH_DEBUG
         Uart.Printf("App TabGet, s=%u, t=%u\r", SnsTable.PTable->Size, chTimeNow());
@@ -216,13 +232,14 @@ void App_t::Task() {
             Lcd.Printf(11, 31+(i*10), clRed, clBlack,"               ");
         }
 
-        for(uint32_t i=0; i<SnsTable.PTable->Size; i++) {
-            Uart.Printf(" ID=%u; Pwr=%u\r", SnsTable.PTable->Row[i].ID, SnsTable.PTable->Row[i].Level);
-            Lcd.Printf(11, 31+(i*10), clRed, clBlack,"ID=%u; Pwr=%u", SnsTable.PTable->Row[i].ID, SnsTable.PTable->Row[i].Level);
+        for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
+            Uart.Printf(" ID=%u; Pwr=%u\r", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
+            Lcd.Printf(11, 31+(i*10), clRed, clBlack,"ID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
         }
 #endif
             //перекладываем данные с радио в массив текущих резонов
-            int val1= MIN((uint32_t)reasons_number, SnsTable.PTable->Size);
+
+            int val1= MIN((uint32_t)reasons_number, RxTable.PTable->Size);
             CurrentIntentionArraySize = val1;
             int j=0;
             //сбрасываем  human syupport
@@ -230,12 +247,12 @@ void App_t::Task() {
                 ArrayOfUserIntentions[kl].human_support_number=0;
 
             for(int i=0; i<val1; i++) {
-                if(SnsTable.PTable->Row[i].ID >= reasons_number || (SnsTable.PTable->Row[i].ID < 0) /*|| (SnsTable.PTable->Row[i].Level < 70)*/ ) {
+                if(RxTable.PTable->Row[i].ID >= reasons_number || (RxTable.PTable->Row[i].ID < 0) /*|| (SnsTable.PTable->Row[i].Level < 70)*/ ) {
                     CurrentIntentionArraySize--;
                     continue;
                 }
-                ArrayOfIncomingIntentions[j].power256 = SnsTable.PTable->Row[i].Level/*-70*/;
-                ArrayOfIncomingIntentions[j].reason_indx = SnsTable.PTable->Row[i].ID;
+                ArrayOfIncomingIntentions[j].power256 = RxTable.PTable->Row[i].Level/*-70*/;
+                ArrayOfIncomingIntentions[j].reason_indx = RxTable.PTable->Row[i].ID;
                 //если входной резон пользователя - пользовательский, добавляем его в челподдержку
                 for(int kk=0;kk<MAX_USER_INTENTIONS_ARRAY_SIZE;kk++)
                 {
@@ -317,8 +334,13 @@ void App_t::Task() {
                         if(rslt == OK) {
                             Uart.Printf("\rConnect: %d", Pill.ChargeCnt);
                             // Here is OnPillConnect
+                            //звук ок!
                         } // if rslt ok
                     } // if chargecnt > 0
+                    else
+                    {
+                        //звук не ок!
+                    }
                 } // if rslt ok
             } // OnConnect
             else if(!IsNowConnected and PillWasConnected) PillWasConnected = false;

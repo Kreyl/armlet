@@ -45,6 +45,9 @@ int bReasonGetState(int screen_id, int button_id);
 
 //вызывается, если резон закончился а картинка у человека на кране - перерисовывает кнопку
 void CheckAndRedrawFinishedReasons();
+
+
+
 //lock button
 //int bLockCheck(int screen_id, int button_id);
 //int bLockChange(int screen_id, int button_id);

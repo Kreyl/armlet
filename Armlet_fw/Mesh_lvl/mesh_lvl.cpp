@@ -215,11 +215,10 @@ void Mesh_t::PreparePktPayload() {
 //            );
 }
 
-uint8_t Mesh_t::GetAstronomicTime(char *PToStr) {
-    uint8_t StrSz = strlen(PToStr);
-    if(StrSz < TIME_SZ) return FAILURE;
+uint8_t Mesh_t::GetAstronomicTime(char *PToStr, uint8_t MaxLen) {
+    if(MaxLen < TIME_SZ) return FAILURE;
     else {
-        memset(PToStr, 0, StrSz);
+        memset(PToStr, 0, MaxLen);
         uint32_t Time;
         Time = AbsCycle * CYCLE_TIME;          // Time from start of epoch
         uint8_t Days;
