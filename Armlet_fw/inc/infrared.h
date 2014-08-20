@@ -21,6 +21,9 @@
  *  in Buf. (Pwr is power level).
  */
 
+// Address space
+#define IR_ADDR_CONST       74  // Lustras transmit IDs [75;127]. Const moves this to [1; 53]
+
 #define IR_CARRIER_HZ       56000
 #define IR_BIT_CNT          14
 

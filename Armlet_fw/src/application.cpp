@@ -32,6 +32,8 @@
 #include "kl_lib_f2xx.h"
 
 #include "sd_log.h"
+#include "console.h"
+#include "mesh_lvl.h"
 
 App_t App;
 
@@ -431,6 +433,20 @@ void App_t::OnUartCmd(Cmd_t *PCmd) {
 //    Uart.Printf("%S\r", PCmd->Name);
     uint32_t dw32 __attribute__((unused));  // May be unused in some cofigurations
     if(PCmd->NameIs("#Ping")) Uart.Ack(OK);
+
+#if 1 // Mesh
+    else if(PCmd->NameIs("#SetMeshCycle")) {
+        uint32_t NewCycle;
+        if(PCmd->TryConvertTokenToNumber(&NewCycle) == OK) {  // Next token is number
+            Console.SetTime_Ack(Mesh.SetNewAbsCycleN(NewCycle));
+        }
+    }
+
+    else if(PCmd->NameIs("#GetMeshInfo")) {
+        Console.GetMeshInfo_Ack(OK);
+    }
+#endif
+
 
     else if(PCmd->NameIs("#Boot")) {
         Uart.Printf("\rDFU request");

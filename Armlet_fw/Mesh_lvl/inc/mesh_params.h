@@ -20,10 +20,10 @@
 
 
 // ==== MESH PARAMS ====
-#define MAX_ABONENTS            100   /* max ID, started from 1 */
+#define MAX_ABONENTS            300   /* max ID, started from 1 */
 #define MESH_CHANNEL            1     /* mesh RF channel */
-#define MESH_PKT_TIME           3
-#define MESH_GUARD_TIME         7
+#define MESH_PKT_TIME           1     /* ms */
+#define MESH_GUARD_TIME         1     /* ms */
 
 /* SLOT_TIME is equivalent to doubled time of transmit rf packet */
 #define SLOT_TIME               (uint32_t)(MESH_PKT_TIME + MESH_GUARD_TIME)    /* 3 ms normal time for transmit packet, take it as 10 ms */
@@ -34,7 +34,7 @@
 #define S_CYCLE_TIME            (uint32_t)(CYCLE_TIME * COUNT_OF_CYCLES)
 
 /* Time specific */
-#define TIME_SZ                 5  //  "hh:mm\0"
+#define TIME_SZ                 5   //  "hh:mm\0"
 #define TIME_SZ_LONG            8   // "hh:mm:ss\0"
 #define MESH_MS_IN_DAY          (uint32_t)86400000
 
