@@ -379,6 +379,7 @@ void App_t::Init() {
 
     Time.Init();
     Time.Reset();
+    ParseCsvFileToEmotions("character.csv");
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
 }
@@ -388,30 +389,78 @@ void App_t::SaveData()
     FIL file;
     int open_code= f_open (
             &file,
-       "\appdata.sav",
+       "\state.ini",
        FA_WRITE
     );
     if(open_code!=0)
         return;
     UINT bw;
     int buff_size;
-
-
+#if 0
+#energy
+50
+#narcograss
+0
+#narcoher
+0
+#narcolsd
+0
+#narcoTrain
+0
+#nacroManiac
+0
+#endif
+    //klfprintf
     //energy to buff
     //energy to file
-    f_write(&file, DataFileBuff, buff_size, &bw);
+    f_printf(&file,"#energy");
+    f_printf(&file,"%d",Energy.GetEnergy());
+    //weed, lambda welcome!
+    f_printf(&file,"#narcograss");
+    if(ArrayOfUserIntentions[5].current_time>=0)
+        f_printf(&file,"%d",1);
+    else
+        f_printf(&file,"%d",0);
+
+
+   // f_write(&file, DataFileBuff, buff_size, &bw);
     f_close(&file);
+    Uart.Printf("App_t::SaveData done");
 }
 void App_t::LoadData()
 {
     FIL file;
        int open_code= f_open (
                &file,
-          "\appdata.sav",
+          "\state.ini",
           FA_READ
        );
        if(open_code!=0)
            return;
+       //till file end
+       int line_num=0;
+       while(f_gets(DataFileBuff, SD_STRING_SZ, &file) != nullptr)
+       {
+           if(strncmp(DataFileBuff,"#",1)==0)
+               continue;
+           else
+               line_num++;
+           int int_val;
+           int_val=strtol(DataFileBuff,NULL,10);
+           if(line_num==1)
+               Energy.SetEnergy(int_val);
+           if(line_num==2 && int_val==1)//weed
+               ArrayOfUserIntentions[5].current_time=0;
+           if(line_num==2 && int_val==1)//her
+               ArrayOfUserIntentions[6].current_time=0;
+           if(line_num==3 && int_val==1)//lsd
+               ArrayOfUserIntentions[7].current_time=0;
+           if(line_num==3 && int_val==1)//krayk
+               ArrayOfUserIntentions[8].current_time=0;
+           if(line_num==3 && int_val==1)//manyac
+               ArrayOfUserIntentions[10].current_time=0;
+       }
+
      //  UINT bw;
      //  int buff_size;
        //energy to buff
@@ -420,12 +469,109 @@ void App_t::LoadData()
        //energy to data
 
        f_close(&file);
+       Uart.Printf("App_t::LoadData done");
+}
+void App_t::WriteInentionStringToData(char * int_name, int int_val, char * emo_name)
+{
+    int reason_id=-1;
+    if(int_val<0)
+        int_val=0;
+    if(int_val>256)
+        int_val=256;
+    for(int i=0;i<reasons_number;i++)
+        if(strcmp(reasons[i].name,int_name)==0)
+        {reason_id=i;break;}
+    int emo_id=-1;
+    //emotions_number
+    for(int i=0;i<emotions_number;i++)
+        if(strcmp(emotions[i].name,emo_name)==0)
+            emo_id=i;
+    if(reason_id>=0 && emo_id>=0)
+    {
+        reasons[reason_id].weight=int_val;
+        reasons[reason_id].eID=emo_id;
+        Uart.Printf("\r App_t::WriteInentionStringToData  connect, reason_name=%s, emo_name=%s ",int_name,emo_name);
+    }
+    else
+        Uart.Printf("\r App_t::WriteInentionStringToData Fail to connect, reason_name=%s, emo_name=%s ",int_name,emo_name);
 
 }
-//void App_t::GetDataFileName()
-//{
-//
-//}
+uint8_t App_t::ParseCsvFileToEmotions(const char* filename)
+{
+
+    Uart.Printf("\rParseCsvFileToEmotions beg\r");
+    FRESULT rslt;
+    FIL file;
+        // Open file
+        rslt = f_open(&file, filename, FA_READ+FA_OPEN_EXISTING);
+        if(rslt != FR_OK) {
+            if (rslt == FR_NO_FILE) Uart.Printf("\r%S: not found", filename);
+            else Uart.Printf("\r%S: openFile error: %u", filename, rslt);
+            return FAILURE;
+        }
+
+        // Check if zero file
+        if(file.fsize == 0) {
+            f_close(&file);
+            Uart.Printf("\rEmpty file");
+            return FAILURE;
+        }
+      //  strcpy(toiintstr,"aaaaaaa");
+      //  strcpy(reasonstr,"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+      //  strcpy(emostr,"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
+        //till file end
+        while(f_gets(BuffStr, SD_STRING_SZ, &file) != nullptr)
+        {
+
+            if(strncmp(BuffStr,"#",1)==0)
+                continue;
+            int sep1=-1,sep2=-1;
+            int strlen=0;
+            TCHAR c,*p = BuffStr;
+
+            for(int i=0;i<SD_STRING_SZ;i++)
+            {
+                c=BuffStr[i];
+                if(c=='\n' || c=='\r' )
+                    break;
+                else
+                    strlen++;
+                if(sep1==-1 && c==CSV_SEPARATOR_CHAR)
+                    sep1=i;
+                if(sep1!=-1 &&c==CSV_SEPARATOR_CHAR)
+                    sep2=i;
+            }
+
+            if(sep1==0 ||sep1==sep2-1||sep2==strlen-1)
+                continue;
+            strncpy(reasonstr,p,sep1);
+
+            reasonstr[sep1]='\0';
+
+            strncpy(toiintstr,p+sep1+1,sep2-sep1-1);
+            toiintstr[sep2-sep1-1]='\0';
+
+            strncpy(emostr,p+sep2+1,strlen-sep2-1);
+            emostr[strlen-sep2-1]='\0';
+
+            int int_val;
+            int_val=strtol(toiintstr,NULL,10);
+            WriteInentionStringToData(reasonstr,int_val,emostr);
+           // Uart.Printf("\rParseCsvFileToEmotions sep1 %d sep2 %d eol !%d!",sep1,sep2,strlen);
+#if 0
+            //Uart.Printf("\rParseCsvFileToEmotions rstr !%s! toi !%s! emo !%s!",reasonstr,toiintstr,emostr);
+            Uart.Printf("\rParseCsvFileToEmotions rstr !%s! ",reasonstr);
+            Uart.Printf("\rParseCsvFileToEmotions toi !%s! ",toiintstr);
+            Uart.Printf("\rParseCsvFileToEmotions emo !%s! ",emostr);
+            Uart.Printf("\rParseCsvFileToEmotions emoint !%d! ",int_val);
+#endif
+        }
+
+        Uart.Printf("\rParseCsvFileToEmotions end\r");
+        f_close(&file);
+      return OK;
+}
 
 #if 1 // ======================= Command processing ============================
 #if UART_RX_ENABLED

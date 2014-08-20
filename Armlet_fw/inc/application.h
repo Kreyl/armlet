@@ -36,6 +36,7 @@ struct Pill_t {
 void TmrUartRxCallback(void *p);
 #endif
 
+#define CSV_SEPARATOR_CHAR ','
 enum AppState_t {asIdle, asCurrent};
 
 class App_t {
@@ -51,13 +52,18 @@ public:
     void StopEverything();
     void LoadData();
     void SaveData();
+    uint8_t ParseCsvFileToEmotions(const char* filename);
+    void WriteInentionStringToData(char * int_name, int int_val, char * emo_name);
     //void GetDataFileName();
    char DataFileBuff[33];
 
 #if UART_RX_ENABLED
     void OnUartCmd(Cmd_t *PCmd);
 #endif
-
+    char BuffStr[SD_STRING_SZ];
+    char reasonstr[32];
+    char emostr[32];
+    char toiintstr[8];
     int on_run;
 };
 

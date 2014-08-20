@@ -376,7 +376,7 @@ bool AtlGui_t::ButtonIsClicked(int button_id)
 void AtlGui_t::RenderNameTimeBat()
 {
     //timechar
-    if(Mesh.GetAstronomicTime(timechar)==FAILURE)
+    if(Mesh.GetAstronomicTime(timechar,5)==FAILURE)
         strcpy(timechar,"TM.FL");
 
     Lcd.Printf(B52,0, 0, clAtlFront, clAtlBack, "%s",char_name);

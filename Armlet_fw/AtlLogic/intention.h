@@ -76,6 +76,7 @@ typedef struct IntentionCalculationData
     int last_played_file;
     bool is_last_played_id_recent;
     bool is_global_stop_active;
+    bool is_everysec_calculation_active;
 }IntentionCalculationData;
 
 typedef struct SRPFEArrayEl
@@ -107,7 +108,10 @@ int GetPlayerReasonCurrentPower(int reason_id);
 int CalculateCurrentPowerOfPlayerReason(int array_indx); //считаеттекущую мощность позаданному стандартному алгоритму
 //Obsolete??
 void SwitchPlayerReason(int reason_id,bool is_turn_on);  // игрок нажал накнопку резона, вклили выкл.
+
+//UPDATE TO ALL USER REASONS
 void CallReasonSuccess(int user_reason_id); // вызовется если игрок отключит резон, все id и проверки внутри
+//UPDATE TO ALL USER REASONS
 void CallReasonFalure(int user_reason_id); // вызовется если игрок просрал по времени
 void PushPlayerReasonToArrayOfIntentions();
 //return true if any intention go fall, false otherwise
