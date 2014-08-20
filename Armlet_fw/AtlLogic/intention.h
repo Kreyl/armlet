@@ -75,6 +75,7 @@ typedef struct IntentionCalculationData
     int last_played_emo;
     int last_played_file;
     bool is_last_played_id_recent;
+    bool is_global_stop_active;
 }IntentionCalculationData;
 
 typedef struct SRPFEArrayEl

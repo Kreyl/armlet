@@ -189,6 +189,11 @@ char * GetFileNameToPlayFromEmoId(int emo_id) {
 	return GetMusicFileNameFromList(emo_id, track_num_calculated);
 }
 void PlayNewEmo(int emo_id, int err_id) {
+    if(SICD.is_global_stop_active)
+    {
+        //во время глобального останова рассчетов играть одну и ту-же эмоцию
+        PlayNewEmo(SICD.last_played_emo,5);
+    }
     //если гавно, то фон
     if(emo_id < 0) {
         Uart.Printf("\rEmo_id <0 %d", emo_id);

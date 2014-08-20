@@ -143,8 +143,10 @@ struct IntentionCalculationData SICD=
       false,
       -1,
       -1,
-      false
-        /*
+      false,
+      false, //global stop
+      false //is_everysec_calculation_active
+        /* DO NOT DELETE
 		10,//int Intention_weight_cost;
 		4,//	int Signal_power_weight_cost;
 		1,//	int Normalizer;
@@ -432,7 +434,7 @@ void CallReasonSuccess(int user_reason_id)
 
    return;
 }
-//not used!
+//not used!???
 void SwitchPlayerReason(int reason_id,bool is_turn_on)
 {
     for(int i =0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
