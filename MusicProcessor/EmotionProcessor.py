@@ -121,7 +121,7 @@ REASONS_CSV_HEADER = '''\
 
 C_NODE = ' /* %s */ %s{ %s, 1, %s, -1, -1 },'
 
-REASON_NODE = ' /* %s */ { %s, %d, %d },'
+REASON_NODE = ' /* %s */ { %s, %d, %d, %d },'
 
 REASON_COMMENT = '\t/* %s */'
 
@@ -145,9 +145,11 @@ TEST_COMMAND = 'gcc -I "%s" -o test "%s" test.c && ./test && rm test' % (C_PATH,
 
 TRANSLIFY_PATCHES = {
     u'ä': u'a',
-    u'ё': u'e',
     u'Ё': u'Е',
+    u'ё': u'e',
+    u'é': u'e',
     u'Ü': u'U',
+    u'†': u't',
     u'и\u0306': u'й', # й on Mac
     u'\xc9': u'E',
     u'\xa0': u' ' # non-breaking space
@@ -193,6 +195,7 @@ HEARTBEAT = convertEmotion(u'сердцебиение')
 TRIP = convertEmotion(u'трип')
 ADDITIONAL_EMOTIONS = (WRONG, MASTER, SILENCE, TUMAN, SMERT, MERTV, HEARTBEAT, TRIP)
 
+EMOTION_ACCEPT_RANGE = 1
 EMOTION_GUESS_RANGE = 3
 EMOTION_GUESS_MAX_PROPOSALS = 9
 
@@ -200,7 +203,11 @@ def guessEmotion(emotions, emotion):
     emotion = convertEmotion(emotion)
     if not distance or emotion in emotions:
         return emotion
-    distances = ((distance(e, emotion), e) for e in emotions)
+    distances = sorted((distance(e, emotion), e) for e in emotions)
+    acceptable = tuple((d, e) for (d, e) in distances if d <= EMOTION_ACCEPT_RANGE)
+    if len(acceptable) == 1:
+        print "\nWARNING: Unknown emotion: %s, replaced with %s" % (emotion, acceptable[0][1])
+        return acceptable[0][1]
     close = ((d, e) for (d, e) in distances if d <= EMOTION_GUESS_RANGE)
     proposals = (emotion,) + tuple(e for (d, e) in sorted(close))[:EMOTION_GUESS_MAX_PROPOSALS]
     ret = None
@@ -238,10 +245,10 @@ def getWeight(weight):
     assert ret in xrange(MAX_WEIGHT + 1), "Incorrect weight: %d" % ret
     return ret
 
-def addReason(reasons, rid, reason, weight, eid, emotion):
+def addReason(reasons, rid, reason, weight, age, eid, emotion):
     assert rid == int(rid) and rid >= 0 and rid < MAX_ID, "Bad ReasonID: %s" % rid
     assert reason.lower() not in (r[1].lower() for r in reasons), "Duplicate reason: %s" % reason
-    reasons.append((rid, reason, weight, eid, emotion))
+    reasons.append((rid, reason, weight, age, eid, emotion))
 
 def processEmotions(fileName = getFileName(EMOTIONS_CSV)):
     parents = []
@@ -268,7 +275,7 @@ def processLocations(emotions, fileName = getFileName(LOCATIONS_CSV), tag = 'loc
         (reason, weight, emotion) = row
         eid = getEmotion(emotions, emotion)
         weight = getWeight(weight)
-        addReason(reasons, rid, reason, weight, eid, emotion)
+        addReason(reasons, rid, reason, weight, 0, eid, emotion)
     assert len(reasons) <= maxLength
     return tuple(reasons)
 
@@ -280,17 +287,17 @@ def processCharacters(fileName = getFileName(CHARACTERS_CSV)):
     for row in readCSV(fileName):
         assert len(row) == 4, "Bad characters file format"
         (rid, reason, _longName, _power) = row
-        addReason(reasons, int(rid), reason, 0, 0, '')
+        addReason(reasons, int(rid), reason, 0, 0, 0, '')
     assert len(reasons) <= len(CHARACTER_IDS)
     return tuple(reasons)
 
 def processReasons(emotions):
     def reserveReason(rid):
-        return (rid, RESERVED_REASON % rid, MAX_WEIGHT, emotions[WRONG], WRONG) # ToDo: Default reserve to fon?
+        return (rid, RESERVED_REASON % rid, MAX_WEIGHT, 0, emotions[WRONG], WRONG) # ToDo: Default reserve to fon?
     def mistReason(rid):
-        return (rid, MIST_REASON % rid, 0, emotions['fon'], 'fon')
+        return (rid, MIST_REASON % rid, 0, 0, emotions['fon'], 'fon')
     def emotionFixReason(eid, emotion):
-        return (eid + EMOTION_FIX_ID_START, EMOTION_FIX_REASON % firstCapital(emotion), EMOTION_FIX_WEIGHT, eid, emotion)
+        return (eid + EMOTION_FIX_ID_START, EMOTION_FIX_REASON % firstCapital(emotion), EMOTION_FIX_WEIGHT, 0, eid, emotion)
     stuffing0 = (reserveReason(0),)
     locations =  processLocations(emotions)
     stuffing1 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations), MIST_ID_START))
@@ -331,8 +338,8 @@ def cString(s):
 def cEmotion(eidWidth, eid, level, emotion, parent):
     return C_NODE % (str(eid).rjust(eidWidth), level * INDENT, cString(emotion), parent if parent != None else NO_PARENT)
 
-def cReason(ridWidth, rid, reason, weight, eid, emotion):
-    return REASON_NODE % (str(rid).rjust(ridWidth), cString(reason), weight, eid) + (REASON_COMMENT % emotion if emotion else '')
+def cReason(ridWidth, rid, reason, weight, age, eid, emotion):
+    return REASON_NODE % (str(rid).rjust(ridWidth), cString(reason), weight, age, eid) + (REASON_COMMENT % emotion if emotion else '')
 
 def writeC(emotions, *reasons):
     eidWidth = width(emotions)
@@ -345,7 +352,7 @@ def writeC(emotions, *reasons):
 def writeCSV(*reasons):
     with open(getFileName(CSV_TARGET), 'wb') as f:
         f.writelines(s + '\r\n' for s in (REASONS_CSV_HEADER % currentTime()).splitlines())
-        CSVWriter(f).writerows((rid, reason) for (rid, reason, _weight, _eid, _emotion) in chain.from_iterable(reasons))
+        CSVWriter(f).writerows((rid, reason) for (rid, reason, _weight, _age, _eid, _emotion) in chain.from_iterable(reasons))
 
 def updateEmotions():
     charactersList = updateCharacters()
