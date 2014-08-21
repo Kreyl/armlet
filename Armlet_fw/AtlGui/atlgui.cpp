@@ -376,7 +376,7 @@ bool AtlGui_t::ButtonIsClicked(int button_id)
 void AtlGui_t::RenderNameTimeBat()
 {
     //timechar
-    if(Mesh.GetAstronomicTime(timechar)==FAILURE)
+    if(Mesh.GetAstronomicTime(timechar,5)==FAILURE)
         strcpy(timechar,"TM.FL");
 
     Lcd.Printf(B52,0, 0, clAtlFront, clAtlBack, "%s",char_name);
@@ -386,10 +386,10 @@ void AtlGui_t::RenderNameTimeBat()
 void AtlGui_t::GetCharname()
 {
     //ID
-    int chsize=sizeof(reasons[App.ID])/sizeof(char);
+    int chsize=sizeof(reasons[App.ID+100])/sizeof(char);
     if(chsize>11)
         chsize=11;
-    strncpy(char_name,reasons[App.ID].name,chsize);
+    strncpy(char_name,reasons[App.ID+100].name,chsize);
 }
 void AtlGui_t::DrawSondLvlMark()
 {
