@@ -119,7 +119,7 @@ def generateTickets(characters):
     pyGameInit()
     set_mode((1, 1), NOFRAME)
     template = loadImage(TEMPLATE)
-    names = sorted(characters, key = lambda (shortName, (rid, _longName, _power)): rid)
+    names = sorted(characters, key = lambda (shortName, (rid, _longName, _power, _kill, _killLength, _addiction)): rid)
     tickets = (createTicket(template, shortName, longName) for (shortName, (_rid, longName, _power)) in names)
     nNamedSheets = createSheets(tickets, template)
     assert nNamedSheets >= ALREADY_PRINTED_SHEETS

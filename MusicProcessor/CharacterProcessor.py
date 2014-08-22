@@ -17,7 +17,7 @@ from os.path import dirname, isfile, join, realpath
 from traceback import format_exc
 from sys import argv
 
-from Settings import CHARACTER_ID_START, CHARACTER_IDS
+from Settings import CHARACTER_ID_START, CHARACTER_ID_END, CHARACTER_IDS
 
 GAME_ID = 584
 
@@ -25,6 +25,11 @@ SHORT_NAME_COLUMN_TITLE = u'Имя на браслете'
 LONG_NAME_COLUMN_TITLE = u'Имя и фамилия латиницей'
 SEX_COLUMN_TITLE = u'Пол персонажа'
 POWER_COLUMN_TITLE = u'Крутость в драке'
+KILL_COLUMN_TITLE= u'Готовность убить'
+KILL_LENGTH_COLUMN_TITLE = u'Длительность готовности убить'
+ADDICTION_COLUMN_TITLE = u'Наркомания'
+
+ADDICTIONS = dict((s, i) for (i, s) in enumerate((u'отсутствует', u'марихуана', u'ЛСД', u'героин', u'убийца', u'Крайк')))
 
 SEXES = {u'мужчина': 'Mr', u'женщина': 'Ms'}
 
@@ -61,7 +66,7 @@ def readCSV(csv): # generator
 def verifyCharacters(characters):
     assert characters
     assert len(characters) <= len(CHARACTER_IDS)
-    assert tuple(sorted(number for (number, longName, power) in characters.itervalues())) == tuple(xrange(CHARACTER_ID_START, CHARACTER_ID_START + len(characters))), "Damaged %s file" % CHARACTERS_CSV
+    assert tuple(sorted(number for (number, longName, power, kill, killLength, addiction) in characters.itervalues())) == tuple(xrange(CHARACTER_ID_START, CHARACTER_ID_START + len(characters))), "Damaged %s file" % CHARACTERS_CSV
 
 def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
     if not isfile(fileName):
@@ -71,22 +76,31 @@ def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
     shortNames = set()
     longNames = set()
     ret = {}
-    for (number, shortName, longName, power) in data:
+    for (number, shortName, longName, power, kill, killLength, addiction) in data:
+        number = int(number)
+        power = int(power)
+        kill = int(kill)
+        killLength = int(killLength)
+        addiction = int(addiction)
+        assert CHARACTER_ID_START <= number <= CHARACTER_ID_END
+        assert 1 <= power <= 9
+        assert 1 <= kill <= 9
+        assert 1 <= killLength <= 9
+        assert 0 <= int(addiction) < len(ADDICTIONS)
         assert number not in numbers, "Duplicate character ID %s" % number
         assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
         assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
-        assert 1 <= int(power) <= 9, "Bad power %s" % power
         numbers.add(number)
         shortNames.add(shortName.lower())
         longNames.add(longName.lower())
-    ret = dict((shortName, (int(number), longName, int(power))) for (number, shortName, longName, power) in data)
+        ret[shortName] = (number, longName, power, kill, killLength, addiction)
     verifyCharacters(ret)
     return ret
 
 def writeCharacters(characters, fileName = getFileName(CHARACTERS_CSV), header = CHARACTERS_CSV_HEADER):
     with open(fileName, 'wb') as f:
         f.writelines(s + '\r\n' for s in (header % currentTime()).splitlines())
-        CSVWriter(f).writerows((number, shortName, longName, power) for (shortName, (number, longName, power)) in sorted(characters.iteritems(), key = lambda (shortName, (number, longName, power)): number))
+        CSVWriter(f).writerows((number, shortName, longName, power, kill, killLength, addiction) for (shortName, (number, longName, power, kill, killLength, addiction)) in sorted(characters.iteritems(), key = lambda (shortName, (number, longName, power, kill, killLength, addiction)): number))
 
 def loadCharacters():
     #print "Fetching allrpg.info library..."
@@ -112,15 +126,25 @@ def loadCharacters():
         longNameColumnID = header.index(LONG_NAME_COLUMN_TITLE)
         sexColumnID = header.index(SEX_COLUMN_TITLE)
         powerColumnID = header.index(POWER_COLUMN_TITLE)
+        killColumnID = header.index(KILL_COLUMN_TITLE)
+        killLengthColumnID = header.index(KILL_LENGTH_COLUMN_TITLE)
+        addictionColumnID = header.index(ADDICTION_COLUMN_TITLE)
         allRoles = sorted(allRoles[1:])
-        data = ((row[shortNameColumnID], row[longNameColumnID], row[sexColumnID], row[powerColumnID]) for row in allRoles[1:])
-        data = sorted(data, key = lambda (shortName, longName, sex, power): longName.split()[-1:])
+        data = (tuple(row[x] for x in (shortNameColumnID, longNameColumnID, sexColumnID, powerColumnID, killColumnID, killLengthColumnID, addictionColumnID)) for row in allRoles[1:])
+        data = sorted(data, key = lambda (shortName, longName, sex, power, kill, killLength, addiction): longName.split()[-1:])
         ret = []
         shortNames = set()
         longNames = set()
-        for (shortName, longName, sex, power) in data:
+        for (shortName, longName, sex, power, kill, killLength, addiction) in data:
             if not shortName:
                 continue
+            power = int(power)
+            kill = int(kill)
+            killLength = int(killLength)
+            addiction = ADDICTIONS[addiction]
+            assert 1 <= power <= 9
+            assert 1 <= kill <= 9
+            assert 1 <= killLength <= 9
             try:
                 shortName = str(shortName.strip())
             except UnicodeError:
@@ -144,9 +168,7 @@ def loadCharacters():
             assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
             shortNames.add(shortName.lower())
             longNames.add(longName.lower())
-            power = int(power)
-            assert 1 <= power <= 9
-            ret.append((shortName, longName, power))
+            ret.append((shortName, longName, power, kill, killLength, addiction))
         return tuple(ret)
     except Exception, e:
         print format_exc()
@@ -157,15 +179,15 @@ def updateCharacters():
     print "Processing characters..."
     characters = readCharacters()
     changed = False
-    for (shortName, longName, power) in loadCharacters():
-        (rid, oldLongName, oldPower) = characters.get(shortName, (None, None, None))
+    for (shortName, longName, power, kill, killLength, addiction) in loadCharacters():
+        (rid, oldLongName, oldPower, oldKill, oldKillLength, oldAddiction) = characters.get(shortName, (None, None, None))
         if not rid: # new character
             characterID = len(characters) + CHARACTER_ID_START
             assert characterID in CHARACTER_IDS
             characters[shortName] = (characterID, longName, power)
             changed = True
-        elif longName != oldLongName or power != oldPower: # changed character
-            characters[shortName] = (rid, longName, power)
+        elif (longName, power, kill, killLength, addiction) != (oldLongName, oldPower, oldKill, oldKillLength, oldAddiction): # changed character
+            characters[shortName] = (rid, longName, power, kill, killLength, addiction)
             changed = True
     verifyCharacters(characters)
     if changed:
