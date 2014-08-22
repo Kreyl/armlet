@@ -28,12 +28,21 @@ except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pytils v0.2.3 or later: https://pypi.python.org/pypi/pytils\n" % (ex.__class__.__name__, ex))
 
 try:
+    from unidecode import unidecode
+except ImportError, ex:
+    raise ImportError("%s: %s\n\nPlease install Unidecode v0.04.16 or later: https://pypi.python.org/pypi/Unidecode/\n" % (ex.__class__.__name__, ex))
+
+try:
     from Levenshtein import distance
 except ImportError, ex:
     distance = None
     print "%s: %s\nWARNING: Emotion guessing will not be available.\bPlease install Levenshtein v0.11.2 or later: https://pypi.python.org/pypi/python-Levenshtein\n" % (ex.__class__.__name__, ex)
 
-from Settings import LOCATION_ID_START, LOCATION_IDS, MIST_ID_START, MIST_IDS, CHARACTER_ID_START, CHARACTER_IDS, INTENTION_ID_START, INTENTION_IDS, EMOTION_FIX_ID_START, EMOTION_FIX_IDS
+from Settings import LOCATION_ID_START, LOCATIONS_ID_END, LOCATION_IDS
+from Settings import MIST_ID_START, MIST_ID_END, MIST_IDS
+from Settings import CHARACTER_ID_START, CHARACTER_ID_END, CHARACTER_IDS
+from Settings import INTENTION_ID_START, INTENTION_ID_END, INTENTION_IDS
+from Settings import EMOTION_FIX_ID_START, EMOTION_FIX_ID_END, EMOTION_FIX_IDS
 
 from CharacterProcessor import CHARACTERS_CSV, currentTime, getFileName, updateCharacters
 
@@ -76,6 +85,22 @@ Emotion_t emotions[] = {
 
 const int emotions_number = countof(emotions);
 
+// RID ranges
+const int first_location_id = %d;
+const int last_location_id = %d;
+
+const int first_mist_id = %d;
+const int last_mist_id = %d;
+
+const int first_character_id = %d;
+const int last_character_id = %d;
+
+const int first_intention_id = %d;
+const int last_intention_id = %d;
+
+const int first_emotion_fix_id = %d;
+const int last_emotion_fix_id = %d;
+
 // RIDs are indexes in this array.
 Reason_t reasons[] = {
 %%s
@@ -103,7 +128,8 @@ Reason_t reasons[] = {
 const int reasons_number = countof(reasons);
 
 // End of emotions.c
-''' % (EMOTIONS_CSV, LOCATIONS_CSV, CHARACTERS_CSV, INTENTIONS_CSV)
+''' % (EMOTIONS_CSV, LOCATIONS_CSV, CHARACTERS_CSV, INTENTIONS_CSV,
+       LOCATION_ID_START, LOCATIONS_ID_END, MIST_ID_START, MIST_ID_END, CHARACTER_ID_START, CHARACTER_ID_END, INTENTION_ID_START, INTENTION_ID_END, EMOTION_FIX_ID_START, EMOTION_FIX_ID_END)
 
 REASONS_CSV_HEADER = '''\
 #
@@ -144,15 +170,7 @@ EMOTION_FIX_WEIGHT = 5
 TEST_COMMAND = 'gcc -I "%s" -o test "%s" test.c && ./test && rm test' % (C_PATH, C_TARGET)
 
 TRANSLIFY_PATCHES = {
-    u'ä': u'a',
-    u'Ё': u'Е',
-    u'ё': u'e',
-    u'é': u'e',
-    u'Ü': u'U',
-    u'†': u't',
-    u'и\u0306': u'й', # й on Mac
-    u'\xc9': u'E',
-    u'\xa0': u' ' # non-breaking space
+    u'и\u0306': u'й' # й on Mac
 }
 
 EMOTION_PATCHES = {
@@ -173,10 +191,14 @@ def width(array):
 def convert(s):
     for (f, t) in TRANSLIFY_PATCHES.iteritems():
         s = s.replace(f, t)
-    try:
-        return translify(s)
-    except ValueError, e:
-        raise ValueError("Translify failed for %s: %s" % (encodeForConsole(s), e))
+    ret = ''
+    for c in s:
+        try:
+            c = translify(c)
+        except ValueError:
+            c = unidecode(c)
+        ret += c
+    return ret
 
 def convertTitle(s):
     return convert(s.strip())

@@ -10,11 +10,25 @@
 #define EMOTIONS_H
 
 #define ROOT -1
-#define MOBILE_ID_START 101
 
 #ifndef countof
 #define countof(a) (sizeof(a) / sizeof(a[0]))
 #endif
+
+extern const int first_location_id;
+extern const int last_location_id;
+
+extern const int first_mist_id;
+extern const int last_mist_id;
+
+extern const int first_character_id;
+extern const int last_character_id;
+
+extern const int first_intention_id;
+extern const int last_intention_id;
+
+extern const int first_emotion_fix_id;
+extern const int last_emotion_fix_id;
 
 typedef struct Emotion {
     const char* name;
@@ -30,6 +44,7 @@ extern const int emotions_number;
 typedef struct Reason {
     const char* name;
     int weight;
+    int age;
     int eID;
 } Reason_t;
 

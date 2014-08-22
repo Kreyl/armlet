@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-21 18:32:39
+ * Generated at 2014-08-22 22:02:01
  */
 #include "emotions.h"
 
@@ -105,6 +105,22 @@ Emotion_t emotions[] = {
 };
 
 const int emotions_number = countof(emotions);
+
+// RID ranges
+const int first_location_id = 1;
+const int last_location_id = 89;
+
+const int first_mist_id = 90;
+const int last_mist_id = 99;
+
+const int first_character_id = 101;
+const int last_character_id = 189;
+
+const int first_intention_id = 190;
+const int last_intention_id = 209;
+
+const int first_emotion_fix_id = 210;
+const int last_emotion_fix_id = 299;
 
 // RIDs are indexes in this array.
 Reason_t reasons[] = {
@@ -216,7 +232,7 @@ Reason_t reasons[] = {
 	// Characters
  /* 101 */ { "PAdams", 0, 0, 0 },
  /* 102 */ { "FBuster", 0, 0, 0 },
- /* 103 */ { "ZCampbell", 0, 0, 0 },
+ /* 103 */ { "ZZampbell", 0, 0, 0 },
  /* 104 */ { "NCassidy", 0, 0, 0 },
  /* 105 */ { "JChamber", 0, 0, 0 },
  /* 106 */ { "SClayton", 0, 0, 0 },
@@ -294,8 +310,8 @@ Reason_t reasons[] = {
  /* 178 */ { "SSummer", 0, 0, 0 },
  /* 179 */ { "FCunningham", 0, 0, 0 },
  /* 180 */ { "JSullivan", 0, 0, 0 },
+ /* 181 */ { "ZCampbell", 0, 0, 0 },
 	// end of characters
- /* 181 */ { "r181", 99, 0, 1 },	/* neverno */
  /* 182 */ { "r182", 99, 0, 1 },	/* neverno */
  /* 183 */ { "r183", 99, 0, 1 },	/* neverno */
  /* 184 */ { "r184", 99, 0, 1 },	/* neverno */
