@@ -38,14 +38,16 @@ RESULT RxTable_t::PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P) {
     for(uint32_t i=0; i<PCurrTbl->Size; i++) {
         if(PCurrTbl->Row[i].ID == ID) {
             PCurrTbl->Row[i].Level   = MAX(PCurrTbl->Row[i].Level, Level);
-            PCurrTbl->Row[i].State  = *P;
+            if(P != nullptr) PCurrTbl->Row[i].State  = *P;
+            else PCurrTbl->Row[i].State  = (state_t){0,0,0};
             goto lblPutRxEnd;
         }
     }
     // No such ID found, append table
     PCurrTbl->Row[PCurrTbl->Size].ID = ID;
     PCurrTbl->Row[PCurrTbl->Size].Level = Level;
-    PCurrTbl->Row[PCurrTbl->Size].State = *P;
+    if(P != nullptr) PCurrTbl->Row[PCurrTbl->Size].State = *P;
+    else PCurrTbl->Row[PCurrTbl->Size].State  = (state_t){0,0,0};
     PCurrTbl->Size++;
     lblPutRxEnd:
     chSemSignal(&WriteFlag);
