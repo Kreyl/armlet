@@ -8,8 +8,8 @@ from functools import partial
 
 from MeshView import CONST, RAW, PROC
 
-NUM_DEVICES = 100
-NUM_STATIC_DEVICES = 10
+NUM_DEVICES = 300
+NUM_STATIC_DEVICES = 100
 
 EMOTIONS_CSV = '../MusicProcessor/Emotions.csv'
 REASONS_CSV = '../MusicProcessor/Reasons.csv'
