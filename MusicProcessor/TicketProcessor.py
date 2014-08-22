@@ -120,7 +120,7 @@ def generateTickets(characters):
     set_mode((1, 1), NOFRAME)
     template = loadImage(TEMPLATE)
     names = sorted(characters, key = lambda (shortName, (rid, _longName, _power, _kill, _killLength, _addiction)): rid)
-    tickets = (createTicket(template, shortName, longName) for (shortName, (_rid, longName, _power)) in names)
+    tickets = (createTicket(template, shortName, longName) for (shortName, (_rid, longName, _power, _kill, _killLength, _addiction)) in names)
     nNamedSheets = createSheets(tickets, template)
     assert nNamedSheets >= ALREADY_PRINTED_SHEETS
     createCopiedSheet('TicketA', 'TicketsA-%d' % NUM_SHEETS_TO)
