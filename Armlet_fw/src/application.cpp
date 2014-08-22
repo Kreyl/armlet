@@ -422,6 +422,29 @@ void App_t::SaveData()
     else
         f_printf(&file,"%d",0);
 
+    f_printf(&file,"#narcoher");
+    if(ArrayOfUserIntentions[6].current_time>=0)
+        f_printf(&file,"%d",1);
+    else
+        f_printf(&file,"%d",0);
+
+    f_printf(&file,"#narcolsd");
+    if(ArrayOfUserIntentions[7].current_time>=0)
+        f_printf(&file,"%d",1);
+    else
+        f_printf(&file,"%d",0);
+
+    f_printf(&file,"#narcoTrain");
+    if(ArrayOfUserIntentions[8].current_time>=0)
+        f_printf(&file,"%d",1);
+    else
+        f_printf(&file,"%d",0);
+
+    f_printf(&file,"#nacroManiac");
+    if(ArrayOfUserIntentions[10].current_time>=0)
+        f_printf(&file,"%d",1);
+    else
+        f_printf(&file,"%d",0);
 
    // f_write(&file, DataFileBuff, buff_size, &bw);
     f_close(&file);
@@ -451,13 +474,13 @@ void App_t::LoadData()
                Energy.SetEnergy(int_val);
            if(line_num==2 && int_val==1)//weed
                ArrayOfUserIntentions[5].current_time=0;
-           if(line_num==2 && int_val==1)//her
+           if(line_num==3 && int_val==1)//her
                ArrayOfUserIntentions[6].current_time=0;
-           if(line_num==3 && int_val==1)//lsd
+           if(line_num==4 && int_val==1)//lsd
                ArrayOfUserIntentions[7].current_time=0;
-           if(line_num==3 && int_val==1)//krayk
+           if(line_num==5 && int_val==1)//krayk
                ArrayOfUserIntentions[8].current_time=0;
-           if(line_num==3 && int_val==1)//manyac
+           if(line_num==6 && int_val==1)//manyac
                ArrayOfUserIntentions[10].current_time=0;
        }
 
