@@ -14,7 +14,7 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pySerial v2.6 or later: http://pypi.python.org/pypi/pyserial\n" % (ex.__class__.__name__, ex))
 
-BAUD_RATE = 115200
+BAUD_RATES = (512000, 256000, 230400, 115200, 57600, 38400, 28800, 19200, 14400, 9600, 4800, 2400, 1200, 300)
 
 TIMEOUT = 1
 DT = 0.1
@@ -94,25 +94,29 @@ class SerialPort(object):
             portNames = (self.externalPort.name,) if self.externalPort else tuple(portName for (portName, _description, _address) in comports())
             if portNames:
                 for portName in portNames:
-                    try:
-                        displayPortName = sub('^/dev/', '', portName)
-                        self.statusUpdate(displayPortName, self.TRYING)
-                        self.port = self.externalPort or Serial(portName, baudrate = BAUD_RATE, timeout = TIMEOUT, writeTimeout = TIMEOUT)
-                        self.statusUpdate(displayPortName, self.CONNECTED)
-                        self.logger.info("connected to %s" % portName)
-                        if self.ping:
-                            pong = self.command(self.ping, self.pong, notReady = True)
-                            if pong is not None:
-                                if self.connectCallBack:
-                                    self.connectCallBack(pong)
+                    for baudRate in BAUD_RATES:
+                        try:
+                            displayPortName = sub('^/dev/', '', portName)
+                            self.statusUpdate(displayPortName, self.TRYING)
+                            self.port = self.externalPort or Serial(portName, baudrate = baudRate, timeout = TIMEOUT, writeTimeout = TIMEOUT)
+                            self.statusUpdate(displayPortName, self.CONNECTED)
+                            self.logger.info("connected to %s at %d baud" % (portName, baudRate))
+                            if self.ping:
+                                pong = self.command(self.ping, self.pong, notReady = True)
+                                if pong is not None:
+                                    if self.connectCallBack:
+                                        self.connectCallBack(pong)
+                                    self.ready = True
+                                    break
+                            else:
                                 self.ready = True
                                 break
-                        else:
-                            self.ready = True
-                            break
-                    except Exception:
-                        self.statusUpdate(displayPortName, self.ERROR)
-                    self.reset()
+                        except Exception:
+                            self.statusUpdate(displayPortName, self.ERROR)
+                        self.reset()
+                    else:
+                        continue
+                    break
             else:
                 self.statusUpdate("No COM", self.NONE)
 
