@@ -31,6 +31,7 @@ typedef struct Reason {
     const char* name;
     int weight;
     int eID;
+    int var_param;
 } Reason_t;
 
 extern Reason_t reasons[];

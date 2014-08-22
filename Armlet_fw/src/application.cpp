@@ -394,8 +394,8 @@ void App_t::SaveData()
     );
     if(open_code!=0)
         return;
-    UINT bw;
-    int buff_size;
+   // UINT bw;
+   // int buff_size;
 #if 0
 #energy
 50
@@ -418,33 +418,33 @@ void App_t::SaveData()
     //weed, lambda welcome!
     f_printf(&file,"#narcograss");
     if(ArrayOfUserIntentions[5].current_time>=0)
-        f_printf(&file,"%d",1);
+        f_printf(&file,"%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",0);
+        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
 
     f_printf(&file,"#narcoher");
     if(ArrayOfUserIntentions[6].current_time>=0)
-        f_printf(&file,"%d",1);
+        f_printf(&file,"%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",0);
+        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
 
     f_printf(&file,"#narcolsd");
     if(ArrayOfUserIntentions[7].current_time>=0)
-        f_printf(&file,"%d",1);
+        f_printf(&file,"%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",0);
+        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
 
     f_printf(&file,"#narcoTrain");
     if(ArrayOfUserIntentions[8].current_time>=0)
-        f_printf(&file,"%d",1);
+        f_printf(&file,"%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",0);
+        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
 
     f_printf(&file,"#nacroManiac");
     if(ArrayOfUserIntentions[10].current_time>=0)
-        f_printf(&file,"%d",1);
+        f_printf(&file,"%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",0);
+        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
 
    // f_write(&file, DataFileBuff, buff_size, &bw);
     f_close(&file);

@@ -6,14 +6,6 @@
 #include "gui.h"
 //TODO move it right
 int CurrentIntentionArraySize=2;
-/*Intention intentionArray[INTENTIONS_ARRAY_SIZE]={
-
-	{1000,"creation",0},			//0
-	{1000,"destruction",1},		//1 negativ
-	{1000,"horror_house",1},	//2 negativ
-	{1000,"wasteland",0},		//3
-	{1000,"reaper",4}		//4 positiv
-};*/
 
 struct SeekRecentlyPlayedFilesEmo SRPFESingleton
 {
@@ -61,6 +53,25 @@ int process_type;
 char * p_int_name;//button name if available
 
 #endif
+
+//ArrayOfUserIntentions id defines, not buttons, user intentions itself
+
+#define SI_MURDER 0
+#define SI_CREATION 1
+#define SI_DESTRUCTION 2
+#define SI_SEX 3
+#define SI_FIGHT 4
+#define SI_WEED 5
+#define SI_HER 6
+#define SI_LSD 7
+#define SI_KRAYK 8
+#define SI_DEATH 9
+#define SI_MANIAC 10
+#define SI_TUMAN 11
+#define SI_STRAH 12
+#define SI_MSOURCE 13
+#define SI_PROJECT 14
+
 //STATIC ARRAY, inits inside, all external are in InitArrayOfUserIntentions
 struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
         {-1,25,120,300,120,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_MURDER)},//murder 0
@@ -79,13 +90,6 @@ struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
         {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mSource 13
         {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mProject 14
 };
-/* 188 */ //{ "lsd", 20, 8 },    /* trip */+
-/* 189 */ //{ "krayk", 20, 0 },  /* fon */+
-/* 190 */// { "death", 50, 5 },  /* smert' */
-/* 191 */// { "mist", 50, 4 },   /* tuman */
-/* 192 */// { "fear", 40, 28 },  /* strah */
-/* 193 */// { "mSource", 9, 1 }, /* neverno */
-/* 194 */// { "mProject", 9, 1 },    /* neverno */
 void InitArrayOfUserIntentions()
 {
     for(int i=0;i<reasons_number;i++)
@@ -160,7 +164,7 @@ struct IntentionCalculationData SICD=
 void SeekRecentlyPlayedFilesEmo::OnCallStopPlay(int emo_id,int file_id, int pos)
 {
     //this->last_array_id идет в минус по ходу пляски, проверяются в плюс начиная с этого
-    //стартовый -
+    //стартовый - ???
     this->IncrementArrayId();
     seek_array[this->last_array_id].emo_id=emo_id;
     seek_array[this->last_array_id].file_indx=file_id;
@@ -297,11 +301,9 @@ bool UpdateUserIntentionsTime(int add_time_sec)
        {
            if(ArrayOfUserIntentions[i].current_time>=0)
            {
-             //  Uart.Printf("CALL ADD TIME SUCESS reason %d\r",i);
                ArrayOfUserIntentions[i].current_time+=add_time_sec;
                if(ArrayOfUserIntentions[i].current_time>ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau)//после плато, на спуске
                {
-                  // Uart.Printf("ct%d, summ %d\r", ArrayOfUserIntentions[i].current_time,ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau);
                    ArrayOfUserIntentions[i].TurnOff();//current_time=-1;
                    CallReasonFalure(i);
                    return_value=true;
@@ -405,21 +407,28 @@ int CalculateCurrentPowerOfPlayerReason(int array_indx)
             ArrayOfUserIntentions[array_indx].TurnOff();//current_time=-1;
             CallReasonFalure(array_indx);
             return -1;
-
         }
     }
     else return -1;
 }
+
 void CallReasonFalure(int user_reason_id)
 {
-    if(user_reason_id==3)
+    if(user_reason_id==SI_SEX)
     {
         // не прерванный секс всегда успешен! ^_^
         CallReasonSuccess(user_reason_id);
         return;
     }
     Uart.Printf("CALL REASON FALURE reason %d\r",user_reason_id);
-    Energy.AddEnergy(-5);
+    Energy.AddEnergy(REASON_FAIL_ENERGY_CHANGE);
+
+   // маньяки икрайк неизлечимо наркозависимы
+    if(ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_MANIAC || ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_KRAYK)
+    {
+        ArrayOfUserIntentions[user_reason_id].current_time=0;
+    }
+    //если у маньяка что-то неполучилось - убвать не хочет??
 
     return;
 }
@@ -427,9 +436,19 @@ void CallReasonFalure(int user_reason_id)
 void CallReasonSuccess(int user_reason_id)
 {
     //если наркозависимость - перезапустить!
-    //подумать над размерамиинтервалов!
-    if(user_reason_id==5)
-        ArrayOfUserIntentions[5].current_time=0;
+    //подумать над размерамиинтервалов! PROCESS_NARCO
+    if(ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NARCO)
+        ArrayOfUserIntentions[user_reason_id].current_time=0;
+    //если маньяк убил кого-то - вырубить ему намеряние заново. если не нашел - также вырубить, онять нергию.
+    if(ArrayOfUserIntentions[SI_MANIAC].current_time>=0 && user_reason_id==SI_MURDER)
+        ArrayOfUserIntentions[SI_MANIAC].current_time=0;
+    //если крайк что-то сделал - перезапустить его зависимость
+    //TODO заменить процессы на SI
+    if(ArrayOfUserIntentions[SI_KRAYK].current_time>=0 &&
+            (ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NORMAL ||
+             ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_FIGHT
+            ))
+        ArrayOfUserIntentions[SI_KRAYK].current_time=0;
     Energy.AddEnergy(5);
 
    return;

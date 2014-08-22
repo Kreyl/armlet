@@ -14,6 +14,11 @@ void AppInit();
 #include "kl_lib_f2xx.h"
 #include "cmd_uart.h"
 
+//state.ini defines
+#define NARCO_IS_OFF_STATE 0
+#define NARCO_IS_ON_STATE 1
+
+
 #if 1 // ==== Timings ====
 #define T_PILL_CHECK_MS         360  // Check if pill connected every TM_PILL_CHECK
 #define T_MEASUREMENT_MS        5004 // Battery measurement

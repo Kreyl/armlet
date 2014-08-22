@@ -110,6 +110,7 @@ int CalculateCurrentPowerOfPlayerReason(int array_indx); //считаеттекущую мощнос
 void SwitchPlayerReason(int reason_id,bool is_turn_on);  // игрок нажал накнопку резона, вклили выкл.
 
 //UPDATE TO ALL USER REASONS
+//в этой же функции обрабатываются проходы наркоподобных при окончании резона!
 void CallReasonSuccess(int user_reason_id); // вызовется если игрок отключит резон, все id и проверки внутри
 //UPDATE TO ALL USER REASONS
 void CallReasonFalure(int user_reason_id); // вызовется если игрок просрал по времени

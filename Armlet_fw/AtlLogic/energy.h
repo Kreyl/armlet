@@ -13,6 +13,7 @@
 #define SEC_TO_SELF_REDUCE 5700
 #define START_ENERGY 50
 #define STANDART_TOUGHNESS 3
+#define REASON_FAIL_ENERGY_CHANGE -5
 #define ETS 50 //если это маленькое число - надо вводить вес для равномерного деления!
 class Energy_t
 {
