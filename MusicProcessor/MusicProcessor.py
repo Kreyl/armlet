@@ -82,7 +82,7 @@ MUSIC_MARK = 'music_here'
 
 RESULT_MARKS = { True: 'music_errors', False: 'music_ok' }
 
-INVALID_FILENAME_CHARS = ':/\\\'"?*' # for file names, to be replaced with _
+INVALID_FILENAME_CHARS = '<>:"/\\|?*' # for file names, to be replaced with _
 def cleanupFileName(fileName):
     return ''.join('_' if c in INVALID_FILENAME_CHARS else c for c in fileName)
 
@@ -233,29 +233,29 @@ def processCharacter(name, number, power, kill, killLength, addiction, emotions,
                 raise ProcessException("Existing record mentions %s files, but %d is actually found" % (okNum, len(musicFiles)))
             if okSize != sum(getsize(f) for f in musicFiles):
                 raise ProcessException("Existing record mentions total file size %d bytes, while actual total size is %d bytes" % (okSize, sum(getsize(f) for f in musicFiles)))
-            if verifyFiles:
-                # Verify existing music files
-                print "Veryfying files",
-                for fileName in listdir(musicDir):
-                    stdout.write('.')
-                    stdout.flush()
-                    fullName = join(musicDir, fileName)
-                    dumpToErrors = False
-                    match = CHECK_PATTERN.match(fileName)
-                    if match:
-                        groups = match.groupdict()
-                        emotion = convertEmotion(groups[EMOTION])
-                        artist = convertTitle(groups[ARTIST])
-                        title = convertTitle(groups[TITLE] or '')
-                        tail = convert(groups[TAIL] or '')
-                        if emotion not in emotions:
-                            raise ProcessException("\nUnknown emotion: %d" % emotion)
-                    else:
-                        raise ProcessException("\nBad file name: %s" % fileName)
+            # Verify existing music files
+            print "Veryfying files",
+            for fileName in listdir(musicDir):
+                stdout.write('.')
+                stdout.flush()
+                fullName = join(musicDir, fileName)
+                dumpToErrors = False
+                match = CHECK_PATTERN.match(fileName)
+                if match:
+                    groups = match.groupdict()
+                    emotion = convertEmotion(groups[EMOTION])
+                    artist = convertTitle(groups[ARTIST])
+                    title = convertTitle(groups[TITLE] or '')
+                    tail = convert(groups[TAIL] or '')
+                    if emotion not in emotions:
+                        raise ProcessException("\nUnknown emotion: %d" % emotion)
+                else:
+                    raise ProcessException("\nBad file name: %s" % fileName)
+                if verifyFiles:
                     e = verifyFile(join(musicDir, fileName))
                     if e:
                         raise ProcessException("\nError processing: %s" % e)
-                print
+            print
         except ProcessException, e:
             print "%s, reprocessing" % e
             resultMark(baseDir, None)
