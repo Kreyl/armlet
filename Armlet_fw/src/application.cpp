@@ -199,6 +199,12 @@ static inline void KeysHandler() {
 }
 #endif
 
+#if 1 // ========================== OnPillConnect ==============================
+static void OnPillConnect() {
+
+}
+#endif
+
 // ================================= App thread ================================
 static WORKING_AREA(waAppThread, 1024);
 __attribute__((noreturn))
@@ -335,15 +341,13 @@ void App_t::Task() {
                         Pill.ChargeCnt--;
                         rslt = PillMgr.Write(PILL_I2C_ADDR, (PILL_START_ADDR + PILL_CHARGECNT_ADDR), &Pill.ChargeCnt, sizeof(Pill.ChargeCnt));
                         if(rslt == OK) {
-                            Uart.Printf("\rConnect: %d", Pill.ChargeCnt);
-                            // Here is OnPillConnect
-                            //звук ок!
+//                            Uart.Printf("\rConnect: %d", Pill.ChargeCnt);
+                            Beeper.Beep(BeepPillOk);
+                            OnPillConnect();
                         } // if rslt ok
+                        else Beeper.Beep(BeepPillBad);  // Pill write failed
                     } // if chargecnt > 0
-                    else
-                    {
-                        //звук не ок!
-                    }
+                    else Beeper.Beep(BeepPillBad); // ChargeCnt == 0
                 } // if rslt ok
             } // OnConnect
             else if(!IsNowConnected and PillWasConnected) PillWasConnected = false;
