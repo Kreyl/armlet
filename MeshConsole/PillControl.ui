@@ -229,7 +229,7 @@
         </widget>
        </item>
        <item>
-        <widget class="Line" name="line">
+        <widget class="Line" name="line1">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -257,28 +257,7 @@
         </widget>
        </item>
        <item>
-        <widget class="Line" name="line_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="CommandButton" name="killerButton">
-         <property name="text">
-          <string>Killer</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="CommandButton" name="guideButton">
-         <property name="text">
-          <string>Guide</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="Line" name="lineTop">
+        <widget class="Line" name="line2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -296,14 +275,6 @@
           <bool>true</bool>
          </property>
          <widget class="QLabel" name="documentationLabel">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>436</width>
-            <height>244</height>
-           </rect>
-          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -334,7 +305,7 @@
         </widget>
        </item>
        <item>
-        <widget class="Line" name="lineBottom">
+        <widget class="Line" name="line3">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -402,10 +373,10 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>dontWritePillButton</tabstop>
   <tabstop>weedButton</tabstop>
   <tabstop>lsdButton</tabstop>
   <tabstop>heroinButton</tabstop>
-  <tabstop>killerButton</tabstop>
   <tabstop>resetButton</tabstop>
   <tabstop>logTextEdit</tabstop>
   <tabstop>consoleEdit</tabstop>
@@ -417,16 +388,6 @@
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
   </connection>
  </connections>
 </ui>
