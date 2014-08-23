@@ -133,10 +133,7 @@ void Init() {
 
     #ifndef CLEAR_SCREEN_FOR_DEBUG
     Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
-#endif
-
- //   Init_emotionTreeMusicNodeFiles_FromFile(filename);
- //   Print_emotionTreeMusicNodeFiles_ToUART();
+    #endif
 
     Keys.Init();
     Beeper.Init();
@@ -151,7 +148,7 @@ void Init() {
 
     PillMgr.Init();
 #if 1
-   Init_emotionTreeMusicNodeFiles_FromFileIterrator();
+    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
     App.Init();
     AtlGui.Init();
 

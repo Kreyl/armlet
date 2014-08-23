@@ -48,9 +48,7 @@ const BeepChunk_t BeepPillOk[] = {
 };
 
 const BeepChunk_t BeepPillBad[] = {
-        {BEEP_VOLUME, 2794, 180, ckNormal},
-        {BEEP_VOLUME, 2349, 180, ckNormal},
-        {BEEP_VOLUME, 1975, 180, ckStop},
+        {BEEP_VOLUME, 1568, 720, ckStop},
 };
 
 
