@@ -131,7 +131,7 @@ def loadCharacters():
         addictionColumnID = header.index(ADDICTION_COLUMN_TITLE)
         allRoles = sorted(allRoles[1:])
         data = (tuple(row[x] for x in (shortNameColumnID, longNameColumnID, sexColumnID, powerColumnID, killColumnID, killLengthColumnID, addictionColumnID)) for row in allRoles[1:])
-        data = sorted(data, key = lambda (shortName, longName, sex, power, kill, killLength, addiction): longName.split()[-1:])
+        data = sorted(data, key = lambda (shortName, longName, sex, power, kill, killLength, addiction): ((longName.split()[-1:] or ('',))[0].lower(), longName.lower()))
         ret = []
         shortNames = set()
         longNames = set()
