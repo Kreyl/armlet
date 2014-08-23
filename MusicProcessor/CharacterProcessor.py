@@ -66,7 +66,7 @@ def readCSV(csv): # generator
 def verifyCharacters(characters):
     assert characters
     assert len(characters) <= len(CHARACTER_IDS)
-    assert tuple(sorted(number for (number, longName, power, kill, killLength, addiction) in characters.itervalues())) == tuple(xrange(CHARACTER_ID_START, CHARACTER_ID_START + len(characters))), "Damaged %s file" % CHARACTERS_CSV
+    assert tuple(sorted(number for (number, _longName, _power, _kill, _killLength, _addiction) in characters.itervalues())) == tuple(xrange(CHARACTER_ID_START, CHARACTER_ID_START + len(characters))), "Damaged %s file" % CHARACTERS_CSV
 
 def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
     if not isfile(fileName):
@@ -180,11 +180,11 @@ def updateCharacters():
     characters = readCharacters()
     changed = False
     for (shortName, longName, power, kill, killLength, addiction) in loadCharacters():
-        (rid, oldLongName, oldPower, oldKill, oldKillLength, oldAddiction) = characters.get(shortName, (None, None, None))
+        (rid, oldLongName, oldPower, oldKill, oldKillLength, oldAddiction) = characters.get(shortName, (None, None, None, None, None, None))
         if not rid: # new character
             characterID = len(characters) + CHARACTER_ID_START
             assert characterID in CHARACTER_IDS
-            characters[shortName] = (characterID, longName, power)
+            characters[shortName] = (characterID, longName, power, kill, killLength, addiction)
             changed = True
         elif (longName, power, kill, killLength, addiction) != (oldLongName, oldPower, oldKill, oldKillLength, oldAddiction): # changed character
             characters[shortName] = (rid, longName, power, kill, killLength, addiction)
