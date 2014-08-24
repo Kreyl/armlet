@@ -30,6 +30,11 @@ struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRA
 		{1,2},{4,3},
 		{1,2},{4,3}
 };
+
+void UserIntentions::TurnOn()
+{
+    this->current_time=0;
+}
 //int CurrentUserIntentionsArraySize=6;
 #if 0
 #define RNAME_FIGHT  "\xc4\xf0\xe0\xea\xe0"
@@ -54,23 +59,7 @@ char * p_int_name;//button name if available
 
 #endif
 
-//ArrayOfUserIntentions id defines, not buttons, user intentions itself
 
-#define SI_MURDER 0
-#define SI_CREATION 1
-#define SI_DESTRUCTION 2
-#define SI_SEX 3
-#define SI_FIGHT 4
-#define SI_WEED 5
-#define SI_HER 6
-#define SI_LSD 7
-#define SI_KRAYK 8
-#define SI_DEATH 9
-#define SI_MANIAC 10
-#define SI_TUMAN 11
-#define SI_STRAH 12
-#define SI_MSOURCE 13
-#define SI_PROJECT 14
 
 //STATIC ARRAY, inits inside, all external are in InitArrayOfUserIntentions
 struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={

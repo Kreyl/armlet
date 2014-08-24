@@ -23,7 +23,7 @@
 #include "sound.h"
 #include "ff.h"
 #include "intention.h"
-#include "RxTable.h"
+//#include "RxTable.h"
 #include "..\AtlGui\atlgui.h"
 #include "energy.h"
 
@@ -36,7 +36,9 @@
 #include "mesh_lvl.h"
 
 App_t App;
-
+#define PILLTYPEWEED 1
+#define PILLTYPELSD 2
+#define PILLTYPEHER 3
 #if 1 // ============================ Timers ===================================
 // Pill check
 void TmrPillCheckCallback(void *p) {
@@ -336,8 +338,13 @@ void App_t::Task() {
                         rslt = PillMgr.Write(PILL_I2C_ADDR, (PILL_START_ADDR + PILL_CHARGECNT_ADDR), &Pill.ChargeCnt, sizeof(Pill.ChargeCnt));
                         if(rslt == OK) {
                             Uart.Printf("\rConnect: %d", Pill.ChargeCnt);
-                            // Here is OnPillConnect
-                            //звук ок!
+                            //1 - марихуана, 2 - лсд, 3 - героин
+                            if(Pill.Type==PILLTYPEWEED)
+                                ArrayOfUserIntentions[SI_WEED].TurnOn();
+                            else if(Pill.Type==PILLTYPELSD)
+                                ArrayOfUserIntentions[SI_LSD].TurnOn();
+                            else if(Pill.Type==PILLTYPEHER)
+                                ArrayOfUserIntentions[SI_HER].TurnOn();
                         } // if rslt ok
                     } // if chargecnt > 0
                     else
@@ -365,13 +372,18 @@ void App_t::Task() {
 #endif
     } // while true
 }
+void App_t::UpdateLocation()
+{
 
+}
 void App_t::Init() {
     State = asIdle;
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
     RxTable.RegisterAppThd(PThd);
     Sound.RegisterAppThd(PThd);
     on_run=0;
+    last_location=-1;
+    last_location_signal_pw=-1;
 
 #if UART_RX_ENABLED
     chVTSet(&TmrUartRx,    MS2ST(UART_RX_POLLING_MS), TmrUartRxCallback, nullptr);
@@ -417,31 +429,31 @@ void App_t::SaveData()
     f_printf(&file,"%d",Energy.GetEnergy());
     //weed, lambda welcome!
     f_printf(&file,"#narcograss");
-    if(ArrayOfUserIntentions[5].current_time>=0)
+    if(ArrayOfUserIntentions[SI_WEED].current_time>=0)
         f_printf(&file,"%d",NARCO_IS_ON_STATE);
     else
         f_printf(&file,"%d",NARCO_IS_OFF_STATE);
 
     f_printf(&file,"#narcoher");
-    if(ArrayOfUserIntentions[6].current_time>=0)
+    if(ArrayOfUserIntentions[SI_HER].current_time>=0)
         f_printf(&file,"%d",NARCO_IS_ON_STATE);
     else
         f_printf(&file,"%d",NARCO_IS_OFF_STATE);
 
     f_printf(&file,"#narcolsd");
-    if(ArrayOfUserIntentions[7].current_time>=0)
+    if(ArrayOfUserIntentions[SI_LSD].current_time>=0)
         f_printf(&file,"%d",NARCO_IS_ON_STATE);
     else
         f_printf(&file,"%d",NARCO_IS_OFF_STATE);
 
     f_printf(&file,"#narcoTrain");
-    if(ArrayOfUserIntentions[8].current_time>=0)
+    if(ArrayOfUserIntentions[SI_KRAYK].current_time>=0)
         f_printf(&file,"%d",NARCO_IS_ON_STATE);
     else
         f_printf(&file,"%d",NARCO_IS_OFF_STATE);
 
     f_printf(&file,"#nacroManiac");
-    if(ArrayOfUserIntentions[10].current_time>=0)
+    if(ArrayOfUserIntentions[SI_MANIAC].current_time>=0)
         f_printf(&file,"%d",NARCO_IS_ON_STATE);
     else
         f_printf(&file,"%d",NARCO_IS_OFF_STATE);
@@ -473,15 +485,15 @@ void App_t::LoadData()
            if(line_num==1)
                Energy.SetEnergy(int_val);
            if(line_num==2 && int_val==1)//weed
-               ArrayOfUserIntentions[5].current_time=0;
+               ArrayOfUserIntentions[SI_WEED].current_time=0;
            if(line_num==3 && int_val==1)//her
-               ArrayOfUserIntentions[6].current_time=0;
+               ArrayOfUserIntentions[SI_HER].current_time=0;
            if(line_num==4 && int_val==1)//lsd
-               ArrayOfUserIntentions[7].current_time=0;
+               ArrayOfUserIntentions[SI_LSD].current_time=0;
            if(line_num==5 && int_val==1)//krayk
-               ArrayOfUserIntentions[8].current_time=0;
+               ArrayOfUserIntentions[SI_KRAYK].current_time=0;
            if(line_num==6 && int_val==1)//manyac
-               ArrayOfUserIntentions[10].current_time=0;
+               ArrayOfUserIntentions[SI_MANIAC].current_time=0;
        }
 
      //  UINT bw;

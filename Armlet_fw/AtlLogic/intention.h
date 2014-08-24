@@ -16,6 +16,25 @@
 #define PROCESS_TUMAN  4
 #define PROCESS_MANIAC  5
 #define PROCESS_KRAYK  6
+
+//ArrayOfUserIntentions id defines, not buttons, user intentions itself
+
+#define SI_MURDER 0
+#define SI_CREATION 1
+#define SI_DESTRUCTION 2
+#define SI_SEX 3
+#define SI_FIGHT 4
+#define SI_WEED 5
+#define SI_HER 6
+#define SI_LSD 7
+#define SI_KRAYK 8
+#define SI_DEATH 9
+#define SI_MANIAC 10
+#define SI_TUMAN 11
+#define SI_STRAH 12
+#define SI_MSOURCE 13
+#define SI_PROJECT 14
+
 /*typedef struct Intention {
 	int weight1000;	//константа, определяющая степень и время роста
 	//int last_measure_weight;//
@@ -52,6 +71,7 @@ typedef struct UserIntentions {
         current_time=-1;
         was_winning=false;
     }
+    void TurnOn();
 } UserIntentions;
 
 extern struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRAY_SIZE];
