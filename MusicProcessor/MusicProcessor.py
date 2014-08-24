@@ -21,7 +21,7 @@ from os import getenv, listdir, makedirs, remove, rmdir, walk
 from os.path import basename, expanduser, getmtime, getsize, isdir, isfile, islink, join
 from re import compile as reCompile
 from shutil import copy, copytree, rmtree
-from sys import argv, stdout
+from sys import argv, platform, stdout
 
 try:
     from pydub import AudioSegment
@@ -41,7 +41,16 @@ SD_DIR = '_SD'
 EXCLUDE_DIRS = (SD_DIR,)
 
 INI_FILE = 'settings.ini'
-INI_CONTENT = '[radio]\r\nid=%d\r\n\r\n[character]\r\npower=%d\r\n'
+INI_CONTENT = '''\
+[radio]
+id=%d
+
+[character]
+power=%d
+readyToKill=%d
+readyToKillTime=%d
+addict=%d
+'''.replace('\r\n', '\n').replace('\n', '\r\n')
 
 CHARACTER_CSV = 'character.csv'
 
@@ -54,8 +63,7 @@ TAIL = 'tail'
 
 SEPARATOR = '-'
 
-CHECK_PATTERN = reCompile(r'(?i)^(?P<%s>[^%s\s\d]+)\s*\d*\s*%s\s*(?P<%s>[^%s]+?)(?:\s*%s\s*(?P<%s>[^%s]*?)(?:\s*%s\s*(?P<%s>.*))?)?\..*' % (EMOTION, SEPARATOR, SEPARATOR, ARTIST, SEPARATOR, SEPARATOR, TITLE, SEPARATOR, SEPARATOR, TAIL))
-
+CHECK_PATTERN = reCompile(r'(?i)^(?P<%s>[^%s\s\d]+)\s*\d*\s*%s\s*(?P<%s>[^%s]*?)(?:\s*%s\s*(?P<%s>[^%s]*?)(?:\s*%s\s*(?P<%s>.*))?)?\..*' % (EMOTION, SEPARATOR, SEPARATOR, ARTIST, SEPARATOR, SEPARATOR, TITLE, SEPARATOR, SEPARATOR, TAIL))
 NEW_FORMAT = 'mp3'
 
 MAX_FILE_NAME = 64
@@ -73,6 +81,15 @@ TAGS = {
 MUSIC_MARK = 'music_here'
 
 RESULT_MARKS = { True: 'music_errors', False: 'music_ok' }
+
+INVALID_FILENAME_CHARS = '<>:"/\\|?*' # for file names, to be replaced with _
+def cleanupFileName(fileName):
+    return ''.join('_' if c in INVALID_FILENAME_CHARS else c for c in fileName)
+
+isWindows = platform.lower().startswith('win')
+CONSOLE_ENCODING = stdout.encoding or ('cp866' if isWindows else 'UTF-8')
+def encodeForConsole(s):
+    return s.encode(CONSOLE_ENCODING, 'replace')
 
 def silentRemove(filename):
     try:
@@ -156,14 +173,14 @@ def checkResultMark(targetDir):
             errorText = f.read()
     return (bool(errorDate), max(okDate, errorDate), okNum, okSize, errorText)
 
-def processCharacter(name, number, power, emotions, baseDir = '.', verifyFiles = False):
+def processCharacter(name, number, power, kill, killLength, addiction, emotions, baseDir = '.', verifyFiles = False):
     class ProcessException(Exception):
         pass
     def log(error, fileName, message):
         s = '%s%s' % (('%s: ' % fileName) if fileName else '', message)
         if fileName:
             print
-        print s
+        print encodeForConsole(s)
         messages.append('%s\r\n' % s)
         hasErrors[0] = hasErrors[0] or error # pylint: disable=E0601
     print "\nProcessing character: %s (%d)" % (name, number)
@@ -197,7 +214,7 @@ def processCharacter(name, number, power, emotions, baseDir = '.', verifyFiles =
     # Creating settings.ini
     if number > 0:
         with open(join(armletDir, INI_FILE), 'wb') as f:
-            f.write(INI_CONTENT % (number, power))
+            f.write(INI_CONTENT % (number, power, kill, killLength, addiction))
     # Processing character.csv
     characterFile = join(armletDir, CHARACTER_CSV)
     if isfile(characterFile):
@@ -216,29 +233,29 @@ def processCharacter(name, number, power, emotions, baseDir = '.', verifyFiles =
                 raise ProcessException("Existing record mentions %s files, but %d is actually found" % (okNum, len(musicFiles)))
             if okSize != sum(getsize(f) for f in musicFiles):
                 raise ProcessException("Existing record mentions total file size %d bytes, while actual total size is %d bytes" % (okSize, sum(getsize(f) for f in musicFiles)))
-            if verifyFiles:
-                # Verify existing music files
-                print "Veryfying files",
-                for fileName in listdir(musicDir):
-                    stdout.write('.')
-                    stdout.flush()
-                    fullName = join(musicDir, fileName)
-                    dumpToErrors = False
-                    match = CHECK_PATTERN.match(fileName)
-                    if match:
-                        groups = match.groupdict()
-                        emotion = convertEmotion(groups[EMOTION])
-                        artist = convertTitle(groups[ARTIST])
-                        title = convertTitle(groups[TITLE] or '')
-                        tail = convert(groups[TAIL] or '')
-                        if emotion not in emotions:
-                            raise ProcessException("\nUnknown emotion: %d" % emotion)
-                    else:
-                        raise ProcessException("\nBad file name: %s" % fileName)
+            # Verify existing music files
+            print "Veryfying files",
+            for fileName in listdir(musicDir):
+                stdout.write('.')
+                stdout.flush()
+                fullName = join(musicDir, fileName)
+                dumpToErrors = False
+                match = CHECK_PATTERN.match(fileName)
+                if match:
+                    groups = match.groupdict()
+                    emotion = convertEmotion(groups[EMOTION])
+                    artist = convertTitle(groups[ARTIST])
+                    title = convertTitle(groups[TITLE] or '')
+                    tail = convert(groups[TAIL] or '')
+                    if emotion not in emotions:
+                        raise ProcessException("\nUnknown emotion: %d" % emotion)
+                else:
+                    raise ProcessException("\nBad file name: %s" % fileName)
+                if verifyFiles:
                     e = verifyFile(join(musicDir, fileName))
                     if e:
                         raise ProcessException("\nError processing: %s" % e)
-                print
+            print
         except ProcessException, e:
             print "%s, reprocessing" % e
             resultMark(baseDir, None)
@@ -286,7 +303,7 @@ def processCharacter(name, number, power, emotions, baseDir = '.', verifyFiles =
                     for s in (artist, title, tail):
                         if s:
                             newFileNamePrefix += SEPARATOR + s
-                    newFileNamePrefix = newFileNamePrefix[:MAX_FILE_NAME]
+                    newFileNamePrefix = cleanupFileName(newFileNamePrefix)[:MAX_FILE_NAME]
                     for i in count():
                         newFileName = '%s%s%s' % (newFileNamePrefix, i or '', NEW_EXTENSION)
                         if newFileName.lower() not in newFileNameSet:
@@ -348,8 +365,8 @@ def updateMusic(sourceDir = '.', verifyFiles = False):
     noMusicCharacters = []
     errorCharacters = []
     for d in characterDirs:
-        (number, _longName, power) = characters.get(d, (-1, None, None))
-        (hasMusic, hasErrors) = processCharacter(d, number, power, emotions, sourceDir, verifyFiles)
+        (number, _longName, power, kill, killLength, addiction) = characters.get(d, (-1, None, None, None, None, None))
+        (hasMusic, hasErrors) = processCharacter(d, number, power, kill, killLength, addiction, emotions, sourceDir, verifyFiles)
         if hasMusic:
             if not hasErrors:
                 okCharacters.append(d)

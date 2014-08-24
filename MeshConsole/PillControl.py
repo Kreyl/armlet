@@ -239,13 +239,13 @@ class PillControl(QMainWindow):
                 if not button:
                     raise ValueError("Unknown button name: %s" % objectName)
                 button.configure(buttonStyleSheets, comment.strip(), command.strip(), self.processCommand)
-        self.doseTopEdit.configure(self.doseTopDefaultButton, lambda value: self.doseTopButton.setArguments((value,)))
-        self.deviceTypeComboBox.configure(lambda index: self.deviceTypeButton.setArguments((DEVICE_INDEXES[index],)))
+        #self.doseTopEdit.configure(self.doseTopDefaultButton, lambda value: self.doseTopButton.setArguments((value,)))
+        #self.deviceTypeComboBox.configure(lambda index: self.deviceTypeButton.setArguments((DEVICE_INDEXES[index],)))
         if not self.advanced:
             for w in self.commandWidget.findChildren(QWidget):
                 if str(w.objectName()).startswith('advanced'):
                     w.hide()
-        self.uniqueIDButton.hide()
+        #self.uniqueIDButton.hide()
         self.lastCommandButton = None
         self.writingPill = None
         # Setup logging
@@ -350,7 +350,7 @@ class PillControl(QMainWindow):
         settings = QSettings()
         try:
             settings.setValue('timeStamp', QDateTime.currentDateTime().toString(LONG_DATETIME_FORMAT))
-            settings.setValue('doseTop', int(self.doseTopEdit.text() or self.doseTopEdit.placeholderText()))
+            #settings.setValue('doseTop', int(self.doseTopEdit.text() or self.doseTopEdit.placeholderText()))
             settings.beginGroup('window')
             settings.setValue('width', self.size().width())
             settings.setValue('height', self.size().height())
@@ -374,7 +374,7 @@ class PillControl(QMainWindow):
         try:
             timeStamp = settings.value('timeStamp').toString()
             if timeStamp:
-                self.doseTopEdit.setText(settings.value('doseTop').toString())
+                #self.doseTopEdit.setText(settings.value('doseTop').toString())
                 settings.beginGroup('window')
                 self.resize(settings.value('width').toInt()[0], settings.value('height').toInt()[0])
                 self.move(settings.value('x').toInt()[0], settings.value('y').toInt()[0])

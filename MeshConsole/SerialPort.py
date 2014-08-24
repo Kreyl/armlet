@@ -4,6 +4,7 @@
 # Serial port operation routines
 #
 from collections import deque
+from itertools import chain
 from re import sub
 from threading import Thread
 from time import sleep, time
@@ -15,7 +16,7 @@ except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pySerial v2.6 or later: http://pypi.python.org/pypi/pyserial\n" % (ex.__class__.__name__, ex))
 
 BAUD_RATES = (512000, 256000, 230400, 115200, 57600, 38400, 28800, 19200, 14400, 9600, 4800, 2400, 1200, 300)
-
+NUM_CONNECT_ATTEMPTS = 3
 TIMEOUT = 1
 DT = 0.1
 
@@ -30,6 +31,7 @@ class SerialPort(object):
         self.logger = logger
         self.ping = ping
         self.pong = pong
+        self.baudRate = BAUD_RATES[0]
         self.connectCallBack = connectCallBack
         self.readCallBack = readCallBack
         self.portTryCallBack = portTryCallBack
@@ -65,6 +67,8 @@ class SerialPort(object):
                         elif self.ready and self.readCallBack:
                             self.readCallBack(line)
             except Exception:
+                from traceback import format_exc
+                print format_exc()
                 self.logger.warning("connection broken")
                 self.reset()
             sleep(DT)
@@ -94,20 +98,24 @@ class SerialPort(object):
             portNames = (self.externalPort.name,) if self.externalPort else tuple(portName for (portName, _description, _address) in comports())
             if portNames:
                 for portName in portNames:
-                    for baudRate in BAUD_RATES:
+                    for self.baudRate in chain((self.baudRate,), tuple(br for br in BAUD_RATES if br != self.baudRate)):
                         try:
                             displayPortName = sub('^/dev/', '', portName)
                             self.statusUpdate(displayPortName, self.TRYING)
-                            self.port = self.externalPort or Serial(portName, baudrate = baudRate, timeout = TIMEOUT, writeTimeout = TIMEOUT)
+                            self.port = self.externalPort or Serial(portName, baudrate = self.baudRate, timeout = TIMEOUT, writeTimeout = TIMEOUT)
                             self.statusUpdate(displayPortName, self.CONNECTED)
-                            self.logger.info("connected to %s at %d baud" % (portName, baudRate))
+                            self.logger.info("connected to %s at %d baud" % (portName, self.baudRate))
                             if self.ping:
-                                pong = self.command(self.ping, self.pong, notReady = True)
-                                if pong is not None:
-                                    if self.connectCallBack:
-                                        self.connectCallBack(pong)
-                                    self.ready = True
-                                    break
+                                for _ in xrange(NUM_CONNECT_ATTEMPTS):
+                                    pong = self.command(self.ping, self.pong, notReady = True)
+                                    if pong is not None:
+                                        if self.connectCallBack:
+                                            self.connectCallBack(pong)
+                                        self.ready = True
+                                        break
+                                else:
+                                    continue
+                                break
                             else:
                                 self.ready = True
                                 break
@@ -115,6 +123,7 @@ class SerialPort(object):
                             self.statusUpdate(displayPortName, self.ERROR)
                         self.reset()
                     else:
+                        self.baudRate = BAUD_RATES[0]
                         continue
                     break
             else:

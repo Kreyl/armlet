@@ -119,12 +119,14 @@ def generateTickets(characters):
     pyGameInit()
     set_mode((1, 1), NOFRAME)
     template = loadImage(TEMPLATE)
-    names = sorted(characters, key = lambda (shortName, (rid, _longName, _power)): rid)
-    tickets = (createTicket(template, shortName, longName) for (shortName, (_rid, longName, _power)) in names)
+    names = sorted(characters, key = lambda (shortName, (rid, _longName, _power, _kill, _killLength, _addiction)): rid)
+    tickets = (createTicket(template, shortName, longName) for (shortName, (_rid, longName, _power, _kill, _killLength, _addiction)) in names)
     nNamedSheets = createSheets(tickets, template)
     assert nNamedSheets >= ALREADY_PRINTED_SHEETS
-    createCopiedSheet('TicketA', 'TicketsA-%d' % NUM_SHEETS_TO)
-    createCopiedSheet('TicketFromA', 'TicketsFromA-%d' % NUM_SHEETS_FROM)
+    if NUM_SHEETS_TO:
+        createCopiedSheet('TicketA', 'TicketsA-%d' % NUM_SHEETS_TO)
+    if NUM_SHEETS_FROM:
+        createCopiedSheet('TicketFromA', 'TicketsFromA-%d' % NUM_SHEETS_FROM)
     createCopiedSheet('TicketR', 'TicketsR-%d' % (NUM_SHEETS_TO + NUM_SHEETS_FROM + NUM_NAMED_TICKETS * (nNamedSheets - ALREADY_PRINTED_SHEETS)))
 
 def main():
