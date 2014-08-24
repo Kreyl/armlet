@@ -10,6 +10,8 @@
 #include "cmd_uart.h"
 #include "RxTable.h"
 
+#include "lcd2630.h"
+
 Infrared_t IR;
 
 // ============================= Interrupts ====================================
@@ -89,9 +91,13 @@ void Infrared_t::IRxTask() {
                 RxWord = IRxW << 2;
                 // Leave only ID: 0xxx xxxx 0000 01**, xxx is ID
                 RxWord >>= 8;
+
+                Lcd.Printf(0, 40, clGreen, clBlack, "IR: %u  ");
+                chThdSleepMilliseconds(702);
+                Lcd.Printf(0, 40, clRed, clBlack, "IR:      ");
                 //Uart.Printf("\rIR: %u", RxWord);
                 // Add ID to table; increase to fit in address space
-                RxTable.PutRxInfo(RxWord - IR_ADDR_CONST, 0, nullptr);
+//                RxTable.PutRxInfo(RxWord - IR_ADDR_CONST, 0, nullptr);
                 // Rise evt
 //                if(App.PThd != nullptr) {
 //                    chSysLock();
@@ -165,6 +171,8 @@ void Infrared_t::RxInit() {
     chMBInit(&imailbox, IRxBuf, IR_RXBUF_SZ);
     // ==== Receiving thread ====
     chThdCreateStatic(waIRRxThread, sizeof(waIRRxThread), NORMALPRIO, (tfunc_t)IRRxThread, NULL);
+
+    Lcd.Printf(0, 40, clRed, clBlack, "IR:      ");
 
     // ==== IRQ ==== PC5
     rccEnableAPB2(RCC_APB2ENR_SYSCFGEN, FALSE); // Enable sys cfg controller

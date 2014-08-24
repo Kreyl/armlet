@@ -220,17 +220,17 @@ void App_t::Task() {
     while(true) {
         EvtMsk = chEvtWaitAny(ALL_EVENTS);
 
-        if(EvtMsk & EVTMSK_KEYS) {
-//            Uart.Printf("\rApp Keys");
-            KeysHandler();
-        }
+//        if(EvtMsk & EVTMSK_KEYS) {
+////            Uart.Printf("\rApp Keys");
+//            KeysHandler();
+//        }
 
-        if(EvtMsk & EVTMASK_PLAY_ENDS) {
-            Uart.Printf("\rApp PlayEnd");
-            //играть музыку по текущей эмоции
-            PlayNewEmo(SICD.last_played_emo,1);
-        }
-#if 1 //EVTMASK_RADIO on/off
+//        if(EvtMsk & EVTMASK_PLAY_ENDS) {
+//            Uart.Printf("\rApp PlayEnd");
+//            //играть музыку по текущей эмоции
+//            PlayNewEmo(SICD.last_played_emo,1);
+//        }
+#if 0 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
 #ifdef       UART_MESH_DEBUG
         Uart.Printf("App TabGet, s=%u, t=%u\r", SnsTable.PTable->Size, chTimeNow());
@@ -296,7 +296,7 @@ void App_t::Task() {
             }
         }
 #endif
-#if 1 // ==== New second ====
+#if 0 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
 //            Uart.Printf("\rNewSecond");
 // @KL            AtlGui.AddSuspendScreenTimer(1);
@@ -337,6 +337,7 @@ void App_t::Task() {
                 uint8_t rslt = PillMgr.Read(PILL_I2C_ADDR, PILL_START_ADDR, &Pill, sizeof(Pill_t));
                 if(rslt == OK) {
                     Uart.Printf("\rPill: %d %d", Pill.Type, Pill.ChargeCnt);
+                    Lcd.Printf(0, 90, clGreen, clBlack, "Pill %d %d   ", Pill.Type, Pill.ChargeCnt);
                     if(Pill.ChargeCnt > 0) {    // Check charge count, decrease it and write it back
                         Pill.ChargeCnt--;
                         rslt = PillMgr.Write(PILL_I2C_ADDR, (PILL_START_ADDR + PILL_CHARGECNT_ADDR), &Pill.ChargeCnt, sizeof(Pill.ChargeCnt));
@@ -350,11 +351,14 @@ void App_t::Task() {
                     else Beeper.Beep(BeepPillBad); // ChargeCnt == 0
                 } // if rslt ok
             } // OnConnect
-            else if(!IsNowConnected and PillWasConnected) PillWasConnected = false;
+            else if(!IsNowConnected and PillWasConnected) {
+                PillWasConnected = false;
+                Lcd.Printf(0, 90, clGreen, clBlack, "Pill disconnected ");
+            }
         } // if EVTMSK_PILL_CHECK
 #endif
 
-#if 1 // ==== New battery state ====
+#if 0 // ==== New battery state ====
         if(EvtMsk & EVTMSK_NEW_POWER_STATE) {
             Lcd.DrawBatteryState();
         }
@@ -373,7 +377,7 @@ void App_t::Task() {
 void App_t::Init() {
     State = asIdle;
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
-    RxTable.RegisterAppThd(PThd);
+//    RxTable.RegisterAppThd(PThd);
     Sound.RegisterAppThd(PThd);
     on_run=0;
 
@@ -381,100 +385,14 @@ void App_t::Init() {
     chVTSet(&TmrUartRx,    MS2ST(UART_RX_POLLING_MS), TmrUartRxCallback, nullptr);
 #endif
 
-    Time.Init();
-    Time.Reset();
-    ParseCsvFileToEmotions("character.csv");
-    InitArrayOfUserIntentions();
-    InitButtonsToUserReasons();
+//    Time.Init();
+//    Time.Reset();
+//    ParseCsvFileToEmotions("character.csv");
+//    InitArrayOfUserIntentions();
+//    InitButtonsToUserReasons();
 }
 
-void App_t::SaveData()
-{
-    FIL file;
-    int open_code= f_open (
-            &file,
-       "\state.ini",
-       FA_WRITE
-    );
-    if(open_code!=0)
-        return;
-    UINT bw;
-    int buff_size;
-#if 0
-#energy
-50
-#narcograss
-0
-#narcoher
-0
-#narcolsd
-0
-#narcoTrain
-0
-#nacroManiac
-0
-#endif
-    //klfprintf
-    //energy to buff
-    //energy to file
-    f_printf(&file,"#energy");
-    f_printf(&file,"%d",Energy.GetEnergy());
-    //weed, lambda welcome!
-    f_printf(&file,"#narcograss");
-    if(ArrayOfUserIntentions[5].current_time>=0)
-        f_printf(&file,"%d",1);
-    else
-        f_printf(&file,"%d",0);
 
-
-   // f_write(&file, DataFileBuff, buff_size, &bw);
-    f_close(&file);
-    Uart.Printf("App_t::SaveData done");
-}
-void App_t::LoadData()
-{
-    FIL file;
-       int open_code= f_open (
-               &file,
-          "\state.ini",
-          FA_READ
-       );
-       if(open_code!=0)
-           return;
-       //till file end
-       int line_num=0;
-       while(f_gets(DataFileBuff, SD_STRING_SZ, &file) != nullptr)
-       {
-           if(strncmp(DataFileBuff,"#",1)==0)
-               continue;
-           else
-               line_num++;
-           int int_val;
-           int_val=strtol(DataFileBuff,NULL,10);
-           if(line_num==1)
-               Energy.SetEnergy(int_val);
-           if(line_num==2 && int_val==1)//weed
-               ArrayOfUserIntentions[5].current_time=0;
-           if(line_num==2 && int_val==1)//her
-               ArrayOfUserIntentions[6].current_time=0;
-           if(line_num==3 && int_val==1)//lsd
-               ArrayOfUserIntentions[7].current_time=0;
-           if(line_num==3 && int_val==1)//krayk
-               ArrayOfUserIntentions[8].current_time=0;
-           if(line_num==3 && int_val==1)//manyac
-               ArrayOfUserIntentions[10].current_time=0;
-       }
-
-     //  UINT bw;
-     //  int buff_size;
-       //energy to buff
-       //f_read(
-
-       //energy to data
-
-       f_close(&file);
-       Uart.Printf("App_t::LoadData done");
-}
 void App_t::WriteInentionStringToData(char * int_name, int int_val, char * emo_name)
 {
     int reason_id=-1;

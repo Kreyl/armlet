@@ -20,7 +20,6 @@
 #include "sound.h"
 
 #include "kl_sd.h"
-#include "sd_log.h"
 
 #define USB_ENABLED
 
@@ -93,6 +92,7 @@ void Pwr_t::Task() {
             chSysUnlock();
 #endif
             Uart.Printf("\rExtPwr Off");
+            Lcd.Printf(0, 50, clBlue, clBlack, "ExtPwr OFF ");
             if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
         }
         else if(!WasExternal and ExternalPwrOn()) {
@@ -107,9 +107,12 @@ void Pwr_t::Task() {
             Usb.Connect();
 #endif
             Uart.Printf("\rExtPwr On");
+            Lcd.Printf(0, 50, clBlue, clBlack, "ExtPwr ON  ");
             if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
         }
-        //if(IsCharging()) Uart.Printf("\rCharging");
+//        if(IsCharging()) Uart.Printf("\rCharging");
+        if(IsCharging()) Lcd.Printf(0, 60, clBlue, clBlack, "Charging    ");
+        else             Lcd.Printf(0, 60, clRed,  clBlack, "Not Charging");
 
 #if 1 // ==== ADC ====
         Adc.Measure();
@@ -122,6 +125,8 @@ void Pwr_t::Task() {
         // Calculate percent
         if(mV2PercentHasChanged(U)) {
             // Indicate if has changed
+            Lcd.Printf(120, 60, clBlue, clBlack, "%u%%", CapacityPercent);
+
 //            Uart.Printf("\rAdc=%u; U=%u; %=%u", rslt, U, CapacityPercent);
 //            Uart.Printf("\r%u", U);
             if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
@@ -136,6 +141,7 @@ void Pwr_t::Init() {
     PinSetupIn(PWR_CHARGING_GPIO, PWR_CHARGING_PIN, pudPullUp);
     PinSetupAnalog(PWR_BATTERY_GPIO, PWR_BATTERY_PIN);
     Adc.Init();
+    Lcd.Printf(0, 50, clBlue, clBlack, "ExtPwr OFF ");
     // Create and start thread
     PThr = chThdCreateStatic(waPwrThread, sizeof(waPwrThread), LOWPRIO, (tfunc_t)PwrThread, NULL);
 }

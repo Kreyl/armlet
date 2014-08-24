@@ -29,13 +29,16 @@
 
 #include "flashloader_support.h"
 
+#include "BeepSequences.h"
+#include "VibroSequences.h"
+
 #include "application.h"
 #include "atlantis_music_tree.h"
 #include "..\AtlGui\atlgui.h"
 
+extern SDCDriver SDCD1;
+
 static inline void Init();
-#define CLEAR_SCREEN_FOR_DEBUG
-//#define UART_MESH_DEBUG
 
 int main() {
     // Check if IWDG reset occured => power-off occured
@@ -105,58 +108,70 @@ int main() {
 
 void Init() {
     Uart.Init(256000);
-    Uart.Printf("\rAtlantis   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
-
-    //in case uart not working 0
-#if 0 //const_cast for defines test
-#define DSTRING "GAGAGA"
-#define DSTRING2 "GAGAGA2"
-    char * str1 =const_cast<char *> ("GAGAGA");
-    char * str2;
-    str2= const_cast<char *> (DSTRING2);
-
-    if(strcmp(str1,const_cast<char *> (DSTRING))==0)
-        Uart.Printf("\r DSTRING  str %s OK\r",str1);
-    if(strcmp(str2,const_cast<char *> (DSTRING2))==0)
-        Uart.Printf("\r DSTRING2  str %s OK\r",str2);
-#endif
-#if 1
-    SD.Init();
-    Log.Init();
-    // Read config
-    SD.iniReadInt32("Radio", "ID", "settings.ini", &App.ID);
-    Uart.Printf("\rID=%u", App.ID);
-    Log.Printf("ID=%u", App.ID);
-
+    Uart.Printf("\rTesting   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
     Lcd.Init();
-    Lcd.Cls(clAtlBack);
+    Lcd.Cls(clBlack);
+    Lcd.Printf(0, 0, clGreen, clBlack, "Testing Firmware");
 
-    #ifndef CLEAR_SCREEN_FOR_DEBUG
-    Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
-    #endif
+    // ==== SD ====
+    SD.Init();
+    if(SD.IsReady) Lcd.Printf(0, 10, clGreen, clBlack, "SD capacity: %u", SDCD1.capacity);
+    else Lcd.Printf(0, 10, clRed, clBlack, "SD Init Failure");
 
-    Keys.Init();
+    // ==== Beeper & Vibro ====
     Beeper.Init();
     Vibro.Init();
+    Lcd.Printf(0, 20, clGreen, clBlack, "Beep & Vibrate");
+    Beeper.Beep(BeepPillOk);
+    Vibro.Vibrate(BrrBrr);
+    chThdSleepMilliseconds(450);
+    Vibro.Vibrate(BrrBrr);
+    chThdSleepMilliseconds(450);
 
+    // ==== Keys ====
+    for(uint8_t i=0; i<KEYS_CNT; i++) PinSetupIn(KeyData[i].PGpio, KeyData[i].Pin, pudPullUp);
+    Lcd.Printf(0, 30, clYellow, clBlack, "Press A  ");
+    while(PinIsSet(KeyData[keyA].PGpio, KeyData[keyA].Pin));
+    Vibro.Vibrate(BrrBrr);
+    Lcd.Printf(0, 30, clYellow, clBlack, "Press B  ");
+    while(PinIsSet(KeyData[keyB].PGpio, KeyData[keyB].Pin));
+    Vibro.Vibrate(BrrBrr);
+    Lcd.Printf(0, 30, clYellow, clBlack, "Press C  ");
+    while(PinIsSet(KeyData[keyC].PGpio, KeyData[keyC].Pin));
+    Vibro.Vibrate(BrrBrr);
+    Lcd.Printf(0, 30, clYellow, clBlack, "Press X  ");
+    while(PinIsSet(KeyData[keyX].PGpio, KeyData[keyX].Pin));
+    Vibro.Vibrate(BrrBrr);
+    Lcd.Printf(0, 30, clYellow, clBlack, "Press Y  ");
+    while(PinIsSet(KeyData[keyY].PGpio, KeyData[keyY].Pin));
+    Vibro.Vibrate(BrrBrr);
+    Lcd.Printf(0, 30, clYellow, clBlack, "Press Z  ");
+    while(PinIsSet(KeyData[keyZ].PGpio, KeyData[keyZ].Pin));
+    Vibro.Vibrate(BrrBrr);
+    Lcd.Printf(0, 30, clYellow, clBlack, "Press L  ");
+    while(PinIsSet(KeyData[keyL].PGpio, KeyData[keyL].Pin));
+    Vibro.Vibrate(BrrBrr);
+    Lcd.Printf(0, 30, clYellow, clBlack, "Press E  ");
+    while(PinIsSet(KeyData[keyE].PGpio, KeyData[keyE].Pin));
+    Vibro.Vibrate(BrrBrr);
+    Lcd.Printf(0, 30, clYellow, clBlack, "Press R  ");
+    while(PinIsSet(KeyData[keyR].PGpio, KeyData[keyR].Pin));
+    Vibro.Vibrate(BrrBrr);
+    Lcd.Printf(0, 30, clGreen,  clBlack, "Keys OK  ");
+
+    // ==== IR ====
     IR.RxInit();
     MassStorage.Init();
     Power.Init();
 
     Sound.Init();
     Sound.SetVolume(START_VOL_CONST);
+    Sound.Play("moon.mp3");
 
     PillMgr.Init();
-#if 1
-    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
+
     App.Init();
-    AtlGui.Init();
+    Lcd.Printf(0, 90, clGreen, clBlack, "Pill disconnected ");
 
     Radio.Init();
-    Mesh.Init();
-
-    Uart.Printf("\rInit done");
-    Log.Printf("Init done");
-#endif
-#endif
 }

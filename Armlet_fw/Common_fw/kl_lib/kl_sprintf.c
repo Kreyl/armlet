@@ -97,6 +97,11 @@ int32_t kl_vsprintf(ftVoidChar PPutChar, int32_t MaxLength, const char *format, 
                     if(CharCnt >= MaxLength) return CharCnt;
                 } // for i
             } // if 'A'
+            else if(c == '%') {
+                if(CharCnt >= MaxLength) return CharCnt;
+                PPutChar('%');
+                CharCnt++;
+            }
             if(CharCnt >= MaxLength) return CharCnt;
         } // if c != '%'
     } // while

@@ -1,8 +1,7 @@
 #include "sound.h"
 #include <string.h>
 #include "evt_mask.h"
-
-//#if SOUND_ENABLED
+#include "lcd2630.h"
 
 Sound_t Sound;
 
@@ -140,8 +139,14 @@ void Sound_t::IPlayNew() {
     Uart.Printf("\rPlay %S", IFilename);
     rslt = f_open(&IFile, IFilename, FA_READ+FA_OPEN_EXISTING);
     if (rslt != FR_OK) {
-        if (rslt == FR_NO_FILE) Uart.Printf("\r%S: not found", IFilename);
-        else Uart.Printf("\rOpenFile error: %u", rslt);
+        if (rslt == FR_NO_FILE) {
+            Uart.Printf("\r%S: not found", IFilename);
+            Lcd.Printf(0, 80, clRed, clBlack, "snd: No Such File ");
+        }
+        else {
+            Uart.Printf("\rOpenFile error: %u", rslt);
+            Lcd.Printf(0, 80, clRed, clBlack, "snd: OpenFile Err ");
+        }
         IFilename = NULL;
         Stop();
         return;

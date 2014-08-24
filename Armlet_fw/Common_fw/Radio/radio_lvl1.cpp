@@ -13,6 +13,8 @@
 #include "peripheral.h"
 #include "mesh_lvl.h"
 
+#include "lcd2630.h"
+
 //#define DBG_PINS
 
 #ifdef DBG_PINS
@@ -31,40 +33,12 @@ static void rLvl1Thread(void *arg) {
     while(true) Radio.ITask();
 }
 
-//#define TX
-//#define LED_RX
 void rLevel1_t::ITask() {
     while(true) {
-        if(Mesh.IsInit) {
-            CC.Recalibrate();
-            CC.SetChannel(MESH_CHANNEL); /* set mesh channel */
-            CC.SetPktSize(MESH_PKT_SZ);
-            uint32_t EvtMsk = chEvtWaitAny(ALL_EVENTS); /* wait mesh cycle */
-
-            if(EvtMsk & EVTMSK_MESH_RX) IMeshRx();
-
-            if(EvtMsk & EVTMSK_MESH_TX) {
-//                    Uart.Printf("rTxPkt: %u %u %u %u %u %u %u  {%u %u %u %d %u %u %u} \r",
-//                            Mesh.PktTx.SenderInfo.Mesh.SelfID,
-//                            Mesh.PktTx.SenderInfo.Mesh.CycleN,
-//                            Mesh.PktTx.SenderInfo.Mesh.TimeOwnerID,
-//                            Mesh.PktTx.SenderInfo.Mesh.TimeAge,
-//                            Mesh.PktTx.SenderInfo.State.Reason,
-//                            Mesh.PktTx.SenderInfo.State.Location,
-//                            Mesh.PktTx.SenderInfo.State.Emotion,
-//                            Mesh.PktTx.AlienID,
-//                            Mesh.PktTx.AlienInfo.Mesh.Hops,
-//                            Mesh.PktTx.AlienInfo.Mesh.Timestamp,
-//                            Mesh.PktTx.AlienInfo.Mesh.TimeDiff,
-//                            Mesh.PktTx.AlienInfo.State.Reason,
-//                            Mesh.PktTx.AlienInfo.State.Location,
-//                            Mesh.PktTx.AlienInfo.State.Emotion
-//                            );
-                CC.TransmitSync(&Mesh.PktTx); /* Pkt was prepared in Mesh Thd */
-                Mesh.ITxEnd();
-            } // Mesh Tx
-        } // Mesh Init
-        else chThdSleepMilliseconds(41);
+        int8_t RSSI=0;
+        uint8_t RxRslt = CC.ReceiveSync(306, &Mesh.PktRx, &RSSI);
+        if(RxRslt == OK) Lcd.Printf(0, 70, clGreen, clBlack, "Radio RSSI=%d  ", RSSI);
+        else             Lcd.Printf(0, 70, clGreen, clBlack, "Radio: nothing  ", RSSI);
     }
 }
 #endif
