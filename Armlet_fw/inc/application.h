@@ -60,7 +60,7 @@ public:
     uint8_t ParseCsvFileToEmotions(const char* filename);
     void WriteInentionStringToData(char * int_name, int int_val, char * emo_name);
 
-    void UpdateLocation(RxTable_t * p_table_in);
+    void UpdateLocation();
     //void GetDataFileName();
    char DataFileBuff[33];
 
