@@ -155,6 +155,10 @@ void SeekRecentlyPlayedFilesEmo::OnCallStopPlay(int emo_id,int file_id, int pos)
     //this->last_array_id идет в минус по ходу пляски, проверяются в плюс начиная с этого
     //стартовый - ???
     this->IncrementArrayId();
+    // проверяем на намеряния - если у корня и не эмоции!
+    if(emotions[emo_id].parent==0 && strcmp(emotions[emo_id].name,"pozitiv")!=0 && strcmp(emotions[emo_id].name,"negativ")!=0 &&
+            strcmp(emotions[emo_id].name,"duhovnoe")!=0 && strcmp(emotions[emo_id].name,"zhelanie")!=0)
+        return;
     seek_array[this->last_array_id].emo_id=emo_id;
     seek_array[this->last_array_id].file_indx=file_id;
     seek_array[this->last_array_id].seek_pos=pos;
@@ -176,6 +180,9 @@ int SeekRecentlyPlayedFilesEmo::CheckIfRecent(int emo_id,int file_id)
 
 void SeekRecentlyPlayedFilesEmo::IncrementArrayId()
 {
+    //на самом деле строчка ненужна, но надо понимать как оплучается стартовая позиция
+    if(last_array_id==-1)
+        last_array_id=0;
     this->last_array_id--;
     if(this->last_array_id<0)
         this->last_array_id=MAX_RECENTLY_PLAYED_ARRAY-1;
@@ -186,7 +193,6 @@ int SeekRecentlyPlayedFilesEmo::GetNext(int current_array_id)
         return 0;
     else
         return current_array_id+1;
-
 }
 
 void PrintSCIDToUart()
@@ -461,4 +467,11 @@ void SwitchPlayerReason(int reason_id,bool is_turn_on)
            }
        }
 }
-
+void ReasonAgeModifyChangeMelody()
+{
+    if(reasons[SICD.last_intention_index_winner].weight>0 && reasons[SICD.last_intention_index_winner].age>=0 &&  reasons[SICD.last_intention_index_winner].age<=AGE_SEC_REDUCE*(AGE_MAX_WEIGHT_REDUCE-1)+1)
+    {
+        reasons[SICD.last_intention_index_winner].age+=AGE_SEC_REDUCE;
+        reasons[SICD.last_intention_index_winner].
+    }
+}

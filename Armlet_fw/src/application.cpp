@@ -36,6 +36,8 @@
 #include "mesh_lvl.h"
 
 App_t App;
+//#define SCREEN_SUSPEND_TIMER
+
 #define PILLTYPEWEED 1
 #define PILLTYPELSD 2
 #define PILLTYPEHER 3
@@ -246,6 +248,8 @@ void App_t::Task() {
             Lcd.Printf(11, 31+(i*10), clRed, clBlack,"ID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
         }
 #endif
+            //обновляем данные по локации TODO - записать их  в исходящий пакет  mesh
+            UpdateLocation();
             //перекладываем данные с радио в массив текущих резонов
 
             int val1= MIN((uint32_t)reasons_number, RxTable.PTable->Size);
@@ -299,8 +303,11 @@ void App_t::Task() {
 #endif
 #if 1 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
-//            Uart.Printf("\rNewSecond");
-// @KL            AtlGui.AddSuspendScreenTimer(1);
+
+#ifndef SCREEN_SUSPEND_TIMER
+            AtlGui.AddSuspendScreenTimer(1);
+#endif
+
             //UPDATE user intentions timers
             if(UpdateUserIntentionsTime(1))
                 CheckAndRedrawFinishedReasons();
@@ -381,9 +388,14 @@ void App_t::UpdateLocation()
 {
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
        // Uart.Printf(" ID=%u; Pwr=%u\r", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
-        if(RxTable.PTable->Row[i].ID>
+        if((RxTable.PTable->Row[i].ID>=first_location_id && RxTable.PTable->Row[i].ID<=last_location_id) ||
+           (RxTable.PTable->Row[i].ID>=first_location_id && RxTable.PTable->Row[i].ID<=last_location_id))
+       if(RxTable.PTable->Row[i].Level>last_location_signal_pw)
+       {
+           last_location_signal_pw = RxTable.PTable->Row[i].Level;
+           last_location = RxTable.PTable->Row[i].ID;
+       }
     }
-
 }
 void App_t::Init() {
     State = asIdle;
