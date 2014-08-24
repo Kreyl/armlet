@@ -59,8 +59,9 @@ void Lcd_t::Init() {
     WriteCmd(0x13);         // Normal Display Mode ON
     WriteCmd(0x36, 0xA0);   // Display mode: Y inv, X none-inv, Row/Col exchanged
 
-    Cls(clBlack);
     SetBrightness(Brightness);
+    chSemInit(&semLcd, 1);
+    Cls(clBlack);
 }
 
 void Lcd_t::Shutdown(void) {
@@ -158,31 +159,39 @@ void Lcd_t::PutChar(char c) {
 static inline void FLcdPutChar(char c) { Lcd.PutChar(c); }
 
 void Lcd_t::Printf(uint8_t x, uint8_t y, Color_t ForeClr, Color_t BckClr, const char *S, ...) {
-    Fnt.X = x;
-    Fnt.Y = y;
-    Fnt.FClr = ForeClr;
-    Fnt.BClr = BckClr;
-    va_list args;
-    va_start(args, S);
-    kl_vsprintf(FLcdPutChar, 20, S, args);
-    va_end(args);
+    msg_t msg = chSemWait(&semLcd);
+    if(msg == RDY_OK) {
+        Fnt.X = x;
+        Fnt.Y = y;
+        Fnt.FClr = ForeClr;
+        Fnt.BClr = BckClr;
+        va_list args;
+        va_start(args, S);
+        kl_vsprintf(FLcdPutChar, 20, S, args);
+        va_end(args);
+        chSemSignal(&semLcd);
+    }
 }
 
 #if 1 // ============================= Graphics ================================
 void Lcd_t::Cls(Color_t Color) {
-    SetBounds(0, LCD_W, 0, LCD_H);
-    // Prepare variables
-    uint32_t Cnt = LCD_W * LCD_H;
-    uint8_t b1 = Color.RGBTo565_HiByte();
-    uint8_t b2 = Color.RGBTo565_LoByte();
-    // Write RAM
-    WriteByte(0x2C);    // Memory write
-    DC_Hi();
-    for(uint32_t i=0; i<Cnt; i++) {
-        WriteByte(b1);
-        WriteByte(b2);
+    msg_t msg = chSemWait(&semLcd);
+    if(msg == RDY_OK) {
+        SetBounds(0, LCD_W, 0, LCD_H);
+        // Prepare variables
+        uint32_t Cnt = LCD_W * LCD_H;
+        uint8_t b1 = Color.RGBTo565_HiByte();
+        uint8_t b2 = Color.RGBTo565_LoByte();
+        // Write RAM
+        WriteByte(0x2C);    // Memory write
+        DC_Hi();
+        for(uint32_t i=0; i<Cnt; i++) {
+            WriteByte(b1);
+            WriteByte(b2);
+        }
+        DC_Lo();
+        chSemSignal(&semLcd);
     }
-    DC_Lo();
 }
 
 void Lcd_t::GetBitmap(uint8_t x0, uint8_t y0, uint8_t Width, uint8_t Height, uint16_t *PBuf) {
@@ -280,15 +289,19 @@ void Lcd_t::PutFontChar(char c) {
 static inline void FLcdPutFontChar(char c) { Lcd.PutFontChar(c); }
 
 void Lcd_t::Printf(const tFont &Font, uint8_t x, uint8_t y, Color_t ForeClr, Color_t BckClr, const char *S, ...) {
-    Fnt.X = x;
-    Fnt.Y = y;
-    Fnt.FClr = ForeClr;
-    Fnt.BClr = BckClr;
-    Fnt.PFirstChar = Font.Chars;
-    va_list args;
-    va_start(args, S);
-    kl_vsprintf(FLcdPutFontChar, 20, S, args);
-    va_end(args);
+    msg_t msg = chSemWait(&semLcd);
+    if(msg == RDY_OK) {
+        Fnt.X = x;
+        Fnt.Y = y;
+        Fnt.FClr = ForeClr;
+        Fnt.BClr = BckClr;
+        Fnt.PFirstChar = Font.Chars;
+        va_list args;
+        va_start(args, S);
+        kl_vsprintf(FLcdPutFontChar, 20, S, args);
+        va_end(args);
+        chSemSignal(&semLcd);
+    }
 }
 #endif
 

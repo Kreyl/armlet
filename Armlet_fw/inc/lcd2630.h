@@ -75,6 +75,7 @@ private:
     void WriteCmd(uint8_t ACmd, uint8_t AData);
     FIL IFile;
     char IFileBuf[LCD_FILE_BUF_SZ];
+    Semaphore semLcd;
 public:
     // General use
     uint16_t Brightness;

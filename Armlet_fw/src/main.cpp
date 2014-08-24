@@ -110,7 +110,6 @@ void Init() {
     Uart.Init(256000);
     Uart.Printf("\rTesting   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
     Lcd.Init();
-    Lcd.Cls(clBlack);
     Lcd.Printf(0, 0, clGreen, clBlack, "Testing Firmware");
 
     // ==== SD ====

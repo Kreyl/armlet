@@ -123,14 +123,8 @@ void Pwr_t::Task() {
         // Calculate voltage
         uint32_t U = (2 * rslt * ADC_VREF_MV) / 4095;   // 2 because of resistor divider
         // Calculate percent
-        if(mV2PercentHasChanged(U)) {
-            // Indicate if has changed
-            Lcd.Printf(120, 60, clBlue, clBlack, "%u%%", CapacityPercent);
-
-//            Uart.Printf("\rAdc=%u; U=%u; %=%u", rslt, U, CapacityPercent);
-//            Uart.Printf("\r%u", U);
-            if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
-        }
+        mV2PercentHasChanged(U);
+        Lcd.Printf(120, 60, clBlue, clBlack, "%u%%", CapacityPercent);
 #endif
     } // while
 }
