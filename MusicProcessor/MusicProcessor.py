@@ -365,7 +365,7 @@ def updateMusic(sourceDir = '.', verifyFiles = False):
     noMusicCharacters = []
     errorCharacters = []
     for d in characterDirs:
-        (number, _longName, power, kill, killLength, addiction) = characters.get(d, (-1, None, None))
+        (number, _longName, power, kill, killLength, addiction) = characters.get(d, (-1, None, None, None, None, None))
         (hasMusic, hasErrors) = processCharacter(d, number, power, kill, killLength, addiction, emotions, sourceDir, verifyFiles)
         if hasMusic:
             if not hasErrors:
