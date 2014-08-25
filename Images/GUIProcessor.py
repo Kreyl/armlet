@@ -72,6 +72,9 @@ H_CONTENT = '''\
 
 #define NO_BUTTON {nullptr, 0, 0, nullptr, nullptr, nullptr}
 
+#define LOCK_X %d
+#define LOCK_Y %d
+
 typedef struct Button {
     const char* name; // Text to be displayed for a button if text interface is used.
     const int left;
@@ -155,12 +158,15 @@ def tagString(s):
 def hButton(tag, name):
     return "#define %s\t%s" % (tagString(tag), cString(name))
 
+def getStyles(node):
+    return dict(split(' *: *', pair) for pair in split(' *; *', str(node.attrs['style'])))
+
 def cButton(node):
     name = node.attrs['alt']
     tag = node.attrs.get('tag')
     key = str(node.attrs['key']).upper()
     index = BUTTONS.index(key)
-    styles = dict(split(' *: *', pair) for pair in split(' *; *', str(node.attrs['style'])))
+    styles = getStyles(node)
     left = getInt(styles.get('left'))
     top = getInt(styles.get('top'))
     isPressable = node.attrs.get('isPressable')
@@ -181,8 +187,11 @@ def main():
     print "Processing %s..." % GUI_HTML
     soup = BeautifulSoup(open(GUI_HTML))
     screens = soup.find_all(class_ = 'screen')
+    lockStyles = getStyles(soup.find(id = 'lock'))
+    lockLeft = getInt(lockStyles.get('left'))
+    lockTop = getInt(lockStyles.get('top'))
     with open(getFileName(H_TARGET), 'wb') as f:
-        f.write(H_CONTENT % (currentTime(), '\n'.join(hButton(node.attrs['tag'], node.attrs['alt']) for node in soup.find_all(tag = True))))
+        f.write(H_CONTENT % (currentTime(), '\n'.join(hButton(node.attrs['tag'], node.attrs['alt']) for node in soup.find_all(tag = True)), lockLeft, lockTop))
     with open(getFileName(C_TARGET), 'wb') as f:
         f.write(C_CONTENT % (currentTime(), ',\n'.join(cScreen(screen, INDENT) for screen in screens)))
     if isWindows:

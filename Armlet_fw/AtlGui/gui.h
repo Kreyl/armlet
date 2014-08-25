@@ -7,7 +7,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-07-30 04:31:28
+ * Generated at 2014-08-25 19:11:10
  */
 #ifndef GUI_H
 #define GUI_H
@@ -43,6 +43,9 @@
 #define RNAME_DEATH	"\xd1\xec\xe5\xf0\xf2\xfc"
 
 #define NO_BUTTON {nullptr, 0, 0, nullptr, nullptr, nullptr}
+
+#define LOCK_X 62
+#define LOCK_Y 44
 
 typedef struct Button {
     const char* name; // Text to be displayed for a button if text interface is used.
