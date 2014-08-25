@@ -167,6 +167,7 @@ static inline void KeysHandler() {
         {
             if(Evt.KeyID[0] == KEY_PWRON)
             {
+                //выключение
                 Log.Shutdown( );
                 chThdSleepMilliseconds(250);
                 Power.EnterStandby();
@@ -177,12 +178,53 @@ static inline void KeysHandler() {
         {
             AtlGui.ButtonIsReleased(Evt.KeyID[0],keRepeat);
         }
+        else if(Evt.Type==keCancel)
+        {
+            AtlGui.RenderFullScreen(AtlGui.current_state);
+        }
+
         else if(Evt.Type==keCombo)
         {
-               if(Evt.NKeys==3 && Evt.KeyID[0]==1 && Evt.KeyID[1]==3 && Evt.KeyID[2]==4)
+            //    void EnterStandby();
+            //void Reset()
+           // Программное включение, выключение (длинная А)+
+            //, перезагрузка, с перепрошивкой, если есть файл на флэшке (ARX),
+            //переход в бутлоадер (ABCXYZ),
+            //сброс состояния персонажа с перезагрузкой (ABC Z LER)
+               //if(Evt.NKeys==3 && Evt.KeyID[0]==1 && Evt.KeyID[1]==3 && Evt.KeyID[2]==4)//bcx
+               if(Evt.NKeys==3 && Evt.KeyID[0]==keyA && Evt.KeyID[1]==keyX && Evt.KeyID[2]==keyR)//arx
                {
+                   Uart.Printf(" GO REBOOT  %d\r", Evt.NKeys);
+                   Log.Shutdown( );
+                   chThdSleepMilliseconds(250);
+                   Power.Reset();
+
+               }
+               if(
+                  Evt.NKeys==6 &&
+                  Evt.KeyID[0]==keyA && Evt.KeyID[1]==keyB && Evt.KeyID[2]==keyC &&
+                  Evt.KeyID[3]==keyX && Evt.KeyID[4]==keyY && Evt.KeyID[5]==keyZ
+               )//abc xyz
+               {
+
+
+                   Log.Shutdown( );
+                   chThdSleepMilliseconds(250);
                    Uart.Printf(" GO BOOTLOADER %d\r", Evt.NKeys);
                    Bootloader.DFU_request();
+               }
+               if(
+                  Evt.NKeys==7 &&
+                  Evt.KeyID[0]==keyA && Evt.KeyID[1]==keyB && Evt.KeyID[2]==keyC &&
+                  Evt.KeyID[3]==keyZ && Evt.KeyID[4]==keyL && Evt.KeyID[5]==keyE && Evt.KeyID[6]==keyR
+               )//abc z ler
+               {
+                   Uart.Printf(" GO REBOOT ( &DROP state later!) %d\r", Evt.NKeys);
+                                     Bootloader.DFU_request();
+                   //TODO drop character to initial here
+                   Log.Shutdown( );
+                   chThdSleepMilliseconds(250);
+                   Power.Reset();
                }
         }
 

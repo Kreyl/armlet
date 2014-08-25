@@ -18,6 +18,8 @@
 #define MAX_EMO_NAME_CHAR 20
 #define MAX_MUSIC_FILE_NAME_CHAR 128
 
+#define MID_SEEK_SUPPORT
+
 //#define UART_EMOTREE_DEBUG
 
 static const char* FDirList[] = {
@@ -156,6 +158,8 @@ char * GetFileNameToPlayFromEmoId(int emo_id) {
 		Uart.Printf("\rGetFileNameToPlayFromEmoId emo_id out of range");
 		return NULL;
 	}
+
+
 	//if no file available for this emo, play from top emo
 	if(emotions[emo_id].numTracks==0) {
 		Uart.Printf("\rNo files for emo %s", emotions[emo_id]);
@@ -186,13 +190,22 @@ char * GetFileNameToPlayFromEmoId(int emo_id) {
 	//Uart.Printf("GetFileNameToPlayFromEmoId result: rand_val %d, track_num %d, last played %d \r", rand_val,track_num_calculated,emotions[emo_id].lastPlayedTrack);
 	emotions[emo_id].lastPlayedTrack = track_num_calculated;
 //	Uart.Printf("GetFileNameToPlayFromEmoId result: new last played %d\r",emotions[emo_id].lastPlayedTrack);
+
+
+#ifdef MID_SEEK_SUPPORT
+       SRPFESingleton.last_played_emo_imdx=emo_id;
+       SRPFESingleton.last_played_file_indx=track_num_calculated;
+#endif
 	return GetMusicFileNameFromList(emo_id, track_num_calculated);
 }
 void PlayNewEmo(int emo_id, int err_id) {
+
     if(SICD.is_global_stop_active)
     {
         //во время глобального останова рассчетов играть одну и ту-же эмоцию
-        PlayNewEmo(SICD.last_played_emo,5);
+        //PlayNewEmo(SICD.last_played_emo,5); - endless cycle
+        Uart.Printf("PlayNewEmo called on globalstop,playing same emo");
+        emo_id=SICD.last_played_emo;
     }
     //обработка снижений важности резонов:
     if(SRD.reduced_reason_id!=-1 && SRD.reduced_reason_id!=SICD.last_intention_index_winner)
@@ -215,13 +228,33 @@ void PlayNewEmo(int emo_id, int err_id) {
         emo_id =0;
     }
     //Uart.Printf("")
+#ifdef MID_SEEK_SUPPORT
+       //get old position
+       int old_pos=Sound.GetPosition();
+       if(emo_id!=SRPFESingleton.last_played_emo_imdx)
+           Uart.Printf("MID_SEEK_SUPPORT warning! possible differ: emo play %d, rmo stored: %d",emo_id,SRPFESingleton.last_played_emo_imdx);
+      //записали старые emo id file id
+       SRPFESingleton.OnCallStopPlay(SRPFESingleton.last_played_emo_imdx,SRPFESingleton.last_played_file_indx,old_pos);
+
+#endif
+
     SICD.last_played_emo=emo_id;
     char * fname = GetFileNameToPlayFromEmoId(SICD.last_played_emo);
     if(fname != nullptr) {
        strcpy(PlayEmoBuffTmp,fname);
+#ifdef MID_SEEK_SUPPORT
+       //проверили новые emo id file id
+       int seek_pos_old=SRPFESingleton.CheckIfRecent(SRPFESingleton.last_played_emo_imdx,SRPFESingleton.last_played_file_indx);
+       Sound.Play(PlayEmoBuffTmp,seek_pos_old);
+       Uart.Printf(PlayEmoBuffTmp);
+       Uart.Printf("\r");
+       Uart.Printf("\r PlayNewEmo SEEKPOS %d",seek_pos_old);
+#else
        Sound.Play(PlayEmoBuffTmp);
        Uart.Printf(PlayEmoBuffTmp);
        Uart.Printf("\r");
+
+#endif
 
     }
     else {

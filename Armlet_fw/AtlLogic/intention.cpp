@@ -9,7 +9,7 @@ int CurrentIntentionArraySize=2;
 
 struct SeekRecentlyPlayedFilesEmo SRPFESingleton
 {
-    -1,{
+    -1,-1,-1,{
     {0,-1,-1},
     {0,-1,-1},
     {0,-1,-1},
@@ -159,11 +159,12 @@ void SeekRecentlyPlayedFilesEmo::OnCallStopPlay(int emo_id,int file_id, int pos)
 {
     //this->last_array_id идет в минус по ходу пляски, проверяются в плюс начиная с этого
     //стартовый - ???
-    this->IncrementArrayId();
+
     // проверяем на намеряния - если у корня и не эмоции!
     if(emotions[emo_id].parent==0 && strcmp(emotions[emo_id].name,"pozitiv")!=0 && strcmp(emotions[emo_id].name,"negativ")!=0 &&
             strcmp(emotions[emo_id].name,"duhovnoe")!=0 && strcmp(emotions[emo_id].name,"zhelanie")!=0)
         return;
+    this->IncrementArrayId();
     seek_array[this->last_array_id].emo_id=emo_id;
     seek_array[this->last_array_id].file_indx=file_id;
     seek_array[this->last_array_id].seek_pos=pos;
@@ -176,11 +177,14 @@ int SeekRecentlyPlayedFilesEmo::CheckIfRecent(int emo_id,int file_id)
 
         if(seek_array[this->last_array_id].emo_id==emo_id)
             if(seek_array[this->last_array_id].file_indx==file_id)
-                return seek_array[this->last_array_id].seek_pos;
-
+            {
+                int rval=seek_array[this->last_array_id].seek_pos;
+                seek_array[this->last_array_id].seek_pos=0;
+                return rval;
+            }
         curr_id=GetNext(curr_id);
     }
-    return -1;
+    return 0;
 }
 
 void SeekRecentlyPlayedFilesEmo::IncrementArrayId()

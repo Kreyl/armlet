@@ -115,6 +115,8 @@ typedef struct SRPFEArrayEl
 typedef struct SeekRecentlyPlayedFilesEmo
 {
     int last_array_id;
+    int last_played_file_indx;
+    int last_played_emo_imdx; //теоретически то дублирование данных, но тут они нужны в связке, и чтобы 100 раз везде не проверять, пусть лучше safe-load будет в одно изолированное место
     SRPFEArrayEl seek_array[MAX_RECENTLY_PLAYED_ARRAY];
     void OnCallStopPlay(int emo_id,int file_id, int pos);
     //return -1 if no, pos if yes
