@@ -126,7 +126,13 @@ void InitArrayOfUserIntentions()
     Uart.Printf("InitArrayOfUserIntentions done\r");
 }
 
+struct GlobalStopCalculationSupport GSCS=
+{
+        gsNotInited,
+        -1, //timer
+        -1,-1 //draka
 
+};
 struct IntentionCalculationData SICD=
 {
       10,//  Intention_weight_cost;
@@ -189,32 +195,53 @@ int SeekRecentlyPlayedFilesEmo::CheckIfRecent(int emo_id,int file_id)
     }
     return 0;
 }
+void GlobalStopCalculationSupport::BeginStopCalculations(GlobalStopType_t stop_reason_type_in)
+{
+    this->stop_reason_type=stop_reason_type_in;
+    this->timer=0;
+    SICD.is_global_stop_active=true;
+    Uart.Printf("\rGlobalStopCalculationSupport::BeginStopCalculations()");
+}
 void GlobalStopCalculationSupport::FinishStopCalculation()
 {
     this->timer=-1;
+    SICD.is_global_stop_active=false;
+    Uart.Printf("\rGlobalStopCalculationSupport::FinishStopCalculation()");
 }
 int GlobalStopCalculationSupport::GetFightTime()
 {
-    return 10;
+    return 20;
 }
 void GlobalStopCalculationSupport::OnNewSec()
 {
     if(this->stop_reason_type==gsDraka)
     {
         if(timer==0)
-            PlayNewEmo(reasons[ArrayOfUserIntentions[SI_FIGHT].reason_indx].eID,6);
-        if(timer==GetFightTime() || timer ==MAX_FIGHT_PLAY_TIME)
+        {
+            draka_fight_length=MIN(GetFightTime(),MAX_FIGHT_PLAY_TIME);
+            draka_heart_length= HEART_PLAYING_TIME_SEC;
+            PlayNewEmo(reasons[ArrayOfUserIntentions[SI_FIGHT].reason_indx].eID,6,true);
+        }
+        if(timer==draka_fight_length)
         {
             for(int i=0;i<reasons_number;i++)
                  if(strcmp(reasons[i].name,"heartbeat")==0)
                  {
-                     PlayNewEmo(reasons[i])
+                     PlayNewEmo(reasons[i].eID,7,true);
                      break;
                  }
+        }
+        if(timer==draka_fight_length+draka_heart_length)
+        {
+            ArrayOfUserIntentions[SI_FIGHT].TurnOff();
+            PlayNewEmo(0,8,true);
+            FinishStopCalculation();
+            return;
         }
             //heartbeat
     }
     this->timer++;
+    Uart.Printf("\rGlobalStopCalculationSupport::OnNewSec() timer %d",timer);
 
 }
 void SeekRecentlyPlayedFilesEmo::IncrementArrayId()
@@ -499,25 +526,6 @@ void CallReasonSuccess(int user_reason_id)
     Energy.AddEnergy(5);
 
    return;
-}
-//not used!???
-void SwitchPlayerReason(int reason_id,bool is_turn_on)
-{
-    for(int i =0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
-       {
-           if(reason_id==ArrayOfUserIntentions[i].reason_indx)
-           {
-               if(is_turn_on)
-               {
-                   ArrayOfUserIntentions[i].current_time=0;
-               }
-               else //turn off
-               {
-                   ArrayOfUserIntentions[i].TurnOff();//current_time=-1;
-               }
-               return;
-           }
-       }
 }
 void ReasonAgeModifyChangeMelody()
 {

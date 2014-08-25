@@ -198,9 +198,9 @@ char * GetFileNameToPlayFromEmoId(int emo_id) {
 #endif
 	return GetMusicFileNameFromList(emo_id, track_num_calculated);
 }
-void PlayNewEmo(int emo_id, int err_id) {
+void PlayNewEmo(int emo_id, int err_id, bool is_gs) {
 
-    if(SICD.is_global_stop_active)
+    if(SICD.is_global_stop_active && !is_gs)
     {
         //во время глобального останова рассчетов играть одну и ту-же эмоцию
         //PlayNewEmo(SICD.last_played_emo,5); - endless cycle
@@ -208,6 +208,7 @@ void PlayNewEmo(int emo_id, int err_id) {
         emo_id=SICD.last_played_emo;
     }
     //обработка снижений важности резонов:
+    if(!is_gs)
     if(SRD.reduced_reason_id!=-1 && SRD.reduced_reason_id!=SICD.last_intention_index_winner)
     {
         if(SRD.is_reason_changed==false)

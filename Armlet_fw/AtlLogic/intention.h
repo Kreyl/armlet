@@ -101,15 +101,18 @@ typedef struct IntentionCalculationData
 
 #define HEART_PLAYING_TIME_SEC 20
 #define MAX_FIGHT_PLAY_TIME 100
-enum GlobalStopType_t {gsDraka};
+enum GlobalStopType_t {gsDraka, gsNotInited};
 typedef struct GlobalStopCalculationSupport
 {
     GlobalStopType_t stop_reason_type; //0 - draka
-    int stage;
     int timer; //-1 - inactive, else move by sec
+
+    int draka_fight_length;
+    int draka_heart_length;
     int GetFightTime();
     void FinishStopCalculation();
     void OnNewSec();
+    void BeginStopCalculations(GlobalStopType_t stop_reason_type_in);
 } GlobalStopCalculationSupport;
 
 typedef struct IntentionReduceData
@@ -161,6 +164,7 @@ void PushPlayerReasonToArrayOfIntentions();
 bool UpdateUserIntentionsTime(int add_time_sec);
 int MainCalculateReasons();
 extern struct IntentionCalculationData SICD;//SingletonIntentionCalculationData;
+extern struct GlobalStopCalculationSupport GSCS;
 extern struct IntentionReduceData SRD;
 void PrintSCIDToUart();
 

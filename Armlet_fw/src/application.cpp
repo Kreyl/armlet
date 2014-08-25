@@ -361,6 +361,8 @@ void App_t::Task() {
                 if(Time.S_total% SEC_TO_SELF_REDUCE ==0)
                     Energy.AddEnergy(-1);
             }
+            else
+                GSCS.OnNewSec();
             if(Time.S_total % 6 ==0)
             {
                 AtlGui.RenderNameTimeBat();

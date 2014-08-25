@@ -225,6 +225,8 @@ int bReasonChange(int screen_id, int button_id ,int press_mode)
                {
                    //setup reason
                    ArrayOfUserIntentions[user_reason_indx].current_time=0;
+                   if(user_reason_indx==SI_FIGHT)
+                       GSCS.BeginStopCalculations(gsDraka);
                    Uart.Printf("\rCALL bReasonChange REASON IS ON THE RUN");
                    //return red
                    return BUTTON_ENABLED;
