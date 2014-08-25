@@ -51,7 +51,7 @@ static const mVPercent_t mVPercentTable[] = {
 #define ADC_DEVIATION       11  // Sigma=5
 
 // ============================== Implementation ===============================
-static WORKING_AREA(waPwrThread, 128);
+static WORKING_AREA(waPwrThread, 256);
 static void PwrThread(void *arg) {
     chRegSetThreadName("Pwr");
     Power.Task();
@@ -124,7 +124,8 @@ void Pwr_t::Task() {
         uint32_t U = (2 * rslt * ADC_VREF_MV) / 4095;   // 2 because of resistor divider
         // Calculate percent
         mV2PercentHasChanged(U);
-        Lcd.Printf(120, 60, clBlue, clBlack, "%u%%", CapacityPercent);
+        Lcd.Printf(110, 60, clBlue, clBlack, " %u%% ", CapacityPercent);
+//        Uart.Printf("\rCapacity=%u", CapacityPercent);
 #endif
     } // while
 }

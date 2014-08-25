@@ -85,24 +85,11 @@ int main() {
     if(ClkResult) Uart.Printf("Clock failure\r");
 
     while(TRUE) {
-        uint32_t EvtMsk;
-        EvtMsk = chEvtWaitAny(ALL_EVENTS);
-        if(EvtMsk & EVTMSK_DFU_REQUEST) {
-            Usb.Shutdown();
-            MassStorage.Reset();
-            Log.Shutdown();
-            // execute boot
-            __disable_irq();
-            chSysLock();
-            Clk.SwitchToHSI();
-            SysTick->CTRL = 0;
-            SCB->VTOR = 0x17FF0000;
-            __enable_irq();
-            boot_jump(SYSTEM_MEMORY_ADDR);
-            while(1);
-            chSysUnlock();
+        chThdSleepMilliseconds(99);
+        if(!PinIsSet(KeyData[keyA].PGpio, KeyData[keyA].Pin)) {
+            Sound.Play("moon.mp3");
+            chThdSleepMilliseconds(5004);
         }
-//        Uart.Printf("\r_abW");
     }
 }
 
@@ -127,8 +114,9 @@ void Init() {
     Vibro.Vibrate(BrrBrr);
     chThdSleepMilliseconds(450);
 
-    // ==== Keys ====
+// ==== Keys ====
     for(uint8_t i=0; i<KEYS_CNT; i++) PinSetupIn(KeyData[i].PGpio, KeyData[i].Pin, pudPullUp);
+#if 1
     Lcd.Printf(0, 30, clYellow, clBlack, "Press A  ");
     while(PinIsSet(KeyData[keyA].PGpio, KeyData[keyA].Pin));
     Vibro.Vibrate(BrrBrr);
@@ -157,6 +145,7 @@ void Init() {
     while(PinIsSet(KeyData[keyR].PGpio, KeyData[keyR].Pin));
     Vibro.Vibrate(BrrBrr);
     Lcd.Printf(0, 30, clGreen,  clBlack, "Keys OK  ");
+#endif
 
     // ==== IR ====
     IR.RxInit();
@@ -165,7 +154,6 @@ void Init() {
 
     Sound.Init();
     Sound.SetVolume(START_VOL_CONST);
-    Sound.Play("moon.mp3");
 
     PillMgr.Init();
 
@@ -173,4 +161,6 @@ void Init() {
     Lcd.Printf(0, 90, clGreen, clBlack, "Pill disconnected ");
 
     Radio.Init();
+
+    Lcd.Printf(0, 100, clYellow, clBlack, "Press A to play mp3");
 }

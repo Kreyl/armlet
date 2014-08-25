@@ -49,7 +49,7 @@ void Infrared_t::IRxEdgeIrq() {
 }
 
 // =============================== Implementation ==============================
-static WORKING_AREA(waIRRxThread, 128);
+static WORKING_AREA(waIRRxThread, 256);
 __attribute__ ((__noreturn__))
 static void IRRxThread(void *arg) {
     chRegSetThreadName("IRRx");
@@ -92,10 +92,10 @@ void Infrared_t::IRxTask() {
                 // Leave only ID: 0xxx xxxx 0000 01**, xxx is ID
                 RxWord >>= 8;
 
-                Lcd.Printf(0, 40, clGreen, clBlack, "IR: %u  ");
+                Lcd.Printf(0, 40, clGreen, clBlack, "IR: %u ", RxWord);
                 chThdSleepMilliseconds(702);
                 Lcd.Printf(0, 40, clRed, clBlack, "IR:      ");
-                //Uart.Printf("\rIR: %u", RxWord);
+                Uart.Printf("\rIR: %u", RxWord);
                 // Add ID to table; increase to fit in address space
 //                RxTable.PutRxInfo(RxWord - IR_ADDR_CONST, 0, nullptr);
                 // Rise evt

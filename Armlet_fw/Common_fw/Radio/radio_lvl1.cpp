@@ -36,8 +36,8 @@ static void rLvl1Thread(void *arg) {
 void rLevel1_t::ITask() {
     while(true) {
         int8_t RSSI=0;
-        uint8_t RxRslt = CC.ReceiveSync(306, &Mesh.PktRx, &RSSI);
-        if(RxRslt == OK) Lcd.Printf(0, 70, clGreen, clBlack, "Radio RSSI=%d  ", RSSI);
+        uint8_t RxRslt = CC.ReceiveSync(999, &Mesh.PktRx, &RSSI);
+        if(RxRslt == OK) Lcd.Printf(0, 70, clGreen, clBlack, "Radio: RSSI=%d  ", RSSI);
         else             Lcd.Printf(0, 70, clGreen, clBlack, "Radio: nothing  ", RSSI);
     }
 }

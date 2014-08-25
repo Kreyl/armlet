@@ -12,8 +12,10 @@
 #include <stdlib.h>
 #include "kl_lib_f2xx.h"
 #include "cmd_uart.h"
+#include "diskio.h"
 
 sd_t SD;
+extern Semaphore semSDRW;
 
 void sd_t::Init() {
     IsReady = FALSE;
@@ -45,6 +47,8 @@ void sd_t::Init() {
         sdcDisconnect(&SDCD1);
         return;
     }
+    // Init RW semaphore
+    chSemInit(&semSDRW, 1);
     IsReady = TRUE;
 }
 

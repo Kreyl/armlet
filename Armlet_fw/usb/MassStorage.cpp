@@ -81,7 +81,7 @@ void MassStorage_t::UsbOutTask() {
 
 #if 1 // =========================== SCSI ======================================
 void MassStorage_t::SCSICmdHandler() {
-    //Uart.Printf("Sgn=%X; Tag=%X; Len=%u; Flags=%X; LUN=%u; SLen=%u; SCmd=%A\r", CmdBlock.Signature, CmdBlock.Tag, CmdBlock.DataTransferLen, CmdBlock.Flags, CmdBlock.LUN, CmdBlock.SCSICmdLen, CmdBlock.SCSICmdData, CmdBlock.SCSICmdLen, ' ');
+//    Uart.Printf("Sgn=%X; Tag=%X; Len=%u; Flags=%X; LUN=%u; SLen=%u; SCmd=%A\r", CmdBlock.Signature, CmdBlock.Tag, CmdBlock.DataTransferLen, CmdBlock.Flags, CmdBlock.LUN, CmdBlock.SCSICmdLen, CmdBlock.SCSICmdData, CmdBlock.SCSICmdLen, ' ');
     bool CmdOk = false;
     switch(CmdBlock.SCSICmdData[0]) {
         case SCSI_CMD_INQUIRY:            CmdOk = CmdInquiry(); break;

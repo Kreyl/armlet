@@ -159,6 +159,7 @@ void Sound_t::IPlayNew() {
         Stop();
         return;
     }
+    Lcd.Printf(0, 80, clGreen, clBlack, "snd: playing      ");
     // Fast forward to start position if not zero
     if(IStartPosition != 0) {
         if(IStartPosition < IFile.fsize) f_lseek(&IFile, IStartPosition);
