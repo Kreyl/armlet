@@ -80,6 +80,8 @@ public:
     void ButtonIsReleased(int button_id ,KeyEvt_t Type);
     void RenderFullScreen(int screen_id);
 
+    bool is_lock_redraw_active;
+    void DrawBigLockMark();
     void DrawSondLvlMark();
     void RenderSingleButton(int screen_id,int button_id,int button_state);
     void RenderSingleButtonStateCheck(int screen_id,int button_id);
@@ -96,6 +98,7 @@ public:
     int current_state;
     bool is_gui_shown;
     bool is_locked;
+    bool is_lock_now; //для разршения бесконечного цикла в отрисовке
     bool is_screen_suspended;
     bool is_suspend_timer_run;
     int screen_suspend_timer;

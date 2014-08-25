@@ -324,22 +324,24 @@ void App_t::Task() {
             //добавляем массив игроцких резонов в общий
             PushPlayerReasonToArrayOfIntentions();
                // сюда - все массивы резонов с других источников!
+            if(!SICD.is_global_stop_active)
+            {
+                //пересчитываем резоны
+                int reason_id=MainCalculateReasons();
 
-            //пересчитываем резоны
-            int reason_id=MainCalculateReasons();
-
-            if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3) {
-                Uart.Printf("\rID to play=%d",reason_id);
-                //new reason to play!
-                if(reasons[reason_id].eID != SICD.last_played_emo)
-                {
-                    //check if it's user reason,if any, set already played flag
-                    UserReasonFlagRecalc(SICD.last_intention_index_winner);//тут должэн стоять прошлый победитель!!
-                    PlayNewEmo(reasons[reason_id].eID,3);
+                if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3) {
+                    Uart.Printf("\rID to play=%d",reason_id);
+                    //new reason to play!
+                    if(reasons[reason_id].eID != SICD.last_played_emo)
+                    {
+                        //check if it's user reason,if any, set already played flag
+                        UserReasonFlagRecalc(SICD.last_intention_index_winner);//тут должэн стоять прошлый победитель!!
+                        PlayNewEmo(reasons[reason_id].eID,3);
+                    }
                 }
-            }
-            if(reason_id==-3) {
-                PlayNewEmo(0,4);
+                if(reason_id==-3) {
+                    PlayNewEmo(0,4);
+                }
             }
         }
 #endif
@@ -351,11 +353,14 @@ void App_t::Task() {
 #endif
 
             //UPDATE user intentions timers
-            if(UpdateUserIntentionsTime(1))
-                CheckAndRedrawFinishedReasons();
+            if(!SICD.is_global_stop_active)
+            {
+                if(UpdateUserIntentionsTime(1))
+                    CheckAndRedrawFinishedReasons();
 
-            if(Time.S_total% SEC_TO_SELF_REDUCE ==0)
-                Energy.AddEnergy(-1);
+                if(Time.S_total% SEC_TO_SELF_REDUCE ==0)
+                    Energy.AddEnergy(-1);
+            }
             if(Time.S_total % 6 ==0)
             {
                 AtlGui.RenderNameTimeBat();

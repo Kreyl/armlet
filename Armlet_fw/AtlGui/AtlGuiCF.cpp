@@ -321,8 +321,13 @@ int bLockCheck(int screen_id, int button_id)
 int bLockChange(int screen_id, int button_id ,int press_mode)
 {
     if(press_mode==2)
-    AtlGui.is_locked=!AtlGui.is_locked;
-
+    {
+        AtlGui.is_locked=!AtlGui.is_locked;
+      //  if(AtlGui.is_locked==false)
+        AtlGui.is_lock_now=true;
+        if(AtlGui.is_locked==true)
+            AtlGui.current_state=0;
+    }
     Uart.Printf("bLockChange press_mode%d islocked%d \r",press_mode,AtlGui.is_locked);
     if(AtlGui.is_locked)
         return BUTTON_ENABLED;

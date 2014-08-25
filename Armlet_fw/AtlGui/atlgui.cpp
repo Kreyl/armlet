@@ -26,9 +26,10 @@ void AtlGui_t::Init()
     current_state=-1;
     is_gui_shown=false;
     is_locked=false;
+    is_lock_now=false;
     is_screen_suspended=false;
     is_suspend_timer_run=false;
-
+    is_lock_redraw_active=false;
     //init gui pos andfunc arrays
 
     //get screen ptrs
@@ -131,6 +132,8 @@ void AtlGui_t::TurnOffScreen()
         return;
     }
     is_screen_suspended=true;
+    this->current_state=0;//TODO set onmainwith search main screen
+    is_locked=true;
     Uart.Printf("\rAtlGui_t::TurnOffScreen  turn off");
     Lcd.SetBrightness(0);
 }
@@ -386,6 +389,10 @@ void AtlGui_t::GetCharname()
         chsize=MAX_CHARNAME_LCD_SIZE;
     strncpy(char_name,reasons[App.ID].name,chsize);
 }
+void AtlGui_t::DrawBigLockMark()
+{
+    Lcd.DrawBmpFile(LOCK_X,LOCK_Y,"/GUI/lock.bmp");
+}
 void AtlGui_t::DrawSondLvlMark()
 {
     Lcd.DrawBmpFile(155,60,"/GUI/main/volume.bmp");
@@ -466,10 +473,31 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
         // render it
         Lcd.DrawBmpFile(screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom,bmp_filename);
 
+        //is_lock_redraw_active
+
+        if(screens[screen_id].buttons[button_id].press==bLockChange)
+        {
+            if(is_locked==true)
+            DrawBigLockMark();
+            if(is_lock_now==true)
+            {
+                is_lock_now=false;
+                RenderFullScreen(screen_id);
+               // is_lock_redraw_active=false;
+            };
+
+        }
+
         if(screens[screen_id].buttons[button_id].press==bSoundUpChange || screens[screen_id].buttons[button_id].press==bSoundDownChange)
         {
             DrawSondLvlMark();
-           // RenderFullScreen(screen_id);
+            //
 
         }
+//        if(screens[screen_id].buttons[button_id].press==bSoundUpChange || screens[screen_id].buttons[button_id].press==bSoundDownChange)
+//        {
+//            DrawSondLvlMark();
+//           // RenderFullScreen(screen_id);
+//
+//        }
 }

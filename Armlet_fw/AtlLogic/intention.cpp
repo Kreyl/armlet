@@ -5,6 +5,9 @@
 #include "energy.h"
 #include "gui.h"
 //TODO move it right
+
+#define AGE_WEIGHT_SCALE_REDUCE 1
+#define AGE_MAX_WEIGHT_REDUCE 5
 int CurrentIntentionArraySize=2;
 
 struct SeekRecentlyPlayedFilesEmo SRPFESingleton
@@ -175,18 +178,45 @@ int SeekRecentlyPlayedFilesEmo::CheckIfRecent(int emo_id,int file_id)
     for(int i=0;i<MAX_RECENTLY_PLAYED_ARRAY;i++)
     {
 
-        if(seek_array[this->last_array_id].emo_id==emo_id)
-            if(seek_array[this->last_array_id].file_indx==file_id)
+        if(seek_array[curr_id].emo_id==emo_id)
+            if(seek_array[curr_id].file_indx==file_id)
             {
-                int rval=seek_array[this->last_array_id].seek_pos;
-                seek_array[this->last_array_id].seek_pos=0;
+                int rval=seek_array[curr_id].seek_pos;
+                seek_array[curr_id].seek_pos=0;
                 return rval;
             }
         curr_id=GetNext(curr_id);
     }
     return 0;
 }
+void GlobalStopCalculationSupport::FinishStopCalculation()
+{
+    this->timer=-1;
+}
+int GlobalStopCalculationSupport::GetFightTime()
+{
+    return 10;
+}
+void GlobalStopCalculationSupport::OnNewSec()
+{
+    if(this->stop_reason_type==gsDraka)
+    {
+        if(timer==0)
+            PlayNewEmo(reasons[ArrayOfUserIntentions[SI_FIGHT].reason_indx].eID,6);
+        if(timer==GetFightTime() || timer ==MAX_FIGHT_PLAY_TIME)
+        {
+            for(int i=0;i<reasons_number;i++)
+                 if(strcmp(reasons[i].name,"heartbeat")==0)
+                 {
+                     PlayNewEmo(reasons[i])
+                     break;
+                 }
+        }
+            //heartbeat
+    }
+    this->timer++;
 
+}
 void SeekRecentlyPlayedFilesEmo::IncrementArrayId()
 {
     //на самом деле строчка ненужна, но надо понимать как оплучается стартовая позиция

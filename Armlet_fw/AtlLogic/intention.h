@@ -99,6 +99,19 @@ typedef struct IntentionCalculationData
     bool is_everysec_calculation_active;//???
 }IntentionCalculationData;
 
+#define HEART_PLAYING_TIME_SEC 20
+#define MAX_FIGHT_PLAY_TIME 100
+enum GlobalStopType_t {gsDraka};
+typedef struct GlobalStopCalculationSupport
+{
+    GlobalStopType_t stop_reason_type; //0 - draka
+    int stage;
+    int timer; //-1 - inactive, else move by sec
+    int GetFightTime();
+    void FinishStopCalculation();
+    void OnNewSec();
+} GlobalStopCalculationSupport;
+
 typedef struct IntentionReduceData
 {
     int reduced_reason_id;
