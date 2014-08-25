@@ -42,7 +42,6 @@ extern Emotion_t emotions[];
 extern const int emotions_number;
 //age>=0 - give me another music timer
 //age<=0 - meeting important. give another here doesnt give less weight
-#define AGE_SEC_REDUCE 180
 #define AGE_WEIGHT_SCALE_REDUCE 1
 #define AGE_MAX_WEIGHT_REDUCE 5
 typedef struct Reason {

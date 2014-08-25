@@ -94,11 +94,18 @@ typedef struct IntentionCalculationData
 	bool is_empty_fon;
     int last_played_emo;
     int last_played_file;
-    bool is_last_played_id_recent;
+    bool is_last_played_id_recent;//???
     bool is_global_stop_active;
-    bool is_everysec_calculation_active;
+    bool is_everysec_calculation_active;//???
 }IntentionCalculationData;
 
+typedef struct IntentionReduceData
+{
+    int reduced_reason_id;
+    int weight_reduced;
+    bool is_reason_changed;
+}
+IntentionReduceData;
 typedef struct SRPFEArrayEl
 {
     int seek_pos;
@@ -139,11 +146,14 @@ void PushPlayerReasonToArrayOfIntentions();
 bool UpdateUserIntentionsTime(int add_time_sec);
 int MainCalculateReasons();
 extern struct IntentionCalculationData SICD;//SingletonIntentionCalculationData;
+extern struct IntentionReduceData SRD;
 void PrintSCIDToUart();
 
 //user intentions array funcs
 void InitArrayOfUserIntentions();
 void UserReasonFlagRecalc(int reason_id);
+
+void ReasonAgeModifyChangeMelody();
 
 //в структуре рассчета будет индекс текущего победителя мощности,
 //индекс предыдущего победителя мощности,

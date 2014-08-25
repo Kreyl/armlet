@@ -194,6 +194,21 @@ void PlayNewEmo(int emo_id, int err_id) {
         //во время глобального останова рассчетов играть одну и ту-же эмоцию
         PlayNewEmo(SICD.last_played_emo,5);
     }
+    //обработка снижений важности резонов:
+    if(SRD.reduced_reason_id!=-1 && SRD.reduced_reason_id!=SICD.last_intention_index_winner)
+    {
+        if(SRD.is_reason_changed==false)
+            SRD.is_reason_changed=true;
+        else
+        {
+            SRD.is_reason_changed=false;
+            SRD.reduced_reason_id=-1;
+            SRD.weight_reduced=0;
+        }
+
+
+    }
+
     //если гавно, то фон
     if(emo_id < 0) {
         Uart.Printf("\rEmo_id <0 %d", emo_id);

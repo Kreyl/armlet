@@ -148,7 +148,12 @@ struct IntentionCalculationData SICD=
 		0,//	int winning_integral;
 		10//int winning_integral_top_limit_normalizer;*/
 };
-
+struct IntentionReduceData SRD=
+{
+        -1,
+        -1,
+        false
+};
 
 void SeekRecentlyPlayedFilesEmo::OnCallStopPlay(int emo_id,int file_id, int pos)
 {
@@ -236,6 +241,7 @@ void CalculateIntentionsRadioChange() {
             else SICD.winning_integral+=FON_RELAX_SPEED;
             return;
         }
+
         SICD.is_empty_fon=false;
         Uart.Printf("input reas_id=%d, power=%d\r", ArrayOfIncomingIntentions[0].reason_indx,  ArrayOfIncomingIntentions[0].power256);
 
@@ -247,6 +253,15 @@ void CalculateIntentionsRadioChange() {
             SICD.last_intention_index_winner=ArrayOfIncomingIntentions[0].reason_indx;
             return;
         }
+
+        //Ћќ јЋ№Ќќ —Ќ»∆ј≈ћ ¬≈—
+        int wr=0;
+        if(SRD.reduced_reason_id>=0)
+        {
+            wr=MIN(SRD.weight_reduced,reasons[SRD.reduced_reason_id].weight);
+            reasons[SRD.reduced_reason_id].weight-=wr;
+        }
+
         int maxnotnormval=-1;// временна€ переменна€!
         int currnotnormval=0;
         int current_reason_arr_winner_indx=-1;
@@ -287,6 +302,9 @@ void CalculateIntentionsRadioChange() {
             SICD.last_intention_power_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].power256;//get current power!
             SICD.last_intention_index_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].reason_indx;
         }
+        //Ћќ јЋ№Ќќ ѕќƒЌ»ћј≈ћ ¬≈—
+        if(SRD.reduced_reason_id>=0)
+            reasons[SRD.reduced_reason_id].weight+=wr;
 }
 bool UpdateUserIntentionsTime(int add_time_sec)
 {
@@ -469,9 +487,23 @@ void SwitchPlayerReason(int reason_id,bool is_turn_on)
 }
 void ReasonAgeModifyChangeMelody()
 {
-    if(reasons[SICD.last_intention_index_winner].weight>0 && reasons[SICD.last_intention_index_winner].age>=0 &&  reasons[SICD.last_intention_index_winner].age<=AGE_SEC_REDUCE*(AGE_MAX_WEIGHT_REDUCE-1)+1)
+    //если нет резона уменьшеного - задать этот и уменьшить.
+    //если есть резон, этот - еще уменьшить
+    //если есть резон, но уже другой - задать этот заново
+    if(SRD.reduced_reason_id==-1)
     {
-        reasons[SICD.last_intention_index_winner].age+=AGE_SEC_REDUCE;
-        reasons[SICD.last_intention_index_winner].
+        SRD.reduced_reason_id=SICD.last_intention_index_winner;
+        SRD.weight_reduced=1;
+        SRD.is_reason_changed=false;
     }
+    else if(SRD.reduced_reason_id==SICD.last_intention_index_winner)
+        SRD.weight_reduced+=AGE_WEIGHT_SCALE_REDUCE;
+    else//??? вроде ок, на свежую голову перечитать код
+    {
+        SRD.reduced_reason_id=SICD.last_intention_index_winner;
+        SRD.weight_reduced=1;
+        SRD.is_reason_changed=false;
+    }
+    if(SRD.weight_reduced>AGE_MAX_WEIGHT_REDUCE)
+        SRD.weight_reduced=AGE_MAX_WEIGHT_REDUCE;
 }
