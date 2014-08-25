@@ -33,7 +33,7 @@
 #define GUI_BUTTON_NUMBER 9
 #define SUSPEND_SCREEN_SEC 30
 
-
+#define MAX_CHARNAME_LCD_SIZE 11
 
 /* GSI - init this
  * GUI_STATE_ABSENT - no color
@@ -86,7 +86,7 @@ public:
 
     void RenderNameTimeBat();
     void GetCharname();//getname by id
-    char char_name[11];
+    char char_name[MAX_CHARNAME_LCD_SIZE];
     char timechar[5];
     int time1, time2;
 

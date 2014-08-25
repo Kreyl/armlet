@@ -187,13 +187,9 @@ void AtlGui_t::RenderFullScreen(int screen_id)
     strcat(bmp_filename,PATH_FOLDER_STR);
     strcat(bmp_filename,"back");
     strcat(bmp_filename,GUI_PATH_EXT);
-    //strcpy(bmp_filename,"TestHorizontal.png");
     Uart.Printf("\rRenderFullScreen %s", bmp_filename);
     // render it
     Lcd.DrawBmpFile(0,0,bmp_filename);
-    //strncpy (char_name,"char_name",10);
-    //time1=11;
-    //time2=22;
     RenderNameTimeBat();
     //and all buttons
     for(int i=0;i<9;i++)
@@ -201,7 +197,6 @@ void AtlGui_t::RenderFullScreen(int screen_id)
         if(screens[screen_id].buttons[i].isPressable!=nullptr)
         {
             int state1=screens[screen_id].buttons[i].isPressable(screen_id,i);
-//            Uart.Printf("\rbutton_state_val2 %d",state1);
             RenderSingleButton(screen_id,i,state1);
         }//не рисовать кнопки, которых нет
     }
@@ -379,17 +374,17 @@ void AtlGui_t::RenderNameTimeBat()
     if(Mesh.GetAstronomicTime(timechar,5)==FAILURE)
         strcpy(timechar,"TM.FL");
 
-    Lcd.Printf(B52,0, 0, clAtlFront, clAtlBack, "%s",char_name);
-    Lcd.Printf(B52,96, 0, clAtlFront, clAtlBack, " %s",timechar);
+    Lcd.Printf(B52,1, 0, clAtltopstr, clAtlBack, "%s",char_name);
+    Lcd.Printf(B52,96-2, 0, clAtltopstr, clAtlBack, " %s",timechar);
 
 }
 void AtlGui_t::GetCharname()
 {
     //ID
-    int chsize=sizeof(reasons[App.ID+100])/sizeof(char);
-    if(chsize>11)
-        chsize=11;
-    strncpy(char_name,reasons[App.ID+100].name,chsize);
+    int chsize=sizeof(reasons[App.ID])/sizeof(char);
+    if(chsize>MAX_CHARNAME_LCD_SIZE)
+        chsize=MAX_CHARNAME_LCD_SIZE;
+    strncpy(char_name,reasons[App.ID].name,chsize);
 }
 void AtlGui_t::DrawSondLvlMark()
 {

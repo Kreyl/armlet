@@ -16,6 +16,25 @@
 #define PROCESS_TUMAN  4
 #define PROCESS_MANIAC  5
 #define PROCESS_KRAYK  6
+
+//ArrayOfUserIntentions id defines, not buttons, user intentions itself
+
+#define SI_MURDER 0
+#define SI_CREATION 1
+#define SI_DESTRUCTION 2
+#define SI_SEX 3
+#define SI_FIGHT 4
+#define SI_WEED 5
+#define SI_HER 6
+#define SI_LSD 7
+#define SI_KRAYK 8
+#define SI_DEATH 9
+#define SI_MANIAC 10
+#define SI_TUMAN 11
+#define SI_STRAH 12
+#define SI_MSOURCE 13
+#define SI_PROJECT 14
+
 /*typedef struct Intention {
 	int weight1000;	//константа, определ€юща€ степень и врем€ роста
 	//int last_measure_weight;//
@@ -52,6 +71,7 @@ typedef struct UserIntentions {
         current_time=-1;
         was_winning=false;
     }
+    void TurnOn();
 } UserIntentions;
 
 extern struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRAY_SIZE];
@@ -74,11 +94,18 @@ typedef struct IntentionCalculationData
 	bool is_empty_fon;
     int last_played_emo;
     int last_played_file;
-    bool is_last_played_id_recent;
+    bool is_last_played_id_recent;//???
     bool is_global_stop_active;
-    bool is_everysec_calculation_active;
+    bool is_everysec_calculation_active;//???
 }IntentionCalculationData;
 
+typedef struct IntentionReduceData
+{
+    int reduced_reason_id;
+    int weight_reduced;
+    bool is_reason_changed;
+}
+IntentionReduceData;
 typedef struct SRPFEArrayEl
 {
     int seek_pos;
@@ -88,6 +115,8 @@ typedef struct SRPFEArrayEl
 typedef struct SeekRecentlyPlayedFilesEmo
 {
     int last_array_id;
+    int last_played_file_indx;
+    int last_played_emo_imdx; //теоретически то дублирование данных, но тут они нужны в св€зке, и чтобы 100 раз везде не провер€ть, пусть лучше safe-load будет в одно изолированное место
     SRPFEArrayEl seek_array[MAX_RECENTLY_PLAYED_ARRAY];
     void OnCallStopPlay(int emo_id,int file_id, int pos);
     //return -1 if no, pos if yes
@@ -110,6 +139,7 @@ int CalculateCurrentPowerOfPlayerReason(int array_indx); //считаеттекущую мощнос
 void SwitchPlayerReason(int reason_id,bool is_turn_on);  // игрок нажал накнопку резона, вклили выкл.
 
 //UPDATE TO ALL USER REASONS
+//в этой же функции обрабатываютс€ проходы наркоподобных при окончании резона!
 void CallReasonSuccess(int user_reason_id); // вызоветс€ если игрок отключит резон, все id и проверки внутри
 //UPDATE TO ALL USER REASONS
 void CallReasonFalure(int user_reason_id); // вызоветс€ если игрок просрал по времени
@@ -118,11 +148,14 @@ void PushPlayerReasonToArrayOfIntentions();
 bool UpdateUserIntentionsTime(int add_time_sec);
 int MainCalculateReasons();
 extern struct IntentionCalculationData SICD;//SingletonIntentionCalculationData;
+extern struct IntentionReduceData SRD;
 void PrintSCIDToUart();
 
 //user intentions array funcs
 void InitArrayOfUserIntentions();
 void UserReasonFlagRecalc(int reason_id);
+
+void ReasonAgeModifyChangeMelody();
 
 //в структуре рассчета будет индекс текущего победител€ мощности,
 //индекс предыдущего победител€ мощности,

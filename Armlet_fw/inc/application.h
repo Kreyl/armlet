@@ -13,6 +13,11 @@ void AppInit();
 #include "atlantis_music_tree.h"
 #include "kl_lib_f2xx.h"
 #include "cmd_uart.h"
+#include  "RxTable.h"
+//state.ini defines
+#define NARCO_IS_OFF_STATE 0
+#define NARCO_IS_ON_STATE 1
+
 
 #if 1 // ==== Timings ====
 #define T_PILL_CHECK_MS         360  // Check if pill connected every TM_PILL_CHECK
@@ -54,6 +59,8 @@ public:
     void SaveData();
     uint8_t ParseCsvFileToEmotions(const char* filename);
     void WriteInentionStringToData(char * int_name, int int_val, char * emo_name);
+
+    void UpdateLocation();
     //void GetDataFileName();
    char DataFileBuff[33];
 
@@ -65,6 +72,9 @@ public:
     char emostr[32];
     char toiintstr[8];
     int on_run;
+
+    int last_location;
+    int last_location_signal_pw;
 };
 
 extern App_t App;

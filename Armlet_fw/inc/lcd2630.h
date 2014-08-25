@@ -43,6 +43,7 @@
 // Atlantis' colors
 #define clAtlFront  ((Color_t){0x3C, 0x46, 0x3C})
 #define clAtlBack   ((Color_t){0xFF, 0xEE, 0xAF})
+#define clAtltopstr ((Color_t){0x21, 0x26, 0x21})
 
 // LCD params
 #define LCD_X_0             1   // }

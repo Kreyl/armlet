@@ -6,18 +6,10 @@
 #include "gui.h"
 //TODO move it right
 int CurrentIntentionArraySize=2;
-/*Intention intentionArray[INTENTIONS_ARRAY_SIZE]={
-
-	{1000,"creation",0},			//0
-	{1000,"destruction",1},		//1 negativ
-	{1000,"horror_house",1},	//2 negativ
-	{1000,"wasteland",0},		//3
-	{1000,"reaper",4}		//4 positiv
-};*/
 
 struct SeekRecentlyPlayedFilesEmo SRPFESingleton
 {
-    -1,{
+    -1,-1,-1,{
     {0,-1,-1},
     {0,-1,-1},
     {0,-1,-1},
@@ -38,6 +30,11 @@ struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRA
 		{1,2},{4,3},
 		{1,2},{4,3}
 };
+
+void UserIntentions::TurnOn()
+{
+    this->current_time=0;
+}
 //int CurrentUserIntentionsArraySize=6;
 #if 0
 #define RNAME_FIGHT  "\xc4\xf0\xe0\xea\xe0"
@@ -61,6 +58,9 @@ int process_type;
 char * p_int_name;//button name if available
 
 #endif
+
+
+
 //STATIC ARRAY, inits inside, all external are in InitArrayOfUserIntentions
 struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
         {-1,25,120,300,120,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_MURDER)},//murder 0
@@ -79,13 +79,6 @@ struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
         {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mSource 13
         {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mProject 14
 };
-/* 188 */ //{ "lsd", 20, 8 },    /* trip */+
-/* 189 */ //{ "krayk", 20, 0 },  /* fon */+
-/* 190 */// { "death", 50, 5 },  /* smert' */
-/* 191 */// { "mist", 50, 4 },   /* tuman */
-/* 192 */// { "fear", 40, 28 },  /* strah */
-/* 193 */// { "mSource", 9, 1 }, /* neverno */
-/* 194 */// { "mProject", 9, 1 },    /* neverno */
 void InitArrayOfUserIntentions()
 {
     for(int i=0;i<reasons_number;i++)
@@ -155,12 +148,22 @@ struct IntentionCalculationData SICD=
 		0,//	int winning_integral;
 		10//int winning_integral_top_limit_normalizer;*/
 };
-
+struct IntentionReduceData SRD=
+{
+        -1,
+        -1,
+        false
+};
 
 void SeekRecentlyPlayedFilesEmo::OnCallStopPlay(int emo_id,int file_id, int pos)
 {
     //this->last_array_id идет в минус по ходу пл€ски, провер€ютс€ в плюс начина€ с этого
-    //стартовый -
+    //стартовый - ???
+
+    // провер€ем на намер€ни€ - если у корн€ и не эмоции!
+    if(emotions[emo_id].parent==0 && strcmp(emotions[emo_id].name,"pozitiv")!=0 && strcmp(emotions[emo_id].name,"negativ")!=0 &&
+            strcmp(emotions[emo_id].name,"duhovnoe")!=0 && strcmp(emotions[emo_id].name,"zhelanie")!=0)
+        return;
     this->IncrementArrayId();
     seek_array[this->last_array_id].emo_id=emo_id;
     seek_array[this->last_array_id].file_indx=file_id;
@@ -174,15 +177,21 @@ int SeekRecentlyPlayedFilesEmo::CheckIfRecent(int emo_id,int file_id)
 
         if(seek_array[this->last_array_id].emo_id==emo_id)
             if(seek_array[this->last_array_id].file_indx==file_id)
-                return seek_array[this->last_array_id].seek_pos;
-
+            {
+                int rval=seek_array[this->last_array_id].seek_pos;
+                seek_array[this->last_array_id].seek_pos=0;
+                return rval;
+            }
         curr_id=GetNext(curr_id);
     }
-    return -1;
+    return 0;
 }
 
 void SeekRecentlyPlayedFilesEmo::IncrementArrayId()
 {
+    //на самом деле строчка ненужна, но надо понимать как оплучаетс€ стартова€ позици€
+    if(last_array_id==-1)
+        last_array_id=0;
     this->last_array_id--;
     if(this->last_array_id<0)
         this->last_array_id=MAX_RECENTLY_PLAYED_ARRAY-1;
@@ -193,7 +202,6 @@ int SeekRecentlyPlayedFilesEmo::GetNext(int current_array_id)
         return 0;
     else
         return current_array_id+1;
-
 }
 
 void PrintSCIDToUart()
@@ -237,6 +245,7 @@ void CalculateIntentionsRadioChange() {
             else SICD.winning_integral+=FON_RELAX_SPEED;
             return;
         }
+
         SICD.is_empty_fon=false;
         Uart.Printf("input reas_id=%d, power=%d\r", ArrayOfIncomingIntentions[0].reason_indx,  ArrayOfIncomingIntentions[0].power256);
 
@@ -248,6 +257,15 @@ void CalculateIntentionsRadioChange() {
             SICD.last_intention_index_winner=ArrayOfIncomingIntentions[0].reason_indx;
             return;
         }
+
+        //Ћќ јЋ№Ќќ —Ќ»∆ј≈ћ ¬≈—
+        int wr=0;
+        if(SRD.reduced_reason_id>=0)
+        {
+            wr=MIN(SRD.weight_reduced,reasons[SRD.reduced_reason_id].weight);
+            reasons[SRD.reduced_reason_id].weight-=wr;
+        }
+
         int maxnotnormval=-1;// временна€ переменна€!
         int currnotnormval=0;
         int current_reason_arr_winner_indx=-1;
@@ -288,6 +306,9 @@ void CalculateIntentionsRadioChange() {
             SICD.last_intention_power_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].power256;//get current power!
             SICD.last_intention_index_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].reason_indx;
         }
+        //Ћќ јЋ№Ќќ ѕќƒЌ»ћј≈ћ ¬≈—
+        if(SRD.reduced_reason_id>=0)
+            reasons[SRD.reduced_reason_id].weight+=wr;
 }
 bool UpdateUserIntentionsTime(int add_time_sec)
 {
@@ -297,11 +318,9 @@ bool UpdateUserIntentionsTime(int add_time_sec)
        {
            if(ArrayOfUserIntentions[i].current_time>=0)
            {
-             //  Uart.Printf("CALL ADD TIME SUCESS reason %d\r",i);
                ArrayOfUserIntentions[i].current_time+=add_time_sec;
                if(ArrayOfUserIntentions[i].current_time>ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau)//после плато, на спуске
                {
-                  // Uart.Printf("ct%d, summ %d\r", ArrayOfUserIntentions[i].current_time,ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau);
                    ArrayOfUserIntentions[i].TurnOff();//current_time=-1;
                    CallReasonFalure(i);
                    return_value=true;
@@ -405,21 +424,28 @@ int CalculateCurrentPowerOfPlayerReason(int array_indx)
             ArrayOfUserIntentions[array_indx].TurnOff();//current_time=-1;
             CallReasonFalure(array_indx);
             return -1;
-
         }
     }
     else return -1;
 }
+
 void CallReasonFalure(int user_reason_id)
 {
-    if(user_reason_id==3)
+    if(user_reason_id==SI_SEX)
     {
         // не прерванный секс всегда успешен! ^_^
         CallReasonSuccess(user_reason_id);
         return;
     }
     Uart.Printf("CALL REASON FALURE reason %d\r",user_reason_id);
-    Energy.AddEnergy(-5);
+    Energy.AddEnergy(REASON_FAIL_ENERGY_CHANGE);
+
+   // мань€ки икрайк неизлечимо наркозависимы
+    if(ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_MANIAC || ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_KRAYK)
+    {
+        ArrayOfUserIntentions[user_reason_id].current_time=0;
+    }
+    //если у мань€ка что-то неполучилось - убвать не хочет??
 
     return;
 }
@@ -427,9 +453,19 @@ void CallReasonFalure(int user_reason_id)
 void CallReasonSuccess(int user_reason_id)
 {
     //если наркозависимость - перезапустить!
-    //подумать над размерамиинтервалов!
-    if(user_reason_id==5)
-        ArrayOfUserIntentions[5].current_time=0;
+    //подумать над размерамиинтервалов! PROCESS_NARCO
+    if(ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NARCO)
+        ArrayOfUserIntentions[user_reason_id].current_time=0;
+    //если мань€к убил кого-то - вырубить ему намер€ние заново. если не нашел - также вырубить, он€ть нергию.
+    if(ArrayOfUserIntentions[SI_MANIAC].current_time>=0 && user_reason_id==SI_MURDER)
+        ArrayOfUserIntentions[SI_MANIAC].current_time=0;
+    //если крайк что-то сделал - перезапустить его зависимость
+    //TODO заменить процессы на SI
+    if(ArrayOfUserIntentions[SI_KRAYK].current_time>=0 &&
+            (ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NORMAL ||
+             ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_FIGHT
+            ))
+        ArrayOfUserIntentions[SI_KRAYK].current_time=0;
     Energy.AddEnergy(5);
 
    return;
@@ -453,4 +489,25 @@ void SwitchPlayerReason(int reason_id,bool is_turn_on)
            }
        }
 }
-
+void ReasonAgeModifyChangeMelody()
+{
+    //если нет резона уменьшеного - задать этот и уменьшить.
+    //если есть резон, этот - еще уменьшить
+    //если есть резон, но уже другой - задать этот заново
+    if(SRD.reduced_reason_id==-1)
+    {
+        SRD.reduced_reason_id=SICD.last_intention_index_winner;
+        SRD.weight_reduced=1;
+        SRD.is_reason_changed=false;
+    }
+    else if(SRD.reduced_reason_id==SICD.last_intention_index_winner)
+        SRD.weight_reduced+=AGE_WEIGHT_SCALE_REDUCE;
+    else//??? вроде ок, на свежую голову перечитать код
+    {
+        SRD.reduced_reason_id=SICD.last_intention_index_winner;
+        SRD.weight_reduced=1;
+        SRD.is_reason_changed=false;
+    }
+    if(SRD.weight_reduced>AGE_MAX_WEIGHT_REDUCE)
+        SRD.weight_reduced=AGE_MAX_WEIGHT_REDUCE;
+}

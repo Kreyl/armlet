@@ -23,7 +23,7 @@
 #include "sound.h"
 #include "ff.h"
 #include "intention.h"
-#include "RxTable.h"
+//#include "RxTable.h"
 #include "..\AtlGui\atlgui.h"
 #include "energy.h"
 
@@ -36,7 +36,11 @@
 #include "mesh_lvl.h"
 
 App_t App;
+//#define SCREEN_SUSPEND_TIMER
 
+#define PILLTYPEWEED 1
+#define PILLTYPELSD 2
+#define PILLTYPEHER 3
 #if 1 // ============================ Timers ===================================
 // Pill check
 void TmrPillCheckCallback(void *p) {
@@ -163,6 +167,7 @@ static inline void KeysHandler() {
         {
             if(Evt.KeyID[0] == KEY_PWRON)
             {
+                //выключение
                 Log.Shutdown( );
                 chThdSleepMilliseconds(250);
                 Power.EnterStandby();
@@ -173,12 +178,53 @@ static inline void KeysHandler() {
         {
             AtlGui.ButtonIsReleased(Evt.KeyID[0],keRepeat);
         }
+        else if(Evt.Type==keCancel)
+        {
+            AtlGui.RenderFullScreen(AtlGui.current_state);
+        }
+
         else if(Evt.Type==keCombo)
         {
-               if(Evt.NKeys==3 && Evt.KeyID[0]==1 && Evt.KeyID[1]==3 && Evt.KeyID[2]==4)
+            //    void EnterStandby();
+            //void Reset()
+           // Программное включение, выключение (длинная А)+
+            //, перезагрузка, с перепрошивкой, если есть файл на флэшке (ARX),
+            //переход в бутлоадер (ABCXYZ),
+            //сброс состояния персонажа с перезагрузкой (ABC Z LER)
+               //if(Evt.NKeys==3 && Evt.KeyID[0]==1 && Evt.KeyID[1]==3 && Evt.KeyID[2]==4)//bcx
+               if(Evt.NKeys==3 && Evt.KeyID[0]==keyA && Evt.KeyID[1]==keyX && Evt.KeyID[2]==keyR)//arx
                {
+                   Uart.Printf(" GO REBOOT  %d\r", Evt.NKeys);
+                   Log.Shutdown( );
+                   chThdSleepMilliseconds(250);
+                   Power.Reset();
+
+               }
+               if(
+                  Evt.NKeys==6 &&
+                  Evt.KeyID[0]==keyA && Evt.KeyID[1]==keyB && Evt.KeyID[2]==keyC &&
+                  Evt.KeyID[3]==keyX && Evt.KeyID[4]==keyY && Evt.KeyID[5]==keyZ
+               )//abc xyz
+               {
+
+
+                   Log.Shutdown( );
+                   chThdSleepMilliseconds(250);
                    Uart.Printf(" GO BOOTLOADER %d\r", Evt.NKeys);
                    Bootloader.DFU_request();
+               }
+               if(
+                  Evt.NKeys==7 &&
+                  Evt.KeyID[0]==keyA && Evt.KeyID[1]==keyB && Evt.KeyID[2]==keyC &&
+                  Evt.KeyID[3]==keyZ && Evt.KeyID[4]==keyL && Evt.KeyID[5]==keyE && Evt.KeyID[6]==keyR
+               )//abc z ler
+               {
+                   Uart.Printf(" GO REBOOT ( &DROP state later!) %d\r", Evt.NKeys);
+                                     Bootloader.DFU_request();
+                   //TODO drop character to initial here
+                   Log.Shutdown( );
+                   chThdSleepMilliseconds(250);
+                   Power.Reset();
                }
         }
 
@@ -198,7 +244,6 @@ static inline void KeysHandler() {
     }
 }
 #endif
-
 #if 1 // ========================== OnPillConnect ==============================
 static void OnPillConnect() {
 
@@ -245,6 +290,8 @@ void App_t::Task() {
             Lcd.Printf(11, 31+(i*10), clRed, clBlack,"ID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
         }
 #endif
+            //обновляем данные по локации TODO - записать их  в исходящий пакет  mesh
+            UpdateLocation();
             //перекладываем данные с радио в массив текущих резонов
 
             int val1= MIN((uint32_t)reasons_number, RxTable.PTable->Size);
@@ -298,8 +345,11 @@ void App_t::Task() {
 #endif
 #if 1 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
-//            Uart.Printf("\rNewSecond");
-// @KL            AtlGui.AddSuspendScreenTimer(1);
+
+#ifndef SCREEN_SUSPEND_TIMER
+            AtlGui.AddSuspendScreenTimer(1);
+#endif
+
             //UPDATE user intentions timers
             if(UpdateUserIntentionsTime(1))
                 CheckAndRedrawFinishedReasons();
@@ -341,9 +391,16 @@ void App_t::Task() {
                         Pill.ChargeCnt--;
                         rslt = PillMgr.Write(PILL_I2C_ADDR, (PILL_START_ADDR + PILL_CHARGECNT_ADDR), &Pill.ChargeCnt, sizeof(Pill.ChargeCnt));
                         if(rslt == OK) {
-//                            Uart.Printf("\rConnect: %d", Pill.ChargeCnt);
+                            Uart.Printf("\rConnect: %d", Pill.ChargeCnt);
                             Beeper.Beep(BeepPillOk);
                             OnPillConnect();
+                            //1 - марихуана, 2 - лсд, 3 - героин
+                            if(Pill.Type==PILLTYPEWEED)
+                                ArrayOfUserIntentions[SI_WEED].TurnOn();
+                            else if(Pill.Type==PILLTYPELSD)
+                                ArrayOfUserIntentions[SI_LSD].TurnOn();
+                            else if(Pill.Type==PILLTYPEHER)
+                                ArrayOfUserIntentions[SI_HER].TurnOn();
                         } // if rslt ok
                         else Beeper.Beep(BeepPillBad);  // Pill write failed
                     } // if chargecnt > 0
@@ -369,13 +426,27 @@ void App_t::Task() {
 #endif
     } // while true
 }
-
+void App_t::UpdateLocation()
+{
+    for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
+       // Uart.Printf(" ID=%u; Pwr=%u\r", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
+        if((RxTable.PTable->Row[i].ID>=first_location_id && RxTable.PTable->Row[i].ID<=last_location_id) ||
+           (RxTable.PTable->Row[i].ID>=first_location_id && RxTable.PTable->Row[i].ID<=last_location_id))
+       if(RxTable.PTable->Row[i].Level>last_location_signal_pw)
+       {
+           last_location_signal_pw = RxTable.PTable->Row[i].Level;
+           last_location = RxTable.PTable->Row[i].ID;
+       }
+    }
+}
 void App_t::Init() {
     State = asIdle;
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
     RxTable.RegisterAppThd(PThd);
     Sound.RegisterAppThd(PThd);
     on_run=0;
+    last_location=-1;
+    last_location_signal_pw=-1;
 
 #if UART_RX_ENABLED
     chVTSet(&TmrUartRx,    MS2ST(UART_RX_POLLING_MS), TmrUartRxCallback, nullptr);
@@ -398,8 +469,8 @@ void App_t::SaveData()
     );
     if(open_code!=0)
         return;
-    UINT bw;
-    int buff_size;
+   // UINT bw;
+   // int buff_size;
 #if 0
 #energy
 50
@@ -421,11 +492,34 @@ void App_t::SaveData()
     f_printf(&file,"%d",Energy.GetEnergy());
     //weed, lambda welcome!
     f_printf(&file,"#narcograss");
-    if(ArrayOfUserIntentions[5].current_time>=0)
-        f_printf(&file,"%d",1);
+    if(ArrayOfUserIntentions[SI_WEED].current_time>=0)
+        f_printf(&file,"%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",0);
+        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
 
+    f_printf(&file,"#narcoher");
+    if(ArrayOfUserIntentions[SI_HER].current_time>=0)
+        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+    else
+        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+
+    f_printf(&file,"#narcolsd");
+    if(ArrayOfUserIntentions[SI_LSD].current_time>=0)
+        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+    else
+        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+
+    f_printf(&file,"#narcoTrain");
+    if(ArrayOfUserIntentions[SI_KRAYK].current_time>=0)
+        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+    else
+        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+
+    f_printf(&file,"#nacroManiac");
+    if(ArrayOfUserIntentions[SI_MANIAC].current_time>=0)
+        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+    else
+        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
 
    // f_write(&file, DataFileBuff, buff_size, &bw);
     f_close(&file);
@@ -454,15 +548,15 @@ void App_t::LoadData()
            if(line_num==1)
                Energy.SetEnergy(int_val);
            if(line_num==2 && int_val==1)//weed
-               ArrayOfUserIntentions[5].current_time=0;
-           if(line_num==2 && int_val==1)//her
-               ArrayOfUserIntentions[6].current_time=0;
-           if(line_num==3 && int_val==1)//lsd
-               ArrayOfUserIntentions[7].current_time=0;
-           if(line_num==3 && int_val==1)//krayk
-               ArrayOfUserIntentions[8].current_time=0;
-           if(line_num==3 && int_val==1)//manyac
-               ArrayOfUserIntentions[10].current_time=0;
+               ArrayOfUserIntentions[SI_WEED].current_time=0;
+           if(line_num==3 && int_val==1)//her
+               ArrayOfUserIntentions[SI_HER].current_time=0;
+           if(line_num==4 && int_val==1)//lsd
+               ArrayOfUserIntentions[SI_LSD].current_time=0;
+           if(line_num==5 && int_val==1)//krayk
+               ArrayOfUserIntentions[SI_KRAYK].current_time=0;
+           if(line_num==6 && int_val==1)//manyac
+               ArrayOfUserIntentions[SI_MANIAC].current_time=0;
        }
 
      //  UINT bw;

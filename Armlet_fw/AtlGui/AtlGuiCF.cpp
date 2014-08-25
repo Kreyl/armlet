@@ -292,12 +292,22 @@ int bChangeMelodyCheck(int screen_id, int button_id)
         return BUTTON_PRESSABLE;
     //get this emo file numbers
 }
+
+
 int bChangeMelody(int screen_id, int button_id,int press_mode)
 {
     Uart.Printf("bChangeMelodyCheck press_mode%d \r",press_mode);
     if(press_mode!=0)
-
         return BUTTON_NO_REDRAW;
+    //TODO make extra func!!
+
+    ReasonAgeModifyChangeMelody();
+
+
+
+    //age weight reduce end
+
+
     Sound.Stop();
     return bChangeMelodyCheck(screen_id,button_id);
     //тут кодзавязан на события в application - там вызывается играть ту же эмоцию, если старая кончилась
