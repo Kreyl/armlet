@@ -49,7 +49,7 @@ public:
     int32_t ID=0;
     Pill_t Pill;
     Thread *PThd;
-    AppState_t State;
+    state_t CurrInfo;
     // Timers
     VirtualTimer TmrPillCheck, TmrUartRx;
     void Init();
@@ -73,8 +73,8 @@ public:
     char toiintstr[8];
     int on_run;
 
-    int last_location;
-    int last_location_signal_pw;
+    uint8_t last_location;
+    uint8_t last_location_signal_pw;
 };
 
 extern App_t App;

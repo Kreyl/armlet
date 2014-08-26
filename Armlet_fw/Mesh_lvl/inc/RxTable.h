@@ -51,7 +51,7 @@ public:
 
     static void ToPercent(int8_t InParam, uint8_t *POut) {
         InParam += 100;    // 0...65
-        *POut = DbTranslate[InParam];
+        *POut = DbTranslate[InParam]; // now it in 1..100
     }
 };
 

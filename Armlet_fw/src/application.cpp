@@ -435,25 +435,30 @@ void App_t::Task() {
 }
 void App_t::UpdateLocation()
 {
+    last_location_signal_pw = 0;
+    last_location = 0;
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
        // Uart.Printf(" ID=%u; Pwr=%u\r", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
         if((RxTable.PTable->Row[i].ID>=first_location_id && RxTable.PTable->Row[i].ID<=last_location_id) ||
            (RxTable.PTable->Row[i].ID>=first_location_id && RxTable.PTable->Row[i].ID<=last_location_id))
-       if(RxTable.PTable->Row[i].Level>last_location_signal_pw)
+       if(RxTable.PTable->Row[i].Level > last_location_signal_pw)
        {
            last_location_signal_pw = RxTable.PTable->Row[i].Level;
            last_location = RxTable.PTable->Row[i].ID;
        }
     }
+    if(last_location != 0) {
+        Uart.Printf("\r\nNew location = %u", last_location);
+        CurrInfo.Location = last_location;
+    }
 }
 void App_t::Init() {
-    State = asIdle;
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
     RxTable.RegisterAppThd(PThd);
     Sound.RegisterAppThd(PThd);
     on_run=0;
-    last_location=-1;
-    last_location_signal_pw=-1;
+    last_location = 0;
+    last_location_signal_pw = 0;
 
 #if UART_RX_ENABLED
     chVTSet(&TmrUartRx,    MS2ST(UART_RX_POLLING_MS), TmrUartRxCallback, nullptr);

@@ -160,6 +160,7 @@ void Mesh_t::IUpdateTimer() {
 
 void Mesh_t::PreparePktPayload() {
     PktTx.SenderInfo.Mesh.SelfID = App.ID;         /* need if App.ID changed by the Uart command */
+    PktTx.SenderInfo.State = App.CurrInfo;
     IPktPutCycle(AbsCycle);
     AlienInfo_t *AlienDataStr;
     uint16_t NextID = 0;
