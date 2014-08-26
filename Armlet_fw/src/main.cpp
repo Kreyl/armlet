@@ -85,9 +85,9 @@ int main() {
         uint32_t EvtMsk;
         EvtMsk = chEvtWaitAny(ALL_EVENTS);
         if(EvtMsk & EVTMSK_DFU_REQUEST) {
+            Log.Shutdown();
             Usb.Shutdown();
             MassStorage.Reset();
-            Log.Shutdown();
             // execute boot
             __disable_irq();
             chSysLock();

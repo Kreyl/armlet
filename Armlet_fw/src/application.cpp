@@ -211,7 +211,7 @@ static inline void KeysHandler() {
                    Log.Shutdown( );
                    chThdSleepMilliseconds(250);
                    Uart.Printf(" GO BOOTLOADER %d\r", Evt.NKeys);
-                   Bootloader.dfuJumpIn(wdg_OFF);
+                   Bootloader.dfuJumpIn(wdg_ON);
                }
                if(
                   Evt.NKeys==7 &&
@@ -220,7 +220,7 @@ static inline void KeysHandler() {
                )//abc z ler
                {
                    Uart.Printf(" GO REBOOT ( &DROP state later!) %d\r", Evt.NKeys);
-                   Bootloader.dfuJumpIn(wdg_OFF);
+                   Bootloader.dfuJumpIn(wdg_ON);
                    //TODO drop character to initial here
                    Log.Shutdown( );
                    chThdSleepMilliseconds(250);
