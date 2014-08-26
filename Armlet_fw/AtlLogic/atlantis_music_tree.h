@@ -25,7 +25,7 @@
 //emotion_number_fix = emotion_number_fix
 //intentions = reason
 const int non_tree_array_size = 0;
-const int emotion_number_fix=67;
+const int emotion_number_fix=87;
 const int music_array_size=emotion_number_fix+non_tree_array_size;
 //const int reasons_number_fix=5;
 

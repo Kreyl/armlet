@@ -200,6 +200,14 @@ void AtlGui_t::RenderFullScreen(int screen_id)
         if(screens[screen_id].buttons[i].isPressable!=nullptr)
         {
             int state1=screens[screen_id].buttons[i].isPressable(screen_id,i);
+            int state2=-1;
+            if(screens[screen_id].buttons[i].getState!=nullptr)
+                state2= screens[screen_id].buttons[i].getState(screen_id,i);
+            //if(state2!=BUTTON_NORMAL || state2!=-1 ||state2!=BUTTON_PRESSABLE)
+            if(state2==BUTTON_ENABLED)
+                RenderSingleButton(screen_id,i,state2);
+            else
+           // Uart.Printf("\r RenderFullScreen state2 %d, indx %d",state2,i);
             RenderSingleButton(screen_id,i,state1);
         }//не рисовать кнопки, которых нет
     }

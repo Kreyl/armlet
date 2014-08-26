@@ -195,6 +195,7 @@ int bReasonGetState(int screen_id, int button_id)
                       return BUTTON_ENABLED;
                   }
                    //TODO сюда надо вставлять проверку на неотключаемые резоны???
+                  Uart.Printf("\rbReasonGetState BUTTON_NORMAL, time %d , B%d",ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time,button_id);
                    return BUTTON_NORMAL;
                }
            }
@@ -238,11 +239,13 @@ int bReasonChange(int screen_id, int button_id ,int press_mode)
                    if(ArrayOfUserIntentions[user_reason_indx].was_winning &&
                            SICD.last_intention_index_winner==ArrayOfUserIntentions[user_reason_indx].reason_indx)
                    {
-                       Uart.Printf("\rCALL bReasonChange RESTART");
-                       ArrayOfUserIntentions[user_reason_indx].current_time=0;
+                       Uart.Printf("\rCALL bReasonChange STOPPED");
+                       ArrayOfUserIntentions[user_reason_indx].TurnOff();
+                       //ArrayOfUserIntentions[user_reason_indx].current_time=-1;
                        //теперь продолжение можно выключить!
                        ArrayOfUserIntentions[user_reason_indx].was_winning=false;
-                       return BUTTON_ENABLED;
+                       //return BUTTON_ENABLED;
+                       return BUTTON_NORMAL;
                    }
 
                    // if we are on the tail, and it's not wining reason, restart it.
@@ -287,7 +290,7 @@ int bChangeMelodyCheck(int screen_id, int button_id)
     if(SICD.last_played_emo<0) //ничего еще не играло, тогдаявнобудет фон - можно не париться
         return BUTTON_PRESSABLE;
     int emonum=GetFileNumerForEmoToPlay(SICD.last_played_emo);
-    Uart.Printf("bChangeMelodyCheck emonum%d \r",emonum);
+    Uart.Printf("bChangeMelodyCheck File numbers %d,emo_id %d \r",emonum,SICD.last_played_emo);
     if(emonum<=1)
         return BUTTON_LOCKED;
     else
