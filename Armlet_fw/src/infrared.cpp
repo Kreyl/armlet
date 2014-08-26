@@ -47,7 +47,7 @@ void Infrared_t::IRxEdgeIrq() {
 }
 
 // =============================== Implementation ==============================
-static WORKING_AREA(waIRRxThread, 128);
+static WORKING_AREA(waIRRxThread, 256);
 __attribute__ ((__noreturn__))
 static void IRRxThread(void *arg) {
     chRegSetThreadName("IRRx");
