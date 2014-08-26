@@ -18,26 +18,31 @@ void GoToDFU();
 void boot_jump(uint32_t Address);
 
 enum Iwdg_t {
-    Iwdg_ON, Iwdg_OFF
+    wdg_ON, wdg_OFF
 };
 
 class Btldr_t {
 private:
-
-    void JumpToAddr(uint32_t Addr);
-    void Iwdt_enable() {
+    void iwdgEnable() {
         const uint32_t LsiFreq = 42000;
-        IWDG->KR = IWDG_KR_KEY;                 // Write Access
+        IWDG->KR = 0x5555;                 // Write Access
         IWDG->PR = IWDG_PR_PR_1 | IWDG_PR_PR_0; // set prescaler
-        IWDG->RLR = LsiFreq/128;                // set preload
+        IWDG->RLR = LsiFreq/256;                // set preload
         IWDG->KR = 0xCCCC;                      // enable wdtg
+    }
+    void wwdgEnable() {
+        rccEnableAPB1(RCC_APB1ENR_WWDGEN, FALSE);   // enable wwdg clock
+        WWDG->CFR  = ((uint32_t)0x00000180); // /8
+        WWDG->CFR |= 0x7F;  // window value
+        WWDG->CR = 0x7F;
+        WWDG->CR |= 0x80; // enable wwdg
     }
 public:
     Thread* TerminatorThd;
-    void DFU_request() {
+    void dfuJumpIn(Iwdg_t wdg_state) {
+        if(wdg_state == wdg_ON) wwdgEnable();
         if(TerminatorThd != nullptr) chEvtSignal(TerminatorThd, EVTMSK_DFU_REQUEST);
     }
-    void JumpIn();
 };
 
 extern Btldr_t Bootloader;

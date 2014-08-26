@@ -211,7 +211,7 @@ static inline void KeysHandler() {
                    Log.Shutdown( );
                    chThdSleepMilliseconds(250);
                    Uart.Printf(" GO BOOTLOADER %d\r", Evt.NKeys);
-                   Bootloader.DFU_request();
+                   Bootloader.dfuJumpIn(wdg_OFF);
                }
                if(
                   Evt.NKeys==7 &&
@@ -220,7 +220,7 @@ static inline void KeysHandler() {
                )//abc z ler
                {
                    Uart.Printf(" GO REBOOT ( &DROP state later!) %d\r", Evt.NKeys);
-                                     Bootloader.DFU_request();
+                   Bootloader.dfuJumpIn(wdg_OFF);
                    //TODO drop character to initial here
                    Log.Shutdown( );
                    chThdSleepMilliseconds(250);
@@ -683,7 +683,9 @@ uint8_t App_t::ParseCsvFileToEmotions(const char* filename)
 void App_t::OnUartCmd(Cmd_t *PCmd) {
 //    Uart.Printf("%S\r", PCmd->Name);
     uint32_t dw32 __attribute__((unused));  // May be unused in some cofigurations
-    if(PCmd->NameIs("#Ping")) Uart.Ack(OK);
+    if(PCmd->NameIs("#Ping")) {
+        Uart.Ack(OK);
+    }
 
 #if 1 // Mesh
     else if(PCmd->NameIs("#SetMeshCycle")) {
@@ -701,7 +703,7 @@ void App_t::OnUartCmd(Cmd_t *PCmd) {
 
     else if(PCmd->NameIs("#Boot")) {
         Uart.Printf("\rDFU request");
-        Bootloader.DFU_request();
+        Bootloader.dfuJumpIn(wdg_ON);
     }
 
     else if(*PCmd->Name == '#') Uart.Ack(CMD_UNKNOWN);  // reply only #-started stuff

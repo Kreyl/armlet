@@ -71,19 +71,15 @@ void rLevel1_t::ITask() {
 #if 1 // ==== Mesh Rx Cycle ====
 
 static void RxEnd(void *p) {
-//    Uart.Printf("RxEnd, t=%u\r", chTimeNow());
     Radio.Valets.InRx = false;
 }
 
 void rLevel1_t::IMeshRx() {
-//    Uart.Printf("Rx Start, t=%u\r", chTimeNow());
     int8_t RSSI = 0;
     Valets.RxEndTime = (chTimeNow()) + CYCLE_TIME - SLOT_TIME;
     Valets.InRx = true;
     chEvtSignal(Mesh.IPPktHanlderThread, EVTMSK_MESH_PKT_RDY);
     chVTSet(&Valets.RxVT, MS2ST(CYCLE_TIME-SLOT_TIME), RxEnd, nullptr); /* Set VT */
-
-    // TODO: while(1) -> currtime -> break
     do {
         Valets.CurrentTime = chTimeNow();
         uint8_t RxRslt = CC.ReceiveSync(Valets.RxEndTime - Valets.CurrentTime, &Mesh.PktRx, &RSSI);
