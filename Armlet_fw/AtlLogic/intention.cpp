@@ -66,10 +66,10 @@ char * p_int_name;//button name if available
 
 //STATIC ARRAY, inits inside, all external are in InitArrayOfUserIntentions
 struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
-        {-1,25,120,300,120,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_MURDER)},//murder 0
-        {-1,25,3,10,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_CREATION)},//creation 1
-        {-1,25,3,10,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_DESTR)},//destruction 2
-        {-1,250,1,300,120,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_SEX)},//sex 3
+        {-1,25,30,30,30,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_MURDER)},//murder 0
+        {-1,25,1,30,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_CREATION)},//creation 1
+        {-1,25,1,30,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_DESTR)},//destruction 2
+        {-1,250,1,20,15,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_SEX)},//sex 3
         {-1,250,1,60,120,-1,false,0,PROCESS_FIGHT,const_cast<char *> (RNAME_FIGHT)},//fight 4
         {-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 5 weed
         {-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 6 heroin
@@ -268,9 +268,9 @@ void PrintSCIDToUart()
 	}
 
 int GetNotNormalizedIntegral(int power, int reason_id) {
-    Uart.Printf("reas_id=%d, power=%d\r", reason_id, power);
+    //Uart.Printf("reas_id=%d, power=%d\r", reason_id, power);
     int res = SICD.Intention_weight_cost*reasons[reason_id].weight+power*SICD.Signal_power_weight_cost;
-    Uart.Printf("rRslt=%d\r", res);
+    //Uart.Printf("rRslt=%d\r", res);
     return res;
 }
 

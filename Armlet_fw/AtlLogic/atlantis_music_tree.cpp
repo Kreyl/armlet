@@ -171,6 +171,10 @@ char * GetFileNameToPlayFromEmoId(int emo_id) {
 #ifdef UART_EMOTREE_DEBUG
 		Uart.Printf("GetFileNameToPlayFromEmoId only one file for emo %s \r", emotions[emo_id]);
 #endif
+#ifdef MID_SEEK_SUPPORT
+       SRPFESingleton.last_played_emo_imdx=emo_id;
+       SRPFESingleton.last_played_file_indx=0;
+#endif
 		return GetMusicFileNameFromList(emo_id, 0);//"TODO get full filename";// emotionTreeMusicNodeFiles[emo_id].music_files[0].full_filename;
 	}
 #ifdef UART_EMOTREE_DEBUG
@@ -233,7 +237,7 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs) {
        //get old position
        int old_pos=Sound.GetPosition();
        if(emo_id!=SRPFESingleton.last_played_emo_imdx)
-           Uart.Printf("MID_SEEK_SUPPORT warning! possible differ: emo play %d, rmo stored: %d",emo_id,SRPFESingleton.last_played_emo_imdx);
+           Uart.Printf("\rMID_SEEK_SUPPORT warning! possible differ: emo play %d, rmo stored: %d",emo_id,SRPFESingleton.last_played_emo_imdx);
       //записали старые emo id file id
        SRPFESingleton.OnCallStopPlay(SRPFESingleton.last_played_emo_imdx,SRPFESingleton.last_played_file_indx,old_pos);
 
@@ -245,6 +249,7 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs) {
        strcpy(PlayEmoBuffTmp,fname);
 #ifdef MID_SEEK_SUPPORT
        //проверили новые emo id file id
+       Uart.Printf("\rMID_SEEK_SUPPORT CheckIfRecent: emo indx %d, file_indx: %d",SRPFESingleton.last_played_emo_imdx,SRPFESingleton.last_played_file_indx);
        int seek_pos_old=SRPFESingleton.CheckIfRecent(SRPFESingleton.last_played_emo_imdx,SRPFESingleton.last_played_file_indx);
        Sound.Play(PlayEmoBuffTmp,seek_pos_old);
        Uart.Printf(PlayEmoBuffTmp);
@@ -310,15 +315,24 @@ void Init_emotionTreeMusicNode() {
         char *S = nullptr;
         while(SD.GetNext(&S) == FR_OK) {
             int emo_id = GetEmoIndxFromFileString(S);
-            if(emo_id >= 0) emotions[emo_id].numTracks++;
-//            Uart.Printf("\rFilename: %S", S);
+            if(emo_id >= 0)
+                {
+                emotions[emo_id].numTracks++;
+                Uart.Printf("\rFilename: %S, emo id %d, NumTracks %d", S,emo_id, emotions[emo_id].numTracks);
+                }
+            else
+            Uart.Printf("\rFilename: %S, emo id %d", S,emo_id);
         } // if GetNext
     } // if PrepareToReadDirs
 }
 
 void Init_emotionTreeMusicNodeFiles_FromFileIterrator() {
     // init zero state
-    for(int i=0;i<music_array_size;i++) emotions[i].numTracks=0;
+    for(int i=0;i<music_array_size;i++)
+        {
+            emotions[i].numTracks=0;
+            //Uart.Printf("Init_emotionTreeMusicNodeFiles_FromFileIterrator emo_id %d, trnum %d",i,emotions[i].numTracks )
+        }
     Init_emotionTreeMusicNode();
 }
 
