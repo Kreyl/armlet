@@ -432,14 +432,14 @@ void App_t::UpdateLocation() {
     uint16_t tmpID=0;
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
         tmpID = RxTable.PTable->Row[i].ID;
-        if(tmpID >= first_location_id && tmpID <= last_location_id) {
+        if( (tmpID >= first_location_id && tmpID <= last_location_id) ||
+            (tmpID >= first_emotion_fix_id && tmpID <= last_emotion_fix_id) )    {
             if(RxTable.PTable->Row[i].Level > SignalPwr) {
                 SignalPwr = RxTable.PTable->Row[i].Level;
                 LocationID = tmpID;
             } // if Signal present
         } // if location correct
     }
-    Uart.Printf("\r\nLocID = %u", LocationID);
     if(LocationID) CurrInfo.Location = LocationID;
 }
 void App_t::Init() {
