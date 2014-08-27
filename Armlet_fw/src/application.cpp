@@ -427,8 +427,8 @@ void App_t::Task() {
     } // while true
 }
 void App_t::UpdateLocation() {
-    SignalPwr = 0;
-    LocationID = 0;
+    uint8_t SignalPwr = 0;
+    uint8_t LocationID = 0;
     uint16_t tmpID=0;
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
         tmpID = RxTable.PTable->Row[i].ID;
@@ -447,8 +447,6 @@ void App_t::Init() {
     RxTable.RegisterAppThd(PThd);
     Sound.RegisterAppThd(PThd);
     on_run=0;
-    LocationID = 0;
-    SignalPwr = 0;
 
 #if UART_RX_ENABLED
     chVTSet(&TmrUartRx,    MS2ST(UART_RX_POLLING_MS), TmrUartRxCallback, nullptr);

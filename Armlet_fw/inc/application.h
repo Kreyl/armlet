@@ -72,9 +72,6 @@ public:
     char emostr[32];
     char toiintstr[8];
     int on_run;
-
-    uint8_t LocationID;
-    uint8_t SignalPwr;
 };
 
 extern App_t App;
