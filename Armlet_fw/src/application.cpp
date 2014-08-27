@@ -168,6 +168,7 @@ static inline void KeysHandler() {
             if(Evt.KeyID[0] == KEY_PWRON)
             {
                 //выключение
+                App.SaveData();
                 Log.Shutdown( );
                 chThdSleepMilliseconds(250);
                 Power.EnterStandby();
@@ -194,6 +195,8 @@ static inline void KeysHandler() {
                //if(Evt.NKeys==3 && Evt.KeyID[0]==1 && Evt.KeyID[1]==3 && Evt.KeyID[2]==4)//bcx
                if(Evt.NKeys==3 && Evt.KeyID[0]==keyA && Evt.KeyID[1]==keyX && Evt.KeyID[2]==keyR)//arx
                {
+                   App.SaveData();
+                   chThdSleepMilliseconds(250);
                    Uart.Printf(" GO REBOOT  %d\r", Evt.NKeys);
                    Log.Shutdown( );
                    chThdSleepMilliseconds(250);
@@ -219,8 +222,12 @@ static inline void KeysHandler() {
                   Evt.KeyID[3]==keyZ && Evt.KeyID[4]==keyL && Evt.KeyID[5]==keyE && Evt.KeyID[6]==keyR
                )//abc z ler
                {
-                   Uart.Printf(" GO REBOOT ( &DROP state later!) %d\r", Evt.NKeys);
-                   Bootloader.dfuJumpIn(wdg_ON);
+
+                   App.DropData();
+                   App.SaveData();
+                   Uart.Printf(" GO REBOOT ( &DROP state!) %d\r", Evt.NKeys);
+                   chThdSleepMilliseconds(250);
+                 //  Bootloader.dfuJumpIn(wdg_ON);
                    //TODO drop character to initial here
                    Log.Shutdown( );
                    chThdSleepMilliseconds(250);
@@ -465,7 +472,7 @@ void App_t::SaveData()
     FIL file;
     int open_code= f_open (
             &file,
-       "/state2.ini",
+       "/state.ini",
        FA_WRITE
     );
     if(open_code!=0)
@@ -526,8 +533,14 @@ void App_t::SaveData()
     f_close(&file);
     Uart.Printf("App_t::SaveData done");
 }
-void LoadCharacterSettings()
+void App_t::LoadCharacterSettings()
 {
+//    0 - нету
+//    1 - сидит на траве
+//    2 - сидит на ЛСД
+//    3 - сидит на героине
+//    4 - маньяк
+//    5 - это Крайк
     //драка хранится напрямую в userintentions. power - ширина плато, от энергии +-1!
     //убийство хранится в userintentions   readyToKill = ширина плато*Energymoddecreased(default_energy)
     //убийство хранится в userintentions   readyToKill =Time ширина плато*Energymodincreased(default_energy)
@@ -535,20 +548,38 @@ void LoadCharacterSettings()
     SD.iniReadInt32("character", "power", "settings.ini", &pwr);//draka
     SD.iniReadInt32("character", "readyToKill", "settings.ini", &rk);
     SD.iniReadInt32("character", "readyToKillTime", "settings.ini", &rkt);
-    //writedata to variables
 
-    WriteDrakaTimeFromPower(pwr);
+    WriteDrakaTimeFromPower(pwr);//TODO test
+    WriteReadyToKillTimer(rkt);//TODO test
+    WriteRadyToKill(rk);//TODO test
     int32_t addict;
     SD.iniReadInt32("character", "addict", "settings.ini", &addict);
+    if(addict==1)
+        ArrayOfUserIntentions[SI_WEED].current_time=0;
+    if(addict==2)
+            ArrayOfUserIntentions[SI_HER].current_time=0;
+    if(addict==3)
+            ArrayOfUserIntentions[SI_LSD].current_time=0;
+    if(addict==4)
+            ArrayOfUserIntentions[SI_MANIAC].current_time=0;
+    if(addict==5)
+            ArrayOfUserIntentions[SI_KRAYK].current_time=0;
 }
-void DropData()
+void App_t::DropData()
 {
-
-
     Energy.SetEnergy(START_ENERGY);
-    int def_narco=-1;
-    SD.iniReadInt32("character", "addict", "settings.ini", &App.ID);
-
+    int32_t addict;
+    SD.iniReadInt32("character", "addict", "settings.ini", &addict);
+    if(addict==1)
+        ArrayOfUserIntentions[SI_WEED].current_time=0;
+    if(addict==2)
+            ArrayOfUserIntentions[SI_HER].current_time=0;
+    if(addict==3)
+            ArrayOfUserIntentions[SI_LSD].current_time=0;
+    if(addict==4)
+            ArrayOfUserIntentions[SI_MANIAC].current_time=0;
+    if(addict==5)
+            ArrayOfUserIntentions[SI_KRAYK].current_time=0;
     ArrayOfUserIntentions[SI_WEED].current_time=-1;
     ArrayOfUserIntentions[SI_HER].current_time=-1;
     ArrayOfUserIntentions[SI_LSD].current_time=-1;
@@ -576,7 +607,14 @@ void App_t::LoadData()
            int int_val;
            int_val=strtol(DataFileBuff,NULL,10);
            if(line_num==1)
+           {
+               if(int_val==START_ENERGY)
+               {
+                   Uart.Printf("App_t::LoadData()  Default energy found, loading stopped");
+                   return;
+               }
                Energy.SetEnergy(int_val);
+           }
            if(line_num==2 && int_val==1)//weed
                ArrayOfUserIntentions[SI_WEED].current_time=0;
            if(line_num==3 && int_val==1)//her

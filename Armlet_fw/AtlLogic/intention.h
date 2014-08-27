@@ -177,6 +177,9 @@ void UserReasonFlagRecalc(int reason_id);
 void ReasonAgeModifyChangeMelody();
 
 void WriteDrakaTimeFromPower(int pwr_in);
+void WriteRadyToKill(int val_in);
+void WriteReadyToKillTimer(int val_in);
+
 //в структуре рассчета будет индекс текущего победителя мощности,
 //индекс предыдущего победителя мощности,
 //набранная дельта ( по определению принадлежит предыдущему победителю)

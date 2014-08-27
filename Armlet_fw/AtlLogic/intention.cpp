@@ -19,15 +19,33 @@ int GetDrakaTime()
     int energy_bonus= DRAKA_STEP*(Energy.GetEnergy()-START_ENERGY)/(MAX_ENERGY_LVL-MIN_ENERGY_LVL);
     int random_bonus=Random(DRAKA_STEP*2)-DRAKA_STEP;
     int summ_fight_time=static_char_timing+energy_bonus+random_bonus;
+    Uart.Printf("GetDrakaTime result uncropped:%d", summ_fight_time);
     if(summ_fight_time>DRAKA_MAX_SEC)
         return DRAKA_MAX_SEC;
     if(summ_fight_time<DRAKA_MIN_SEC)
         return DRAKA_MIN_SEC;
+
     return summ_fight_time;
 }
 void WriteDrakaTimeFromPower(int pwr_in)
 {
     ArrayOfUserIntentions[SI_FIGHT].time_on_plateau=DRAKA_MIN_SEC+pwr_in*DRAKA_STEP;
+}
+void WriteRadyToKill(int val_in)
+{
+    int tmp_energy=Energy.GetEnergy();
+    Energy.SetEnergy(START_ENERGY);
+    ArrayOfUserIntentions[SI_FIGHT].time_to_plateau=Energy.GetEnergyScaleValMore(val_in);
+    Energy.SetEnergy(tmp_energy);
+
+}
+void WriteReadyToKillTimer(int val_in)
+{
+    int tmp_energy=Energy.GetEnergy();
+    Energy.SetEnergy(START_ENERGY);
+    ArrayOfUserIntentions[SI_FIGHT].time_on_plateau= Energy.GetEnergyScaleValLess(val_in);
+    ArrayOfUserIntentions[SI_FIGHT].time_after_plateau=Energy.GetEnergyScaleValLess(val_in)/5;
+    Energy.SetEnergy(tmp_energy);
 }
 
 struct SeekRecentlyPlayedFilesEmo SRPFESingleton
