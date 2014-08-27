@@ -6,7 +6,7 @@
 #include "sound.h"
 #define SOUND_STEP 25
 #define MAX_VOL_CONST 256
-#define MIN_VOL_CONST 0
+#define MIN_VOL_CONST 25
 
 #define SCREENS_WITH_REASONS 2
 typedef struct t_scrbtoarr
@@ -241,7 +241,6 @@ int bReasonChange(int screen_id, int button_id ,int press_mode)
                    {
                        Uart.Printf("\rCALL bReasonChange STOPPED");
                        ArrayOfUserIntentions[user_reason_indx].TurnOff();
-                       //ArrayOfUserIntentions[user_reason_indx].current_time=-1;
                        //теперь продолжение можно выключить!
                        ArrayOfUserIntentions[user_reason_indx].was_winning=false;
                        //return BUTTON_ENABLED;

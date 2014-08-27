@@ -3,7 +3,7 @@
 //#include "emotions.h"
 #include "atlantis_music_tree.h"
 #define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 10
-#define MAX_USER_INTENTIONS_ARRAY_SIZE 15
+#define MAX_USER_INTENTIONS_ARRAY_SIZE 16
 #define INTENTIONS_ARRAY_SIZE 5
 #define WINING_INTEGRAL_SWITCH_LIMIT 50
 #define FON_RELAX_SPEED 50
@@ -16,7 +16,7 @@
 #define PROCESS_TUMAN  4
 #define PROCESS_MANIAC  5
 #define PROCESS_KRAYK  6
-
+#define PROCESS_LOMKA  6
 
 
 //ArrayOfUserIntentions id defines, not buttons, user intentions itself
@@ -36,6 +36,7 @@
 #define SI_STRAH 12
 #define SI_MSOURCE 13
 #define SI_PROJECT 14
+#define SI_WITHDRAWAL 15
 
 /*typedef struct Intention {
 	int weight1000;	//константа, определяющая степень и время роста
@@ -61,18 +62,14 @@ typedef struct UserIntentions {
     int time_to_plateau;//[sec]
     int time_on_plateau;//sec
     int time_after_plateau;//[sec]
-    int current_time;//[sec] -1 если не включено, 0,+int если включено
+    int current_time;//[sec] -1 если не включено, 0,+int если включено -2 если является носителем зависимости
     //если уже музыка играла, true. - нужно для поддержки переподключений
     bool was_winning;
     //storage for data from radiochannel, recalc every radio_in
     int human_support_number;
     int process_type;
     char * p_int_name;//button name if available
-    void TurnOff()
-    {
-        current_time=-1;
-        was_winning=false;
-    }
+    void TurnOff();
     void TurnOn();
 } UserIntentions;
 

@@ -74,6 +74,7 @@ struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRA
 
 void UserIntentions::TurnOn()
 {
+
     this->current_time=0;
 }
 //int CurrentUserIntentionsArraySize=6;
@@ -119,41 +120,62 @@ struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
         {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//strah 12
         {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mSource 13
         {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mProject 14
+        {-1,250,1200,2000,400,-1,false,0,PROCESS_LOMKA,nullptr},//narco 15 lomka
 };
+//#define SI_MURDER 0
+//#define SI_CREATION 1
+//#define SI_DESTRUCTION 2
+//#define SI_SEX 3
+//#define SI_FIGHT 4
+//#define SI_WEED 5
+//#define SI_HER 6
+//#define SI_LSD 7
+//#define SI_KRAYK 8
+//#define SI_DEATH 9
+//#define SI_MANIAC 10
+//#define SI_TUMAN 11
+//#define SI_STRAH 12
+//#define SI_MSOURCE 13
+//#define SI_PROJECT 14
 void InitArrayOfUserIntentions()
 {
     for(int i=0;i<reasons_number;i++)
     {
          if(strcmp(reasons[i].name,"murder")==0)
-             ArrayOfUserIntentions[0].reason_indx=i;
-         else if(strcmp(reasons[i].name,"creation")==0)
-             ArrayOfUserIntentions[1].reason_indx=i;
-         else if(strcmp(reasons[i].name,"destruction")==0)
-             ArrayOfUserIntentions[2].reason_indx=i;
-         else if(strcmp(reasons[i].name,"sex")==0)
-             ArrayOfUserIntentions[3].reason_indx=i;
-         else if(strcmp(reasons[i].name,"fight")==0)
-             ArrayOfUserIntentions[4].reason_indx=i;
-         else if(strcmp(reasons[i].name,"weed")==0)//grass
-             ArrayOfUserIntentions[5].reason_indx=i;
-         else if(strcmp(reasons[i].name,"heroin")==0) //hero
-             ArrayOfUserIntentions[6].reason_indx=i;
-         else if(strcmp(reasons[i].name,"lsd")==0)//lsd
-             ArrayOfUserIntentions[7].reason_indx=i;
-         else if(strcmp(reasons[i].name,"krayk")==0)//krayk
-             ArrayOfUserIntentions[8].reason_indx=i;
-         else if(strcmp(reasons[i].name,"death")==0)//death
-             ArrayOfUserIntentions[9].reason_indx=i;
-         else if(strcmp(reasons[i].name,"azart")==0)//maniac
-             ArrayOfUserIntentions[10].reason_indx=i;
-         else if(strcmp(reasons[i].name,"mist")==0)//tuman
-             ArrayOfUserIntentions[11].reason_indx=i;
-         else if(strcmp(reasons[i].name,"fear")==0)//strah
-             ArrayOfUserIntentions[12].reason_indx=i;
-         else if(strcmp(reasons[i].name,"mSource")==0)//mSource
-             ArrayOfUserIntentions[13].reason_indx=i;
-         else if(strcmp(reasons[i].name,"mProject")==0)//mProject
-             ArrayOfUserIntentions[14].reason_indx=i;
+             ArrayOfUserIntentions[SI_MURDER].reason_indx=i;
+         if(strcmp(reasons[i].name,"creation")==0)
+             ArrayOfUserIntentions[SI_CREATION].reason_indx=i;
+         if(strcmp(reasons[i].name,"destruction")==0)
+             ArrayOfUserIntentions[SI_DESTRUCTION].reason_indx=i;
+         if(strcmp(reasons[i].name,"sex")==0)
+             ArrayOfUserIntentions[SI_SEX].reason_indx=i;
+         if(strcmp(reasons[i].name,"fight")==0)
+             ArrayOfUserIntentions[SI_FIGHT].reason_indx=i;
+
+         if(strcmp(reasons[i].name,"weed")==0)//grass
+             ArrayOfUserIntentions[SI_WEED].reason_indx=i;
+         if(strcmp(reasons[i].name,"heroin")==0) //hero
+             ArrayOfUserIntentions[SI_HER].reason_indx=i;
+         if(strcmp(reasons[i].name,"lsd")==0)//lsd
+             ArrayOfUserIntentions[SI_LSD].reason_indx=i;
+         //маньяк и крайк слышат в ушах одно и то-же, если успешно делают своё дело
+         if(strcmp(reasons[i].name,"krayk")==0)//krayk
+             ArrayOfUserIntentions[SI_KRAYK].reason_indx=i;
+         if(strcmp(reasons[i].name,"death")==0)//death
+             ArrayOfUserIntentions[SI_DEATH].reason_indx=i;
+         if(strcmp(reasons[i].name,"krayk")==0)//maniac
+             ArrayOfUserIntentions[SI_MANIAC].reason_indx=i;
+
+         if(strcmp(reasons[i].name,"mist")==0)//tuman
+             ArrayOfUserIntentions[SI_TUMAN].reason_indx=i;
+         if(strcmp(reasons[i].name,"fear")==0)//strah
+             ArrayOfUserIntentions[SI_STRAH].reason_indx=i;
+         if(strcmp(reasons[i].name,"mSource")==0)//mSource
+             ArrayOfUserIntentions[SI_MSOURCE].reason_indx=i;
+         if(strcmp(reasons[i].name,"mProject")==0)//mProject
+             ArrayOfUserIntentions[SI_PROJECT].reason_indx=i;
+         if(strcmp(reasons[i].name,"mProject")==0)//lomka
+             ArrayOfUserIntentions[SI_PROJECT].reason_indx=i;
     }
     //if any is not inited, panic!!
     for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
@@ -519,7 +541,11 @@ int CalculateCurrentPowerOfPlayerReason(int array_indx)
     }
     else return -1;
 }
-
+void UserIntentions::TurnOff()
+{
+    current_time=-1;
+    was_winning=false;
+}
 void CallReasonFalure(int user_reason_id)
 {
     if(user_reason_id==SI_SEX)
@@ -531,12 +557,21 @@ void CallReasonFalure(int user_reason_id)
     Uart.Printf("CALL REASON FALURE reason %d\r",user_reason_id);
     Energy.AddEnergy(REASON_FAIL_ENERGY_CHANGE);
 
-   // маньяки икрайк неизлечимо наркозависимы
-    if(ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_MANIAC || ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_KRAYK)
+   // если кайф перестает действовать. включается ломка
+    if(ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_MANIAC || ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_KRAYK ||ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NARCO)
     {
-        ArrayOfUserIntentions[user_reason_id].current_time=0;
+        ArrayOfUserIntentions[user_reason_id].current_time=-2;
+        ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
     }
-    //если у маньяка что-то неполучилось - убвать не хочет??
+    // маньяки и крайк неизлечимо наркозависимы
+    if( ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_LOMKA)
+    {
+        if(ArrayOfUserIntentions[SI_KRAYK].current_time==-2 || ArrayOfUserIntentions[SI_KRAYK].current_time>=0)
+            ArrayOfUserIntentions[user_reason_id].current_time=0;
+        if(ArrayOfUserIntentions[SI_MANIAC].current_time==-2 || ArrayOfUserIntentions[SI_MANIAC].current_time>=0)
+            ArrayOfUserIntentions[user_reason_id].current_time=0;
+    }
+
 
     return;
 }
@@ -545,18 +580,28 @@ void CallReasonSuccess(int user_reason_id)
 {
     //если наркозависимость - перезапустить!
     //подумать над размерамиинтервалов! PROCESS_NARCO
-    if(ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NARCO)
-        ArrayOfUserIntentions[user_reason_id].current_time=0;
+
+    //маньяк и крайк неизлечимы - при окончании ломки перезапускается ломка
+    if( ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NARCO)
+        if(user_reason_id==SI_KRAYK || user_reason_id==SI_MANIAC)
+            ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
+
     //если маньяк убил кого-то - вырубить ему намеряние заново. если не нашел - также вырубить, онять нергию.
-    if(ArrayOfUserIntentions[SI_MANIAC].current_time>=0 && user_reason_id==SI_MURDER)
-        ArrayOfUserIntentions[SI_MANIAC].current_time=0;
+    if((ArrayOfUserIntentions[SI_MANIAC].current_time>=0 || ArrayOfUserIntentions[SI_MANIAC].current_time==-2) && user_reason_id==SI_MURDER)
+    {
+        ArrayOfUserIntentions[SI_MANIAC].current_time=0;//включить кайф
+        ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
+    }
     //если крайк что-то сделал - перезапустить его зависимость
     //TODO заменить процессы на SI
-    if(ArrayOfUserIntentions[SI_KRAYK].current_time>=0 &&
+    if((ArrayOfUserIntentions[SI_KRAYK].current_time>=0 || ArrayOfUserIntentions[SI_KRAYK].current_time==-2) &&
             (ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NORMAL ||
-             ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_FIGHT
-            ))
-        ArrayOfUserIntentions[SI_KRAYK].current_time=0;
+             ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_FIGHT)
+       )
+    {
+        ArrayOfUserIntentions[SI_KRAYK].current_time=0; //включить кайф
+        ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
+    }
     Energy.AddEnergy(5);
 
    return;

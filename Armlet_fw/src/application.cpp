@@ -165,6 +165,8 @@ static inline void KeysHandler() {
         }
         else if(Evt.Type==keLongPress)
         {
+            if(AtlGui.is_locked && Evt.KeyID[0]!=6)//если не лок и залочена - вернуться
+                    continue;
             if(Evt.KeyID[0] == KEY_PWRON)
             {
                 //выключение
@@ -186,6 +188,8 @@ static inline void KeysHandler() {
 
         else if(Evt.Type==keCombo)
         {
+            if(AtlGui.is_locked)//если не лок и залочена - вернуться
+                    continue;
             //    void EnterStandby();
             //void Reset()
            // Программное включение, выключение (длинная А)+
@@ -359,7 +363,10 @@ void App_t::Task() {
                     CheckAndRedrawFinishedReasons();
 
                 if(Time.S_total% SEC_TO_SELF_REDUCE ==0)
+                {
                     Energy.AddEnergy(-1);
+                    Uart.Printf("\renergy self reduced");
+                }
             }
             else
                 GSCS.OnNewSec();
@@ -464,6 +471,7 @@ void App_t::Init() {
     ParseCsvFileToEmotions("character.csv");
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
+    LoadCharacterSettings();
     LoadData();
 }
 
@@ -497,40 +505,41 @@ void App_t::SaveData()
     //energy to buff
     //energy to file
     f_printf(&file,"#energy");
-    f_printf(&file,"%d",Energy.GetEnergy());
+    f_printf(&file,"\r\n%d",Energy.GetEnergy());
     //weed, lambda welcome!
-    f_printf(&file,"#narcograss");
+    f_printf(&file,"\r\n#narcograss");
     if(ArrayOfUserIntentions[SI_WEED].current_time>=0)
-        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
-    f_printf(&file,"#narcoher");
+    f_printf(&file,"\r\n#narcoher");
     if(ArrayOfUserIntentions[SI_HER].current_time>=0)
-        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
-    f_printf(&file,"#narcolsd");
+    f_printf(&file,"\r\n#narcolsd");
     if(ArrayOfUserIntentions[SI_LSD].current_time>=0)
-        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
-    f_printf(&file,"#narcoTrain");
+    f_printf(&file,"\r\n#narcoTrain");
     if(ArrayOfUserIntentions[SI_KRAYK].current_time>=0)
-        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
-    f_printf(&file,"#nacroManiac");
+    f_printf(&file,"\r\n#nacroManiac");
     if(ArrayOfUserIntentions[SI_MANIAC].current_time>=0)
-        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
    // f_write(&file, DataFileBuff, buff_size, &bw);
     f_close(&file);
+    Uart.Printf("\r!!!ArrayOfUserIntentions[SI_MANIAC].current_time%d",ArrayOfUserIntentions[SI_MANIAC].current_time);
     Uart.Printf("App_t::SaveData done");
 }
 void App_t::LoadCharacterSettings()
@@ -610,9 +619,11 @@ void App_t::LoadData()
            {
                if(int_val==START_ENERGY)
                {
-                   Uart.Printf("App_t::LoadData()  Default energy found, loading stopped");
+                   Uart.Printf("\rApp_t::LoadData()  Default energy found, loading stopped");
                    return;
                }
+               else
+                   Uart.Printf("\rApp_t::LoadData()   energy found %d, loading",int_val);
                Energy.SetEnergy(int_val);
            }
            if(line_num==2 && int_val==1)//weed
