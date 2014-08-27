@@ -58,7 +58,9 @@ void Beeper_t::Shutdown() {
 Vibrator_t Vibro;
 // Timer callback
 void VibroTmrCallback(void *p) {
+    chSysLockFromIsr();
     Vibro.VibrateI((const VibroChunk_t*)p);
+    chSysUnlockFromIsr();
 }
 
 void Vibrator_t::Init() {

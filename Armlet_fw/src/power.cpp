@@ -52,7 +52,7 @@ static const mVPercent_t mVPercentTable[] = {
 #define ADC_DEVIATION       11  // Sigma=5
 
 // ============================== Implementation ===============================
-static WORKING_AREA(waPwrThread, 128);
+static WORKING_AREA(waPwrThread, 256);
 static void PwrThread(void *arg) {
     chRegSetThreadName("Pwr");
     Power.Task();

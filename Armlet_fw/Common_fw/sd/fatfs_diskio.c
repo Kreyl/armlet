@@ -40,7 +40,7 @@ extern RTCDriver RTCD1;
 
 
 // ====================== KL's semaphored read/write ===========================
-static Semaphore semSDRW;
+Semaphore semSDRW;
 
 bool SDRead(uint32_t startblk, uint8_t *buffer, uint32_t n) {
 //    PrintfC("\r*%S ", chThdSelf()->p_name);
@@ -75,9 +75,6 @@ DSTATUS disk_initialize (
     BYTE drv                /* Physical drive nmuber (0..) */
 )
 {
-    // Init RW semaphore
-    chSemInit(&semSDRW, 1);
-
   DSTATUS stat;
 
   switch (drv) {

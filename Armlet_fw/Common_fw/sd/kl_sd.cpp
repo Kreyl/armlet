@@ -14,6 +14,7 @@
 #include "cmd_uart.h"
 
 sd_t SD;
+extern Semaphore semSDRW;
 
 void sd_t::Init() {
     IsReady = FALSE;
@@ -27,7 +28,7 @@ void sd_t::Init() {
     // Power pin
     PinSetupOut(GPIOC, 4, omPushPull, pudNone);
     PinClear(GPIOC, 4); // Power on
-    chThdSleepMicroseconds(450);
+    chThdSleepMilliseconds(270);    // Let power to stabilize
 
     FRESULT err;
     sdcInit();
@@ -45,6 +46,8 @@ void sd_t::Init() {
         sdcDisconnect(&SDCD1);
         return;
     }
+    // Init RW semaphore
+    chSemInit(&semSDRW, 1);
     IsReady = TRUE;
 }
 
