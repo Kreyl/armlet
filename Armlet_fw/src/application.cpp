@@ -41,6 +41,17 @@ App_t App;
 #define PILLTYPEWEED 1
 #define PILLTYPELSD 2
 #define PILLTYPEHER 3
+//============================csv dirs==========================================
+static const char* FDirList2[] = {
+        "",
+        "common",
+};
+
+MusList_t CSVList = {
+        sizeof(FDirList2)/sizeof(FDirList2[0]),
+        0,
+        FDirList2
+};
 #if 1 // ============================ Timers ===================================
 // Pill check
 void TmrPillCheckCallback(void *p) {
@@ -468,7 +479,9 @@ void App_t::Init() {
 
     Time.Init();
     Time.Reset();
-    ParseCsvFileToEmotions("character.csv");
+    char *S = nullptr;
+    SD.GetNthFileByPrefix(&MusList,"character", 1, &S);
+    ParseCsvFileToEmotions(S);
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
     LoadCharacterSettings();

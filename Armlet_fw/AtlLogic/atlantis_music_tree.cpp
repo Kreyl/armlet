@@ -65,7 +65,7 @@ char * GetMusicFileNameFromList(int emo_id, int file_num) {
     strcat(emonamebuffer, MUSIC_FILE_EMO_INFO_SEPARATOR_STRING);
     Uart.Printf("\rEmonamebuffer: %s; emotions[emo_id].name: %s",emonamebuffer,emotions[emo_id].name);
     char *S = nullptr;
-    SD.GetNthFileByPrefix(&MusList, emonamebuffer, file_num, &S);
+    SD.GetNthFileByPrefix(&MusList,  emonamebuffer, file_num, &S);
     Uart.Printf("\r%S; Filename = %S", __FUNCTION__, S);
     return S;
 }
@@ -75,8 +75,6 @@ int GetEmoIndxFromFileString(char * string)
 {
 	//TODO weight auto rebalancer function to call here
 
-	//char stremobuff[100];
-	//int return_value=EMO_INFO_NOT_FOUND;
 	//getting emo from filename
 	int sep_id=-1;
 	sep_id=strcspn(string,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING);
@@ -90,11 +88,9 @@ int GetEmoIndxFromFileString(char * string)
 
 	for(int i=0;i<emotions_number;i++)
 	{
-		//if(strncmp(EmoNamebuffer,emotions[i].name,sep_id)==0)
         if((uint32_t)sep_id== strlen(emotions[i].name))
         {
             if(strncmp(EmoNamebuffer,emotions[i].name,sep_id)==0)
-            //if(strcmp(strpbrk(string,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING),emotions[i].name))
             {
             //	Uart.Printf("GetEmoIndx string %s , EmoNamebuffer  %s, name %s  \r",string,EmoNamebuffer,emotions[i].name);
                   //  Uart.Printf("String_size %d %d, ",sep_id,strlen(emotions[i].name));

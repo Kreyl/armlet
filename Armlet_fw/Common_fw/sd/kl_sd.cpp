@@ -119,6 +119,7 @@ uint8_t sd_t::GetNthFileByPrefix(MusList_t* PList, const char* Prefix, uint32_t 
             else N--;
         } // if prefix
     } // while
+    Uart.Printf("\nGetNthFileByPrefix FALURE");
     return FAILURE;
 }
 #endif
