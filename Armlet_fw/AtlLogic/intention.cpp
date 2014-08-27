@@ -10,6 +10,26 @@
 #define AGE_MAX_WEIGHT_REDUCE 5
 int CurrentIntentionArraySize=2;
 
+#define DRAKA_MIN_SEC 10
+#define DRAKA_MAX_SEC 60
+#define DRAKA_STEP ((DRAKA_MAX_SEC-DRAKA_MIN_SEC)/10)
+int GetDrakaTime()
+{
+    int static_char_timing= ArrayOfUserIntentions[SI_FIGHT].time_on_plateau; //[16-60]
+    int energy_bonus= DRAKA_STEP*(Energy.GetEnergy()-START_ENERGY)/(MAX_ENERGY_LVL-MIN_ENERGY_LVL);
+    int random_bonus=Random(DRAKA_STEP*2)-DRAKA_STEP;
+    int summ_fight_time=static_char_timing+energy_bonus+random_bonus;
+    if(summ_fight_time>DRAKA_MAX_SEC)
+        return DRAKA_MAX_SEC;
+    if(summ_fight_time<DRAKA_MIN_SEC)
+        return DRAKA_MIN_SEC;
+    return summ_fight_time;
+}
+void WriteDrakaTimeFromPower(int pwr_in)
+{
+    ArrayOfUserIntentions[SI_FIGHT].time_on_plateau=DRAKA_MIN_SEC+pwr_in*DRAKA_STEP;
+}
+
 struct SeekRecentlyPlayedFilesEmo SRPFESingleton
 {
     -1,-1,-1,{
@@ -208,17 +228,13 @@ void GlobalStopCalculationSupport::FinishStopCalculation()
     SICD.is_global_stop_active=false;
     Uart.Printf("\rGlobalStopCalculationSupport::FinishStopCalculation()");
 }
-int GlobalStopCalculationSupport::GetFightTime()
-{
-    return 20;
-}
 void GlobalStopCalculationSupport::OnNewSec()
 {
     if(this->stop_reason_type==gsDraka)
     {
         if(timer==0)
         {
-            draka_fight_length=MIN(GetFightTime(),MAX_FIGHT_PLAY_TIME);
+            draka_fight_length=GetDrakaTime();
             draka_heart_length= HEART_PLAYING_TIME_SEC;
             PlayNewEmo(reasons[ArrayOfUserIntentions[SI_FIGHT].reason_indx].eID,6,true);
         }

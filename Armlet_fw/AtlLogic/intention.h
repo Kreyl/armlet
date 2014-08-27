@@ -17,6 +17,8 @@
 #define PROCESS_MANIAC  5
 #define PROCESS_KRAYK  6
 
+
+
 //ArrayOfUserIntentions id defines, not buttons, user intentions itself
 
 #define SI_MURDER 0
@@ -100,7 +102,7 @@ typedef struct IntentionCalculationData
 }IntentionCalculationData;
 
 #define HEART_PLAYING_TIME_SEC 20
-#define MAX_FIGHT_PLAY_TIME 100
+
 enum GlobalStopType_t {gsDraka, gsNotInited};
 typedef struct GlobalStopCalculationSupport
 {
@@ -109,7 +111,7 @@ typedef struct GlobalStopCalculationSupport
 
     int draka_fight_length;
     int draka_heart_length;
-    int GetFightTime();
+
     void FinishStopCalculation();
     void OnNewSec();
     void BeginStopCalculations(GlobalStopType_t stop_reason_type_in);
@@ -174,6 +176,7 @@ void UserReasonFlagRecalc(int reason_id);
 
 void ReasonAgeModifyChangeMelody();
 
+void WriteDrakaTimeFromPower(int pwr_in);
 //в структуре рассчета будет индекс текущего победителя мощности,
 //индекс предыдущего победителя мощности,
 //набранная дельта ( по определению принадлежит предыдущему победителю)

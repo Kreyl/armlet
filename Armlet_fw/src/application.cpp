@@ -457,6 +457,7 @@ void App_t::Init() {
     ParseCsvFileToEmotions("character.csv");
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
+    LoadData();
 }
 
 void App_t::SaveData()
@@ -464,7 +465,7 @@ void App_t::SaveData()
     FIL file;
     int open_code= f_open (
             &file,
-       "\state.ini",
+       "/state2.ini",
        FA_WRITE
     );
     if(open_code!=0)
@@ -525,12 +526,41 @@ void App_t::SaveData()
     f_close(&file);
     Uart.Printf("App_t::SaveData done");
 }
+void LoadCharacterSettings()
+{
+    //драка хранится напрямую в userintentions. power - ширина плато, от энергии +-1!
+    //убийство хранится в userintentions   readyToKill = ширина плато*Energymoddecreased(default_energy)
+    //убийство хранится в userintentions   readyToKill =Time ширина плато*Energymodincreased(default_energy)
+    int32_t pwr,rk,rkt;
+    SD.iniReadInt32("character", "power", "settings.ini", &pwr);//draka
+    SD.iniReadInt32("character", "readyToKill", "settings.ini", &rk);
+    SD.iniReadInt32("character", "readyToKillTime", "settings.ini", &rkt);
+    //writedata to variables
+
+    WriteDrakaTimeFromPower(pwr);
+    int32_t addict;
+    SD.iniReadInt32("character", "addict", "settings.ini", &addict);
+}
+void DropData()
+{
+
+
+    Energy.SetEnergy(START_ENERGY);
+    int def_narco=-1;
+    SD.iniReadInt32("character", "addict", "settings.ini", &App.ID);
+
+    ArrayOfUserIntentions[SI_WEED].current_time=-1;
+    ArrayOfUserIntentions[SI_HER].current_time=-1;
+    ArrayOfUserIntentions[SI_LSD].current_time=-1;
+    ArrayOfUserIntentions[SI_KRAYK].current_time=-1;
+    ArrayOfUserIntentions[SI_MANIAC].current_time=-1;
+}
 void App_t::LoadData()
 {
     FIL file;
        int open_code= f_open (
                &file,
-          "\state.ini",
+          "/state.ini",
           FA_READ
        );
        if(open_code!=0)
