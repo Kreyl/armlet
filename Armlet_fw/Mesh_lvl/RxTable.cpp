@@ -29,7 +29,7 @@ RESULT RxTable_t::PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P) {
     /* Get Level (in %) from RSSI (in dBm) */
     RSSI::Cut(RSSI, &RSSI);
     RSSI::ToPercent(RSSI, &Level);
-//    Uart.Printf("[RxTable.cpp] Put:%u,%d,%u\r\n", ID, RSSI, Level);
+//    Uart.Printf("\r\n[RxTable.cpp] Put:%u,%d,%u", ID, RSSI, Level);
     if(ID >= RX_TABLE_SZ) {
         rslt = FAILURE;
         goto lblPutRxEnd;

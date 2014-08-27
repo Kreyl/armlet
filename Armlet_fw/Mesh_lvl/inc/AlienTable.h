@@ -65,7 +65,7 @@ public:
     void UpdateSelf(uint32_t NewCycle) {
         if(App.ID > ALIEN_BUF_SIZE) return;
         Buf[App.ID].Mesh.Timestamp = NewCycle;
-//        Buf[App.ID].State = (state_t*)&&;     // TODO: write after all!
+        Buf[App.ID].State = App.CurrInfo;
         Console.Send_Info(App.ID, &Buf[App.ID]);
     }
 

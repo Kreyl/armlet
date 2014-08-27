@@ -277,22 +277,14 @@ void App_t::Task() {
         }
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
-#ifdef       UART_MESH_DEBUG
-        Uart.Printf("App TabGet, s=%u, t=%u\r", SnsTable.PTable->Size, chTimeNow());
-
-        // FIXME: Lcd Clear before next ID print
-        for(uint8_t i=0; i<5; i++) {
-            Lcd.Printf(11, 31+(i*10), clRed, clBlack,"               ");
-        }
+/*
+            Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
 
         for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
-            Uart.Printf(" ID=%u; Pwr=%u\r", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
-            Lcd.Printf(11, 31+(i*10), clRed, clBlack,"ID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
+            Uart.Printf("\r\nID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
         }
-#endif
-            //обновляем данные по локации TODO - записать их  в исходящий пакет  mesh
-            UpdateLocation();
-            //перекладываем данные с радио в массив текущих резонов
+*/
+        UpdateLocation();
 
             int val1= MIN((uint32_t)reasons_number, RxTable.PTable->Size);
             CurrentIntentionArraySize = val1;
@@ -345,6 +337,7 @@ void App_t::Task() {
             }
         }
 #endif
+
 #if 1 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
 
@@ -433,32 +426,29 @@ void App_t::Task() {
 #endif
     } // while true
 }
-void App_t::UpdateLocation()
-{
-    last_location_signal_pw = 0;
-    last_location = 0;
+void App_t::UpdateLocation() {
+    SignalPwr = 0;
+    LocationID = 0;
+    uint16_t tmpID=0;
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
-       // Uart.Printf(" ID=%u; Pwr=%u\r", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
-        if((RxTable.PTable->Row[i].ID>=first_location_id && RxTable.PTable->Row[i].ID<=last_location_id) ||
-           (RxTable.PTable->Row[i].ID>=first_location_id && RxTable.PTable->Row[i].ID<=last_location_id))
-       if(RxTable.PTable->Row[i].Level > last_location_signal_pw)
-       {
-           last_location_signal_pw = RxTable.PTable->Row[i].Level;
-           last_location = RxTable.PTable->Row[i].ID;
-       }
+        tmpID = RxTable.PTable->Row[i].ID;
+        if(tmpID >= first_location_id && tmpID <= last_location_id) {
+            if(RxTable.PTable->Row[i].Level > SignalPwr) {
+                SignalPwr = RxTable.PTable->Row[i].Level;
+                LocationID = tmpID;
+            } // if Signal present
+        } // if location correct
     }
-    if(last_location != 0) {
-        Uart.Printf("\r\nNew location = %u", last_location);
-        CurrInfo.Location = last_location;
-    }
+    Uart.Printf("\r\nLocID = %u", LocationID);
+    if(LocationID) CurrInfo.Location = LocationID;
 }
 void App_t::Init() {
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
     RxTable.RegisterAppThd(PThd);
     Sound.RegisterAppThd(PThd);
     on_run=0;
-    last_location = 0;
-    last_location_signal_pw = 0;
+    LocationID = 0;
+    SignalPwr = 0;
 
 #if UART_RX_ENABLED
     chVTSet(&TmrUartRx,    MS2ST(UART_RX_POLLING_MS), TmrUartRxCallback, nullptr);

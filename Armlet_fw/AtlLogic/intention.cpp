@@ -304,7 +304,7 @@ void CalculateIntentionsRadioChange() {
         }
 
         SICD.is_empty_fon=false;
-        Uart.Printf("input reas_id=%d, power=%d\r", ArrayOfIncomingIntentions[0].reason_indx,  ArrayOfIncomingIntentions[0].power256);
+        Uart.Printf("\r\ninput reas_id=%d, power=%d", ArrayOfIncomingIntentions[0].reason_indx,  ArrayOfIncomingIntentions[0].power256);
 
         if(CurrentIntentionArraySize == 1) {
             if(SICD.last_intention_index_winner != ArrayOfIncomingIntentions[0].reason_indx) SICD.winning_integral=0;

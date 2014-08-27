@@ -73,8 +73,8 @@ public:
     char toiintstr[8];
     int on_run;
 
-    uint8_t last_location;
-    uint8_t last_location_signal_pw;
+    uint8_t LocationID;
+    uint8_t SignalPwr;
 };
 
 extern App_t App;
