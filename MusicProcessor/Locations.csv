@@ -5,9 +5,25 @@
 #
 # Processed by EmotionProcessor.py and integrated into ArmLet firmware.
 #
+# ToDo: Make them multiple
+#
 hub,99,masterka
-uliza,1,fon
-grave,3,strah
-church,2,pozitiv
-kabak,2,negativ
 dead,99,mertvyak
+hermit,5,umirotvorenie
+square,5,vdohnovenie
+factory,5,skuka
+cityhall,5,gordost'
+station,5,predvkushenie
+bar,5,vesel'e
+coffee,5,interes
+forest1,5,les
+detskaya,5,nostal'giya
+tent,5,depressiya
+hospital,5,obrechennost'
+university,5,vozhdelenie
+redroom,5,trans
+shop,5,neudovletvorennost'
+blackhouse,5,fobiya
+home,5,umilenie
+trench,5,prosvetlenie
+cinema,5,interes

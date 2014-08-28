@@ -22,6 +22,7 @@ from os.path import basename, expanduser, getmtime, getsize, isdir, isfile, isli
 from re import compile as reCompile
 from shutil import copy, copytree, rmtree
 from sys import argv, platform, stdout
+from traceback import format_exc
 
 try:
     from pydub import AudioSegment
@@ -117,7 +118,7 @@ def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion
         if sourceAudio.duration_seconds < 20:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
         if sourceAudio.duration_seconds < 60:
-            print "\nWARNING: %s: Audio too short: %d seconds" % (basename(fullName), sourceAudio.duration_seconds)
+            print "\nWARNING: %s: Audio too short: %d seconds" % (encodeForConsole(basename(fullName)), sourceAudio.duration_seconds)
         processedAudio = sourceAudio.normalize() # pylint: disable=E1103
         if processedAudio.duration_seconds != sourceAudio.duration_seconds:
             return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
@@ -127,6 +128,7 @@ def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion
             return "Processed file is too small: %d bytes, while original file was %d bytes" % (getsize(newFullName), getsize(fullName))
         return None
     except Exception, e:
+        print format_exc()
         return e
 
 def verifyFile(fullName):
@@ -135,7 +137,7 @@ def verifyFile(fullName):
         if sourceAudio.duration_seconds < 20:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
         if sourceAudio.duration_seconds < 60:
-            print "\nWARNING: %s: Audio too short: %d seconds" % (basename(fullName), sourceAudio.duration_seconds)
+            print "\nWARNING: %s: Audio too short: %d seconds" % (encodeForConsole(basename(fullName)), sourceAudio.duration_seconds)
         processedAudio = sourceAudio.normalize() # pylint: disable=E1103
         if processedAudio.duration_seconds != sourceAudio.duration_seconds:
             return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)

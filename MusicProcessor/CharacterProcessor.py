@@ -83,9 +83,6 @@ def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
         killLength = int(killLength)
         addiction = int(addiction)
         assert CHARACTER_ID_START <= number <= CHARACTER_ID_END
-        assert 1 <= power <= 9
-        assert 1 <= kill <= 9
-        assert 1 <= killLength <= 9
         assert 0 <= int(addiction) < len(ADDICTIONS)
         assert number not in numbers, "Duplicate character ID %s" % number
         assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
@@ -129,7 +126,6 @@ def loadCharacters():
         killColumnID = header.index(KILL_COLUMN_TITLE)
         killLengthColumnID = header.index(KILL_LENGTH_COLUMN_TITLE)
         addictionColumnID = header.index(ADDICTION_COLUMN_TITLE)
-        allRoles = sorted(allRoles[1:])
         data = (tuple(row[x] for x in (shortNameColumnID, longNameColumnID, sexColumnID, powerColumnID, killColumnID, killLengthColumnID, addictionColumnID)) for row in allRoles[1:])
         data = sorted(data, key = lambda (shortName, longName, sex, power, kill, killLength, addiction): ((longName.split()[-1:] or ('',))[0].lower(), longName.lower()))
         ret = []
@@ -142,9 +138,6 @@ def loadCharacters():
             kill = int(kill)
             killLength = int(killLength)
             addiction = ADDICTIONS[addiction]
-            assert 1 <= power <= 9
-            assert 1 <= kill <= 9
-            assert 1 <= killLength <= 9
             try:
                 shortName = str(shortName.strip())
             except UnicodeError:
@@ -193,9 +186,9 @@ def updateCharacters():
     if changed:
         print "Updating %s..." % CHARACTERS_CSV
         writeCharacters(characters)
-        print "Updating tickets..."
-        from TicketProcessor import generateTickets
-        generateTickets(characters.iteritems())
+        # print "Updating tickets..."
+        # from TicketProcessor import generateTickets
+        # generateTickets(characters.iteritems())
     else:
         print "No changes detected"
     print "Done"

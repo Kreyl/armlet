@@ -9,12 +9,13 @@ murder,1,ubijstvo
 creation,5,sozidanie
 destruction,5,razrushenie
 sex,9,seks
-fight,50,draka
+fight,0,draka
 heartbeat,50,serdtsebienie
-weed,20,pozitiv
-heroin,20,negativ
+addiction,50,zavisimost'
+weed,20,sozidanie
 lsd,20,trip
-krayk,20,fon
+heroin,20,razrushenie
+krayk,0,fon
 death,50,smert'
 mist,50,tuman
 fear,40,strah
