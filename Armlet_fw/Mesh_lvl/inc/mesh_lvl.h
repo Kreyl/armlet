@@ -8,7 +8,6 @@
 #ifndef MESH_LVL_H_
 #define MESH_LVL_H_
 
-#include "kl_lib_f2xx.h"
 #include "evt_mask.h"
 #include "radio_lvl1.h"
 #include "msg_box.h"
@@ -18,9 +17,19 @@
 #include "AlienTable.h"
 #include "application.h"
 
+#ifdef ARMLET
+#include "kl_lib_f2xx.h"
+#else
+#include "kl_lib_L15x.h"
+#endif
+
 #if 1 // ======================== Circ Buf of Pkt ==============================
 //#define CIRC_PKT_BUF_SZ     5 // 5 size set to debug only
+#ifdef ARMLET
 #define CIRC_PKT_BUF_SZ     MAX_ABONENTS
+#else
+#define CIRC_PKT_BUF_SZ     (MAX_ABONENTS/10)
+#endif
 
 struct CircBufString_t {
     uint32_t Timestamp;

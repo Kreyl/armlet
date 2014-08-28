@@ -8,9 +8,13 @@
 #ifndef ALIENTABLE_H_
 #define ALIENTABLE_H_
 
-#include "kl_lib_f2xx.h"
 #include "mesh_lvl.h"
 #include "console.h"
+#ifdef ARMLET
+#include "kl_lib_f2xx.h"
+#else
+#include "kl_lib_L15x.h"
+#endif
 
 #define ALIEN_BUF_SIZE      MAX_ABONENTS
 #define FINDER_COUNTER      2 // How many times search Buf for valid info

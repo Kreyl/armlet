@@ -8,7 +8,12 @@
 #ifndef MSG_BOX_H_
 #define MSG_BOX_H_
 
+#ifdef ARMLET
 #include "kl_lib_f2xx.h"
+#else
+#include "kl_lib_L15x.h"
+#endif
+
 #include "radio_lvl1.h"
 #include "string.h"
 

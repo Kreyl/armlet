@@ -7,7 +7,9 @@
 
 #include "RxTable.h"
 
+#ifdef ARMLET
 RxTable_t RxTable;
+#endif
 
 void RxTable_t::ISwitchTable() {
     if(PCurrTbl == &ITbl[0]) {
