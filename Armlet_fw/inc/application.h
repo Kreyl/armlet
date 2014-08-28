@@ -55,7 +55,9 @@ public:
     void Init();
     void Task();
     void StopEverything();
+    void LoadCharacterSettings();
     void LoadData();
+    void DropData();//to default
     void SaveData();
     uint8_t ParseCsvFileToEmotions(const char* filename);
     void WriteInentionStringToData(char * int_name, int int_val, char * emo_name);

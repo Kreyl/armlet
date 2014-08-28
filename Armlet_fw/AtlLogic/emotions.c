@@ -330,14 +330,14 @@ Reason_t reasons[] = {
  /* 196 */ { "weed", 20, 0, 43 },	/* pozitiv */
  /* 197 */ { "heroin", 20, 0, 9 },	/* negativ */
  /* 198 */ { "lsd", 20, 0, 8 },	/* trip */
- /* 199 */ { "krayk", 20, 0, 0 },	/* fon */
+ /* 199 */ { "krayk", 20, 0, 43 },	/* pozitiv */
  /* 200 */ { "death", 50, 0, 5 },	/* smert' */
  /* 201 */ { "mist", 50, 0, 4 },	/* tuman */
  /* 202 */ { "fear", 40, 0, 28 },	/* strah */
  /* 203 */ { "mSource", 9, 0, 1 },	/* neverno */
  /* 204 */ { "mProject", 9, 0, 1 },	/* neverno */
+ /* 205 */ { "withdrawal", 99, 0, 82 },   /* zavisimost */
 	// end of intentions
- /* 205 */ { "r205", 99, 0, 1 },	/* neverno */
  /* 206 */ { "r206", 99, 0, 1 },	/* neverno */
  /* 207 */ { "r207", 99, 0, 1 },	/* neverno */
  /* 208 */ { "r208", 99, 0, 1 },	/* neverno */

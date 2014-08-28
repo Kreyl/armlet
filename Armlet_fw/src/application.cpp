@@ -41,6 +41,17 @@ App_t App;
 #define PILLTYPEWEED 1
 #define PILLTYPELSD 2
 #define PILLTYPEHER 3
+//============================csv dirs==========================================
+static const char* FDirList2[] = {
+        "",
+        "common",
+};
+
+MusList_t CSVList = {
+        sizeof(FDirList2)/sizeof(FDirList2[0]),
+        0,
+        FDirList2
+};
 #if 1 // ============================ Timers ===================================
 // Pill check
 void TmrPillCheckCallback(void *p) {
@@ -165,9 +176,12 @@ static inline void KeysHandler() {
         }
         else if(Evt.Type==keLongPress)
         {
+            if(AtlGui.is_locked && Evt.KeyID[0]!=6)//если не лок и залочена - вернуться
+                    continue;
             if(Evt.KeyID[0] == KEY_PWRON)
             {
                 //выключение
+                App.SaveData();
                 Log.Shutdown( );
                 chThdSleepMilliseconds(250);
                 Power.EnterStandby();
@@ -185,6 +199,8 @@ static inline void KeysHandler() {
 
         else if(Evt.Type==keCombo)
         {
+            if(AtlGui.is_locked)//если не лок и залочена - вернуться
+                    continue;
             //    void EnterStandby();
             //void Reset()
            // Программное включение, выключение (длинная А)+
@@ -194,6 +210,8 @@ static inline void KeysHandler() {
                //if(Evt.NKeys==3 && Evt.KeyID[0]==1 && Evt.KeyID[1]==3 && Evt.KeyID[2]==4)//bcx
                if(Evt.NKeys==3 && Evt.KeyID[0]==keyA && Evt.KeyID[1]==keyX && Evt.KeyID[2]==keyR)//arx
                {
+                   App.SaveData();
+                   chThdSleepMilliseconds(250);
                    Uart.Printf(" GO REBOOT  %d\r", Evt.NKeys);
                    Log.Shutdown( );
                    chThdSleepMilliseconds(250);
@@ -219,8 +237,12 @@ static inline void KeysHandler() {
                   Evt.KeyID[3]==keyZ && Evt.KeyID[4]==keyL && Evt.KeyID[5]==keyE && Evt.KeyID[6]==keyR
                )//abc z ler
                {
-                   Uart.Printf(" GO REBOOT ( &DROP state later!) %d\r", Evt.NKeys);
-                   Bootloader.dfuJumpIn(wdg_ON);
+
+                   App.DropData();
+                   App.SaveData();
+                   Uart.Printf(" GO REBOOT ( &DROP state!) %d\r", Evt.NKeys);
+                   chThdSleepMilliseconds(250);
+                 //  Bootloader.dfuJumpIn(wdg_ON);
                    //TODO drop character to initial here
                    Log.Shutdown( );
                    chThdSleepMilliseconds(250);
@@ -352,7 +374,10 @@ void App_t::Task() {
                     CheckAndRedrawFinishedReasons();
 
                 if(Time.S_total% SEC_TO_SELF_REDUCE ==0)
+                {
                     Energy.AddEnergy(-1);
+                    Uart.Printf("\renergy self reduced");
+                }
             }
             else
                 GSCS.OnNewSec();
@@ -454,9 +479,13 @@ void App_t::Init() {
 
     Time.Init();
     Time.Reset();
-    ParseCsvFileToEmotions("character.csv");
+    char *S = nullptr;
+    SD.GetNthFileByPrefix(&MusList,"character", 1, &S);
+    ParseCsvFileToEmotions(S);
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
+    LoadCharacterSettings();
+    LoadData();
 }
 
 void App_t::SaveData()
@@ -464,7 +493,7 @@ void App_t::SaveData()
     FIL file;
     int open_code= f_open (
             &file,
-       "\state.ini",
+       "/state.ini",
        FA_WRITE
     );
     if(open_code!=0)
@@ -489,48 +518,102 @@ void App_t::SaveData()
     //energy to buff
     //energy to file
     f_printf(&file,"#energy");
-    f_printf(&file,"%d",Energy.GetEnergy());
+    f_printf(&file,"\r\n%d",Energy.GetEnergy());
     //weed, lambda welcome!
-    f_printf(&file,"#narcograss");
+    f_printf(&file,"\r\n#narcograss");
     if(ArrayOfUserIntentions[SI_WEED].current_time>=0)
-        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
-    f_printf(&file,"#narcoher");
+    f_printf(&file,"\r\n#narcoher");
     if(ArrayOfUserIntentions[SI_HER].current_time>=0)
-        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
-    f_printf(&file,"#narcolsd");
+    f_printf(&file,"\r\n#narcolsd");
     if(ArrayOfUserIntentions[SI_LSD].current_time>=0)
-        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
-    f_printf(&file,"#narcoTrain");
+    f_printf(&file,"\r\n#narcoTrain");
     if(ArrayOfUserIntentions[SI_KRAYK].current_time>=0)
-        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
-    f_printf(&file,"#nacroManiac");
+    f_printf(&file,"\r\n#nacroManiac");
     if(ArrayOfUserIntentions[SI_MANIAC].current_time>=0)
-        f_printf(&file,"%d",NARCO_IS_ON_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
     else
-        f_printf(&file,"%d",NARCO_IS_OFF_STATE);
+        f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
    // f_write(&file, DataFileBuff, buff_size, &bw);
     f_close(&file);
+    Uart.Printf("\r!!!ArrayOfUserIntentions[SI_MANIAC].current_time%d",ArrayOfUserIntentions[SI_MANIAC].current_time);
     Uart.Printf("App_t::SaveData done");
+}
+void App_t::LoadCharacterSettings()
+{
+//    0 - нету
+//    1 - сидит на траве
+//    2 - сидит на ЛСД
+//    3 - сидит на героине
+//    4 - маньяк
+//    5 - это Крайк
+    //драка хранится напрямую в userintentions. power - ширина плато, от энергии +-1!
+    //убийство хранится в userintentions   readyToKill = ширина плато*Energymoddecreased(default_energy)
+    //убийство хранится в userintentions   readyToKill =Time ширина плато*Energymodincreased(default_energy)
+    int32_t pwr,rk,rkt;
+    SD.iniReadInt32("character", "power", "settings.ini", &pwr);//draka
+    SD.iniReadInt32("character", "readyToKill", "settings.ini", &rk);
+    SD.iniReadInt32("character", "readyToKillTime", "settings.ini", &rkt);
+
+    WriteDrakaTimeFromPower(pwr);//TODO test
+    WriteReadyToKillTimer(rkt);//TODO test
+    WriteRadyToKill(rk);//TODO test
+    int32_t addict;
+    SD.iniReadInt32("character", "addict", "settings.ini", &addict);
+    if(addict==1)
+        ArrayOfUserIntentions[SI_WEED].current_time=0;
+    if(addict==2)
+            ArrayOfUserIntentions[SI_HER].current_time=0;
+    if(addict==3)
+            ArrayOfUserIntentions[SI_LSD].current_time=0;
+    if(addict==4)
+            ArrayOfUserIntentions[SI_MANIAC].current_time=0;
+    if(addict==5)
+            ArrayOfUserIntentions[SI_KRAYK].current_time=0;
+}
+void App_t::DropData()
+{
+    Energy.SetEnergy(START_ENERGY);
+    int32_t addict;
+    SD.iniReadInt32("character", "addict", "settings.ini", &addict);
+    if(addict==1)
+        ArrayOfUserIntentions[SI_WEED].current_time=0;
+    if(addict==2)
+            ArrayOfUserIntentions[SI_HER].current_time=0;
+    if(addict==3)
+            ArrayOfUserIntentions[SI_LSD].current_time=0;
+    if(addict==4)
+            ArrayOfUserIntentions[SI_MANIAC].current_time=0;
+    if(addict==5)
+            ArrayOfUserIntentions[SI_KRAYK].current_time=0;
+    ArrayOfUserIntentions[SI_WEED].current_time=-1;
+    ArrayOfUserIntentions[SI_HER].current_time=-1;
+    ArrayOfUserIntentions[SI_LSD].current_time=-1;
+    ArrayOfUserIntentions[SI_KRAYK].current_time=-1;
+    ArrayOfUserIntentions[SI_MANIAC].current_time=-1;
 }
 void App_t::LoadData()
 {
     FIL file;
        int open_code= f_open (
                &file,
-          "\state.ini",
+          "/state.ini",
           FA_READ
        );
        if(open_code!=0)
@@ -546,7 +629,16 @@ void App_t::LoadData()
            int int_val;
            int_val=strtol(DataFileBuff,NULL,10);
            if(line_num==1)
+           {
+               if(int_val==START_ENERGY)
+               {
+                   Uart.Printf("\rApp_t::LoadData()  Default energy found, loading stopped");
+                   return;
+               }
+               else
+                   Uart.Printf("\rApp_t::LoadData()   energy found %d, loading",int_val);
                Energy.SetEnergy(int_val);
+           }
            if(line_num==2 && int_val==1)//weed
                ArrayOfUserIntentions[SI_WEED].current_time=0;
            if(line_num==3 && int_val==1)//her
