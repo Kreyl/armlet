@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-29 21:20:05
+ * Generated at 2014-08-30 02:10:25
  */
 #include "emotions.h"
 
@@ -311,11 +311,11 @@ Reason_t reasons[] = {
  /* 189 */ { "heroin", 160, 0, 41 },    /* razrushenie */
  /* 190 */ { "krayk", 0, 0, 0 },        /* fon */
  /* 191 */ { "death", 280, 0, 5 },      /* smert' */
- /* 192 */ { "fear", 199, 0, 29 },      /* strah */
- /* 193 */ { "mSource", 0, 0, 1 },      /* neverno */
- /* 194 */ { "mProject", 0, 0, 1 },     /* neverno */
+ /* 192 */ { "mist", 200, 0, 4 },       /* tuman */
+ /* 193 */ { "fear", 199, 0, 29 },      /* strah */
+ /* 194 */ { "mSource", 0, 0, 1 },      /* neverno */
+ /* 195 */ { "mProject", 0, 0, 1 },     /* neverno */
 	// end of intentions
- /* 195 */ { "R195", 0, 0, 1 },         /* neverno */
  /* 196 */ { "R196", 0, 0, 1 },         /* neverno */
  /* 197 */ { "R197", 0, 0, 1 },         /* neverno */
  /* 198 */ { "R198", 0, 0, 1 },         /* neverno */

@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-29 22:00:31
+ * Generated at 2014-08-30 02:10:25
  */
 #ifndef EMOTIONS_H
 #define EMOTIONS_H
@@ -23,6 +23,7 @@
 #define LOCATIONS_ID_END 20
 
 #define FOREST_ID_START 21
+#define FOREST_ALL_ID_END 55
 #define FOREST_ID_END 89		// end of stationary ID interval
 
 #define MIST_ID_START 90
@@ -362,11 +363,11 @@ extern Reason_t reasons[];
 #define REASON_HEROIN              189
 #define REASON_KRAYK               190
 #define REASON_DEATH               191
-#define REASON_FEAR                192
-#define REASON_MSOURCE             193
-#define REASON_MPROJECT            194
+#define REASON_MIST                192
+#define REASON_FEAR                193
+#define REASON_MSOURCE             194
+#define REASON_MPROJECT            195
 	// end of intentions
-#define REASON_R195                195
 #define REASON_R196                196
 #define REASON_R197                197
 #define REASON_R198                198

@@ -29,7 +29,7 @@ except ImportError, ex:
     print "%s: %s\nWARNING: Emotion guessing will not be available.\bPlease install Levenshtein v0.11.2 or later: https://pypi.python.org/pypi/python-Levenshtein\n" % (ex.__class__.__name__, ex)
 
 from Settings import LOCATION_ID_START, LOCATION_ID_END, LOCATION_IDS
-from Settings import FOREST_ID_START, FOREST_ID_END, FOREST_IDS
+from Settings import FOREST_ID_START, FOREST_ALL_ID_END, FOREST_ID_END, FOREST_IDS
 from Settings import MIST_ID_START, MIST_ID_END, MIST_IDS
 from Settings import CHARACTER_ID_START, CHARACTER_ID_END, CHARACTER_IDS
 from Settings import INTENTION_ID_START, INTENTION_ID_END, INTENTION_IDS
@@ -139,6 +139,7 @@ H_CONTENT = '''\
 #define LOCATIONS_ID_END %d
 
 #define FOREST_ID_START %d
+#define FOREST_ALL_ID_END %d
 #define FOREST_ID_END %d\t\t// end of stationary ID interval
 
 #define MIST_ID_START %d
@@ -215,7 +216,7 @@ extern Reason_t reasons[];
 
 // End of emotions.h
 ''' % (SETTINGS_CSV, EMOTIONS_CSV, LOCATIONS_CSV, CHARACTERS_CSV, INTENTIONS_CSV,
-       LOCATION_ID_START, LOCATION_ID_END, FOREST_ID_START, FOREST_ID_END, MIST_ID_START, MIST_ID_END,
+       LOCATION_ID_START, LOCATION_ID_END, FOREST_ID_START, FOREST_ALL_ID_END, FOREST_ID_END, MIST_ID_START, MIST_ID_END,
        CHARACTER_ID_START, CHARACTER_ID_END, INTENTION_ID_START, INTENTION_ID_END, EMOTION_FIX_ID_START, EMOTION_FIX_ID_END)
 
 REASONS_CSV_HEADER = '''\
@@ -251,8 +252,6 @@ NO_PARENT = 'ROOT'
 RESERVED_REASON = 'R%03d'
 
 FOREST_REASON = 'F%s%02d'
-
-FOREST_ALL_LIMIT = (FOREST_ID_START + FOREST_ID_END) // 2
 
 MIST_REASON = 'M%02d'
 
@@ -379,7 +378,7 @@ def processReasons(emotions):
     def reserveReason(rid):
         return (rid, RESERVED_REASON % rid, RESERVED_WEIGHT, 0, emotions[WRONG], WRONG) # ToDo: Default reserve to fon?
     def forestReason(rid):
-        return (rid, FOREST_REASON % ('A' if rid <= FOREST_ALL_LIMIT else 'B' if rid % 2 == 0 else 'C', rid), FOREST_WEIGHT, 0, emotions[LES], LES)
+        return (rid, FOREST_REASON % ('A' if rid <= FOREST_ALL_ID_END else 'B' if rid % 2 == 0 else 'C', rid), FOREST_WEIGHT, 0, emotions[LES], LES)
     def mistReason(rid):
         return (rid, MIST_REASON % rid, MIST_WEIGHT, 0, emotions[TUMAN], TUMAN)
     def emotionFixReason(eid, emotion):
