@@ -47,17 +47,7 @@ void WriteReadyToKillTimer(int val_in)
     ArrayOfUserIntentions[SI_FIGHT].time_after_plateau=Energy.GetEnergyScaleValLess(val_in)/5;
     Energy.SetEnergy(tmp_energy);
 }
-void OnGetTumanMessage()
-{
-    //если туман или страх активны - ничего не делать
-    if(ArrayOfUserIntentions[SI_TUMAN].current_time>=0 || ArrayOfUserIntentions[SI_STRAH].current_time>=0)
-        return;
-    //включить туман и страх
-    ArrayOfUserIntentions[SI_TUMAN].current_time=0;
-    ArrayOfUserIntentions[SI_STRAH].current_time=0;
 
-
-}
 struct SeekRecentlyPlayedFilesEmo SRPFESingleton
 {
     -1,-1,-1,{
@@ -149,29 +139,43 @@ struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
 //#define SI_PROJECT 14
 void InitArrayOfUserIntentions()
 {
-   // for(int i=0;i<NUMBER_OF_REASONS;i++)
+    for(int i=0;i<NUMBER_OF_REASONS;i++)
     {
+         if(strcmp(reasons[i].name,"murder")==0)
+             ArrayOfUserIntentions[SI_MURDER].reason_indx=i;
+         if(strcmp(reasons[i].name,"creation")==0)
+             ArrayOfUserIntentions[SI_CREATION].reason_indx=i;
+         if(strcmp(reasons[i].name,"destruction")==0)
+             ArrayOfUserIntentions[SI_DESTRUCTION].reason_indx=i;
+         if(strcmp(reasons[i].name,"sex")==0)
+             ArrayOfUserIntentions[SI_SEX].reason_indx=i;
+         if(strcmp(reasons[i].name,"fight")==0)
+             ArrayOfUserIntentions[SI_FIGHT].reason_indx=i;
 
-             ArrayOfUserIntentions[SI_MURDER].reason_indx=REASON_MURDER;
-             ArrayOfUserIntentions[SI_CREATION].reason_indx=REASON_CREATION;
-             ArrayOfUserIntentions[SI_DESTRUCTION].reason_indx=REASON_DESTRUCTION;
-             ArrayOfUserIntentions[SI_SEX].reason_indx=REASON_SEX;
-             ArrayOfUserIntentions[SI_FIGHT].reason_indx=REASON_FIGHT;
+         if(strcmp(reasons[i].name,"weed")==0)//grass
+             ArrayOfUserIntentions[SI_WEED].reason_indx=i;
+         if(strcmp(reasons[i].name,"heroin")==0) //hero
+             ArrayOfUserIntentions[SI_HER].reason_indx=i;
+         if(strcmp(reasons[i].name,"lsd")==0)//lsd
+             ArrayOfUserIntentions[SI_LSD].reason_indx=i;
+         //маньяк и крайк слышат в ушах одно и то-же, если успешно делают своё дело
+         if(strcmp(reasons[i].name,"krayk")==0)//krayk
+             ArrayOfUserIntentions[SI_KRAYK].reason_indx=i;
+         if(strcmp(reasons[i].name,"death")==0)//death
+             ArrayOfUserIntentions[SI_DEATH].reason_indx=i;
+         if(strcmp(reasons[i].name,"krayk")==0)//maniac
+             ArrayOfUserIntentions[SI_MANIAC].reason_indx=i;
 
-
-             ArrayOfUserIntentions[SI_WEED].reason_indx=REASON_WEED;
-             ArrayOfUserIntentions[SI_HER].reason_indx=REASON_HEROIN;
-             ArrayOfUserIntentions[SI_LSD].reason_indx=REASON_LSD;
-         //маньяк и крайк слышат в ушах одно и то-же, если успешно делают своё дело - ничего, 0 силы.
-
-             ArrayOfUserIntentions[SI_KRAYK].reason_indx=REASON_KRAYK;
-             ArrayOfUserIntentions[SI_DEATH].reason_indx=REASON_DEATH;
-             ArrayOfUserIntentions[SI_MANIAC].reason_indx=REASON_KRAYK;
-             ArrayOfUserIntentions[SI_TUMAN].reason_indx=REASON_MIST;
-             ArrayOfUserIntentions[SI_STRAH].reason_indx=REASON_FEAR;
-             ArrayOfUserIntentions[SI_MSOURCE].reason_indx=REASON_MSOURCE;
-             ArrayOfUserIntentions[SI_PROJECT].reason_indx=REASON_MPROJECT;
-             ArrayOfUserIntentions[SI_WITHDRAWAL].reason_indx=REASON_ADDICTION;
+         if(strcmp(reasons[i].name,"mist")==0)//tuman
+             ArrayOfUserIntentions[SI_TUMAN].reason_indx=i;
+         if(strcmp(reasons[i].name,"fear")==0)//strah
+             ArrayOfUserIntentions[SI_STRAH].reason_indx=i;
+         if(strcmp(reasons[i].name,"mSource")==0)//mSource
+             ArrayOfUserIntentions[SI_MSOURCE].reason_indx=i;
+         if(strcmp(reasons[i].name,"mProject")==0)//mProject
+             ArrayOfUserIntentions[SI_PROJECT].reason_indx=i;
+         if(strcmp(reasons[i].name,"mProject")==0)//lomka
+             ArrayOfUserIntentions[SI_PROJECT].reason_indx=i;
     }
     //if any is not inited, panic!!
     for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
@@ -215,7 +219,6 @@ struct IntentionCalculationData SICD=
 };
 struct IntentionReduceData SRD=
 {
-        -1,
         -1,
         -1,
         false
@@ -276,16 +279,22 @@ void GlobalStopCalculationSupport::OnNewSec()
             PlayNewEmo(reasons[ArrayOfUserIntentions[SI_FIGHT].reason_indx].eID,6,true);
         }
         if(timer==draka_fight_length)
-            PlayNewEmo(reasons[REASON_HEARTBEAT].eID,7,true);
-
+        {
+            for(int i=0;i<NUMBER_OF_REASONS;i++)
+                 if(strcmp(reasons[i].name,"heartbeat")==0)
+                 {
+                     PlayNewEmo(reasons[i].eID,7,true);
+                     break;
+                 }
+        }
         if(timer==draka_fight_length+draka_heart_length)
         {
             ArrayOfUserIntentions[SI_FIGHT].TurnOff();
-            PlayNewEmo(0,8,true);// ТУТ подумать!! //TODO
-            //поменять last_indx_winner???
+            PlayNewEmo(0,8,true);
             FinishStopCalculation();
             return;
         }
+            //heartbeat
     }
     this->timer++;
     Uart.Printf("\rGlobalStopCalculationSupport::OnNewSec() timer %d",timer);
@@ -539,31 +548,31 @@ void UserIntentions::TurnOff()
 }
 void CallReasonFalure(int user_reason_id)
 {
-    if(user_reason_id==SI_SEX) //здесь еше должна быть драка, но она в другом pipeline
+    if(user_reason_id==SI_SEX)
     {
         // не прерванный секс всегда успешен! ^_^
         CallReasonSuccess(user_reason_id);
         return;
     }
     Uart.Printf("CALL REASON FALURE reason %d\r",user_reason_id);
-    //если это одно из включаемых намеряний - сфейлить.
-    if( ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NORMAL)
     Energy.AddEnergy(REASON_FAIL_ENERGY_CHANGE);
 
    // если кайф перестает действовать. включается ломка
-    if(user_reason_id==SI_KRAYK || user_reason_id==SI_MANIAC ||user_reason_id==SI_HER)
+    if(ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_MANIAC || ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_KRAYK ||ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NARCO)
     {
         ArrayOfUserIntentions[user_reason_id].current_time=-2;
         ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
     }
     // маньяки и крайк неизлечимо наркозависимы
-    if( user_reason_id==SI_PROJECT)
+    if( ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_LOMKA)
     {
         if(ArrayOfUserIntentions[SI_KRAYK].current_time==-2 || ArrayOfUserIntentions[SI_KRAYK].current_time>=0)
             ArrayOfUserIntentions[user_reason_id].current_time=0;
         if(ArrayOfUserIntentions[SI_MANIAC].current_time==-2 || ArrayOfUserIntentions[SI_MANIAC].current_time>=0)
             ArrayOfUserIntentions[user_reason_id].current_time=0;
     }
+
+
     return;
 }
 
@@ -573,6 +582,7 @@ void CallReasonSuccess(int user_reason_id)
     //подумать над размерамиинтервалов! PROCESS_NARCO
 
     //маньяк и крайк неизлечимы - при окончании ломки перезапускается ломка
+    if( ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NARCO)
         if(user_reason_id==SI_KRAYK || user_reason_id==SI_MANIAC)
             ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
 
@@ -599,23 +609,21 @@ void CallReasonSuccess(int user_reason_id)
 void ReasonAgeModifyChangeMelody()
 {
     //если нет резона уменьшеного - задать этот и уменьшить.
+    //если есть резон, этот - еще уменьшить
+    //если есть резон, но уже другой - задать этот заново
     if(SRD.reduced_reason_id==-1)
     {
         SRD.reduced_reason_id=SICD.last_intention_index_winner;
         SRD.weight_reduced=1;
         SRD.is_reason_changed=false;
     }
-    else
+    else if(SRD.reduced_reason_id==SICD.last_intention_index_winner)
+        SRD.weight_reduced+=AGE_WEIGHT_SCALE_REDUCE;
+    else//??? вроде ок, на свежую голову перечитать код
     {
-        if(SRD.reduced_reason_id==SICD.last_intention_index_winner) //если есть резон, этот - еще уменьшить
-            SRD.weight_reduced+=AGE_WEIGHT_SCALE_REDUCE;
-        else//если есть резон, но уже другой - задать этот заново
-        {
-            SRD.reduced_reason_id=SICD.last_intention_index_winner;
-            SRD.overthrower_reason_id=-1;
-            SRD.weight_reduced=AGE_WEIGHT_SCALE_REDUCE;
-            SRD.is_reason_changed=false;
-        }
+        SRD.reduced_reason_id=SICD.last_intention_index_winner;
+        SRD.weight_reduced=1;
+        SRD.is_reason_changed=false;
     }
     if(SRD.weight_reduced>AGE_MAX_WEIGHT_REDUCE)
         SRD.weight_reduced=AGE_MAX_WEIGHT_REDUCE;

@@ -46,6 +46,11 @@ INI_FILE = 'settings.ini'
 INI_CONTENT = '''\
 [radio]
 id=%d
+locationThreshold=60
+forestTheshold=60
+mistThreshold=0
+characterThreshold=0
+IRlevel=75
 
 [character]
 fightPower=%d
@@ -217,7 +222,7 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
     # Creating settings.ini
     if number > 0:
         with open(join(armletDir, INI_FILE), 'wb') as f:
-            f.write(INI_CONTENT % ((number,) + otherFields[:-1]))
+            f.write(INI_CONTENT % ((number,) + otherFields[:5]))
     # Processing character.csv
     characterFile = join(armletDir, CHARACTER_CSV)
     if isfile(characterFile):
@@ -369,12 +374,17 @@ def updateMusic(sourceDir = '.', verifyFiles = False):
     errorCharacters = []
     for d in characterDirs:
         (number, _longName, otherFields) = characters.get(d, (-1, None, None))
+        (_sex, _power, _kill, _killLength, _addiction, _emotion, markedHasMusic) = otherFields
         (hasMusic, hasErrors) = processCharacter(d, number, otherFields, emotions, sourceDir, verifyFiles)
         if hasMusic:
             if not hasErrors:
                 okCharacters.append(d)
+            if not markedHasMusic:
+                print "\nWARNING: Character has music but is not marked so in allrpg"
         else:
             noMusicCharacters.append(d)
+            if markedHasMusic:
+                print "\nWARNING: Character does not have music but is marked so in allrpg"
         if hasErrors:
             errorCharacters.append(d)
     if okCharacters:

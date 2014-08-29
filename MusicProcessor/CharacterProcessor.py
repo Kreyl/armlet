@@ -24,9 +24,12 @@ from EmotionConverter import convertEmotion
 GAME_ID = 584
 
 MAIN_COLUMN_TITLES = (u'Имя на браслете', u'Имя и фамилия латиницей')
-OTHER_COLUMN_TITLES = (u'Пол персонажа', u'Крутость в драке', u'Готовность убить', u'Длительность готовности убить', u'Наркомания', u'Эмоция')
+OTHER_COLUMN_TITLES = (u'Пол персонажа', u'Крутость в драке', u'Готовность убить', u'Длительность готовности убить', u'Наркомания', u'Эмоция', u'Метки')
 
 ADDICTIONS = dict((s, i) for (i, s) in enumerate((u'отсутствует', u'марихуана', u'ЛСД', u'героин', u'убийца', u'Крайк')))
+
+HAS_MUSIC = u'музыкаесть'
+MUSIC_OK = u'музыкаок'
 
 SEXES = {u'мужчина': 'Mr', u'женщина': 'Ms'}
 
@@ -74,7 +77,7 @@ def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
     longNames = set()
     ret = {}
     for d in data:
-        ((number, shortName, longName), (power, kill, killLength, addiction, emotion)) = (d[:3], d[3:])
+        ((number, shortName, longName), (power, kill, killLength, addiction, emotion, hasMusic)) = (d[:3], d[3:])
         # Processing number
         number = int(number)
         assert CHARACTER_ID_START <= number <= CHARACTER_ID_END
@@ -92,7 +95,9 @@ def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
         killLength = int(killLength)
         addiction = int(addiction)
         assert 0 <= int(addiction) < len(ADDICTIONS)
-        ret[shortName] = (number, longName, (power, kill, killLength, addiction, emotion))
+        hasMusic = int(hasMusic)
+        assert hasMusic in (0, 1, 2)
+        ret[shortName] = (number, longName, (power, kill, killLength, addiction, emotion, hasMusic))
     verifyCharacters(ret)
     return ret
 
@@ -127,7 +132,7 @@ def loadCharacters():
         ret = []
         shortNames = set()
         longNames = set()
-        for (shortName, longName, (sex, power, kill, killLength, addiction, emotion)) in data:
+        for (shortName, longName, (sex, power, kill, killLength, addiction, emotion, tags)) in data:
             # Processing short name
             if not shortName:
                 continue
@@ -161,7 +166,9 @@ def loadCharacters():
             killLength = int(killLength)
             addiction = ADDICTIONS[addiction]
             emotion = convertEmotion(emotion)
-            ret.append((shortName, longName, (power, kill, killLength, addiction, emotion)))
+            tags = tags.lower()
+            hasMusic = 2 if MUSIC_OK in tags else 1 if HAS_MUSIC in tags else 0
+            ret.append((shortName, longName, (power, kill, killLength, addiction, emotion, hasMusic)))
         return tuple(ret)
     except Exception, e:
         print format_exc()
