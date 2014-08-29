@@ -22,13 +22,15 @@ from os.path import basename, expanduser, getmtime, getsize, isdir, isfile, isli
 from re import compile as reCompile
 from shutil import copy, copytree, rmtree
 from sys import argv, platform, stdout
+from traceback import format_exc
 
 try:
     from pydub import AudioSegment
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pydub v0.9.2 or later: https://pypi.python.org/pypi/pydub\n" % (ex.__class__.__name__, ex))
 
-from EmotionProcessor import convert, convertEmotion, guessEmotion, convertTitle, updateEmotions, verifyCharacter
+from EmotionConverter import convert, convertEmotion, convertTitle
+from EmotionProcessor import guessEmotion, updateEmotions, verifyCharacter
 
 MUSIC_LOCATION_VARIABLE = 'ATLANTIS_MUSIC'
 
@@ -46,10 +48,10 @@ INI_CONTENT = '''\
 id=%d
 
 [character]
-power=%d
-readyToKill=%d
-readyToKillTime=%d
-addict=%d
+fightPower=%d
+readyToKillInSeconds=%d
+readyToKillForMinutes=%d
+addiction=%d
 '''.replace('\r\n', '\n').replace('\n', '\r\n')
 
 CHARACTER_CSV = 'character.csv'
@@ -114,10 +116,10 @@ def deepGetFiles(dirName):
 def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion, artist, title, tail):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
-        if sourceAudio.duration_seconds < 20:
+        if sourceAudio.duration_seconds < 5:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
         if sourceAudio.duration_seconds < 60:
-            print "\nWARNING: %s: Audio too short: %d seconds" % (basename(fullName), sourceAudio.duration_seconds)
+            print "\nWARNING: %s: Audio too short: %d seconds" % (encodeForConsole(basename(fullName)), sourceAudio.duration_seconds)
         processedAudio = sourceAudio.normalize() # pylint: disable=E1103
         if processedAudio.duration_seconds != sourceAudio.duration_seconds:
             return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
@@ -127,15 +129,16 @@ def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion
             return "Processed file is too small: %d bytes, while original file was %d bytes" % (getsize(newFullName), getsize(fullName))
         return None
     except Exception, e:
+        print format_exc()
         return e
 
 def verifyFile(fullName):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
-        if sourceAudio.duration_seconds < 20:
+        if sourceAudio.duration_seconds < 5:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
         if sourceAudio.duration_seconds < 60:
-            print "\nWARNING: %s: Audio too short: %d seconds" % (basename(fullName), sourceAudio.duration_seconds)
+            print "\nWARNING: %s: Audio too short: %d seconds" % (encodeForConsole(basename(fullName)), sourceAudio.duration_seconds)
         processedAudio = sourceAudio.normalize() # pylint: disable=E1103
         if processedAudio.duration_seconds != sourceAudio.duration_seconds:
             return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
@@ -173,7 +176,7 @@ def checkResultMark(targetDir):
             errorText = f.read()
     return (bool(errorDate), max(okDate, errorDate), okNum, okSize, errorText)
 
-def processCharacter(name, number, power, kill, killLength, addiction, emotions, baseDir = '.', verifyFiles = False):
+def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyFiles = False):
     class ProcessException(Exception):
         pass
     def log(error, fileName, message):
@@ -214,7 +217,7 @@ def processCharacter(name, number, power, kill, killLength, addiction, emotions,
     # Creating settings.ini
     if number > 0:
         with open(join(armletDir, INI_FILE), 'wb') as f:
-            f.write(INI_CONTENT % (number, power, kill, killLength, addiction))
+            f.write(INI_CONTENT % ((number,) + otherFields[:-1]))
     # Processing character.csv
     characterFile = join(armletDir, CHARACTER_CSV)
     if isfile(characterFile):
@@ -365,8 +368,8 @@ def updateMusic(sourceDir = '.', verifyFiles = False):
     noMusicCharacters = []
     errorCharacters = []
     for d in characterDirs:
-        (number, _longName, power, kill, killLength, addiction) = characters.get(d, (-1, None, None, None, None, None))
-        (hasMusic, hasErrors) = processCharacter(d, number, power, kill, killLength, addiction, emotions, sourceDir, verifyFiles)
+        (number, _longName, otherFields) = characters.get(d, (-1, None, None))
+        (hasMusic, hasErrors) = processCharacter(d, number, otherFields, emotions, sourceDir, verifyFiles)
         if hasMusic:
             if not hasErrors:
                 okCharacters.append(d)

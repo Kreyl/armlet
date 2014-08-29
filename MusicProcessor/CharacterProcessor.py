@@ -12,22 +12,19 @@
 #
 from csv import reader as CSVReader, writer as CSVWriter
 from datetime import datetime
+from itertools import chain
 from os.path import dirname, isfile, join, realpath
 #from urllib import urlopen
 from traceback import format_exc
 from sys import argv
 
 from Settings import CHARACTER_ID_START, CHARACTER_ID_END, CHARACTER_IDS
+from EmotionConverter import convertEmotion
 
 GAME_ID = 584
 
-SHORT_NAME_COLUMN_TITLE = u'Имя на браслете'
-LONG_NAME_COLUMN_TITLE = u'Имя и фамилия латиницей'
-SEX_COLUMN_TITLE = u'Пол персонажа'
-POWER_COLUMN_TITLE = u'Крутость в драке'
-KILL_COLUMN_TITLE= u'Готовность убить'
-KILL_LENGTH_COLUMN_TITLE = u'Длительность готовности убить'
-ADDICTION_COLUMN_TITLE = u'Наркомания'
+MAIN_COLUMN_TITLES = (u'Имя на браслете', u'Имя и фамилия латиницей')
+OTHER_COLUMN_TITLES = (u'Пол персонажа', u'Крутость в драке', u'Готовность убить', u'Длительность готовности убить', u'Наркомания', u'Эмоция')
 
 ADDICTIONS = dict((s, i) for (i, s) in enumerate((u'отсутствует', u'марихуана', u'ЛСД', u'героин', u'убийца', u'Крайк')))
 
@@ -66,7 +63,7 @@ def readCSV(csv): # generator
 def verifyCharacters(characters):
     assert characters
     assert len(characters) <= len(CHARACTER_IDS)
-    assert tuple(sorted(number for (number, _longName, _power, _kill, _killLength, _addiction) in characters.itervalues())) == tuple(xrange(CHARACTER_ID_START, CHARACTER_ID_START + len(characters))), "Damaged %s file" % CHARACTERS_CSV
+    assert tuple(sorted(number for (number, _longName, _otherFields) in characters.itervalues())) == tuple(xrange(CHARACTER_ID_START, CHARACTER_ID_START + len(characters))), "Damaged %s file" % CHARACTERS_CSV
 
 def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
     if not isfile(fileName):
@@ -76,31 +73,33 @@ def readCharacters(fileName = getFileName(CHARACTERS_CSV)):
     shortNames = set()
     longNames = set()
     ret = {}
-    for (number, shortName, longName, power, kill, killLength, addiction) in data:
+    for d in data:
+        ((number, shortName, longName), (power, kill, killLength, addiction, emotion)) = (d[:3], d[3:])
+        # Processing number
         number = int(number)
+        assert CHARACTER_ID_START <= number <= CHARACTER_ID_END
+        assert number not in numbers, "Duplicate character ID %s" % number
+        numbers.add(number)
+        # Processing short name
+        assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
+        shortNames.add(shortName.lower())
+        # Processing long name
+        assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
+        longNames.add(longName.lower())
+        # Processing other fields
         power = int(power)
         kill = int(kill)
         killLength = int(killLength)
         addiction = int(addiction)
-        assert CHARACTER_ID_START <= number <= CHARACTER_ID_END
-        assert 1 <= power <= 9
-        assert 1 <= kill <= 9
-        assert 1 <= killLength <= 9
         assert 0 <= int(addiction) < len(ADDICTIONS)
-        assert number not in numbers, "Duplicate character ID %s" % number
-        assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
-        assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
-        numbers.add(number)
-        shortNames.add(shortName.lower())
-        longNames.add(longName.lower())
-        ret[shortName] = (number, longName, power, kill, killLength, addiction)
+        ret[shortName] = (number, longName, (power, kill, killLength, addiction, emotion))
     verifyCharacters(ret)
     return ret
 
 def writeCharacters(characters, fileName = getFileName(CHARACTERS_CSV), header = CHARACTERS_CSV_HEADER):
     with open(fileName, 'wb') as f:
         f.writelines(s + '\r\n' for s in (header % currentTime()).splitlines())
-        CSVWriter(f).writerows((number, shortName, longName, power, kill, killLength, addiction) for (shortName, (number, longName, power, kill, killLength, addiction)) in sorted(characters.iteritems(), key = lambda (shortName, (number, longName, power, kill, killLength, addiction)): number))
+        CSVWriter(f).writerows((number, shortName, longName) + otherFields for (shortName, (number, longName, otherFields)) in sorted(characters.iteritems(), key = lambda (shortName, (number, longName, otherFields)): number))
 
 def loadCharacters():
     #print "Fetching allrpg.info library..."
@@ -122,36 +121,24 @@ def loadCharacters():
         allRoles = getAllRoles(GAME_ID)
         print "Processing data..."
         header = allRoles[0]
-        shortNameColumnID = header.index(SHORT_NAME_COLUMN_TITLE)
-        longNameColumnID = header.index(LONG_NAME_COLUMN_TITLE)
-        sexColumnID = header.index(SEX_COLUMN_TITLE)
-        powerColumnID = header.index(POWER_COLUMN_TITLE)
-        killColumnID = header.index(KILL_COLUMN_TITLE)
-        killLengthColumnID = header.index(KILL_LENGTH_COLUMN_TITLE)
-        addictionColumnID = header.index(ADDICTION_COLUMN_TITLE)
-        allRoles = sorted(allRoles[1:])
-        data = (tuple(row[x] for x in (shortNameColumnID, longNameColumnID, sexColumnID, powerColumnID, killColumnID, killLengthColumnID, addictionColumnID)) for row in allRoles[1:])
-        data = sorted(data, key = lambda (shortName, longName, sex, power, kill, killLength, addiction): ((longName.split()[-1:] or ('',))[0].lower(), longName.lower()))
+        (mainColumnIDs, otherColumnIDs) = (tuple(header.index(title) for title in titles) for titles in (MAIN_COLUMN_TITLES, OTHER_COLUMN_TITLES))
+        data = (tuple(chain((row[x] for x in mainColumnIDs), (tuple(row[x] for x in otherColumnIDs),))) for row in allRoles[1:])
+        data = sorted(data, key = lambda (_shortName, longName, _otherFields): ((longName.split()[-1:] or ('',))[0].lower(), longName.lower()))
         ret = []
         shortNames = set()
         longNames = set()
-        for (shortName, longName, sex, power, kill, killLength, addiction) in data:
+        for (shortName, longName, (sex, power, kill, killLength, addiction, emotion)) in data:
+            # Processing short name
             if not shortName:
                 continue
-            power = int(power)
-            kill = int(kill)
-            killLength = int(killLength)
-            addiction = ADDICTIONS[addiction]
-            assert 1 <= power <= 9
-            assert 1 <= kill <= 9
-            assert 1 <= killLength <= 9
             try:
                 shortName = str(shortName.strip())
             except UnicodeError:
                 print "UNICODE ERROR:", repr(shortName)
                 raise
-            sex = sex.strip()
-            assert sex in SEXES, "%s: unknown sex: %s" % (shortName, repr(sex))
+            assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
+            shortNames.add(shortName.lower())
+            # Processing long name
             try:
                 words = str(longName.strip()).split()
             except UnicodeError:
@@ -164,11 +151,17 @@ def loadCharacters():
                 longName = ' '.join(words)
             else:
                 longName = '%s. %s' % (SEXES[sex], ' '.join(words))
-            assert shortName.lower() not in shortNames, "Duplicate character short name %s" % shortName
             assert longName.lower() not in longNames, "Duplicate character long name %s" % longName
-            shortNames.add(shortName.lower())
             longNames.add(longName.lower())
-            ret.append((shortName, longName, power, kill, killLength, addiction))
+            # Processing other fields
+            sex = sex.strip()
+            assert sex in SEXES, "%s: unknown sex: %s" % (shortName, repr(sex))
+            power = int(power)
+            kill = int(kill)
+            killLength = int(killLength)
+            addiction = ADDICTIONS[addiction]
+            emotion = convertEmotion(emotion)
+            ret.append((shortName, longName, (power, kill, killLength, addiction, emotion)))
         return tuple(ret)
     except Exception, e:
         print format_exc()
@@ -179,23 +172,23 @@ def updateCharacters():
     print "Processing characters..."
     characters = readCharacters()
     changed = False
-    for (shortName, longName, power, kill, killLength, addiction) in loadCharacters():
-        (rid, oldLongName, oldPower, oldKill, oldKillLength, oldAddiction) = characters.get(shortName, (None, None, None, None, None, None))
+    for (shortName, longName, otherFields) in loadCharacters():
+        (rid, oldLongName, oldOtherFields) = characters.get(shortName, (None, None, None))
         if not rid: # new character
             characterID = len(characters) + CHARACTER_ID_START
             assert characterID in CHARACTER_IDS
-            characters[shortName] = (characterID, longName, power, kill, killLength, addiction)
+            characters[shortName] = (characterID, longName, otherFields)
             changed = True
-        elif (longName, power, kill, killLength, addiction) != (oldLongName, oldPower, oldKill, oldKillLength, oldAddiction): # changed character
-            characters[shortName] = (rid, longName, power, kill, killLength, addiction)
+        elif (longName, otherFields) != (oldLongName, oldOtherFields): # changed character
+            characters[shortName] = (rid, longName, otherFields)
             changed = True
     verifyCharacters(characters)
     if changed:
         print "Updating %s..." % CHARACTERS_CSV
         writeCharacters(characters)
-        print "Updating tickets..."
-        from TicketProcessor import generateTickets
-        generateTickets(characters.iteritems())
+        # print "Updating tickets..."
+        # from TicketProcessor import generateTickets
+        # generateTickets(characters.iteritems())
     else:
         print "No changes detected"
     print "Done"

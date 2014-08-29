@@ -8,12 +8,10 @@
 #ifndef RXTABLE_H_
 #define RXTABLE_H_
 
-#include "kl_lib_f2xx.h"
-#include "mesh_params.h"
 #include "evt_mask.h"
 #include "cmd_uart.h"
+#include "mesh_params.h"
 #include "application.h"
-
 // IR
 #define MAX_IR_LUSTRA_CNT       50
 // Radio
