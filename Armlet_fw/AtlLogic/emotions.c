@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-29 07:51:42
+ * Generated at 2014-08-29 08:11:41
  */
 #include "emotions.h"
 
@@ -294,9 +294,10 @@ Reason_t reasons[] = {
  /* 175 */ { "MWright", 0, 0, 0 },
  /* 176 */ { "LYoung", 0, 0, 0 },
  /* 177 */ { "NYoung", 0, 0, 0 },
+ /* 178 */ { "ATest", 0, 0, 0 },
+ /* 179 */ { "BTest", 0, 0, 0 },
 	// end of characters
- /* 178 */ { "r178", 0, 0, 1 },         /* neverno */
- /* 179 */ { "r179", 0, 0, 1 },         /* neverno */
+
 	// Intentions
  /* 180 */ { "murder", 120, 0, 43 },    /* ubijstvo */
  /* 181 */ { "creation", 120, 0, 75 },  /* sozidanie */

@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-29 07:51:42
+ * Generated at 2014-08-29 08:11:41
  */
 #ifndef EMOTIONS_H
 #define EMOTIONS_H
@@ -345,9 +345,10 @@ extern Reason_t reasons[];
 #define REASON_MWRIGHT             175
 #define REASON_LYOUNG              176
 #define REASON_NYOUNG              177
+#define REASON_ATEST               178
+#define REASON_BTEST               179
 	// end of characters
-#define REASON_R178                178
-#define REASON_R179                179
+
 	// Intentions
 #define REASON_MURDER              180
 #define REASON_CREATION            181
