@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-29 08:11:41
+ * Generated at 2014-08-29 15:57:49
  */
 #ifndef EMOTIONS_H
 #define EMOTIONS_H
@@ -156,7 +156,7 @@ typedef struct Reason {
 
 extern Reason_t reasons[];
 
-#define NUMNBER OF REASONS        289
+#define NUMBER_OF_REASONS         289
 
 #define REASON_R000                 0
 	// Locations

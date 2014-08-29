@@ -184,7 +184,7 @@ typedef struct Reason {
 
 extern Reason_t reasons[];
 
-#define NUMNBER OF REASONS%%s%%d
+#define NUMBER_OF_REASONS%%s%%d
 
 %%s
 \t// Locations
@@ -450,7 +450,7 @@ def writeH(emotions, reasons):
     maxReasonWidth = max(len(reason.replace("'", '')) for (_rid, reason, _weight, _age, _eid, _emotion) in chain(*reasons))
     reasonsTexts = tuple('\n'.join(hReason(rid, reason, maxReasonWidth - len(reason.replace("'", ''))) for (rid, reason, _weight, _age, _eid, _emotion) in reason) for reason in reasons)
     with open(getFileName(H_TARGET), 'wb') as f:
-        f.write(H_CONTENT % ((currentTime(), ' ' * (maxEmotionWidth - 9), len(emotions), emotionsText, ' ' * (maxReasonWidth - 11), sum(len(r) for r in reasons)) + reasonsTexts))
+        f.write(H_CONTENT % ((currentTime(), ' ' * max(1, maxEmotionWidth - 9), len(emotions), emotionsText, ' ' * max(1, maxReasonWidth - 10), sum(len(r) for r in reasons)) + reasonsTexts))
 
 def writeCSV(*reasons):
     with open(getFileName(CSV_TARGET), 'wb') as f:
