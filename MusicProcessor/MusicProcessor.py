@@ -29,7 +29,8 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pydub v0.9.2 or later: https://pypi.python.org/pypi/pydub\n" % (ex.__class__.__name__, ex))
 
-from EmotionProcessor import convert, convertEmotion, guessEmotion, convertTitle, updateEmotions, verifyCharacter
+from EmotionConverter import convert, convertEmotion, convertTitle
+from EmotionProcessor import guessEmotion, updateEmotions, verifyCharacter
 
 MUSIC_LOCATION_VARIABLE = 'ATLANTIS_MUSIC'
 
@@ -115,7 +116,7 @@ def deepGetFiles(dirName):
 def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion, artist, title, tail):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
-        if sourceAudio.duration_seconds < 20:
+        if sourceAudio.duration_seconds < 5:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
         if sourceAudio.duration_seconds < 60:
             print "\nWARNING: %s: Audio too short: %d seconds" % (encodeForConsole(basename(fullName)), sourceAudio.duration_seconds)
@@ -134,7 +135,7 @@ def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion
 def verifyFile(fullName):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
-        if sourceAudio.duration_seconds < 20:
+        if sourceAudio.duration_seconds < 5:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
         if sourceAudio.duration_seconds < 60:
             print "\nWARNING: %s: Audio too short: %d seconds" % (encodeForConsole(basename(fullName)), sourceAudio.duration_seconds)

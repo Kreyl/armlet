@@ -23,16 +23,6 @@ from subprocess import Popen, PIPE, STDOUT
 from sys import stdout
 
 try:
-    from pytils.translit import translify
-except ImportError, ex:
-    raise ImportError("%s: %s\n\nPlease install pytils v0.2.3 or later: https://pypi.python.org/pypi/pytils\n" % (ex.__class__.__name__, ex))
-
-try:
-    from unidecode import unidecode
-except ImportError, ex:
-    raise ImportError("%s: %s\n\nPlease install Unidecode v0.04.16 or later: https://pypi.python.org/pypi/Unidecode/\n" % (ex.__class__.__name__, ex))
-
-try:
     from Levenshtein import distance
 except ImportError, ex:
     distance = None
@@ -44,7 +34,11 @@ from Settings import CHARACTER_ID_START, CHARACTER_ID_END, CHARACTER_IDS
 from Settings import INTENTION_ID_START, INTENTION_ID_END, INTENTION_IDS
 from Settings import EMOTION_FIX_ID_START, EMOTION_FIX_ID_END, EMOTION_FIX_IDS
 
+from Settings import CHARACTER_WEIGHT
+
 from CharacterProcessor import CHARACTERS_CSV, currentTime, getFileName, updateCharacters
+
+from EmotionConverter import convertEmotion
 
 isWindows = system().lower().startswith('win')
 
@@ -169,45 +163,11 @@ EMOTION_FIX_WEIGHT = 5
 
 TEST_COMMAND = 'gcc -I "%s" -o test "%s" test.c && ./test && rm test' % (C_PATH, C_TARGET)
 
-TRANSLIFY_PATCHES = {
-    u'Ё': u'Е',
-    u'ё': u'е',
-    u'и\u0306': u'й' # й on Mac
-}
-
-EMOTION_PATCHES = {
-    'somneniya': 'somnenie',
-    'sex': 'seks',
-    'napryazhenie': 'napryazhennost\'',
-    'nastol\'giya': 'nostal\'giya',
-    'sostrodanie': 'sostradanie',
-    'udovletvorennost': 'udovletvorenie'
-}
-
 def firstCapital(s):
     return '%s%s' % (s[0].upper(), s[1:])
 
 def width(array):
     return len(str((len(array) or 1) - 1))
-
-def convert(s):
-    for (f, t) in TRANSLIFY_PATCHES.iteritems():
-        s = s.replace(f, t)
-    ret = ''
-    for c in s:
-        try:
-            c = translify(c)
-        except ValueError:
-            c = unidecode(c)
-        ret += c
-    return ret
-
-def convertTitle(s):
-    return convert(s.strip())
-
-def convertEmotion(s):
-    e = convertTitle(s).lower()
-    return EMOTION_PATCHES.get(e, e)
 
 WRONG = convertEmotion(u'неверно')
 MASTER = convertEmotion(u'мастерка')
@@ -307,12 +267,13 @@ def processLocations(emotions, fileName = getFileName(LOCATIONS_CSV), tag = 'loc
 def processIntentions(emotions, fileName = getFileName(INTENTIONS_CSV)):
     return processLocations(emotions, fileName, 'intentions', INTENTION_ID_START, len(INTENTION_IDS))
 
-def processCharacters(fileName = getFileName(CHARACTERS_CSV)):
+def processCharacters(emotions, fileName = getFileName(CHARACTERS_CSV)):
     reasons = []
     for row in readCSV(fileName):
-        assert len(row) == 7, "Bad characters file format"
-        (rid, reason, _longName, _power, _kill, _killLength, _addiction) = row
-        addReason(reasons, int(rid), reason, 0, 0, 0, '')
+        assert len(row) == 8, "Bad characters file format"
+        (rid, reason, _longName, _power, _kill, _killLength, _addiction, emotion) = row
+        emotion = emotion.strip()
+        addReason(reasons, int(rid), reason, CHARACTER_WEIGHT if emotion else 0, 0, getEmotion(emotions, emotion) if emotion else 0, emotion)
     assert len(reasons) <= len(CHARACTER_IDS)
     return tuple(reasons)
 
@@ -328,7 +289,7 @@ def processReasons(emotions):
     stuffing1 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations), MIST_ID_START))
     mists = tuple(mistReason(rid) for rid in MIST_IDS)
     stuffing2 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(mists), CHARACTER_ID_START))
-    characters = processCharacters()
+    characters = processCharacters(emotions)
     stuffing3 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(mists) + len(stuffing2) + len(characters), INTENTION_ID_START))
     intentions =  processIntentions(emotions)
     stuffing4 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(mists) + len(stuffing2) + len(characters) + len(stuffing3) + len(intentions), EMOTION_FIX_ID_START))

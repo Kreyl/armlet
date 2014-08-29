@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-29 03:21:14
+ * Generated at 2014-08-29 04:34:22
  */
 #include "emotions.h"
 
@@ -253,7 +253,7 @@ Reason_t reasons[] = {
  /* 120 */ { "CDeLorean", 0, 0, 0 },
  /* 121 */ { "JDoe", 0, 0, 0 },
  /* 122 */ { "MDurden", 0, 0, 0 },
- /* 123 */ { "DElis", 0, 0, 0 },
+ /* 123 */ { "DElis", 80, 0, 64 },	/* vozhdelenie */
  /* 124 */ { "NEpstein", 0, 0, 0 },
  /* 125 */ { "CFranklin", 0, 0, 0 },
  /* 126 */ { "LGeertz", 0, 0, 0 },
