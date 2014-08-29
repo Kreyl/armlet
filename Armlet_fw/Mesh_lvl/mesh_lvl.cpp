@@ -139,13 +139,13 @@ void Mesh_t::IPktHandler(){
             *PTimeToWakeUp = MeshMsg.Timestamp - MESH_PKT_TIME - (SLOT_TIME*(PriorityID-1)) + CYCLE_TIME;
         }
     }
+    SendEvent(EVTMSK_MESH_RX_END);
 }
 
 void Mesh_t::IUpdateTimer() {
 #ifdef ARMLET
     RxTable.SendEvtReady();
 #endif
-
     if(GetPrimaryPkt) {
         uint32_t timeNow = chTimeNow();
         while(*PTimeToWakeUp < timeNow) {
