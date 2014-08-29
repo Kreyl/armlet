@@ -46,6 +46,11 @@ INI_FILE = 'settings.ini'
 INI_CONTENT = '''\
 [radio]
 id=%d
+locationThreshold=60
+forestTheshold=60
+mistThreshold=0
+characterThreshold=0
+IRlevel=75
 
 [character]
 fightPower=%d
