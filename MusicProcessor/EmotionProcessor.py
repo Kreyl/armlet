@@ -28,13 +28,15 @@ except ImportError, ex:
     distance = None
     print "%s: %s\nWARNING: Emotion guessing will not be available.\bPlease install Levenshtein v0.11.2 or later: https://pypi.python.org/pypi/python-Levenshtein\n" % (ex.__class__.__name__, ex)
 
-from Settings import LOCATION_ID_START, LOCATIONS_ID_END, LOCATION_IDS
+from Settings import LOCATION_ID_START, LOCATION_ID_END, LOCATION_IDS
+from Settings import FOREST_ID_START, FOREST_ID_END, FOREST_IDS
 from Settings import MIST_ID_START, MIST_ID_END, MIST_IDS
 from Settings import CHARACTER_ID_START, CHARACTER_ID_END, CHARACTER_IDS
 from Settings import INTENTION_ID_START, INTENTION_ID_END, INTENTION_IDS
 from Settings import EMOTION_FIX_ID_START, EMOTION_FIX_ID_END, EMOTION_FIX_IDS
+from Settings import MAX_ID
 
-from Settings import CHARACTER_WEIGHT
+from Settings import CHARACTER_WEIGHT, DEATH_WEIGHT, FOREST_WEIGHT, MIST_WEIGHT, RESERVED_WEIGHT
 
 from CharacterProcessor import CHARACTERS_CSV, currentTime, getFileName, updateCharacters
 
@@ -47,6 +49,7 @@ CONSOLE_ENCODING = stdout.encoding or ('cp866' if isWindows else 'UTF-8')
 def encodeForConsole(s):
     return s.encode(CONSOLE_ENCODING, 'replace')
 
+SETTINGS_CSV = 'Settings.csv'
 EMOTIONS_CSV = 'Emotions.csv'
 LOCATIONS_CSV = 'Locations.csv'
 INTENTIONS_CSV = 'Intentions.csv'
@@ -54,6 +57,8 @@ INTENTIONS_CSV = 'Intentions.csv'
 C_PATH = '../Armlet_fw/AtlLogic'
 
 C_TARGET = join(C_PATH, 'emotions.c')
+
+H_TARGET = join(C_PATH, 'emotions.h')
 
 CSV_TARGET = 'Reasons.csv'
 
@@ -64,7 +69,7 @@ C_CONTENT = '''\
  * Part of "Ticket to Atlantis" LARP music engine.
  *
  * Generated automatically by EmotionProcessor.py
- * from %s, %s, %s and %s
+ * from %s, %s, %s, %s and %s
  *
  * !!! DO NOT EDIT !!!
  *
@@ -77,30 +82,16 @@ Emotion_t emotions[] = {
 %%s
 };
 
-const int emotions_number = countof(emotions);
-
-// RID ranges
-const int first_location_id = %d;
-const int last_location_id = %d;
-
-const int first_mist_id = %d;
-const int last_mist_id = %d;
-
-const int first_character_id = %d;
-const int last_character_id = %d;
-
-const int first_intention_id = %d;
-const int last_intention_id = %d;
-
-const int first_emotion_fix_id = %d;
-const int last_emotion_fix_id = %d;
-
 // RIDs are indexes in this array.
 Reason_t reasons[] = {
 %%s
 \t// Locations
 %%s
 \t// end of locations
+%%s
+\t// Forest
+%%s
+\t// end of forest
 %%s
 \t// Mist sources
 %%s
@@ -119,11 +110,113 @@ Reason_t reasons[] = {
 \t// end of emotion fixes
 };
 
-const int reasons_number = countof(reasons);
-
 // End of emotions.c
-''' % (EMOTIONS_CSV, LOCATIONS_CSV, CHARACTERS_CSV, INTENTIONS_CSV,
-       LOCATION_ID_START, LOCATIONS_ID_END, MIST_ID_START, MIST_ID_END, CHARACTER_ID_START, CHARACTER_ID_END, INTENTION_ID_START, INTENTION_ID_END, EMOTION_FIX_ID_START, EMOTION_FIX_ID_END)
+''' % (SETTINGS_CSV, EMOTIONS_CSV, LOCATIONS_CSV, CHARACTERS_CSV, INTENTIONS_CSV)
+
+H_CONTENT = '''\
+/*
+ * emotions.h
+ *
+ * Part of "Ticket to Atlantis" LARP music engine.
+ *
+ * Generated automatically by EmotionProcessor.py
+ * from %s, %s, %s, %s and %s
+ *
+ * !!! DO NOT EDIT !!!
+ *
+ * Generated at %%s
+ */
+#ifndef EMOTIONS_H
+#define EMOTIONS_H
+
+#define ROOT -1
+
+//
+// ID limits
+//
+
+#define LOCATION_ID_START %d\t\t// start of stationary ID interval
+#define LOCATIONS_ID_END %d
+
+#define FOREST_ID_START %d
+#define FOREST_ID_END %d\t\t// end of stationary ID interval
+
+#define MIST_ID_START %d
+#define MIST_ID_END %d
+
+#define CHARACTER_ID_START %d
+#define CHARACTER_ID_END %d
+
+#define INTENTION_ID_START %d
+#define INTENTION_ID_END %d
+
+#define EMOTION_FIX_ID_START %d\t// start of stationary ID interval
+#define EMOTION_FIX_ID_END %d\t\t// end of stationary ID interval
+
+//
+// Emotions
+//
+
+typedef struct Emotion {
+    const char* name;
+    const int weight;
+    const int parent;
+    int numTracks;
+    int lastPlayedTrack;
+} Emotion_t;
+
+extern Emotion_t emotions[];
+
+#define NUMBER_OF_EMOTIONS%%s%%d
+
+%%s
+
+//
+// Reasons
+//
+
+typedef struct Reason {
+    const char* name;
+    int weight;
+    int age;
+    int eID;
+} Reason_t;
+
+extern Reason_t reasons[];
+
+#define NUMNBER OF REASONS%%s%%d
+
+%%s
+\t// Locations
+%%s
+\t// end of locations
+%%s
+\t// Forest
+%%s
+\t// end of forest
+%%s
+\t// Mist sources
+%%s
+\t// end of mist sources
+%%s
+\t// Characters
+%%s
+\t// end of characters
+%%s
+\t// Intentions
+%%s
+\t// end of intentions
+%%s
+\t// Emotion fixes
+%%s
+\t// end of emotion fixes
+
+#endif
+
+// End of emotions.h
+''' % (SETTINGS_CSV, EMOTIONS_CSV, LOCATIONS_CSV, CHARACTERS_CSV, INTENTIONS_CSV,
+       LOCATION_ID_START, LOCATION_ID_END, FOREST_ID_START, FOREST_ID_END, MIST_ID_START, MIST_ID_END,
+       CHARACTER_ID_START, CHARACTER_ID_END, INTENTION_ID_START, INTENTION_ID_END, EMOTION_FIX_ID_START, EMOTION_FIX_ID_END)
 
 REASONS_CSV_HEADER = '''\
 #
@@ -139,23 +232,27 @@ REASONS_CSV_HEADER = '''\
 #
 '''
 
-C_NODE = ' /* %s */ %s{ %s, 1, %s, -1, -1 },'
+EMOTION_C_NODE = ' /* %s */ %s{ %s, 1, %s, -1, -1 },'
 
-REASON_NODE = ' /* %s */ { %s, %d, %d, %d },'
+REASON_C_NODE = ' /* %s */ { %s, %d, %d, %d },'
 
-REASON_COMMENT = '\t/* %s */'
+REASON_COMMENT = '/* %s */'
+
+REASON_COMMENT_OFFSET = 40
 
 INDENT = '    '
 
+EMOTION_H_NODE = '#define EMOTION_%s%s %2d'
+
+REASON_H_NODE = '#define REASON_%s%s %2d'
+
 NO_PARENT = 'ROOT'
-
-MAX_ID = 254
-
-MAX_WEIGHT = 99
 
 RESERVED_REASON = 'r%03d'
 
-MIST_REASON = 'm%02d'
+FOREST_REASON = 'forest%02d'
+
+MIST_REASON = 'mist%02d'
 
 EMOTION_FIX_REASON = 'x%s'
 
@@ -216,8 +313,7 @@ def guessEmotion(emotions, emotion):
 def readCSV(csv): # generator
     with open(csv) as f:
         for row in CSVReader(f):
-            assert row, "Bad CSV file format"
-            if not row[0].startswith('#'):
+            if row and not row[0].startswith('#'):
                 yield row
 
 def getEmotion(emotions, emotion):
@@ -227,11 +323,11 @@ def getEmotion(emotions, emotion):
 
 def getWeight(weight):
     ret = int(weight)
-    assert ret in xrange(MAX_WEIGHT + 1), "Incorrect weight: %d" % ret
+    assert 0 <= ret <= DEATH_WEIGHT, "Incorrect weight: %d" % ret
     return ret
 
 def addReason(reasons, rid, reason, weight, age, eid, emotion):
-    assert rid == int(rid) and rid >= 0 and rid < MAX_ID, "Bad ReasonID: %s" % rid
+    assert rid == int(rid) and 0 <= rid < MAX_ID, "Bad ReasonID: %s" % rid
     assert reason.lower() not in (r[1].lower() for r in reasons), "Duplicate reason: %s" % reason
     reasons.append((rid, reason, weight, age, eid, emotion))
 
@@ -279,22 +375,26 @@ def processCharacters(emotions, fileName = getFileName(CHARACTERS_CSV)):
 
 def processReasons(emotions):
     def reserveReason(rid):
-        return (rid, RESERVED_REASON % rid, MAX_WEIGHT, 0, emotions[WRONG], WRONG) # ToDo: Default reserve to fon?
+        return (rid, RESERVED_REASON % rid, RESERVED_WEIGHT, 0, emotions[WRONG], WRONG) # ToDo: Default reserve to fon?
+    def forestReason(rid):
+        return (rid, FOREST_REASON % rid, FOREST_WEIGHT, 0, emotions[LES], LES)
     def mistReason(rid):
-        return (rid, MIST_REASON % rid, 0, 0, emotions['fon'], 'fon')
+        return (rid, MIST_REASON % rid, MIST_WEIGHT, 0, emotions[TUMAN], TUMAN)
     def emotionFixReason(eid, emotion):
         return (eid + EMOTION_FIX_ID_START, EMOTION_FIX_REASON % firstCapital(emotion), EMOTION_FIX_WEIGHT, 0, eid, emotion)
     stuffing0 = (reserveReason(0),)
-    locations =  processLocations(emotions)
-    stuffing1 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations), MIST_ID_START))
+    locations = processLocations(emotions)
+    stuffing1 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations), FOREST_ID_START))
+    forests = tuple(forestReason(rid) for rid in FOREST_IDS)
+    stuffing2 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(forests), MIST_ID_START))
     mists = tuple(mistReason(rid) for rid in MIST_IDS)
-    stuffing2 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(mists), CHARACTER_ID_START))
+    stuffing3 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(forests) + len(stuffing2) + len(mists), CHARACTER_ID_START))
     characters = processCharacters(emotions)
-    stuffing3 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(mists) + len(stuffing2) + len(characters), INTENTION_ID_START))
-    intentions =  processIntentions(emotions)
-    stuffing4 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(mists) + len(stuffing2) + len(characters) + len(stuffing3) + len(intentions), EMOTION_FIX_ID_START))
+    stuffing4 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(forests) + len(stuffing2) + len(mists) + len(stuffing3) + len(characters), INTENTION_ID_START))
+    intentions = processIntentions(emotions)
+    stuffing5 = tuple(reserveReason(rid) for rid in xrange(len(stuffing0) + len(locations) + len(stuffing1) + len(forests) + len(stuffing2) + len(mists) + len(stuffing3) + len(characters) + len(stuffing4) + len(intentions), EMOTION_FIX_ID_START))
     emotionFixes = tuple(emotionFixReason(eid, emotion) for (eid, emotion) in sorted((eid, emotion) for (emotion, eid) in emotions.iteritems()))
-    reasons = (stuffing0, locations, stuffing1, mists, stuffing2, characters, stuffing3, intentions, stuffing4, emotionFixes)
+    reasons = (stuffing0, locations, stuffing1, forests, stuffing2, mists, stuffing3, characters, stuffing4, intentions, stuffing5, emotionFixes)
     checkSets = (emotions,) + tuple(set(r[1].lower() for r in reason) for reason in reasons)
     for i in xrange(0, len(checkSets)):
         for rs in checkSets[:i]:
@@ -322,18 +422,35 @@ def cString(s):
     return '"%s"' % ''.join(cChar(c) for c in s.decode('utf-8'))
 
 def cEmotion(eidWidth, eid, level, emotion, parent):
-    return C_NODE % (str(eid).rjust(eidWidth), level * INDENT, cString(emotion), parent if parent != None else NO_PARENT)
+    return EMOTION_C_NODE % (str(eid).rjust(eidWidth), level * INDENT, cString(emotion), parent if parent != None else NO_PARENT)
+
+def hEmotion(eid, emotion, padding):
+    return EMOTION_H_NODE % (emotion.upper().replace("'", ''), ' ' * padding, eid)
 
 def cReason(ridWidth, rid, reason, weight, age, eid, emotion):
-    return REASON_NODE % (str(rid).rjust(ridWidth), cString(reason), weight, age, eid) + (REASON_COMMENT % emotion if emotion else '')
+    ret = REASON_C_NODE % (str(rid).rjust(ridWidth), cString(reason), weight, age, eid)
+    if emotion:
+        ret += ' ' * max(1, (REASON_COMMENT_OFFSET - len(ret))) + (REASON_COMMENT % emotion)
+    return ret
 
-def writeC(emotions, *reasons):
+def hReason(rid, reason, padding):
+    return REASON_H_NODE % (reason.upper().replace("'", ''), ' ' * padding, rid)
+
+def writeC(emotions, reasons):
     eidWidth = width(emotions)
-    ridWidth = len(str(max(r[0] for r in chain.from_iterable(reasons))))
     emotionsText = '\n'.join(cEmotion(eidWidth, *emotion) for emotion in emotions)
+    ridWidth = len(str(max(r[0] for r in chain.from_iterable(reasons))))
     reasonsTexts = tuple('\n'.join(cReason(ridWidth, *r) for r in reason) for reason in reasons)
     with open(getFileName(C_TARGET), 'wb') as f:
         f.write(C_CONTENT % ((currentTime(), emotionsText) + reasonsTexts))
+
+def writeH(emotions, reasons):
+    maxEmotionWidth = max(len(emotion.replace("'", '')) for (_eid, _level, emotion, _parent) in emotions)
+    emotionsText = '\n'.join(hEmotion(eid, emotion.replace("'", ''), maxEmotionWidth - len(emotion.replace("'", ''))) for (eid, _level, emotion, _parent) in emotions)
+    maxReasonWidth = max(len(reason.replace("'", '')) for (_rid, reason, _weight, _age, _eid, _emotion) in chain(*reasons))
+    reasonsTexts = tuple('\n'.join(hReason(rid, reason, maxReasonWidth - len(reason.replace("'", ''))) for (rid, reason, _weight, _age, _eid, _emotion) in reason) for reason in reasons)
+    with open(getFileName(H_TARGET), 'wb') as f:
+        f.write(H_CONTENT % ((currentTime(), ' ' * (maxEmotionWidth - 9), len(emotions), emotionsText, ' ' * (maxReasonWidth - 11), sum(len(r) for r in reasons)) + reasonsTexts))
 
 def writeCSV(*reasons):
     with open(getFileName(CSV_TARGET), 'wb') as f:
@@ -345,7 +462,8 @@ def updateEmotions():
     print "\nProcessing emotions..."
     (emotionsIndexes, emotionsTree) = processEmotions()
     reasons = processReasons(emotionsIndexes)
-    writeC(emotionsTree, *reasons)
+    writeC(emotionsTree, reasons)
+    writeH(emotionsTree, reasons)
     writeCSV(*reasons)
     if isWindows:
         print "Not running test on Windows\nDone"
