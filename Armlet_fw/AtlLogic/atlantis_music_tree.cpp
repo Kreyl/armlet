@@ -86,7 +86,7 @@ int GetEmoIndxFromFileString(char * string)
 	//stremobuff=
 	//str
 
-	for(int i=0;i<emotions_number;i++)
+	for(int i=0;i<NUMBER_OF_EMOTIONS;i++)
 	{
         if((uint32_t)sep_id== strlen(emotions[i].name))
         {
@@ -104,7 +104,7 @@ int GetEmoIndxFromFileString(char * string)
 //recalculate reasons tree to remove zero file numbers on emo tree to call
 void RebuildReasons()
 {
-    for(int i=0;i<reasons_number;i++)
+    for(int i=0;i<NUMBER_OF_REASONS;i++)
     {
         while(emotions[reasons[i].eID].numTracks==0)
         {
@@ -121,10 +121,10 @@ int GetRandomEmoToPlay()
 {
 	int max_sum_weight=0;
 	int min_sum_weight=0;
-	for(int i=0;i<emotions_number;i++)
+	for(int i=0;i<NUMBER_OF_EMOTIONS;i++)
 		max_sum_weight+=emotions[i].weight;
 	int rand_val=Random(max_sum_weight);
-	for(int i=0;i<emotions_number;i++)
+	for(int i=0;i<NUMBER_OF_EMOTIONS;i++)
 	{
 		min_sum_weight+=emotions[i].weight;
 		if(min_sum_weight>=rand_val)
@@ -134,7 +134,7 @@ int GetRandomEmoToPlay()
 }
 int GetFileNumerForEmoToPlay(int emo_id)
 {
-    if(emo_id<0 || emo_id>emotions_number)
+    if(emo_id<0 || emo_id>NUMBER_OF_EMOTIONS)
     {
         Uart.Printf("GetFileNumerForEmoToPlay emo_id out of range\r");
         return -1;
@@ -150,7 +150,7 @@ int GetFileNumerForEmoToPlay(int emo_id)
 }
 char * GetFileNameToPlayFromEmoId(int emo_id) {
 	//TODO error to log here!
-	if(emo_id < 0 || emo_id > emotions_number) {
+	if(emo_id < 0 || emo_id > NUMBER_OF_EMOTIONS) {
 		Uart.Printf("\rGetFileNameToPlayFromEmoId emo_id out of range");
 		return NULL;
 	}
