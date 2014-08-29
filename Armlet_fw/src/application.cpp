@@ -44,7 +44,7 @@ App_t App;
 //============================csv dirs==========================================
 static const char* FDirList2[] = {
         "/",
-        "common",
+
 };
 
 MusList_t CSVList = {
@@ -308,7 +308,7 @@ void App_t::Task() {
 */
         UpdateLocation();
 
-            int val1= MIN((uint32_t)reasons_number, RxTable.PTable->Size);
+            int val1= MIN((uint32_t)NUMBER_OF_REASONS, RxTable.PTable->Size);
             CurrentIntentionArraySize = val1;
             int j=0;
             //сбрасываем  human syupport
@@ -316,7 +316,7 @@ void App_t::Task() {
                 ArrayOfUserIntentions[kl].human_support_number=0;
 
             for(int i=0; i<val1; i++) {
-                if(RxTable.PTable->Row[i].ID >= reasons_number || (RxTable.PTable->Row[i].ID < 0) /*|| (SnsTable.PTable->Row[i].Level < 70)*/ ) {
+                if(RxTable.PTable->Row[i].ID >= NUMBER_OF_REASONS || (RxTable.PTable->Row[i].ID < 0) /*|| (SnsTable.PTable->Row[i].Level < 70)*/ ) {
                     CurrentIntentionArraySize--;
                     continue;
                 }
@@ -457,8 +457,8 @@ void App_t::UpdateLocation() {
     uint16_t tmpID=0;
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
         tmpID = RxTable.PTable->Row[i].ID;
-        if( (tmpID >= first_location_id && tmpID <= last_location_id) ||
-            (tmpID >= first_emotion_fix_id && tmpID <= last_emotion_fix_id) )    {
+        if( (tmpID >= LOCATION_ID_START && tmpID <= LOCATIONS_ID_END) ||
+            (tmpID >= EMOTION_FIX_ID_START && tmpID <= EMOTION_FIX_ID_END) )    {
             if(RxTable.PTable->Row[i].Level > SignalPwr) {
                 SignalPwr = RxTable.PTable->Row[i].Level;
                 LocationID = tmpID;
@@ -479,9 +479,10 @@ void App_t::Init() {
 
     Time.Init();
     Time.Reset();
-   // char *S = nullptr;//character_HWilliams.csv
-    char *S = "character_HWilliams.csv";//character_HWilliams.csv
-   // SD.GetNthFileByPrefix(&CSVList,"character_", 1, &S);
+    char *S = nullptr;//character_HWilliams.csv
+    //char *S = "character_HWilliams.csv";//character_HWilliams.csv
+    SD.GetNthFileByPrefix(&CSVList,"character_", 1, &S);
+    Uart.Printf("\r App_t::Init() file s %s",S);
     ParseCsvFileToEmotions(S);
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
@@ -568,20 +569,18 @@ void App_t::LoadCharacterSettings()
     //убийство хранится в userintentions   readyToKill = ширина плато*Energymoddecreased(default_energy)
     //убийство хранится в userintentions   readyToKill =Time ширина плато*Energymodincreased(default_energy)
     int32_t pwr,rk,rkt;
-    SD.iniReadInt32("character", "power", "settings.ini", &pwr);//draka
-    SD.iniReadInt32("character", "readyToKill", "settings.ini", &rk);
-    SD.iniReadInt32("character", "readyToKillTime", "settings.ini", &rkt);
+    SD.iniReadInt32("character", "fightPower", "settings.ini", &pwr);//draka
+    SD.iniReadInt32("character", "readyToKillInSeconds", "settings.ini", &rk);
+    SD.iniReadInt32("character", "readyToKillForMinutes", "settings.ini", &rkt);
 
     //Готовность к убийству, определяет, насколько быстро у человека начинает звучат музыка убийства, от 1 до 9, 1 - медленно, 9 - сразу, у среднего человека - 3.
 
-    int KillToSecArray[10]={0,1,2,3,4,5,6,7,8,9};
-    int KillTimerToSecArray[10]={0,1,2,3,4,5,6,7,8,9};
     //Продолжительность готовности к убийству, определяет, насколько долго у человека играет музыка убийства, от 1 до 9, 1 - совсем немного (10 секунд?), 9 - долго (полчаса?), у среднего человека - 5.
     WriteDrakaTimeFromPower(pwr);//TODO test
-    WriteReadyToKillTimer(KillTimerToSecArray[rkt]);//TODO test
-    WriteRadyToKill(KillToSecArray[rk]);//TODO test
+    WriteReadyToKillTimer(rkt*60);//TODO test
+    WriteRadyToKill(rk);//TODO test
     int32_t addict;
-    SD.iniReadInt32("character", "addict", "settings.ini", &addict);
+    SD.iniReadInt32("character", "addiction", "settings.ini", &addict);
     if(addict==1)
         ArrayOfUserIntentions[SI_WEED].current_time=0;
     if(addict==2)
@@ -675,13 +674,13 @@ void App_t::WriteInentionStringToData(char * int_name, int int_val, char * emo_n
     if(int_val>256)
         int_val=256;
 
-    for(int i=0;i<reasons_number;i++)
+    for(int i=0;i<NUMBER_OF_REASONS;i++)
         if(strcmp(reasons[i].name,int_name)==0)
         {reason_id=i;break;}
 
     int emo_id=-1;
     //emotions_number
-    for(int i=0;i<emotions_number;i++)
+    for(int i=0;i<NUMBER_OF_EMOTIONS;i++)
         if(strcmp(emotions[i].name,emo_name)==0)
             emo_id=i;
 

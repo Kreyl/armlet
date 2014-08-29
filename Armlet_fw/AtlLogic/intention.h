@@ -100,6 +100,7 @@ typedef struct IntentionCalculationData
 
 #define HEART_PLAYING_TIME_SEC 20
 
+//альтернативная ветка рассчетов того, что играть, со своим таймером для каждого отдельного включения. пока используется только в драке
 enum GlobalStopType_t {gsDraka, gsNotInited};
 typedef struct GlobalStopCalculationSupport
 {
@@ -177,6 +178,8 @@ void ReasonAgeModifyChangeMelody();
 void WriteDrakaTimeFromPower(int pwr_in);
 void WriteRadyToKill(int val_in);
 void WriteReadyToKillTimer(int val_in);
+
+void OnGetTumanMessage();
 
 //в структуре рассчета будет индекс текущего победителя мощности,
 //индекс предыдущего победителя мощности,

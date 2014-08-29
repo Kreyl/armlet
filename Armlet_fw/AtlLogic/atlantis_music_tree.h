@@ -12,7 +12,7 @@
 #include "integer.h"
 #include "kl_sd.h"
 
-//#define emotion_number_fix 5
+
 #define ROOT_ELEMENT_INDX -1
 #define MAX_MUSIC_FILENAME_CHAR_SIZE 40
 #define MAX_NUMBER_MUSIC_FILES_ON_NODE 30
@@ -25,9 +25,7 @@
 //emotion_number_fix = emotion_number_fix
 //intentions = reason
 const int non_tree_array_size = 0;
-const int emotion_number_fix=87;
-const int music_array_size=emotion_number_fix+non_tree_array_size;
-//const int reasons_number_fix=5;
+const int music_array_size=NUMBER_OF_EMOTIONS+non_tree_array_size;
 
 typedef struct string_limited512
 {
