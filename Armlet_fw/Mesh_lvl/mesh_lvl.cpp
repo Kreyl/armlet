@@ -88,9 +88,9 @@ void Mesh_t::ITask() {
 
     if(EvtMsk & EVTMSK_MESH_NEW_CYC) INewCycle();
 
-    else if(EvtMsk & EVTMSK_MESH_RX_END) IUpdateTimer();
+    if(EvtMsk & EVTMSK_MESH_RX_END) IUpdateTimer();
 
-    else if(EvtMsk & EVTMSK_MESH_PKR_HDL) IPktHandler();
+    if(EvtMsk & EVTMSK_MESH_PKR_HDL) IPktHandler();
 }
 
 #if 1 // ==== Inner functions ====

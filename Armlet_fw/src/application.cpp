@@ -788,6 +788,7 @@ void App_t::OnUartCmd(Cmd_t *PCmd) {
 
     else if(PCmd->NameIs("#Boot")) {
         Uart.Printf("\rDFU request");
+        // Setup TIMER
         Bootloader.dfuJumpIn(wdg_ON);
     }
 
