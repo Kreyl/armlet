@@ -139,7 +139,7 @@ struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
 //#define SI_PROJECT 14
 void InitArrayOfUserIntentions()
 {
-    for(int i=0;i<reasons_number;i++)
+    for(int i=0;i<NUMBER_OF_REASONS;i++)
     {
          if(strcmp(reasons[i].name,"murder")==0)
              ArrayOfUserIntentions[SI_MURDER].reason_indx=i;
@@ -181,7 +181,7 @@ void InitArrayOfUserIntentions()
     for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
     {
         if(ArrayOfUserIntentions[i].reason_indx<0)
-            Uart.Printf("CRITICAL ERROR User intention not inited %d , rn %d !!!!\r",i,reasons_number);
+            Uart.Printf("CRITICAL ERROR User intention not inited %d , rn %d !!!!\r",i,NUMBER_OF_REASONS);
     }
     Uart.Printf("InitArrayOfUserIntentions done\r");
 }
@@ -280,7 +280,7 @@ void GlobalStopCalculationSupport::OnNewSec()
         }
         if(timer==draka_fight_length)
         {
-            for(int i=0;i<reasons_number;i++)
+            for(int i=0;i<NUMBER_OF_REASONS;i++)
                  if(strcmp(reasons[i].name,"heartbeat")==0)
                  {
                      PlayNewEmo(reasons[i].eID,7,true);

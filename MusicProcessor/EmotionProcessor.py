@@ -248,11 +248,13 @@ REASON_H_NODE = '#define REASON_%s%s %2d'
 
 NO_PARENT = 'ROOT'
 
-RESERVED_REASON = 'r%03d'
+RESERVED_REASON = 'R%03d'
 
-FOREST_REASON = 'forest%02d'
+FOREST_REASON = 'F%s%02d'
 
-MIST_REASON = 'mist%02d'
+FOREST_ALL_LIMIT = (FOREST_ID_START + FOREST_ID_END) // 2
+
+MIST_REASON = 'M%02d'
 
 EMOTION_FIX_REASON = 'x%s'
 
@@ -366,8 +368,8 @@ def processIntentions(emotions, fileName = getFileName(INTENTIONS_CSV)):
 def processCharacters(emotions, fileName = getFileName(CHARACTERS_CSV)):
     reasons = []
     for row in readCSV(fileName):
-        assert len(row) == 8, "Bad characters file format"
-        (rid, reason, _longName, _power, _kill, _killLength, _addiction, emotion) = row
+        assert len(row) == 9, "Bad characters file format"
+        (rid, reason, _longName, _power, _kill, _killLength, _addiction, emotion, _hasMusic) = row
         emotion = emotion.strip()
         addReason(reasons, int(rid), reason, CHARACTER_WEIGHT if emotion else 0, 0, getEmotion(emotions, emotion) if emotion else 0, emotion)
     assert len(reasons) <= len(CHARACTER_IDS)
@@ -377,7 +379,7 @@ def processReasons(emotions):
     def reserveReason(rid):
         return (rid, RESERVED_REASON % rid, RESERVED_WEIGHT, 0, emotions[WRONG], WRONG) # ToDo: Default reserve to fon?
     def forestReason(rid):
-        return (rid, FOREST_REASON % rid, FOREST_WEIGHT, 0, emotions[LES], LES)
+        return (rid, FOREST_REASON % ('A' if rid <= FOREST_ALL_LIMIT else 'B' if rid % 2 == 0 else 'C', rid), FOREST_WEIGHT, 0, emotions[LES], LES)
     def mistReason(rid):
         return (rid, MIST_REASON % rid, MIST_WEIGHT, 0, emotions[TUMAN], TUMAN)
     def emotionFixReason(eid, emotion):
