@@ -221,6 +221,7 @@ struct IntentionReduceData SRD=
 {
         -1,
         -1,
+        -1,
         false
 };
 
@@ -609,21 +610,25 @@ void CallReasonSuccess(int user_reason_id)
 void ReasonAgeModifyChangeMelody()
 {
     //если нет резона уменьшеного - задать этот и уменьшить.
-    //если есть резон, этот - еще уменьшить
-    //если есть резон, но уже другой - задать этот заново
+
+
     if(SRD.reduced_reason_id==-1)
     {
         SRD.reduced_reason_id=SICD.last_intention_index_winner;
         SRD.weight_reduced=1;
         SRD.is_reason_changed=false;
     }
-    else if(SRD.reduced_reason_id==SICD.last_intention_index_winner)
-        SRD.weight_reduced+=AGE_WEIGHT_SCALE_REDUCE;
-    else//??? вроде ок, на свежую голову перечитать код
+    else
     {
-        SRD.reduced_reason_id=SICD.last_intention_index_winner;
-        SRD.weight_reduced=1;
-        SRD.is_reason_changed=false;
+        if(SRD.reduced_reason_id==SICD.last_intention_index_winner) //если есть резон, этот - еще уменьшить
+            SRD.weight_reduced+=AGE_WEIGHT_SCALE_REDUCE;
+        else//если есть резон, но уже другой - задать этот заново
+        {
+            SRD.reduced_reason_id=SICD.last_intention_index_winner;
+            SRD.overthrower_reason_id=-1;
+            SRD.weight_reduced=AGE_WEIGHT_SCALE_REDUCE;
+            SRD.is_reason_changed=false;
+        }
     }
     if(SRD.weight_reduced>AGE_MAX_WEIGHT_REDUCE)
         SRD.weight_reduced=AGE_MAX_WEIGHT_REDUCE;

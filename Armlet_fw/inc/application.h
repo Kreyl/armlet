@@ -70,9 +70,9 @@ public:
     void OnUartCmd(Cmd_t *PCmd);
 #endif
     char BuffStr[SD_STRING_SZ];
-    char reasonstr[32];
-    char emostr[32];
-    char toiintstr[8];
+    char reasonstr[SD_STRING_SZ];
+    char emostr[SD_STRING_SZ];
+    char toiintstr[SD_STRING_SZ];
     int on_run;
 };
 

@@ -117,6 +117,7 @@ typedef struct GlobalStopCalculationSupport
 typedef struct IntentionReduceData
 {
     int reduced_reason_id;
+    int overthrower_reason_id;
     int weight_reduced;
     bool is_reason_changed;
 }
