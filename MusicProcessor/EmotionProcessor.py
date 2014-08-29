@@ -368,8 +368,8 @@ def processIntentions(emotions, fileName = getFileName(INTENTIONS_CSV)):
 def processCharacters(emotions, fileName = getFileName(CHARACTERS_CSV)):
     reasons = []
     for row in readCSV(fileName):
-        assert len(row) == 8, "Bad characters file format"
-        (rid, reason, _longName, _power, _kill, _killLength, _addiction, emotion) = row
+        assert len(row) == 9, "Bad characters file format"
+        (rid, reason, _longName, _power, _kill, _killLength, _addiction, emotion, _hasMusic) = row
         emotion = emotion.strip()
         addReason(reasons, int(rid), reason, CHARACTER_WEIGHT if emotion else 0, 0, getEmotion(emotions, emotion) if emotion else 0, emotion)
     assert len(reasons) <= len(CHARACTER_IDS)
