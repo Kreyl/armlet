@@ -573,16 +573,15 @@ void App_t::LoadCharacterSettings()
     SD.iniReadInt32("character", "readyToKillInSeconds", "settings.ini", &rk);
     SD.iniReadInt32("character", "readyToKillForMinutes", "settings.ini", &rkt);
 
-    //Готовность к убийству, определяет, насколько быстро у человека начинает звучат музыка убийства, от 1 до 9, 1 - медленно, 9 - сразу, у среднего человека - 3.
-
-    //Продолжительность готовности к убийству, определяет, насколько долго у человека играет музыка убийства, от 1 до 9, 1 - совсем немного (10 секунд?), 9 - долго (полчаса?), у среднего человека - 5.
     WriteDrakaTimeFromPower(pwr);//TODO test
-    WriteReadyToKillTimer(rkt*60);//TODO test
-    WriteRadyToKill(rk);//TODO test
+   // WriteReadyToKillTimer(rkt*60);//TODO test
+    WriteFrontTime(rk,SI_MURDER);//TODO test
+    WriteMidTime(rkt*60,SI_MURDER);//TODO test
+    WriteTailTime(rkt*60/5,SI_MURDER);//TODO test
     int32_t addict;
     SD.iniReadInt32("character", "addiction", "settings.ini", &addict);
     if(addict==1)
-        ArrayOfUserIntentions[SI_WEED].current_time=0;
+            ArrayOfUserIntentions[SI_WEED].current_time=0;
     if(addict==2)
             ArrayOfUserIntentions[SI_HER].current_time=0;
     if(addict==3)

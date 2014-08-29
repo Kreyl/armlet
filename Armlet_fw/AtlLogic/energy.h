@@ -32,6 +32,14 @@ public:
 
     //TODO - make it smoother!!!
     //increase value due to energy
+    int GetEnergyScaleValMoreDefault(int val_to_scale)
+    {
+        return val_to_scale*(ETS+ START_ENERGY)/ETS;
+    }
+    int GetEnergyScaleValLessDefault(int val_to_scale)
+    {
+        return val_to_scale*ETS/(ETS+START_ENERGY);
+    }
     int GetEnergyScaleValMore(int val_to_scale)
     {
         if(human_support>4)

@@ -176,8 +176,9 @@ void UserReasonFlagRecalc(int reason_id);
 void ReasonAgeModifyChangeMelody();
 
 void WriteDrakaTimeFromPower(int pwr_in);
-void WriteRadyToKill(int val_in);
-void WriteReadyToKillTimer(int val_in);
+void WriteFrontTime(int val_in,int array_indx);
+void WriteMidTime(int val_in,int array_indx);
+void WriteTailTime(int val_in,int array_indx);
 
 void OnGetTumanMessage();
 

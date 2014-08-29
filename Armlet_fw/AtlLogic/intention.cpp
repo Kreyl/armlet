@@ -15,6 +15,7 @@ int CurrentIntentionArraySize=2;
 #define DRAKA_STEP ((DRAKA_MAX_SEC-DRAKA_MIN_SEC)/10)
 int GetDrakaTime()
 {
+
     int static_char_timing= ArrayOfUserIntentions[SI_FIGHT].time_on_plateau; //[16-60]
     int energy_bonus= DRAKA_STEP*(Energy.GetEnergy()-START_ENERGY)/(MAX_ENERGY_LVL-MIN_ENERGY_LVL);
     int random_bonus=Random(DRAKA_STEP*2)-DRAKA_STEP;
@@ -31,21 +32,17 @@ void WriteDrakaTimeFromPower(int pwr_in)
 {
     ArrayOfUserIntentions[SI_FIGHT].time_on_plateau=DRAKA_MIN_SEC+pwr_in*DRAKA_STEP;
 }
-void WriteRadyToKill(int val_in)
+void WriteFrontTime(int val_in,int array_indx)
 {
-    int tmp_energy=Energy.GetEnergy();
-    Energy.SetEnergy(START_ENERGY);
-    ArrayOfUserIntentions[SI_FIGHT].time_to_plateau=Energy.GetEnergyScaleValMore(val_in);
-    Energy.SetEnergy(tmp_energy);
-
+    ArrayOfUserIntentions[array_indx].time_to_plateau=Energy.GetEnergyScaleValMoreDefault(val_in);
 }
-void WriteReadyToKillTimer(int val_in)
+void WriteMidTime(int val_in,int array_indx)
 {
-    int tmp_energy=Energy.GetEnergy();
-    Energy.SetEnergy(START_ENERGY);
-    ArrayOfUserIntentions[SI_FIGHT].time_on_plateau= Energy.GetEnergyScaleValLess(val_in);
-    ArrayOfUserIntentions[SI_FIGHT].time_after_plateau=Energy.GetEnergyScaleValLess(val_in)/5;
-    Energy.SetEnergy(tmp_energy);
+    ArrayOfUserIntentions[array_indx].time_on_plateau= Energy.GetEnergyScaleValLessDefault(val_in);
+}
+void WriteTailTime(int val_in,int array_indx)
+{
+    ArrayOfUserIntentions[array_indx].time_after_plateau=Energy.GetEnergyScaleValLessDefault(val_in);
 }
 void OnGetTumanMessage()
 {
@@ -111,26 +108,42 @@ char * p_int_name;//button name if available
 
 #endif
 
-
-
+//TEST VALUES
+//{-1,25,30,30,30,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_MURDER)},//murder 0
+//{-1,25,1,30,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_CREATION)},//creation 1
+//{-1,25,1,30,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_DESTR)},//destruction 2
+//{-1,250,1,20,15,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_SEX)},//sex 3
+//{-1,250,1,60,120,-1,false,0,PROCESS_FIGHT,const_cast<char *> (RNAME_FIGHT)},//fight 4
+//{-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 5 weed
+//{-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 6 heroin
+//{-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 7 lsd
+//{-1,250,1200,2000,400,-1,false,0,PROCESS_KRAYK,nullptr},//narco 8 krayk
+//{-1,250,1200,2000,400,-1,false,0,PROCESS_DEATH,const_cast<char *> (RNAME_DEATH)},//death 9
+//{-1,250,1200,2000,400,-1,false,0,PROCESS_MANIAC,nullptr},//maniac 10
+//{-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//tuman 11
+//{-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//strah 12
+//{-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mSource 13
+//{-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mProject 14
+//{-1,250,1200,2000,400,-1,false,0,PROCESS_LOMKA,nullptr},//narco 15 lomka
 //STATIC ARRAY, inits inside, all external are in InitArrayOfUserIntentions
 struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
-        {-1,25,30,30,30,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_MURDER)},//murder 0
-        {-1,25,1,30,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_CREATION)},//creation 1
-        {-1,25,1,30,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_DESTR)},//destruction 2
-        {-1,250,1,20,15,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_SEX)},//sex 3
-        {-1,250,1,60,120,-1,false,0,PROCESS_FIGHT,const_cast<char *> (RNAME_FIGHT)},//fight 4
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 5 weed
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 6 heroin
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 7 lsd
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_KRAYK,nullptr},//narco 8 krayk
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_DEATH,const_cast<char *> (RNAME_DEATH)},//death 9
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_MANIAC,nullptr},//maniac 10
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//tuman 11
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//strah 12
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mSource 13
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mProject 14
-        {-1,250,1200,2000,400,-1,false,0,PROCESS_LOMKA,nullptr},//narco 15 lomka
+        {-1,-1,-1,-1,-1,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_MURDER)},//murder 0     INITED
+        {-1,-1,-1,-1,-1,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_CREATION)},//creation 1     INITED
+        {-1,-1,-1,-1,-1,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_DESTR)},//destruction 2     INITED
+        {-1,-1,-1,-1,-1,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_SEX)},//sex 3     INITED
+        {-1,-1,-1,-1,-1,-1,false,0,PROCESS_FIGHT,const_cast<char *> (RNAME_FIGHT)},//fight 4 generally used only time on plateau,others not used atexternal pipeline
+        //TODO
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 5 weed     INITED
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 6 heroin     INITED
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 7 lsd     INITED
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_KRAYK,nullptr},//narco 8 krayk
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_DEATH,const_cast<char *> (RNAME_DEATH)},//death 9
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_MANIAC,nullptr},//maniac 10
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//tuman 11
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//strah 12
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mSource 13
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mProject 14
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_LOMKA,nullptr},//narco 15 lomka
 };
 //#define SI_MURDER 0
 //#define SI_CREATION 1
@@ -178,7 +191,41 @@ void InitArrayOfUserIntentions()
     {
         if(ArrayOfUserIntentions[i].reason_indx<0)
             Uart.Printf("CRITICAL ERROR User intention not inited %d , rn %d !!!!\r",i,NUMBER_OF_REASONS);
+        else//переносим вес в мощность сигнала
+        {
+            ArrayOfUserIntentions[i].power256_plateau=reasons[ArrayOfUserIntentions[i].reason_indx].weight;
+            reasons[ArrayOfUserIntentions[i].reason_indx].weight=0;
+            //инициализируем хвост!
+            WriteTailTime(300,i);
+        }
     }
+    //now data!
+    WriteFrontTime(2,SI_SEX);
+    WriteMidTime(240,SI_SEX);
+
+    WriteFrontTime(600,SI_CREATION);
+    WriteMidTime(600,SI_CREATION);
+
+    WriteFrontTime(600,SI_DESTRUCTION);
+    WriteMidTime(600,SI_DESTRUCTION);
+
+    WriteFrontTime(300,SI_WEED);
+    WriteMidTime(600,SI_WEED);
+
+    WriteFrontTime(300,SI_HER);
+    WriteMidTime(600,SI_HER);
+
+    WriteFrontTime(3600*5,SI_WITHDRAWAL);
+    //TODO mid time!
+
+    WriteFrontTime(7*60,SI_LSD);
+    WriteMidTime(25*60,SI_LSD);
+
+
+    //ArrayOfUserIntentions[SI_SEX].time_to_plateau
+   // ArrayOfUserIntentions[SI_SEX].time_on_plateau
+    //ArrayOfUserIntentions[SI_SEX].time_after_plateau
+
     Uart.Printf("InitArrayOfUserIntentions done\r");
 }
 
