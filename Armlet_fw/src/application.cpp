@@ -43,8 +43,8 @@ App_t App;
 #define PILLTYPEHER 3
 //============================csv dirs==========================================
 static const char* FDirList2[] = {
-        "",
-        "common",
+        "/",
+
 };
 
 MusList_t CSVList = {
@@ -479,8 +479,10 @@ void App_t::Init() {
 
     Time.Init();
     Time.Reset();
-    char *S = nullptr;
-    SD.GetNthFileByPrefix(&MusList,"character", 1, &S);
+    char *S = nullptr;//character_HWilliams.csv
+    //char *S = "character_HWilliams.csv";//character_HWilliams.csv
+    SD.GetNthFileByPrefix(&CSVList,"character_", 1, &S);
+    Uart.Printf("\r App_t::Init() file s %s",S);
     ParseCsvFileToEmotions(S);
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
@@ -567,15 +569,18 @@ void App_t::LoadCharacterSettings()
     //убийство хранится в userintentions   readyToKill = ширина плато*Energymoddecreased(default_energy)
     //убийство хранится в userintentions   readyToKill =Time ширина плато*Energymodincreased(default_energy)
     int32_t pwr,rk,rkt;
-    SD.iniReadInt32("character", "power", "settings.ini", &pwr);//draka
-    SD.iniReadInt32("character", "readyToKill", "settings.ini", &rk);
-    SD.iniReadInt32("character", "readyToKillTime", "settings.ini", &rkt);
+    SD.iniReadInt32("character", "fightPower", "settings.ini", &pwr);//draka
+    SD.iniReadInt32("character", "readyToKillInSeconds", "settings.ini", &rk);
+    SD.iniReadInt32("character", "readyToKillForMinutes", "settings.ini", &rkt);
 
+    //Готовность к убийству, определяет, насколько быстро у человека начинает звучат музыка убийства, от 1 до 9, 1 - медленно, 9 - сразу, у среднего человека - 3.
+
+    //Продолжительность готовности к убийству, определяет, насколько долго у человека играет музыка убийства, от 1 до 9, 1 - совсем немного (10 секунд?), 9 - долго (полчаса?), у среднего человека - 5.
     WriteDrakaTimeFromPower(pwr);//TODO test
-    WriteReadyToKillTimer(rkt);//TODO test
+    WriteReadyToKillTimer(rkt*60);//TODO test
     WriteRadyToKill(rk);//TODO test
     int32_t addict;
-    SD.iniReadInt32("character", "addict", "settings.ini", &addict);
+    SD.iniReadInt32("character", "addiction", "settings.ini", &addict);
     if(addict==1)
         ArrayOfUserIntentions[SI_WEED].current_time=0;
     if(addict==2)
@@ -668,19 +673,23 @@ void App_t::WriteInentionStringToData(char * int_name, int int_val, char * emo_n
         int_val=0;
     if(int_val>256)
         int_val=256;
+
     for(int i=0;i<NUMBER_OF_REASONS;i++)
         if(strcmp(reasons[i].name,int_name)==0)
         {reason_id=i;break;}
+
     int emo_id=-1;
     //emotions_number
     for(int i=0;i<NUMBER_OF_EMOTIONS;i++)
         if(strcmp(emotions[i].name,emo_name)==0)
             emo_id=i;
+
     if(reason_id>=0 && emo_id>=0)
     {
         reasons[reason_id].weight=int_val;
         reasons[reason_id].eID=emo_id;
-        Uart.Printf("\r App_t::WriteInentionStringToData  connect, reason_name=%s, emo_name=%s ",int_name,emo_name);
+
+        Uart.Printf("\r App_t::WriteInentionStringToData  connect, reason_name=%s, emo_name=%s ,r_id %d",int_name,emo_name,reason_id);
     }
     else
         Uart.Printf("\r App_t::WriteInentionStringToData Fail to connect, reason_name=%s, emo_name=%s ",int_name,emo_name);
@@ -688,8 +697,7 @@ void App_t::WriteInentionStringToData(char * int_name, int int_val, char * emo_n
 }
 uint8_t App_t::ParseCsvFileToEmotions(const char* filename)
 {
-
-    Uart.Printf("\rParseCsvFileToEmotions beg\r");
+  //  Uart.Printf("\rParseCsvFileToEmotions filename %S\r",filename);
     FRESULT rslt;
     FIL file;
         // Open file
@@ -699,7 +707,6 @@ uint8_t App_t::ParseCsvFileToEmotions(const char* filename)
             else Uart.Printf("\r%S: openFile error: %u", filename, rslt);
             return FAILURE;
         }
-
         // Check if zero file
         if(file.fsize == 0) {
             f_close(&file);
@@ -709,13 +716,14 @@ uint8_t App_t::ParseCsvFileToEmotions(const char* filename)
       //  strcpy(toiintstr,"aaaaaaa");
       //  strcpy(reasonstr,"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
       //  strcpy(emostr,"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-
         //till file end
+
         while(f_gets(BuffStr, SD_STRING_SZ, &file) != nullptr)
         {
 
             if(strncmp(BuffStr,"#",1)==0)
                 continue;
+
             int sep1=-1,sep2=-1;
             int strlen=0;
             TCHAR c,*p = BuffStr;
@@ -723,7 +731,7 @@ uint8_t App_t::ParseCsvFileToEmotions(const char* filename)
             for(int i=0;i<SD_STRING_SZ;i++)
             {
                 c=BuffStr[i];
-                if(c=='\n' || c=='\r' )
+                if(c=='\n' || c=='\r' ||c== '\0')
                     break;
                 else
                     strlen++;
@@ -732,22 +740,28 @@ uint8_t App_t::ParseCsvFileToEmotions(const char* filename)
                 if(sep1!=-1 &&c==CSV_SEPARATOR_CHAR)
                     sep2=i;
             }
-
+#if 1
             if(sep1==0 ||sep1==sep2-1||sep2==strlen-1)
                 continue;
             strncpy(reasonstr,p,sep1);
-
             reasonstr[sep1]='\0';
 
+           // Uart.Printf("\rParseCsvFileToEmotions strncpy2 sep1+1 !%d! sep2-sep1-1 !%d!",sep1+1,sep2-sep1-1);
+
+            //ЭТА СТРОКА strcpy ВЫЗЫВАЕТ 20:35:40.623> stack overflow @idle если на входе character_HWilliams.csv
+            //результат работы - нормальный.
             strncpy(toiintstr,p+sep1+1,sep2-sep1-1);
             toiintstr[sep2-sep1-1]='\0';
+
 
             strncpy(emostr,p+sep2+1,strlen-sep2-1);
             emostr[strlen-sep2-1]='\0';
 
-            int int_val;
+            int int_val=-1;
             int_val=strtol(toiintstr,NULL,10);
+            Uart.Printf("\rParseCsvFileToEmotions emoint !%d! ",int_val);
             WriteInentionStringToData(reasonstr,int_val,emostr);
+#endif
            // Uart.Printf("\rParseCsvFileToEmotions sep1 %d sep2 %d eol !%d!",sep1,sep2,strlen);
 #if 0
             //Uart.Printf("\rParseCsvFileToEmotions rstr !%s! toi !%s! emo !%s!",reasonstr,toiintstr,emostr);
@@ -756,6 +770,7 @@ uint8_t App_t::ParseCsvFileToEmotions(const char* filename)
             Uart.Printf("\rParseCsvFileToEmotions emo !%s! ",emostr);
             Uart.Printf("\rParseCsvFileToEmotions emoint !%d! ",int_val);
 #endif
+
         }
 
         Uart.Printf("\rParseCsvFileToEmotions end\r");
