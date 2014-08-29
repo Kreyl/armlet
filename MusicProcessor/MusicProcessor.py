@@ -48,10 +48,10 @@ INI_CONTENT = '''\
 id=%d
 
 [character]
-power=%d
-readyToKill=%d
-readyToKillTime=%d
-addict=%d
+fightPower=%d
+readyToKillInSeconds=%d
+readyToKillForMinutes=%d
+addiction=%d
 '''.replace('\r\n', '\n').replace('\n', '\r\n')
 
 CHARACTER_CSV = 'character.csv'
@@ -176,7 +176,7 @@ def checkResultMark(targetDir):
             errorText = f.read()
     return (bool(errorDate), max(okDate, errorDate), okNum, okSize, errorText)
 
-def processCharacter(name, number, power, kill, killLength, addiction, emotions, baseDir = '.', verifyFiles = False):
+def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyFiles = False):
     class ProcessException(Exception):
         pass
     def log(error, fileName, message):
@@ -217,7 +217,7 @@ def processCharacter(name, number, power, kill, killLength, addiction, emotions,
     # Creating settings.ini
     if number > 0:
         with open(join(armletDir, INI_FILE), 'wb') as f:
-            f.write(INI_CONTENT % (number, power, kill, killLength, addiction))
+            f.write(INI_CONTENT % ((number,) + otherFields[:-1]))
     # Processing character.csv
     characterFile = join(armletDir, CHARACTER_CSV)
     if isfile(characterFile):
@@ -368,8 +368,8 @@ def updateMusic(sourceDir = '.', verifyFiles = False):
     noMusicCharacters = []
     errorCharacters = []
     for d in characterDirs:
-        (number, _longName, power, kill, killLength, addiction) = characters.get(d, (-1, None, None, None, None, None))
-        (hasMusic, hasErrors) = processCharacter(d, number, power, kill, killLength, addiction, emotions, sourceDir, verifyFiles)
+        (number, _longName, otherFields) = characters.get(d, (-1, None, None))
+        (hasMusic, hasErrors) = processCharacter(d, number, otherFields, emotions, sourceDir, verifyFiles)
         if hasMusic:
             if not hasErrors:
                 okCharacters.append(d)
