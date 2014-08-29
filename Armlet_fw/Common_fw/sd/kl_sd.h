@@ -40,6 +40,7 @@
 struct MusList_t {
     uint32_t Cnt, N;
     const char** Dir;
+    void Reset() { N = 0; }
     uint8_t GetCurrentDir(char** PPDir) {
         if(N >= Cnt) return FAILURE;
         else {

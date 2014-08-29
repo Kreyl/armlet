@@ -212,11 +212,15 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs) {
     if(SRD.reduced_reason_id!=-1 && SRD.reduced_reason_id!=SICD.last_intention_index_winner)
     {
         if(SRD.is_reason_changed==false)
-            SRD.is_reason_changed=true;
-        else
         {
-            SRD.is_reason_changed=false;
+            SRD.is_reason_changed=true;//опознали смену музыки по новому резону. старый снижен, но еще не выключен
+            SRD.overthrower_reason_id=SICD.last_intention_index_winner;
+        }
+        else if(SICD.last_intention_index_winner != SRD.overthrower_reason_id)
+        {
+            SRD.is_reason_changed=false;// музыка поменялась второй раз - ок! теперь сбрасываем счетчик прошедших мелодий по несниженному резону - снова все резоны нормальные
             SRD.reduced_reason_id=-1;
+            SRD.overthrower_reason_id=-1;
             SRD.weight_reduced=0;
         }
 

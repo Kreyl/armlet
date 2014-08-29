@@ -56,13 +56,19 @@ void sd_t::Init() {
 FRESULT sd_t::PrepareToReadDirs(MusList_t *PList) {
     // Setup variables
     IPList = PList;
-    IPList->N = 0;
+    IPList->Reset();
     // Open first dir
     char* DirPath = nullptr;
     if(IPList->GetCurrentDir(&DirPath) == OK) {
-//        Uart.Printf("\r %S", DirPath);
-        int i = strlen(DirPath) + 1;        // } Put filename in middle of buffer,
-        FileInfo.lfname = &LongFileName[i]; // } saving space to copy path from beginning
+//        Uart.Printf("\rDir %S", DirPath);
+        // Put filename in middle of buffer, saving space to copy path from beginning
+        int i = strlen(DirPath);
+        // Check if root dir. Empty string allowed, too
+        if(i > 0) {
+            if((i == 1) and (*DirPath == '/' or *DirPath == '\\')) i = 0;
+            else i++;   // Reserve space for '/' at start of filename
+        }
+        FileInfo.lfname = &LongFileName[i];
         FileInfo.lfsize = MAX_NAME_LEN - i;
         return f_opendir(&Directory, DirPath); // Try to open the folder
     }
@@ -78,8 +84,13 @@ FRESULT sd_t::GetNext(char** PPName) {
             if(IPList == nullptr) return FR_INVALID_OBJECT;
             char* DirPath = nullptr;
             if(IPList->GetNextDir(&DirPath) == OK) {
-//                Uart.Printf("\r %S", DirPath);
-                int i = strlen(DirPath) + 1;
+//                Uart.Printf("\rDir %S", DirPath);
+                int i = strlen(DirPath);
+                // Check if root dir. Empty string allowed, too
+                if(i > 0) {
+                    if((i == 1) and (*DirPath == '/' or *DirPath == '\\')) i = 0;
+                    else i++;   // Reserve space for '/' at start of filename
+                }
                 FileInfo.lfname = &LongFileName[i];
                 FileInfo.lfsize = MAX_NAME_LEN - i;
                 r = f_opendir(&Directory, DirPath); // Try to open the folder
@@ -119,7 +130,7 @@ uint8_t sd_t::GetNthFileByPrefix(MusList_t* PList, const char* Prefix, uint32_t 
             else N--;
         } // if prefix
     } // while
-    Uart.Printf("\nGetNthFileByPrefix FALURE");
+//    Uart.Printf("\rFilesNotFound");
     return FAILURE;
 }
 #endif
