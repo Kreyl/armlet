@@ -320,7 +320,7 @@ void Init_emotionTreeMusicNode() {
                 emotions[emo_id].numTracks++;
                // Uart.Printf("\rFilename: %S, emo id %d, NumTracks %d", S,emo_id, emotions[emo_id].numTracks);
                 }
-            else
+           // else
            // Uart.Printf("\rFilename: %S, emo id %d", S,emo_id);
         } // if GetNext
     } // if PrepareToReadDirs

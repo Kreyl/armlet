@@ -143,6 +143,7 @@ typedef struct SeekRecentlyPlayedFilesEmo
 }SeekRecentlyPlayedFilesEmo;
 
 extern struct SeekRecentlyPlayedFilesEmo SRPFESingleton;
+//extern struct GlobalStopCalculationSupport GSCS;
 
 void CalculateIntentionsRadioChange();
 //returns -1 if winner does not over switch limit, else return reason id

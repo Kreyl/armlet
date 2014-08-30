@@ -43,7 +43,7 @@ App_t App;
 #define PILLTYPEHER 3
 //============================csv dirs==========================================
 static const char* FDirList2[] = {
-        "/",
+        "common",
 
 };
 
@@ -273,7 +273,7 @@ static void OnPillConnect() {
 #endif
 
 // ================================= App thread ================================
-static WORKING_AREA(waAppThread, 1024);
+static WORKING_AREA(waAppThread, 8192);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
     chRegSetThreadName("App");
@@ -371,7 +371,9 @@ void App_t::Task() {
         if(EvtMsk & EVTMSK_NEWSECOND) {
 
 #ifndef SCREEN_SUSPEND_TIMER
-            AtlGui.AddSuspendScreenTimer(1);
+            //таймер выключения крана неактивенпока работает драка!
+            if(!(SICD.is_global_stop_active==true && GSCS.stop_reason_type==gsDraka))
+                AtlGui.AddSuspendScreenTimer(1);
 #endif
 
             //UPDATE user intentions timers
@@ -487,8 +489,14 @@ void App_t::Init() {
     Time.Init();
     Time.Reset();
     char *S = nullptr;//character_HWilliams.csv
-    //char *S = "character_HWilliams.csv";//character_HWilliams.csv
-    SD.GetNthFileByPrefix(&CSVList,"character_", 1, &S);
+   // char *S = "character_HWilliams.csv";//character_HWilliams.csv
+    SD.GetNthFileByPrefix(&CSVList,"character_", 0, &S);
+
+//    if(SD.PrepareToReadDirs(&CSVList) == FR_OK) {
+//        // Count files available
+//        char *S = nullptr;
+//        while(SD.GetNext(&S) == FR_OK)
+
     Uart.Printf("\r App_t::Init() file s %s",S);
     ParseCsvFileToEmotions(S);
     InitArrayOfUserIntentions();

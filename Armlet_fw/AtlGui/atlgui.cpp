@@ -141,6 +141,8 @@ void AtlGui_t::AddSuspendScreenTimer(int sec_to_add)
 {
     if(is_screen_suspended)
         return;
+
+
     if(is_suspend_timer_run)
     {
         this->screen_suspend_timer=0;
