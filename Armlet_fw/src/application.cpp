@@ -43,8 +43,7 @@ App_t App;
 #define PILLTYPEHER 3
 //============================csv dirs==========================================
 static const char* FDirList2[] = {
-        "common",
-
+        "/",
 };
 
 MusList_t CSVList = {
@@ -497,7 +496,7 @@ void App_t::Init() {
 //        char *S = nullptr;
 //        while(SD.GetNext(&S) == FR_OK)
 
-    Uart.Printf("\r App_t::Init() file s %s",S);
+    Uart.Printf("\rCharacter file: %s", S);
     ParseCsvFileToEmotions(S);
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
