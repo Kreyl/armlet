@@ -320,6 +320,13 @@ void App_t::Task() {
                     CurrentIntentionArraySize--;
                     continue;
                 }
+                //init tuman
+                if(RxTable.PTable->Row[i].State.Reason ==(uint16_t)REASON_MSOURCE || RxTable.PTable->Row[i].State.Reason== REASON_MPROJECT)
+                    OnGetTumanMessage();
+                //location reduce75
+               // if(LOCATION_ID_START
+               //         ()
+
                 ArrayOfIncomingIntentions[j].power256 = RxTable.PTable->Row[i].Level/*-70*/;
                 ArrayOfIncomingIntentions[j].reason_indx = RxTable.PTable->Row[i].ID;
                 //если входной резон пользователя - пользовательский, добавляем его в челподдержку
