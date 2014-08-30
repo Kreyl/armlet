@@ -47,13 +47,16 @@ void WriteTailTime(int val_in,int array_indx)
 void OnGetTumanMessage()
 {
     //если туман или страх активны - ничего не делать
-    if(ArrayOfUserIntentions[SI_TUMAN].current_time>=0 || ArrayOfUserIntentions[SI_STRAH].current_time>=0)
+    if(ArrayOfUserIntentions[SI_TUMAN].current_time>=0)// || ArrayOfUserIntentions[SI_STRAH].current_time>=0)
         return;
-    //включить туман и страх
-    ArrayOfUserIntentions[SI_TUMAN].current_time=0;
-    ArrayOfUserIntentions[SI_STRAH].current_time=0;
-
-
+    else if( ArrayOfUserIntentions[SI_STRAH].current_time>=0)
+        ArrayOfUserIntentions[SI_STRAH].current_time=0;
+    else
+    {
+        //включить туман и страх
+        ArrayOfUserIntentions[SI_TUMAN].current_time=0;
+        ArrayOfUserIntentions[SI_STRAH].current_time=0;
+    }
 }
 struct SeekRecentlyPlayedFilesEmo SRPFESingleton
 {

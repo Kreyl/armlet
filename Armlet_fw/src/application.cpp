@@ -323,6 +323,7 @@ void App_t::Task() {
                     continue;
                 }
                 //init tuman
+                Uart.Printf("\rREASON_ON_TABLE: %d indx %d id %d",RxTable.PTable->Row[i].State.Reason,i,RxTable.PTable->Row[i].ID);
                 if(RxTable.PTable->Row[i].State.Reason ==(uint16_t)REASON_MSOURCE || RxTable.PTable->Row[i].State.Reason== REASON_MPROJECT)
                     OnGetTumanMessage();
                 //location reduce75
