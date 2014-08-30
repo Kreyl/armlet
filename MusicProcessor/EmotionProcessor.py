@@ -54,9 +54,9 @@ EMOTIONS_CSV = 'Emotions.csv'
 LOCATIONS_CSV = 'Locations.csv'
 INTENTIONS_CSV = 'Intentions.csv'
 
-C_PATH = '../Armlet_fw/AtlLogic'
+C_PATH = '../Armlet_fw/SharedAtlLogic'
 
-C_TARGET = join(C_PATH, 'emotions.c')
+C_TARGET = join(C_PATH, 'emotions.cpp')
 
 H_TARGET = join(C_PATH, 'emotions.h')
 

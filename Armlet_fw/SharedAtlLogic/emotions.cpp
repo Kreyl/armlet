@@ -8,11 +8,10 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-30 22:18:18
+ * Generated at 2014-08-30 23:10:28
  */
 #include "emotions.h"
 
-#ifdef ARMLET
 // EIDs are indexes in this array.
 Emotion_t emotions[] = {
  /*  0 */ { "fon", 1, ROOT, -1, -1 },
@@ -413,6 +412,5 @@ Reason_t reasons[] = {
  /* 288 */ { "xProsvetlenie", 5, 0, 88 }, /* prosvetlenie */
 	// end of emotion fixes
 };
-#endif
 
 // End of emotions.c
