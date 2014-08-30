@@ -136,7 +136,7 @@ H_CONTENT = '''\
 //
 
 #define LOCATION_ID_START %d\t\t// start of stationary ID interval
-#define LOCATION_IN_GAME_IF_START %%d\t// start of in-game IDs
+#define LOCATION_IN_GAME_ID_START %%d\t// start of in-game IDs
 #define LOCATIONS_ID_END %d
 
 #define FOREST_ID_START %d
@@ -454,7 +454,7 @@ def writeH(emotions, reasons):
     reasonsTexts = tuple('\n'.join(hReason(rid, reason, maxReasonWidth - len(reason.replace("'", ''))) for (rid, reason, _weight, _age, _eid, _emotion) in reason) for reason in reasons)
     lastNotInGameID = tuple(rid for (rid, reason, _weight, _age, _eid, _emotion) in chain(*reasons) if reason == LAST_NOT_IN_GAME_REASON)[0]
     with open(getFileName(H_TARGET), 'wb') as f:
-        f.write(H_CONTENT % ((currentTime(), lastNotInGameID, ' ' * max(1, maxEmotionWidth - 9), len(emotions), emotionsText, ' ' * max(1, maxReasonWidth - 10), sum(len(r) for r in reasons)) + reasonsTexts))
+        f.write(H_CONTENT % ((currentTime(), lastNotInGameID + 1, ' ' * max(1, maxEmotionWidth - 9), len(emotions), emotionsText, ' ' * max(1, maxReasonWidth - 10), sum(len(r) for r in reasons)) + reasonsTexts))
 
 def writeCSV(*reasons):
     with open(getFileName(CSV_TARGET), 'wb') as f:
