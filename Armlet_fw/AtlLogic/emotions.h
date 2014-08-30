@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-30 02:12:45
+ * Generated at 2014-08-30 20:49:05
  */
 #ifndef EMOTIONS_H
 #define EMOTIONS_H
@@ -20,6 +20,7 @@
 //
 
 #define LOCATION_ID_START 1		// start of stationary ID interval
+#define LOCATION_IN_GAME_IF_START 2	// start of in-game IDs
 #define LOCATIONS_ID_END 20
 
 #define FOREST_ID_START 21

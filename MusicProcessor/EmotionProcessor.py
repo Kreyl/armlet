@@ -34,9 +34,9 @@ from Settings import MIST_ID_START, MIST_ID_END, MIST_IDS
 from Settings import CHARACTER_ID_START, CHARACTER_ID_END, CHARACTER_IDS
 from Settings import INTENTION_ID_START, INTENTION_ID_END, INTENTION_IDS
 from Settings import EMOTION_FIX_ID_START, EMOTION_FIX_ID_END, EMOTION_FIX_IDS
-from Settings import MAX_ID
+from Settings import MAX_ID, LAST_NOT_IN_GAME_REASON
 
-from Settings import CHARACTER_WEIGHT, DEATH_WEIGHT, FOREST_WEIGHT, MIST_WEIGHT, RESERVED_WEIGHT
+from Settings import CHARACTER_WEIGHT, DEATH_WEIGHT, FOREST_WEIGHT, RESERVED_WEIGHT
 
 from CharacterProcessor import CHARACTERS_CSV, currentTime, getFileName, updateCharacters
 
@@ -136,6 +136,7 @@ H_CONTENT = '''\
 //
 
 #define LOCATION_ID_START %d\t\t// start of stationary ID interval
+#define LOCATION_IN_GAME_IF_START %%d\t// start of in-game IDs
 #define LOCATIONS_ID_END %d
 
 #define FOREST_ID_START %d
@@ -267,6 +268,7 @@ def firstCapital(s):
 def width(array):
     return len(str((len(array) or 1) - 1))
 
+FON = convertEmotion(u'фон')
 WRONG = convertEmotion(u'неверно')
 MASTER = convertEmotion(u'мастерка')
 SILENCE = convertEmotion(u'тишина')
@@ -380,7 +382,7 @@ def processReasons(emotions):
     def forestReason(rid):
         return (rid, FOREST_REASON % ('A' if rid <= FOREST_ALL_ID_END else 'B' if rid % 2 == 0 else 'C', rid), FOREST_WEIGHT, 0, emotions[LES], LES)
     def mistReason(rid):
-        return (rid, MIST_REASON % rid, MIST_WEIGHT, 0, emotions[TUMAN], TUMAN)
+        return (rid, MIST_REASON % rid, 0, 0, emotions[FON], FON)
     def emotionFixReason(eid, emotion):
         return (eid + EMOTION_FIX_ID_START, EMOTION_FIX_REASON % firstCapital(emotion), EMOTION_FIX_WEIGHT, 0, eid, emotion)
     stuffing0 = (reserveReason(0),)
@@ -450,8 +452,9 @@ def writeH(emotions, reasons):
     emotionsText = '\n'.join(hEmotion(eid, emotion.replace("'", ''), maxEmotionWidth - len(emotion.replace("'", ''))) for (eid, _level, emotion, _parent) in emotions)
     maxReasonWidth = max(len(reason.replace("'", '')) for (_rid, reason, _weight, _age, _eid, _emotion) in chain(*reasons))
     reasonsTexts = tuple('\n'.join(hReason(rid, reason, maxReasonWidth - len(reason.replace("'", ''))) for (rid, reason, _weight, _age, _eid, _emotion) in reason) for reason in reasons)
+    lastNotInGameID = tuple(rid for (rid, reason, _weight, _age, _eid, _emotion) in chain(*reasons) if reason == LAST_NOT_IN_GAME_REASON)[0]
     with open(getFileName(H_TARGET), 'wb') as f:
-        f.write(H_CONTENT % ((currentTime(), ' ' * max(1, maxEmotionWidth - 9), len(emotions), emotionsText, ' ' * max(1, maxReasonWidth - 10), sum(len(r) for r in reasons)) + reasonsTexts))
+        f.write(H_CONTENT % ((currentTime(), lastNotInGameID, ' ' * max(1, maxEmotionWidth - 9), len(emotions), emotionsText, ' ' * max(1, maxReasonWidth - 10), sum(len(r) for r in reasons)) + reasonsTexts))
 
 def writeCSV(*reasons):
     with open(getFileName(CSV_TARGET), 'wb') as f:
