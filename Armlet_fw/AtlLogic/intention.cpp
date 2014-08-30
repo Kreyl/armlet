@@ -260,7 +260,8 @@ struct IntentionCalculationData SICD=
       -1,
       false,
       false, //global stop
-      false //is_everysec_calculation_active
+      false, //is_everysec_calculation_active
+      -1
         /* DO NOT DELETE
 		10,//int Intention_weight_cost;
 		4,//	int Signal_power_weight_cost;
@@ -331,9 +332,14 @@ void GlobalStopCalculationSupport::OnNewSec()
             draka_fight_length=GetDrakaTime();
             draka_heart_length= HEART_PLAYING_TIME_SEC;
             PlayNewEmo(reasons[ArrayOfUserIntentions[SI_FIGHT].reason_indx].eID,6,true);
+            SICD.last_reason_active_armlet=ArrayOfUserIntentions[SI_FIGHT].reason_indx;
+            //TODO проверить что сюда пишется!!
         }
         if(timer==draka_fight_length)
+        {
             PlayNewEmo(reasons[REASON_HEARTBEAT].eID,7,true);
+            SICD.last_reason_active_armlet=REASON_HEARTBEAT;
+        }
 
         if(timer==draka_fight_length+draka_heart_length)
         {

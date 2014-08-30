@@ -369,6 +369,7 @@ void App_t::Task() {
                         //check if it's user reason,if any, set already played flag
                         UserReasonFlagRecalc(SICD.last_intention_index_winner);//тут должэн стоять прошлый победитель!!
                         PlayNewEmo(reasons[reason_id].eID,3);
+                        SICD.last_reason_active_armlet=reason_id;
                     }
                 }
                 if(reason_id==-3) {
@@ -492,6 +493,9 @@ void App_t::UpdateLocation() {
         } // if location correct
     }
     if(LocationID) CurrInfo.Location = LocationID;
+    CurrInfo.Emotion=SICD.last_played_emo;
+    CurrInfo.Reason=SICD.last_reason_active_armlet;
+
 }
 void App_t::Init() {
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);

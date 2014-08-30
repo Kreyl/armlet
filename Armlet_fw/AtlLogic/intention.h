@@ -96,6 +96,7 @@ typedef struct IntentionCalculationData
     bool is_last_played_id_recent;//???
     bool is_global_stop_active;
     bool is_everysec_calculation_active;//???
+    int last_reason_active_armlet;// последний активный резон с точки зрения игрока
 }IntentionCalculationData;
 
 #define HEART_PLAYING_TIME_SEC 20
