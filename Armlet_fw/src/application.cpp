@@ -328,7 +328,7 @@ void App_t::Task() {
                 //location reduce75
 
                 if(
-                        (RxTable.PTable->Row[i].ID>=LOCATION_ID_START && RxTable.PTable->Row[i].ID<=LOCATIONS_ID_END) ||
+                        (RxTable.PTable->Row[i].ID>=LOCATION_ID_START && RxTable.PTable->Row[i].ID<=FOREST_ID_END) ||
                         (RxTable.PTable->Row[i].ID>=FOREST_ID_START && RxTable.PTable->Row[i].ID<=FOREST_ID_END)
                   )
                 {
@@ -484,7 +484,7 @@ void App_t::UpdateLocation() {
     uint16_t tmpID=0;
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
         tmpID = RxTable.PTable->Row[i].ID;
-        if( (tmpID >= LOCATION_ID_START && tmpID <= LOCATIONS_ID_END) ||
+        if( (tmpID >= LOCATION_ID_START && tmpID <= FOREST_ID_END) ||
             (tmpID >= EMOTION_FIX_ID_START && tmpID <= EMOTION_FIX_ID_END) )    {
             if(RxTable.PTable->Row[i].Level > SignalPwr) {
                 SignalPwr = RxTable.PTable->Row[i].Level;
