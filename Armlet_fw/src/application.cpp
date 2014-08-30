@@ -41,10 +41,12 @@ App_t App;
 #define PILLTYPEWEED 1
 #define PILLTYPELSD 2
 #define PILLTYPEHER 3
+
+#define MAX_RECIEVE_ARRAY_SIZE 100
+#define NUMBER_RECIEVE_ARRAYS 4
 //============================csv dirs==========================================
 static const char* FDirList2[] = {
         "/",
-
 };
 
 MusList_t CSVList = {
@@ -273,7 +275,7 @@ static void OnPillConnect() {
 #endif
 
 // ================================= App thread ================================
-static WORKING_AREA(waAppThread, 1024);
+static WORKING_AREA(waAppThread, 8192);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
     chRegSetThreadName("App");
@@ -320,6 +322,22 @@ void App_t::Task() {
                     CurrentIntentionArraySize--;
                     continue;
                 }
+                //init tuman
+                if(RxTable.PTable->Row[i].State.Reason ==(uint16_t)REASON_MSOURCE || RxTable.PTable->Row[i].State.Reason== REASON_MPROJECT)
+                    OnGetTumanMessage();
+                //location reduce75
+
+                if(
+                        (RxTable.PTable->Row[i].ID>=LOCATION_ID_START && RxTable.PTable->Row[i].ID<=LOCATIONS_ID_END) ||
+                        (RxTable.PTable->Row[i].ID>=FOREST_ID_START && RxTable.PTable->Row[i].ID<=FOREST_ID_END)
+                  )
+                {
+                    if(RxTable.PTable->Row[i].Level<75)
+                        ArrayOfIncomingIntentions[j].power256=0;
+                    else
+                        ArrayOfIncomingIntentions[j].power256=4*(RxTable.PTable->Row[i].Level-75);
+                }
+                else
                 ArrayOfIncomingIntentions[j].power256 = RxTable.PTable->Row[i].Level/*-70*/;
                 ArrayOfIncomingIntentions[j].reason_indx = RxTable.PTable->Row[i].ID;
                 //если входной резон пользовател€ - пользовательский, добавл€ем его в челподдержку
@@ -364,7 +382,9 @@ void App_t::Task() {
         if(EvtMsk & EVTMSK_NEWSECOND) {
 
 #ifndef SCREEN_SUSPEND_TIMER
-            AtlGui.AddSuspendScreenTimer(1);
+            //таймер выключени€ крана неактивенпока работает драка!
+            if(!(SICD.is_global_stop_active==true && GSCS.stop_reason_type==gsDraka))
+                AtlGui.AddSuspendScreenTimer(1);
 #endif
 
             //UPDATE user intentions timers
@@ -381,6 +401,12 @@ void App_t::Task() {
             }
             else
                 GSCS.OnNewSec();
+            if(Time.S_total % 300 ==0)
+            {
+                App.SaveData();
+                chThdSleepMilliseconds(250);
+            }
+
             if(Time.S_total % 6 ==0)
             {
                 AtlGui.RenderNameTimeBat();
@@ -480,9 +506,15 @@ void App_t::Init() {
     Time.Init();
     Time.Reset();
     char *S = nullptr;//character_HWilliams.csv
-    //char *S = "character_HWilliams.csv";//character_HWilliams.csv
-    SD.GetNthFileByPrefix(&CSVList,"character_", 1, &S);
-    Uart.Printf("\r App_t::Init() file s %s",S);
+   // char *S = "character_HWilliams.csv";//character_HWilliams.csv
+    SD.GetNthFileByPrefix(&CSVList,"character_", 0, &S);
+
+//    if(SD.PrepareToReadDirs(&CSVList) == FR_OK) {
+//        // Count files available
+//        char *S = nullptr;
+//        while(SD.GetNext(&S) == FR_OK)
+
+    Uart.Printf("\rCharacter file: %s", S);
     ParseCsvFileToEmotions(S);
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
@@ -573,16 +605,15 @@ void App_t::LoadCharacterSettings()
     SD.iniReadInt32("character", "readyToKillInSeconds", "settings.ini", &rk);
     SD.iniReadInt32("character", "readyToKillForMinutes", "settings.ini", &rkt);
 
-    //√отовность к убийству, определ€ет, насколько быстро у человека начинает звучат музыка убийства, от 1 до 9, 1 - медленно, 9 - сразу, у среднего человека - 3.
-
-    //ѕродолжительность готовности к убийству, определ€ет, насколько долго у человека играет музыка убийства, от 1 до 9, 1 - совсем немного (10 секунд?), 9 - долго (полчаса?), у среднего человека - 5.
     WriteDrakaTimeFromPower(pwr);//TODO test
-    WriteReadyToKillTimer(rkt*60);//TODO test
-    WriteRadyToKill(rk);//TODO test
+   // WriteReadyToKillTimer(rkt*60);//TODO test
+    WriteFrontTime(rk,SI_MURDER);//TODO test
+    WriteMidTime(rkt*60,SI_MURDER);//TODO test
+    WriteTailTime(rkt*60/5,SI_MURDER);//TODO test
     int32_t addict;
     SD.iniReadInt32("character", "addiction", "settings.ini", &addict);
     if(addict==1)
-        ArrayOfUserIntentions[SI_WEED].current_time=0;
+            ArrayOfUserIntentions[SI_WEED].current_time=0;
     if(addict==2)
             ArrayOfUserIntentions[SI_HER].current_time=0;
     if(addict==3)
