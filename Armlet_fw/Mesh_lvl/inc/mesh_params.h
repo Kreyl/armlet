@@ -41,7 +41,7 @@
 #define MESH_COUNT_OF_CYCLES    5     /* count of cycles in supercycle */
 
 #define CYCLE_TIME              (uint32_t)((SLOT_TIME * MAX_ABONENTS))
-#define S_CYCLE_TIME            (uint32_t)(CYCLE_TIME * COUNT_OF_CYCLES)
+#define S_CYCLE_TIME            (uint32_t)(CYCLE_TIME * MESH_COUNT_OF_CYCLES)
 
 /* Time specific */
 #define TIME_SZ                 5   //  "hh:mm\0"
