@@ -41,6 +41,9 @@ App_t App;
 #define PILLTYPEWEED 1
 #define PILLTYPELSD 2
 #define PILLTYPEHER 3
+
+#define MAX_RECIEVE_ARRAY_SIZE 100
+#define NUMBER_RECIEVE_ARRAYS 4
 //============================csv dirs==========================================
 static const char* FDirList2[] = {
         "common",
@@ -324,9 +327,18 @@ void App_t::Task() {
                 if(RxTable.PTable->Row[i].State.Reason ==(uint16_t)REASON_MSOURCE || RxTable.PTable->Row[i].State.Reason== REASON_MPROJECT)
                     OnGetTumanMessage();
                 //location reduce75
-               // if(LOCATION_ID_START
-               //         ()
 
+                if(
+                        (RxTable.PTable->Row[i].ID>=LOCATION_ID_START && RxTable.PTable->Row[i].ID<=LOCATIONS_ID_END) ||
+                        (RxTable.PTable->Row[i].ID>=FOREST_ID_START && RxTable.PTable->Row[i].ID<=FOREST_ID_END)
+                  )
+                {
+                    if(RxTable.PTable->Row[i].Level<75)
+                        ArrayOfIncomingIntentions[j].power256=0;
+                    else
+                        ArrayOfIncomingIntentions[j].power256=4*(RxTable.PTable->Row[i].Level-75);
+                }
+                else
                 ArrayOfIncomingIntentions[j].power256 = RxTable.PTable->Row[i].Level/*-70*/;
                 ArrayOfIncomingIntentions[j].reason_indx = RxTable.PTable->Row[i].ID;
                 //если входной резон пользователя - пользовательский, добавляем его в челподдержку
@@ -339,7 +351,6 @@ void App_t::Task() {
                         break;
                     }
                 }
-
                 j++;
             }
             //добавляем массив игроцких резонов в общий
@@ -390,6 +401,12 @@ void App_t::Task() {
             }
             else
                 GSCS.OnNewSec();
+            if(Time.S_total % 300 ==0)
+            {
+                App.SaveData();
+                chThdSleepMilliseconds(250);
+            }
+
             if(Time.S_total % 6 ==0)
             {
                 AtlGui.RenderNameTimeBat();
@@ -489,16 +506,22 @@ void App_t::Init() {
     Time.Init();
     Time.Reset();
     char *S = nullptr;//character_HWilliams.csv
-   // char *S = "character_HWilliams.csv";//character_HWilliams.csv
-    SD.GetNthFileByPrefix(&CSVList,"character_", 0, &S);
-
-//    if(SD.PrepareToReadDirs(&CSVList) == FR_OK) {
-//        // Count files available
-//        char *S = nullptr;
-//        while(SD.GetNext(&S) == FR_OK)
-
-    Uart.Printf("\r App_t::Init() file s %s",S);
+   // char *S = "common/character_HWilliams.csv";//character_HWilliams.csv
+   // SD.GetNthFileByPrefix(&CSVList,"character_", 0, &S);
+#if 1
+    if(SD.PrepareToReadDirs(&CSVList) == FR_OK) {
+      // Count files available
+        char *S = nullptr;
+        if(SD.GetNext(&S) == FR_OK)
+            if(SD.GetNext(&S) == FR_OK)
+        {
+            Uart.Printf("\r App_t::Init() file s %s",S);
+        }
+    }
+#endif
     ParseCsvFileToEmotions(S);
+
+
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
     LoadCharacterSettings();
