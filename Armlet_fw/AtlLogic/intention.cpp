@@ -125,7 +125,7 @@ char * p_int_name;//button name if available
 //{-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mSource 13
 //{-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mProject 14
 //{-1,250,1200,2000,400,-1,false,0,PROCESS_LOMKA,nullptr},//narco 15 lomka
-//STATIC ARRAY, inits inside, all external are in InitArrayOfUserIntentions
+//ARRAY, inits inside, all external are in InitArrayOfUserIntentions
 struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
         {-1,-1,-1,-1,-1,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_MURDER)},//murder 0     INITED
         {-1,-1,-1,-1,-1,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_CREATION)},//creation 1     INITED
@@ -221,6 +221,16 @@ void InitArrayOfUserIntentions()
     WriteFrontTime(7*60,SI_LSD);
     WriteMidTime(25*60,SI_LSD);
 
+    WriteFrontTime(0,SI_DEATH);
+    WriteFrontTime(0,SI_TUMAN);
+    WriteFrontTime(0,SI_STRAH);
+
+    WriteMidTime(60000,SI_DEATH);
+    WriteMidTime(60,SI_TUMAN);
+    WriteMidTime(600,SI_STRAH);
+
+    WriteTailTime(5,SI_TUMAN);
+    WriteTailTime(5,SI_STRAH);
 
     //ArrayOfUserIntentions[SI_SEX].time_to_plateau
    // ArrayOfUserIntentions[SI_SEX].time_on_plateau
