@@ -236,7 +236,7 @@ void InitArrayOfUserIntentions()
    // ArrayOfUserIntentions[SI_SEX].time_on_plateau
     //ArrayOfUserIntentions[SI_SEX].time_after_plateau
 
-    Uart.Printf("InitArrayOfUserIntentions done\r");
+    Uart.Printf("\rInitArrayOfUserIntentions done");
 }
 
 struct GlobalStopCalculationSupport GSCS=

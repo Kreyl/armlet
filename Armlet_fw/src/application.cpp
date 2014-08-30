@@ -46,8 +46,7 @@ App_t App;
 #define NUMBER_RECIEVE_ARRAYS 4
 //============================csv dirs==========================================
 static const char* FDirList2[] = {
-        "common",
-
+        "/",
 };
 
 MusList_t CSVList = {
@@ -351,6 +350,7 @@ void App_t::Task() {
                         break;
                     }
                 }
+
                 j++;
             }
             //добавляем массив игроцких резонов в общий
@@ -506,22 +506,16 @@ void App_t::Init() {
     Time.Init();
     Time.Reset();
     char *S = nullptr;//character_HWilliams.csv
-   // char *S = "common/character_HWilliams.csv";//character_HWilliams.csv
-   // SD.GetNthFileByPrefix(&CSVList,"character_", 0, &S);
-#if 1
-    if(SD.PrepareToReadDirs(&CSVList) == FR_OK) {
-      // Count files available
-        char *S = nullptr;
-        if(SD.GetNext(&S) == FR_OK)
-            if(SD.GetNext(&S) == FR_OK)
-        {
-            Uart.Printf("\r App_t::Init() file s %s",S);
-        }
-    }
-#endif
+   // char *S = "character_HWilliams.csv";//character_HWilliams.csv
+    SD.GetNthFileByPrefix(&CSVList,"character_", 0, &S);
+
+//    if(SD.PrepareToReadDirs(&CSVList) == FR_OK) {
+//        // Count files available
+//        char *S = nullptr;
+//        while(SD.GetNext(&S) == FR_OK)
+
+    Uart.Printf("\rCharacter file: %s", S);
     ParseCsvFileToEmotions(S);
-
-
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
     LoadCharacterSettings();

@@ -60,7 +60,7 @@ FRESULT sd_t::PrepareToReadDirs(MusList_t *PList) {
     // Open first dir
     char* DirPath = nullptr;
     if(IPList->GetCurrentDir(&DirPath) == OK) {
-//        Uart.Printf("\rDir %S", DirPath);
+//        Uart.Printf("\rDir1 %S", DirPath);
         // Put filename in middle of buffer, saving space to copy path from beginning
         int i = strlen(DirPath);
         // Check if root dir. Empty string allowed, too
@@ -84,7 +84,7 @@ FRESULT sd_t::GetNext(char** PPName) {
             if(IPList == nullptr) return FR_INVALID_OBJECT;
             char* DirPath = nullptr;
             if(IPList->GetNextDir(&DirPath) == OK) {
-//                Uart.Printf("\rDir %S", DirPath);
+//                Uart.Printf("\rDir2 %S", DirPath);
                 int i = strlen(DirPath);
                 // Check if root dir. Empty string allowed, too
                 if(i > 0) {
@@ -103,6 +103,7 @@ FRESULT sd_t::GetNext(char** PPName) {
             if(!(FileInfo.fattrib & AM_DIR)) break;
         }
     } // while
+//    Uart.Printf("\rFile: %S", *PPName);
     return FR_OK;
 }
 
@@ -112,6 +113,7 @@ uint8_t sd_t::GetNthFileByPrefix(MusList_t* PList, const char* Prefix, uint32_t 
     if(r != FR_OK) return r;
     char *S = nullptr;
     while(GetNext(&S) == FR_OK) {
+//        Uart.Printf("\rFile: %S", S);
         // Check if name begins with prefix
         if(strncmp(S, Prefix, Len) == 0) {  // Prefix found
             if(N == 0) {                    // Required number of files found
@@ -120,11 +122,16 @@ uint8_t sd_t::GetNthFileByPrefix(MusList_t* PList, const char* Prefix, uint32_t 
                 // Copy dir path
                 char *DirPath = nullptr;
                 IPList->GetCurrentDir(&DirPath);
-                strcpy(LongFileName, DirPath);
-                // Add '/' between path and name
-                int Len = strlen(DirPath);
-                LongFileName[Len] = '/';
+//                Uart.Printf("\rDir: %S", DirPath);
+                // Add '/' between path and name if not root
+                Len = strlen(DirPath);
+                // Check if root dir. Empty string allowed, too. Reserve space for '/' at start of filename
+                if((Len > 1) or (Len == 1 and *DirPath != '/' and *DirPath != '\\')) {
+                    strcpy(LongFileName, DirPath);
+                    LongFileName[Len] = '/';
+                }
                 *PPName = LongFileName; // return Path + Filename
+//                Uart.Printf("\rRslt: %S", *PPName);
                 return OK;
             }
             else N--;
