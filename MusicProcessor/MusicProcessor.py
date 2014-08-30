@@ -121,7 +121,7 @@ def deepGetFiles(dirName):
 def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion, artist, title, tail):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
-        if sourceAudio.duration_seconds < 5:
+        if sourceAudio.duration_seconds < 4:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
         if sourceAudio.duration_seconds < 60:
             print "\nWARNING: %s: Audio too short: %d seconds" % (encodeForConsole(basename(fullName)), sourceAudio.duration_seconds)
@@ -140,7 +140,7 @@ def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion
 def verifyFile(fullName):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
-        if sourceAudio.duration_seconds < 5:
+        if sourceAudio.duration_seconds < 4:
             return "Audio too short: %d seconds" % sourceAudio.duration_seconds
         if sourceAudio.duration_seconds < 60:
             print "\nWARNING: %s: Audio too short: %d seconds" % (encodeForConsole(basename(fullName)), sourceAudio.duration_seconds)

@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-30 20:49:05
+ * Generated at 2014-08-30 22:18:18
  */
 #include "emotions.h"
 
@@ -302,7 +302,7 @@ Reason_t reasons[] = {
  /* 180 */ { "murder", 120, 0, 43 },    /* ubijstvo */
  /* 181 */ { "creation", 120, 0, 75 },  /* sozidanie */
  /* 182 */ { "destruction", 120, 0, 41 }, /* razrushenie */
- /* 183 */ { "sex", 120, 0, 76 },       /* seks */
+ /* 183 */ { "sex", 130, 0, 76 },       /* seks */
  /* 184 */ { "fight", 0, 0, 42 },       /* draka */
  /* 185 */ { "heartbeat", 0, 0, 7 },    /* serdtsebienie */
  /* 186 */ { "addiction", 155, 0, 83 }, /* zavisimost' */
