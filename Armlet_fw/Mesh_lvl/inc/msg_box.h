@@ -8,7 +8,7 @@
 #ifndef MSG_BOX_H_
 #define MSG_BOX_H_
 
-#ifdef ARMLET
+#ifdef STM32F2XX
 #include "kl_lib_f2xx.h"
 #else
 #include "kl_lib_L15x.h"

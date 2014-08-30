@@ -18,7 +18,7 @@
 #define ARMLET
 #endif
 
-#ifdef ARMLET
+#ifdef STM32F2XX
 #include "kl_lib_f2xx.h"
 #else
 #include "kl_lib_L15x.h"
@@ -48,7 +48,7 @@
 #define TIME_SZ_LONG            8   // "hh:mm:ss\0"
 #define MESH_MS_IN_DAY          (uint32_t)86400000
 
-#ifdef ARMLET
+#ifdef STM32F2XX
 #define GET_RND_VALUE(Top)  (Random(chTimeNow()) % Top)
 #else
 #define GET_RND_VALUE(Top)    (rand() % (Top))

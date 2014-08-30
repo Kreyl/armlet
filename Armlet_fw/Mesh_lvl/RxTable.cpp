@@ -7,9 +7,7 @@
 
 #include "RxTable.h"
 
-#ifdef ARMLET
 RxTable_t RxTable;
-#endif
 
 void RxTable_t::ISwitchTable() {
     if(PCurrTbl == &ITbl[0]) {
@@ -27,16 +25,13 @@ RESULT RxTable_t::PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P) {
     chSemWait(&WriteFlag);
     RESULT rslt = OK;
     uint8_t Level = 0;
-    if(ID == App.ID) goto lblPutRxEnd;
+    if(ID == App.ID) goto lblPutRxEnd;  // Do not add self ID
+    if(PCurrTbl->Size >= RX_TABLE_SZ) goto lblPutRxEnd; // Table is full
     /* Get Level (in %) from RSSI (in dBm) */
     RSSI::Cut(RSSI, &RSSI);
     RSSI::ToPercent(RSSI, &Level);
 //    Uart.Printf("\r\n[RxTable.cpp] Put:%u,%d,%u", ID, RSSI, Level);
-    if(ID >= RX_TABLE_SZ) {
-        rslt = FAILURE;
-        goto lblPutRxEnd;
-    }
-    // Iterate IDs
+    // Iterate IDs to find same ID if any
     for(uint32_t i=0; i<PCurrTbl->Size; i++) {
         if(PCurrTbl->Row[i].ID == ID) {
             PCurrTbl->Row[i].Level   = MAX(PCurrTbl->Row[i].Level, Level);
@@ -59,9 +54,7 @@ RESULT RxTable_t::PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P) {
 void RxTable_t::SendEvtReady() {
     chSysLock();
     ISwitchTable();
-    if(IPThd != nullptr) chEvtSignalI(IPThd, RX_TABLE_READY_EVT);
-    else {
-//        Uart.Printf("[RxTable.cpp] IPthd = nullptr\r\n");
-    }
+    if(App.PThd != nullptr) chEvtSignalI(App.PThd, RX_TABLE_READY_EVT);
+    else Uart.Printf("\r[RxTable.cpp] IPthd = nullptr");
     chSysUnlock();
 }
