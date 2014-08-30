@@ -10,7 +10,7 @@
 
 #include "mesh_lvl.h"
 #include "console.h"
-#ifdef ARMLET
+#ifdef STM32F2XX
 #include "kl_lib_f2xx.h"
 #else
 #include "kl_lib_L15x.h"
