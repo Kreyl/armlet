@@ -12,13 +12,17 @@
 #include "cmd_uart.h"
 #include "mesh_params.h"
 #include "application.h"
-// IR
-#define MAX_IR_LUSTRA_CNT       50
+
 // Radio
 #define BOTTOM_TRSHHLD_RSSI     -100
 #define TOP_TRSHLD_RSSI         -35
 #define RX_TABLE_READY_EVT      EVTMSK_SENS_TABLE_READY
-#define RX_TABLE_SZ             (MAX_ABONENTS + MAX_IR_LUSTRA_CNT)
+
+#ifdef ARMLET
+#define RX_TABLE_SZ             MAX_ABONENTS
+#else
+#define RX_TABLE_SZ             200 // Lowered to fit in memory
+#endif
 
 #define RESULT                  uint8_t
 
@@ -36,6 +40,12 @@ struct RxTableRow_t {
 struct Table_t {
     uint32_t Size;
     RxTableRow_t Row[RX_TABLE_SZ];
+    void Print() {
+        Uart.Printf("\rTbl Sz=%u; ID, Level, Loc, Rea, Emo", Size);
+        for(uint32_t i=0; i<Size; i++) {
+            Uart.Printf("\r %u; %u;   %u; %u; %u", Row[i].ID, Row[i].Level, Row[i].State.Location, Row[i].State.Reason, Row[i].State.Emotion);
+        }
+    }
 };
 
 class RSSI {
@@ -56,15 +66,13 @@ public:
 class RxTable_t {
 private:
     Table_t ITbl[2], *PCurrTbl;
-    Thread *IPThd;
     Semaphore WriteFlag;
     void ISwitchTable();
 public:
-    RxTable_t(): PCurrTbl(&ITbl[0]), IPThd(nullptr), PTable(&ITbl[1]) {
+    RxTable_t(): PCurrTbl(&ITbl[0]), PTable(&ITbl[1]) {
         chSemInit(&WriteFlag, 1);
     }
     Table_t *PTable;
-    void RegisterAppThd(Thread *PThd) { IPThd = PThd; }
     RESULT PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P);
     void SendEvtReady();
 };

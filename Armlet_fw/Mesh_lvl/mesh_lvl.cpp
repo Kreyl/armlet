@@ -35,6 +35,7 @@ static void MeshLvlThread(void *arg) {
 }
 
 static WORKING_AREA(waMeshPktHandlerThd, 128);
+__attribute__ ((__noreturn__))
 static void MeshPktHandlerThd(void *arg) {
     chRegSetThreadName("MeshPktThd");
     while(1) {
@@ -121,11 +122,9 @@ void Mesh_t::IPktHandler(){
         int32_t CycleDiff = AbsCycle - MeshMsg.RadioPkt.SenderInfo.Mesh.CycleN;
         AlienTable.PutAlien(MeshMsg.RadioPkt.AlienID, CycleDiff, &MeshMsg.RadioPkt.AlienInfo);
 
-#ifdef ARMLET
         /*Put Information to RxTable */
         RxTable.PutRxInfo(MeshMsg.RadioPkt.SenderInfo.Mesh.SelfID, MeshMsg.RSSI, &MeshMsg.RadioPkt.SenderInfo.State);
         RxTable.PutRxInfo(MeshMsg.RadioPkt.AlienID, STATIONARY_MIN_LEVEL, &MeshMsg.RadioPkt.AlienInfo.State);
-#endif
 
         sender_mesh_t *pSM = &MeshMsg.RadioPkt.SenderInfo.Mesh;
         if( (pSM->TimeOwnerID < PriorityID) ||
@@ -143,9 +142,7 @@ void Mesh_t::IPktHandler(){
 }
 
 void Mesh_t::IUpdateTimer() {
-#ifdef ARMLET
     RxTable.SendEvtReady();
-#endif
     if(GetPrimaryPkt) {
         uint32_t timeNow = chTimeNow();
         while(*PTimeToWakeUp < timeNow) {
