@@ -13,6 +13,8 @@
 #ifndef EMOTIONS_H
 #define EMOTIONS_H
 
+#include "mesh_params.h"
+
 #define ROOT -1
 
 //
@@ -51,7 +53,9 @@ typedef struct Emotion {
     int lastPlayedTrack;
 } Emotion_t;
 
+#ifdef ARMLET
 extern Emotion_t emotions[];
+#endif
 
 #define NUMBER_OF_EMOTIONS         89
 
@@ -156,7 +160,9 @@ typedef struct Reason {
     int eID;
 } Reason_t;
 
+#ifdef ARMLET
 extern Reason_t reasons[];
+#endif
 
 #define NUMBER_OF_REASONS         289
 
