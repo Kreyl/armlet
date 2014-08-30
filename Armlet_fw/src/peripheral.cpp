@@ -15,7 +15,7 @@
 //PwrStatus_t PwrStatus;
 
 // ================================== Beep =====================================
-#define BEEP_TOP_VALUE   22
+#define BEEP_TOP_VALUE   45
 Beeper_t Beeper;
 // Timer callback
 void BeeperTmrCallback(void *p) {

@@ -14,7 +14,7 @@ sex,120,seks
 fight,0,draka
 heartbeat,0,serdtsebienie
 
-addiction,160,zavisimost'
+addiction,155,zavisimost'
 weed,160,sozidanie
 lsd,160,trip
 heroin,160,razrushenie
@@ -22,6 +22,7 @@ krayk,0,fon
 
 death,280,smert'
 
+mist,200,tuman
 fear,199,strah
 mSource,0,neverno
 mProject,0,neverno
