@@ -74,6 +74,13 @@ public:
     char emostr[SD_STRING_SZ];
     char toiintstr[SD_STRING_SZ];
     int on_run;
+
+    int32_t locationThreshold;
+    int32_t forestTheshold;
+    int32_t mistThreshold;
+    int32_t characterThreshold;
+    int32_t IRlevel;
+    int recalc_signal_pw_thr(int pw,int thr);
 };
 
 extern App_t App;
