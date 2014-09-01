@@ -332,16 +332,16 @@ void App_t::Task() {
                         (RxTable.PTable->Row[i].ID>=LOCATION_ID_START && RxTable.PTable->Row[i].ID<=LOCATIONS_ID_END) ||
                         (RxTable.PTable->Row[i].ID>=EMOTION_FIX_ID_START && RxTable.PTable->Row[i].ID<=EMOTION_FIX_ID_END)
                   )
-                        ArrayOfIncomingIntentions[j].power256=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->locationThreshold);//4*(RxTable.PTable->Row[i].Level-75);
+                        ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->locationThreshold);//4*(RxTable.PTable->Row[i].Level-75);
 
                 else if(RxTable.PTable->Row[i].ID>=FOREST_ID_START && RxTable.PTable->Row[i].ID<=FOREST_ID_END)
-                    ArrayOfIncomingIntentions[j].power256=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->forestTheshold);
+                    ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->forestTheshold);
                 else if(RxTable.PTable->Row[i].ID>=CHARACTER_ID_START && RxTable.PTable->Row[i].ID<=CHARACTER_ID_END)
-                    ArrayOfIncomingIntentions[j].power256=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->characterThreshold);
+                    ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->characterThreshold);
                 else if(RxTable.PTable->Row[i].ID>=MIST_ID_START && RxTable.PTable->Row[i].ID<=MIST_ID_END)
-                    ArrayOfIncomingIntentions[j].power256=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->mistThreshold);
+                    ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->mistThreshold);
                 else
-                ArrayOfIncomingIntentions[j].power256 = RxTable.PTable->Row[i].Level/*-70*/;
+                ArrayOfIncomingIntentions[j].power512 = RxTable.PTable->Row[i].Level/*-70*/;
                 ArrayOfIncomingIntentions[j].reason_indx = RxTable.PTable->Row[i].ID;
                 //если входной резон пользователя - пользовательский, добавляем его в челподдержку
                 for(int kk=0;kk<MAX_USER_INTENTIONS_ARRAY_SIZE;kk++)

@@ -52,17 +52,19 @@
 
 typedef struct IncomingIntentions {
 	int reason_indx;	//индекс из стандартного массива
-	int power256; //сила сигнала
+	int power512; //сила сигнала
 } IncomingIntentions;
 
 
 typedef struct UserIntentions {
     int reason_indx;    //индекс из стандартного массива
-    int power256_plateau; //[power256] сила сигнала наплато 0-256 если включено.
-    //на вводе - это интервалы состояния. в коде - интервалы от 0 времени! иначе не приводится :(
+    int power512_plateau; //[power512] сила сигнала наплато 0-512 если включено.
+
+    //ВНИМАНИЕ! на вводе - это интервалы состояния. в коде - интервалы от 0 времени! иначе не приводится :(
     int time_to_plateau;//[sec]
     int time_on_plateau;//sec
     int time_after_plateau;//[sec]
+
     int current_time;//[sec] -1 если не включено, 0,+int если включено -2 если является носителем зависимости
     //если уже музыка играла, true. - нужно для поддержки переподключений
     bool was_winning;
@@ -85,7 +87,7 @@ typedef struct IntentionCalculationData
 //структура для рассчета изменений по входящим намерениям,
 //TODO тут же тики по времени для намерений, если есть, потом сделать
 {
-	//formula: (IWC*Intention.weight1000+power256*SPWC)/Normalizer
+	//formula: (IWC*Intention.weight1000+power512*SPWC)/Normalizer
 	int Intention_weight_cost;
 	int Signal_power_weight_cost;
 	int Normalizer;
@@ -152,9 +154,7 @@ extern struct SeekRecentlyPlayedFilesEmo SRPFESingleton;
 void CalculateIntentionsRadioChange();
 //returns -1 if winner does not over switch limit, else return reason id
 
-//run through player recieved array of intentoins, and return its power if available, else -1;
-//obsolete,not used
-int GetPlayerReasonCurrentPower(int reason_id);
+bool UIIsONTail(int array_indx);
 
 int CalculateCurrentPowerOfPlayerReason(int array_indx, bool is_change=true); //считаеттекущую мощность позаданному стандартному алгоритму, if(is_change) - меняет состояние
 //Obsolete??

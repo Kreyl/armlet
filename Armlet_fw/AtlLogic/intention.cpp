@@ -34,15 +34,15 @@ void WriteDrakaTimeFromPower(int pwr_in)
 }
 void WriteFrontTime(int val_in,int array_indx)
 {
-    ArrayOfUserIntentions[array_indx].time_to_plateau=Energy.GetEnergyScaleValMoreDefault(val_in);
+    ArrayOfUserIntentions[array_indx].time_to_plateau=val_in;
 }
 void WriteMidTime(int val_in,int array_indx)
 {
-    ArrayOfUserIntentions[array_indx].time_on_plateau= Energy.GetEnergyScaleValLessDefault(val_in);
+    ArrayOfUserIntentions[array_indx].time_on_plateau= val_in;
 }
 void WriteTailTime(int val_in,int array_indx)
 {
-    ArrayOfUserIntentions[array_indx].time_after_plateau=Energy.GetEnergyScaleValLessDefault(val_in);
+    ArrayOfUserIntentions[array_indx].time_after_plateau=val_in;
 }
 void OnGetTumanMessage()
 {
@@ -97,7 +97,7 @@ void UserIntentions::TurnOn()
 #define RNAME_DEATH "\xd1\xec\xe5\xf0\xf2\xfc"
 
 int reason_indx;    //индекс из стандартного массива
-int power256_plateau; //[power256] сила сигнала наплато 0-256 если включено.
+int power512_plateau; //[power512] сила сигнала наплато 0-256 если включено.
 int time_to_plateau;//[sec]
 int time_on_plateau;//sec
 int time_after_plateau;//[sec]
@@ -196,7 +196,7 @@ void InitArrayOfUserIntentions()
             Uart.Printf("CRITICAL ERROR User intention not inited %d , rn %d !!!!\r",i,NUMBER_OF_REASONS);
         else//переносим вес в мощность сигнала
         {
-            ArrayOfUserIntentions[i].power256_plateau=reasons[ArrayOfUserIntentions[i].reason_indx].weight;
+            ArrayOfUserIntentions[i].power512_plateau=reasons[ArrayOfUserIntentions[i].reason_indx].weight;
             reasons[ArrayOfUserIntentions[i].reason_indx].weight=0;
             //инициализируем хвост!
             WriteTailTime(300,i);
@@ -239,10 +239,9 @@ void InitArrayOfUserIntentions()
     WriteMidTime(5,SI_SEX);
     WriteTailTime(20,SI_SEX);
 #endif
-    //ArrayOfUserIntentions[SI_SEX].time_to_plateau
-   // ArrayOfUserIntentions[SI_SEX].time_on_plateau
-    //ArrayOfUserIntentions[SI_SEX].time_after_plateau
-
+    for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
+        if(i!=SI_FIGHT)
+        ArrayOfUserIntentions[i].NormalizeToDefEnergy();
     Uart.Printf("\rInitArrayOfUserIntentions done");
 }
 
@@ -421,13 +420,13 @@ void CalculateIntentionsRadioChange() {
         }
 
         SICD.is_empty_fon=false;
-        Uart.Printf("\r\ninput reas_id=%d, power=%d", ArrayOfIncomingIntentions[0].reason_indx,  ArrayOfIncomingIntentions[0].power256);
+        Uart.Printf("\r\ninput reas_id=%d, power=%d", ArrayOfIncomingIntentions[0].reason_indx,  ArrayOfIncomingIntentions[0].power512);
 
         if(CurrentIntentionArraySize == 1) {
             if(SICD.last_intention_index_winner != ArrayOfIncomingIntentions[0].reason_indx) SICD.winning_integral=0;
 
-            SICD.winning_integral+=GetNotNormalizedIntegral(ArrayOfIncomingIntentions[0].power256,ArrayOfIncomingIntentions[0].reason_indx)/SICD.Normalizer;
-            SICD.last_intention_power_winner=ArrayOfIncomingIntentions[0].power256;//get current power!
+            SICD.winning_integral+=GetNotNormalizedIntegral(ArrayOfIncomingIntentions[0].power512,ArrayOfIncomingIntentions[0].reason_indx)/SICD.Normalizer;
+            SICD.last_intention_power_winner=ArrayOfIncomingIntentions[0].power512;//get current power!
             SICD.last_intention_index_winner=ArrayOfIncomingIntentions[0].reason_indx;
             return;
         }
@@ -445,7 +444,7 @@ void CalculateIntentionsRadioChange() {
         int current_reason_arr_winner_indx=-1;
         int current_incoming_winner_indx=-1;
         for(int i=0; i<CurrentIntentionArraySize; i++) {
-            currnotnormval = GetNotNormalizedIntegral(ArrayOfIncomingIntentions[i].power256,ArrayOfIncomingIntentions[i].reason_indx);
+            currnotnormval = GetNotNormalizedIntegral(ArrayOfIncomingIntentions[i].power512,ArrayOfIncomingIntentions[i].reason_indx);
             if(currnotnormval > maxnotnormval) {
                 maxnotnormval=currnotnormval;
                 current_reason_arr_winner_indx=ArrayOfIncomingIntentions[i].reason_indx;
@@ -460,7 +459,7 @@ void CalculateIntentionsRadioChange() {
         if(current_reason_arr_winner_indx == SICD.last_intention_index_winner) {
             for(int i=0; i<CurrentIntentionArraySize; i++) {
                 if(ArrayOfIncomingIntentions[i].reason_indx!=current_reason_arr_winner_indx) {
-                    currnotnormval2=GetNotNormalizedIntegral(ArrayOfIncomingIntentions[i].power256,ArrayOfIncomingIntentions[i].reason_indx);
+                    currnotnormval2=GetNotNormalizedIntegral(ArrayOfIncomingIntentions[i].power512,ArrayOfIncomingIntentions[i].reason_indx);
                     if(currnotnormval2>maxnotnormval2)
                             {
                                 maxnotnormval2=currnotnormval2;
@@ -470,14 +469,14 @@ void CalculateIntentionsRadioChange() {
                 }
             }
             if(current_reason_arr_winner_indx2<0) return;
-            SICD.winning_integral+=CalcWinIntegral(ArrayOfIncomingIntentions[current_incoming_winner_indx].power256,ArrayOfIncomingIntentions[current_incoming_winner_indx].reason_indx,
-                    ArrayOfIncomingIntentions[current_incoming_winner_indx2].power256,ArrayOfIncomingIntentions[current_incoming_winner_indx2].reason_indx);
-            SICD.last_intention_power_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].power256;
+            SICD.winning_integral+=CalcWinIntegral(ArrayOfIncomingIntentions[current_incoming_winner_indx].power512,ArrayOfIncomingIntentions[current_incoming_winner_indx].reason_indx,
+                    ArrayOfIncomingIntentions[current_incoming_winner_indx2].power512,ArrayOfIncomingIntentions[current_incoming_winner_indx2].reason_indx);
+            SICD.last_intention_power_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].power512;
             SICD.last_intention_index_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].reason_indx;
         }
         else {
-            SICD.winning_integral = GetNotNormalizedIntegral(ArrayOfIncomingIntentions[current_incoming_winner_indx].power256,ArrayOfIncomingIntentions[current_incoming_winner_indx].reason_indx)/SICD.Normalizer;
-            SICD.last_intention_power_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].power256;//get current power!
+            SICD.winning_integral = GetNotNormalizedIntegral(ArrayOfIncomingIntentions[current_incoming_winner_indx].power512,ArrayOfIncomingIntentions[current_incoming_winner_indx].reason_indx)/SICD.Normalizer;
+            SICD.last_intention_power_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].power512;//get current power!
             SICD.last_intention_index_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].reason_indx;
         }
         Uart.Printf("\r SICD.winning_integral %d, iw %d",SICD.winning_integral,SICD.last_intention_index_winner);
@@ -517,14 +516,14 @@ void PushPlayerReasonToArrayOfIntentions()
             int curr_power=CalculateCurrentPowerOfPlayerReason(i);
             if(curr_power>=0)
             {
-                if(curr_power>256)
-                    curr_power=256;
+                if(curr_power>512)
+                    curr_power=512;
                 //перезаписываем силу, если есть место в массиве!
                 //иначе предупреждение о переполнении
                    if(CurrentIntentionArraySize < MAX_INCOMING_INTENTIONS_ARRAY_SIZE)
                    {
                        //добавляем во входящие
-                       ArrayOfIncomingIntentions[CurrentIntentionArraySize].power256=curr_power;
+                       ArrayOfIncomingIntentions[CurrentIntentionArraySize].power512=curr_power;
                        ArrayOfIncomingIntentions[CurrentIntentionArraySize].reason_indx=ArrayOfUserIntentions[i].reason_indx;
                        CurrentIntentionArraySize++;
                    }
@@ -559,30 +558,24 @@ int MainCalculateReasons() {
     return -1;
 }
 
-
-int GetPlayerReasonCurrentPower(int reason_id)
-{
-    for(int i =0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
-    {
-        if(reason_id==ArrayOfUserIntentions[i].reason_indx)
-            return CalculateCurrentPowerOfPlayerReason(i);
-    }
-    return -1;
-    //search in last incoming array, where it's based??
-}
 int GetPersentage100(int curval,int maxval)
 {
     return (curval*100)/maxval;
 }
 void UserIntentions::NormalizeToDefEnergy()
 {
-    //Energy.GetEnergyScaleValLessDefault() F
-    //Energy.GetEnergyScaleValMoreDefault() L
     int etp=this->time_to_plateau;
     int eop= this->time_on_plateau;
     int eap=this->time_after_plateau;
-    int tp= Energy.GetEnergyScaleValMoreDefault(etp);
-    int op=Energy.GetEnergyScaleValLessDefault(etp+eop)-tp;
+    int int1=etp;
+    int int2=etp+eop;
+    int int3=etp+eop+eap;
+    int tp= Energy.GetEnergyScaleValMoreDefault(int1);
+    int op=Energy.GetEnergyScaleValLessDefault(int2);
+    int ap=Energy.GetEnergyScaleValLessDefault(int3);
+    this->time_to_plateau=tp;
+    this->time_on_plateau=op;
+    this->time_after_plateau=ap;
 
 }
 bool UIIsONTail(int array_indx)
@@ -591,8 +584,8 @@ bool UIIsONTail(int array_indx)
         return false;
     int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time);
     int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time);//<current_time
-    if(slower_time<ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau+ArrayOfUserIntentions[array_indx].time_after_plateau)// хвост не кончился [op-ap] notpassed
-        if(slower_time>=ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau)//уже были на плато [tp-op]pass
+    if(slower_time<ArrayOfUserIntentions[array_indx].time_after_plateau)// хвост не кончился [op-ap] notpassed
+        if(slower_time>=ArrayOfUserIntentions[array_indx].time_on_plateau)//уже были на плато [tp-op]pass
             if(faster_time>ArrayOfUserIntentions[array_indx].time_to_plateau) //[0-tp] pass
             return true;
     return false;
@@ -607,22 +600,16 @@ int CalculateCurrentPowerOfPlayerReason(int array_indx, bool is_change)
     int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time);//>current_time
     int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time);//<current_time
 
-    Uart.Printf("\r EN %d",Energy.GetEnergy());
-    Uart.Printf("\r FT %d LT %d,CT%d FLT %d, LFT%d",faster_time,slower_time, ArrayOfUserIntentions[array_indx].current_time,Energy.GetEnergyScaleValMore(slower_time),Energy.GetEnergyScaleValLess(faster_time));
+    Uart.Printf("\r EN %d tp%d OP%d AP%d",Energy.GetEnergy(),ArrayOfUserIntentions[array_indx].time_to_plateau,ArrayOfUserIntentions[array_indx].time_on_plateau,ArrayOfUserIntentions[array_indx].time_after_plateau);
+  //  Uart.Printf("\r FT %d LT %d,CT%d FLT %d, LFT%d",faster_time,slower_time, ArrayOfUserIntentions[array_indx].current_time,Energy.GetEnergyScaleValMore(slower_time),Energy.GetEnergyScaleValLess(faster_time));
     if(ArrayOfUserIntentions[array_indx].current_time>=0)
     {
         if(faster_time<ArrayOfUserIntentions[array_indx].time_to_plateau)//перед плато
-            return 0;// (ArrayOfUserIntentions[array_indx].power256_plateau*GetPersentage100(faster_time,ArrayOfUserIntentions[array_indx].time_to_plateau))/100;
-        if(slower_time<ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau)//на плато
-            return (ArrayOfUserIntentions[array_indx].power256_plateau);
-        if(slower_time<ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau+ArrayOfUserIntentions[array_indx].time_after_plateau)//после плато, на спуске
             return 0;
-//                    (ArrayOfUserIntentions[array_indx].power256_plateau *
-//                    GetPersentage100(
-//                            slower_time-ArrayOfUserIntentions[array_indx].time_to_plateau-ArrayOfUserIntentions[array_indx].time_on_plateau
-//                            ,ArrayOfUserIntentions[array_indx].time_after_plateau
-//                            )
-//                    )/100;
+        if(slower_time<ArrayOfUserIntentions[array_indx].time_on_plateau)//на плато
+            return (ArrayOfUserIntentions[array_indx].power512_plateau);
+        if(slower_time<ArrayOfUserIntentions[array_indx].time_after_plateau)//после плато, на спуске
+            return 0;
         else    //вышли за плато
         {//выключить резон??
             if(!is_change)
