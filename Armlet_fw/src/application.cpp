@@ -329,15 +329,17 @@ void App_t::Task() {
                 //location reduce75
 
                 if(
-                        (RxTable.PTable->Row[i].ID>=LOCATION_ID_START && RxTable.PTable->Row[i].ID<=FOREST_ID_END) ||
-                        (RxTable.PTable->Row[i].ID>=FOREST_ID_START && RxTable.PTable->Row[i].ID<=FOREST_ID_END)
+                        (RxTable.PTable->Row[i].ID>=LOCATION_ID_START && RxTable.PTable->Row[i].ID<=LOCATIONS_ID_END) ||
+                        (RxTable.PTable->Row[i].ID>=EMOTION_FIX_ID_START && RxTable.PTable->Row[i].ID<=EMOTION_FIX_ID_END)
                   )
-                {
-                    if(RxTable.PTable->Row[i].Level<75)
-                        ArrayOfIncomingIntentions[j].power256=0;
-                    else
-                        ArrayOfIncomingIntentions[j].power256=4*(RxTable.PTable->Row[i].Level-75);
-                }
+                        ArrayOfIncomingIntentions[j].power256=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->locationThreshold);//4*(RxTable.PTable->Row[i].Level-75);
+
+                else if(RxTable.PTable->Row[i].ID>=FOREST_ID_START && RxTable.PTable->Row[i].ID<=FOREST_ID_END)
+                    ArrayOfIncomingIntentions[j].power256=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->forestTheshold);
+                else if(RxTable.PTable->Row[i].ID>=CHARACTER_ID_START && RxTable.PTable->Row[i].ID<=CHARACTER_ID_END)
+                    ArrayOfIncomingIntentions[j].power256=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->characterThreshold);
+                else if(RxTable.PTable->Row[i].ID>=MIST_ID_START && RxTable.PTable->Row[i].ID<=MIST_ID_END)
+                    ArrayOfIncomingIntentions[j].power256=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->mistThreshold);
                 else
                 ArrayOfIncomingIntentions[j].power256 = RxTable.PTable->Row[i].Level/*-70*/;
                 ArrayOfIncomingIntentions[j].reason_indx = RxTable.PTable->Row[i].ID;
@@ -610,6 +612,8 @@ void App_t::LoadCharacterSettings()
     SD.iniReadInt32("character", "readyToKillInSeconds", "settings.ini", &rk);
     SD.iniReadInt32("character", "readyToKillForMinutes", "settings.ini", &rkt);
 
+
+
     WriteDrakaTimeFromPower(pwr);//TODO test
    // WriteReadyToKillTimer(rkt*60);//TODO test
     WriteFrontTime(rk,SI_MURDER);//TODO test
@@ -812,6 +816,22 @@ uint8_t App_t::ParseCsvFileToEmotions(const char* filename)
         Uart.Printf("\rParseCsvFileToEmotions end\r");
         f_close(&file);
       return OK;
+}
+int App_t::recalc_signal_pw_thr(int pw,int thr)
+{
+    if(pw<0 || thr<0)
+    {
+        Uart.Printf("App_t::recalc_signal_pw_thr error: pw=%d,thr=%d",pw,thr);
+        return 0;
+    }
+    if(thr==0)
+        return pw;
+    if(pw<thr)
+        return 0;
+    if(pw>100)
+        return 100;
+    return (pw-thr)*100/(100-thr);
+
 }
 
 #if 1 // ======================= Command processing ============================
