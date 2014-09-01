@@ -189,7 +189,12 @@ int bReasonGetState(int screen_id, int button_id)
            {
                if(ButtonsToUserReasons[i].BtoR[button_id]>=0)
                {
-                  if(ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time>=0)
+                   int aui_indx=ButtonsToUserReasons[i].BtoR[button_id];
+                  //если прошли плато - игрок не видит что намерение еще включено
+                  if(ArrayOfUserIntentions[aui_indx].current_time<=ArrayOfUserIntentions[aui_indx].time_to_plateau+ArrayOfUserIntentions[aui_indx].time_on_plateau &&
+                          ArrayOfUserIntentions[aui_indx].current_time>=0)
+                 // if(CalculateCurrentPowerOfPlayerReason(ButtonsToUserReasons[i].BtoR[button_id])>0);
+                          //ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time>=0 &&)
                   {
                       Uart.Printf("\rbReasonGetState ENABLED, time %d , B%d",ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time,button_id);
                       return BUTTON_ENABLED;

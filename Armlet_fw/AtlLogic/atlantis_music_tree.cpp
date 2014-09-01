@@ -314,11 +314,12 @@ void Init_emotionTreeMusicNode() {
         // Count files available
         char *S = nullptr;
         while(SD.GetNext(&S) == FR_OK) {
+            Uart.Printf("\rFilename: %S,",S);
             int emo_id = GetEmoIndxFromFileString(S);
             if(emo_id >= 0)
                 {
                 emotions[emo_id].numTracks++;
-               // Uart.Printf("\rFilename: %S, emo id %d, NumTracks %d", S,emo_id, emotions[emo_id].numTracks);
+                Uart.Printf("\rFilename: %S, emo id %d, NumTracks %d", S,emo_id, emotions[emo_id].numTracks);
                 }
            // else
            // Uart.Printf("\rFilename: %S, emo id %d", S,emo_id);

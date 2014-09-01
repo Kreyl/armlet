@@ -5,8 +5,8 @@
 #define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 10
 #define MAX_USER_INTENTIONS_ARRAY_SIZE 16
 #define INTENTIONS_ARRAY_SIZE 5
-#define WINING_INTEGRAL_SWITCH_LIMIT 50
-#define FON_RELAX_SPEED 50
+#define WINING_INTEGRAL_SWITCH_LIMIT 500
+#define FON_RELAX_SPEED 500
 #define MAX_RECENTLY_PLAYED_ARRAY 10
 
 #define PROCESS_NORMAL 0
@@ -59,6 +59,7 @@ typedef struct IncomingIntentions {
 typedef struct UserIntentions {
     int reason_indx;    //индекс из стандартного массива
     int power256_plateau; //[power256] сила сигнала наплато 0-256 если включено.
+    //на вводе - это интервалы состояния. в коде - интервалы от 0 времени! иначе не приводится :(
     int time_to_plateau;//[sec]
     int time_on_plateau;//sec
     int time_after_plateau;//[sec]
@@ -71,6 +72,8 @@ typedef struct UserIntentions {
     char * p_int_name;//button name if available
     void TurnOff();
     void TurnOn();
+    void NormalizeToDefEnergy();
+    //bool is_on_tail();
 } UserIntentions;
 
 extern struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRAY_SIZE];
@@ -153,7 +156,7 @@ void CalculateIntentionsRadioChange();
 //obsolete,not used
 int GetPlayerReasonCurrentPower(int reason_id);
 
-int CalculateCurrentPowerOfPlayerReason(int array_indx); //считаеттекущую мощность позаданному стандартному алгоритму
+int CalculateCurrentPowerOfPlayerReason(int array_indx, bool is_change=true); //считаеттекущую мощность позаданному стандартному алгоритму, if(is_change) - меняет состояние
 //Obsolete??
 void SwitchPlayerReason(int reason_id,bool is_turn_on);  // игрок нажал накнопку резона, вклили выкл.
 

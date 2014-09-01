@@ -234,7 +234,11 @@ void InitArrayOfUserIntentions()
 
     WriteTailTime(5,SI_TUMAN);
     WriteTailTime(5,SI_STRAH);
-
+#if 1
+    WriteFrontTime(5,SI_SEX);
+    WriteMidTime(5,SI_SEX);
+    WriteTailTime(20,SI_SEX);
+#endif
     //ArrayOfUserIntentions[SI_SEX].time_to_plateau
    // ArrayOfUserIntentions[SI_SEX].time_on_plateau
     //ArrayOfUserIntentions[SI_SEX].time_after_plateau
@@ -476,6 +480,7 @@ void CalculateIntentionsRadioChange() {
             SICD.last_intention_power_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].power256;//get current power!
             SICD.last_intention_index_winner = ArrayOfIncomingIntentions[current_incoming_winner_indx].reason_indx;
         }
+        Uart.Printf("\r SICD.winning_integral %d, iw %d",SICD.winning_integral,SICD.last_intention_index_winner);
         //Ћќ јЋ№Ќќ ѕќƒЌ»ћј≈ћ ¬≈—
         if(SRD.reduced_reason_id>=0)
             reasons[SRD.reduced_reason_id].weight+=wr;
@@ -489,8 +494,10 @@ bool UpdateUserIntentionsTime(int add_time_sec)
            if(ArrayOfUserIntentions[i].current_time>=0)
            {
                ArrayOfUserIntentions[i].current_time+=add_time_sec;
-               if(ArrayOfUserIntentions[i].current_time>ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau)//после плато, на спуске
+               int slower_time=Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[i].current_time);
+               if(slower_time>ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau)//после плато, на спуске
                {
+                   Uart.Printf("\rTURN_OFF_REASON2 tp%d op %d ap %d curr %d" ,ArrayOfUserIntentions[i].time_to_plateau ,ArrayOfUserIntentions[i].time_on_plateau ,ArrayOfUserIntentions[i].time_after_plateau,slower_time );
                    ArrayOfUserIntentions[i].TurnOff();//current_time=-1;
                    CallReasonFalure(i);
                    return_value=true;
@@ -567,30 +574,60 @@ int GetPersentage100(int curval,int maxval)
 {
     return (curval*100)/maxval;
 }
-int CalculateCurrentPowerOfPlayerReason(int array_indx)
+void UserIntentions::NormalizeToDefEnergy()
+{
+    //Energy.GetEnergyScaleValLessDefault() F
+    //Energy.GetEnergyScaleValMoreDefault() L
+    int etp=this->time_to_plateau;
+    int eop= this->time_on_plateau;
+    int eap=this->time_after_plateau;
+    int tp= Energy.GetEnergyScaleValMoreDefault(etp);
+    int op=Energy.GetEnergyScaleValLessDefault(etp+eop)-tp;
+
+}
+bool UIIsONTail(int array_indx)
+{
+    if(ArrayOfUserIntentions[array_indx].current_time<0)//не активировано
+        return false;
+    int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time);
+    int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time);//<current_time
+    if(slower_time<ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau+ArrayOfUserIntentions[array_indx].time_after_plateau)// хвост не кончилс€ [op-ap] notpassed
+        if(slower_time>=ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau)//уже были на плато [tp-op]pass
+            if(faster_time>ArrayOfUserIntentions[array_indx].time_to_plateau) //[0-tp] pass
+            return true;
+    return false;
+}
+
+int CalculateCurrentPowerOfPlayerReason(int array_indx, bool is_change)
 {//TODO normal func
 
+    Energy.SetEnergy(50);
     Energy.human_support=ArrayOfUserIntentions[array_indx].human_support_number;
     //всЄ удлинн€ет
     int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time);//>current_time
     int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time);//<current_time
 
-
+    Uart.Printf("\r EN %d",Energy.GetEnergy());
+    Uart.Printf("\r FT %d LT %d,CT%d FLT %d, LFT%d",faster_time,slower_time, ArrayOfUserIntentions[array_indx].current_time,Energy.GetEnergyScaleValMore(slower_time),Energy.GetEnergyScaleValLess(faster_time));
     if(ArrayOfUserIntentions[array_indx].current_time>=0)
     {
         if(faster_time<ArrayOfUserIntentions[array_indx].time_to_plateau)//перед плато
-            return (ArrayOfUserIntentions[array_indx].power256_plateau*GetPersentage100(faster_time,ArrayOfUserIntentions[array_indx].time_to_plateau))/100;
+            return 0;// (ArrayOfUserIntentions[array_indx].power256_plateau*GetPersentage100(faster_time,ArrayOfUserIntentions[array_indx].time_to_plateau))/100;
         if(slower_time<ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau)//на плато
             return (ArrayOfUserIntentions[array_indx].power256_plateau);
         if(slower_time<ArrayOfUserIntentions[array_indx].time_to_plateau+ArrayOfUserIntentions[array_indx].time_on_plateau+ArrayOfUserIntentions[array_indx].time_after_plateau)//после плато, на спуске
-            return (ArrayOfUserIntentions[array_indx].power256_plateau *
-                    GetPersentage100(
-                            slower_time-ArrayOfUserIntentions[array_indx].time_to_plateau-ArrayOfUserIntentions[array_indx].time_on_plateau
-                            ,ArrayOfUserIntentions[array_indx].time_after_plateau
-                            )
-                    )/100;
+            return 0;
+//                    (ArrayOfUserIntentions[array_indx].power256_plateau *
+//                    GetPersentage100(
+//                            slower_time-ArrayOfUserIntentions[array_indx].time_to_plateau-ArrayOfUserIntentions[array_indx].time_on_plateau
+//                            ,ArrayOfUserIntentions[array_indx].time_after_plateau
+//                            )
+//                    )/100;
         else    //вышли за плато
         {//выключить резон??
+            if(!is_change)
+                return -1;
+            Uart.Printf("\rTURN_OFF_REASON tp%d op %d ap %d curr %d" ,ArrayOfUserIntentions[array_indx].time_to_plateau ,ArrayOfUserIntentions[array_indx].time_on_plateau ,ArrayOfUserIntentions[array_indx].time_after_plateau,slower_time );
             ArrayOfUserIntentions[array_indx].TurnOff();//current_time=-1;
             CallReasonFalure(array_indx);
             return -1;
@@ -607,6 +644,7 @@ void CallReasonFalure(int user_reason_id)
 {
     if(user_reason_id==SI_SEX) //здесь еше должна быть драка, но она в другом pipeline
     {
+        Uart.Printf("CALL REASON FALURE SEX %d\r",user_reason_id);
         // не прерванный секс всегда успешен! ^_^
         CallReasonSuccess(user_reason_id);
         return;
