@@ -366,8 +366,8 @@ void App_t::Task() {
 
                 if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3) {
                     Uart.Printf("\rID to play=%d",reason_id);
-                    //new reason to play!
-                    if(reasons[reason_id].eID != SICD.last_played_emo)
+                    //new reason to play!remade on absent files!!
+                    if(GetRealEmoForEmoToPlay(reasons[reason_id].eID) != SICD.last_played_emo)
                     {
                         //check if it's user reason,if any, set already played flag
                         UserReasonFlagRecalc(SICD.last_intention_index_winner);//тут должэн стоять прошлый победитель!!

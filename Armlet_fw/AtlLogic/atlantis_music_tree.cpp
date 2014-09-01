@@ -136,17 +136,33 @@ int GetFileNumerForEmoToPlay(int emo_id)
 {
     if(emo_id<0 || emo_id>NUMBER_OF_EMOTIONS)
     {
-        Uart.Printf("GetFileNumerForEmoToPlay emo_id out of range\r");
+        Uart.Printf("\rGetFileNumerForEmoToPlay emo_id out of range\r");
         return -1;
     }
     //if no file available for this emo, play from top emo
     if(emotions[emo_id].numTracks==0)
     {
-        Uart.Printf("no files for emo %s \r", emotions[emo_id]);
+        Uart.Printf("\rno files for emo %s \r", emotions[emo_id]);
         return GetFileNumerForEmoToPlay(emotions[emo_id].parent);
     }
     else
         return emotions[emo_id].numTracks;
+}
+int GetRealEmoForEmoToPlay(int emo_id)
+{
+    if(emo_id<0 || emo_id>NUMBER_OF_EMOTIONS)
+    {
+        Uart.Printf("\r GetRealEmoForEmoToPlay emo_id out of range\r");
+        return -1;
+    }
+    //if no file available for this emo, play from top emo
+    if(emotions[emo_id].numTracks==0)
+    {
+        Uart.Printf("\r GetRealEmoForEmoToPlayno files for emo %s \r", emotions[emo_id]);
+        return GetRealEmoForEmoToPlay(emotions[emo_id].parent);
+    }
+    else
+        return emo_id;
 }
 char * GetFileNameToPlayFromEmoId(int emo_id) {
 	//TODO error to log here!
@@ -198,6 +214,7 @@ char * GetFileNameToPlayFromEmoId(int emo_id) {
 #endif
 	return GetMusicFileNameFromList(emo_id, track_num_calculated);
 }
+
 void PlayNewEmo(int emo_id, int err_id, bool is_gs) {
 
     if(SICD.is_global_stop_active && !is_gs)
