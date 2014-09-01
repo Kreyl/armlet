@@ -44,6 +44,8 @@ App_t App;
 
 #define MAX_RECIEVE_ARRAY_SIZE 100
 #define NUMBER_RECIEVE_ARRAYS 4
+#define CHARACTER_MS_DIFF_SILENCE 1200000
+#define CHARACTER_MS_DIFF_MEETING   60000
 //============================csv dirs==========================================
 static const char* FDirList2[] = {
         "/",
@@ -337,7 +339,26 @@ void App_t::Task() {
                 else if(RxTable.PTable->Row[i].ID>=FOREST_ID_START && RxTable.PTable->Row[i].ID<=FOREST_ID_END)
                     ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->forestTheshold);
                 else if(RxTable.PTable->Row[i].ID>=CHARACTER_ID_START && RxTable.PTable->Row[i].ID<=CHARACTER_ID_END)
+                {
                     ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->characterThreshold);
+                    //manipulate with power on people, 1 min to play, 20 min Silence begin
+                    int rid=RxTable.PTable->Row[i].ID;
+                    //init age
+                    int32_t curr_time_ms=Mesh.GetAbsTimeMS();
+
+// #define CHARACTER_MS_DIFF_SILENCE 1200000
+// #define CHARACTER_MS_DIFF_MEETING   60000
+
+                    //init
+                    if( reasons[rid].age==0)
+                        reasons[rid].age=curr_time_ms;
+                    //if d>20m-restart!
+                    if( reasons[rid].age-curr_time_ms>CHARACTER_MS_DIFF_SILENCE)
+                        reasons[rid].age=curr_time_ms;
+                    if(reasons[rid].age-curr_time_ms>=CHARACTER_MS_DIFF_MEETING)
+                        ArrayOfIncomingIntentions[j].power512=0;
+                    //manipulate with power on people, 1 min to play, 20 min Silence end
+                }
                 else if(RxTable.PTable->Row[i].ID>=MIST_ID_START && RxTable.PTable->Row[i].ID<=MIST_ID_END)
                     ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->mistThreshold);
                 else

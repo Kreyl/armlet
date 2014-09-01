@@ -219,8 +219,6 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs) {
 
     if(SICD.is_global_stop_active && !is_gs)
     {
-        //во время глобального останова рассчетов играть одну и ту-же эмоцию
-        //PlayNewEmo(SICD.last_played_emo,5); - endless cycle
         Uart.Printf("PlayNewEmo called on globalstop,playing same emo");
         emo_id=SICD.last_played_emo;
     }

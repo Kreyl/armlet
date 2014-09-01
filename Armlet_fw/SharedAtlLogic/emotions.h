@@ -152,7 +152,7 @@ extern Emotion_t emotions[];
 typedef struct Reason {
     const char* name;
     int weight;
-    int age;
+    signed long age;
     int eID;
 } Reason_t;
 
