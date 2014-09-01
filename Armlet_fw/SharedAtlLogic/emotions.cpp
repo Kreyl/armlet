@@ -1,5 +1,5 @@
 /*
- * emotions.c
+ * emotions.cpp
  *
  * Part of "Ticket to Atlantis" LARP music engine.
  *
@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-30 23:10:28
+ * Generated at 2014-09-01 17:14:39
  */
 #include "emotions.h"
 

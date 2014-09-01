@@ -64,7 +64,7 @@ CSV_TARGET = 'Reasons.csv'
 
 C_CONTENT = '''\
 /*
- * emotions.c
+ * emotions.cpp
  *
  * Part of "Ticket to Atlantis" LARP music engine.
  *
