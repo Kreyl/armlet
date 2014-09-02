@@ -8,12 +8,12 @@
 #
 # !!! DO NOT EDIT !!!
 #
-# Generated at 2014-09-02 21:13:43
+# Generated at 2014-09-03 02:21:35
 #
 101,PAdams,Mr. Peter Adams,3,900,5,0,,0
 102,DAllgood,Mr. David Allgood,9,20,30,0,,1
 103,MBanks,Ms. Marian Banks,3,900,5,0,,1
-104,BBernhard,Ms. Brenda Bernhard,3,900,5,0,,0
+104,BBernhard,Ms. Brenda Bernhard,3,900,5,0,,1
 105,ABrown,Ms. Anna Brown,3,900,5,0,,1
 106,FBuster,Mr. Frank Buster,3,20,30,0,,1
 107,ZCampbell,Mr. Zack Campbell,3,20,30,0,,1
@@ -53,7 +53,7 @@
 141,SKendall,Ms. Sarah Kendall,3,900,5,0,,0
 142,LLane,Mr. Lloyd Lewis Lane,3,900,5,0,,0
 143,SLarken,Ms. Sheila Larken,3,900,5,0,,0
-144,ALee,Ms. Alice Lee,3,900,5,0,,0
+144,ALee,Ms. Alice Lee,3,900,5,0,,1
 145,CLefebvre,Ms. Celine Lefebvre,3,20,30,0,,1
 146,VLehndorff,Ms. Vera von Lehndorff,3,900,5,0,,1
 147,TMalone,Ms. Trinity Malone,3,900,5,0,,1
