@@ -502,7 +502,6 @@ void App_t::UpdateLocation() {
 }
 void App_t::Init() {
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
-    //RxTable.RegisterAppThd(PThd);
     Sound.RegisterAppThd(PThd);
     on_run=0;
 
