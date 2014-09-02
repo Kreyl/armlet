@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-09-03 02:21:35
+ * Generated at 2014-09-03 03:35:46
  */
 #ifndef EMOTIONS_H
 #define EMOTIONS_H
@@ -152,7 +152,7 @@ extern Emotion_t emotions[];
 typedef struct Reason {
     const char* name;
     int weight;
-    int age;
+    long age;
     int eID;
 } Reason_t;
 
