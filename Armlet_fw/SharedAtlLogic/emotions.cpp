@@ -129,7 +129,7 @@ Reason_t reasons[] = {
  /*  18 */ { "trench", 40, 0, 88 },     /* prosvetlenie */
  /*  19 */ { "cinema", 40, 0, 52 },     /* interes */
 	// end of locations
- /*  20 */ { "R020", 0, 0, 1 },         /* neverno */
+ /*  20 */ { "fon_tech", 0, 0, 0 },         /* neverno */
 	// Forest
  /*  21 */ { "FA21", 40, 0, 9 },        /* les */
  /*  22 */ { "FA22", 40, 0, 9 },        /* les */
