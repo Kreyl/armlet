@@ -19,7 +19,7 @@ void AppInit();
 #define NARCO_IS_ON_STATE 1
 
 #define COPY_RX_TABLE_SZ 100
-#define NUM_ROWS_COPY_RX_TABLE 4
+#define NUM_ROWS_COPY_RX_TABLE 3
 #if 1 // ==== Timings ====
 #define T_PILL_CHECK_MS         360  // Check if pill connected every TM_PILL_CHECK
 #define T_MEASUREMENT_MS        5004 // Battery measurement
