@@ -335,7 +335,7 @@ void App_t::Task() {
             if(Table_buff.PTable->current_row_size==0)
             {
                 Table_buff.PTable->current_row_size=1;
-                Table_buff.PTable->Row[0].ID=20;
+                Table_buff.PTable->Row[0].ID=REASON_BG;
                 Table_buff.PTable->Row[0].Level=100;
                 Table_buff.PTable->Row[0].Reason=0;
               //  Uart.Printf("\r No signals, add fon to incoming reasons!");
