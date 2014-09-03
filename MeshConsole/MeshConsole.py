@@ -87,7 +87,7 @@ class EmulatedSerial(object):
             if self.ready and now > self.nextNode:
                 self.nextNode = now + float(randint(0, 1000)) / 1000
                 num = randint(1, 100)
-                data = meshNodeInfoResponse.encode(num, 0 if num == 1 else randint(1, 5), randint(0, 10000), randint(0, 200) - 100, randint(0, 20), randint(0, 20), randint(0, 20))
+                data = meshNodeInfoResponse.encode(num, 0 if num == 1 else randint(1, 5), randint(0, 10000), randint(0, 200) - 100, randint(0, 20), randint(0, 20), randint(0, 20), randint(0, 100))
                 break
             sleep(DT)
         return data
@@ -112,10 +112,13 @@ class MeshConsole(QMainWindow):
         QMainWindow.__init__(self)
         uic.loadUi(MAIN_UI_FILE_NAME, self)
         self.emulated = False
-        (options, _parameters) = getopt(args, 'e', ('emulated',))
+        self.needLoadSettings = True
+        (options, _parameters) = getopt(args, 'er', ('emulated', 'reset'))
         for (option, _value) in options:
             if option in ('-e', '--emulated'):
                 self.emulated = True
+            elif option in ('-r', '--reset'):
+                self.needLoadSettings = False
 
     def configure(self):
         # Setting window size
@@ -320,33 +323,34 @@ class MeshConsole(QMainWindow):
         QCoreApplication.setOrganizationDomain('ostranna.ru')
         QCoreApplication.setApplicationName('MeshConsole')
         settings = QSettings()
-        self.logger.info("Loading settings from %s", settings.fileName())
         startDate = None
         self.savedMaximized = False
-        try:
-            timeStamp = settings.value('timeStamp').toString()
-            if timeStamp:
-                settings.beginGroup('window')
-                self.resize(settings.value('width').toInt()[0], settings.value('height').toInt()[0])
-                self.move(settings.value('x').toInt()[0], settings.value('y').toInt()[0])
-                self.savedMaximized = settings.value('maximized', False).toBool()
-                self.restoreState(settings.value('state').toByteArray())
-                settings.endGroup()
-                columnsVisible = str(settings.value('columnsVisible').toString()).strip().split()
-                for (action, checked) in zip(self.columnActions, columnsVisible):
-                    action.setChecked(int(checked))
-                startDate = QDate.fromString(settings.value('startDate').toString(), LONG_DATE_FORMAT)
-                settings.beginGroup('emulated' if self.emulated else 'devices')
-                for tag in settings.childKeys():
-                    data = str(settings.value(tag).toString()).strip()
-                    if data:
-                        self.devices[int(tag) - 1].update(*data.split())
-                settings.endGroup()
-                self.logger.info("Loaded settings dated %s", timeStamp)
-            else:
-                self.logger.info("No settings found")
-        except:
-            self.logger.exception("Error loading settings")
+        if self.needLoadSettings:
+            self.logger.info("Loading settings from %s", settings.fileName())
+            try:
+                timeStamp = settings.value('timeStamp').toString()
+                if timeStamp:
+                    settings.beginGroup('window')
+                    self.resize(settings.value('width').toInt()[0], settings.value('height').toInt()[0])
+                    self.move(settings.value('x').toInt()[0], settings.value('y').toInt()[0])
+                    self.savedMaximized = settings.value('maximized', False).toBool()
+                    self.restoreState(settings.value('state').toByteArray())
+                    settings.endGroup()
+                    columnsVisible = str(settings.value('columnsVisible').toString()).strip().split()
+                    for (action, checked) in zip(self.columnActions, columnsVisible):
+                        action.setChecked(int(checked))
+                    startDate = QDate.fromString(settings.value('startDate').toString(), LONG_DATE_FORMAT)
+                    settings.beginGroup('emulated' if self.emulated else 'devices')
+                    for tag in settings.childKeys():
+                        data = str(settings.value(tag).toString()).strip()
+                        if data:
+                            self.devices[int(tag) - 1].update(*data.split())
+                    settings.endGroup()
+                    self.logger.info("Loaded settings dated %s", timeStamp)
+                else:
+                    self.logger.info("No settings found")
+            except:
+                self.logger.exception("Error loading settings")
         self.startDateEdit.setDate(startDate if startDate else QDate.currentDate())
         self.devicesModel.refresh(True)
 

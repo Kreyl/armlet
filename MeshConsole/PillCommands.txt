@@ -6,6 +6,7 @@
 
 dontWritePillButton,,#pillRepeatWrite32,0
 
-weedButton,,#pillRepeatWrite32,0,1,0,1,0
-lsdButton,,#pillRepeatWrite32,0,2,0,1,0
-heroinButton,,#pillRepeatWrite32,0,3,0,1,0
+weedButton,,#pillRepeatWrite32,0,1,1
+lsdButton,,#pillRepeatWrite32,0,2,1
+heroinButton,,#pillRepeatWrite32,0,3,1
+

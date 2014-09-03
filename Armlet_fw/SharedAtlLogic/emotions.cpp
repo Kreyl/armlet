@@ -1,5 +1,5 @@
 /*
- * emotions.c
+ * emotions.cpp
  *
  * Part of "Ticket to Atlantis" LARP music engine.
  *
@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-30 23:10:28
+ * Generated at 2014-09-03 02:21:35
  */
 #include "emotions.h"
 
@@ -308,15 +308,15 @@ Reason_t reasons[] = {
  /* 186 */ { "addiction", 155, 0, 83 }, /* zavisimost' */
  /* 187 */ { "weed", 160, 0, 75 },      /* sozidanie */
  /* 188 */ { "lsd", 160, 0, 8 },        /* trip */
- /* 189 */ { "heroin", 160, 0, 41 },    /* razrushenie */
- /* 190 */ { "krayk", 0, 0, 0 },        /* fon */
- /* 191 */ { "death", 280, 0, 5 },      /* smert' */
- /* 192 */ { "mist", 200, 0, 4 },       /* tuman */
- /* 193 */ { "fear", 199, 0, 29 },      /* strah */
- /* 194 */ { "mSource", 0, 0, 1 },      /* neverno */
- /* 195 */ { "mProject", 0, 0, 1 },     /* neverno */
+ /* 189 */ { "pejotl", 160, 0, 8 },     /* trip */
+ /* 190 */ { "heroin", 160, 0, 41 },    /* razrushenie */
+ /* 191 */ { "krayk", 0, 0, 0 },        /* fon */
+ /* 192 */ { "death", 280, 0, 5 },      /* smert' */
+ /* 193 */ { "mist", 200, 0, 4 },       /* tuman */
+ /* 194 */ { "fear", 199, 0, 29 },      /* strah */
+ /* 195 */ { "mSource", 0, 0, 1 },      /* neverno */
+ /* 196 */ { "mProject", 0, 0, 1 },     /* neverno */
 	// end of intentions
- /* 196 */ { "R196", 0, 0, 1 },         /* neverno */
  /* 197 */ { "R197", 0, 0, 1 },         /* neverno */
  /* 198 */ { "R198", 0, 0, 1 },         /* neverno */
  /* 199 */ { "R199", 0, 0, 1 },         /* neverno */

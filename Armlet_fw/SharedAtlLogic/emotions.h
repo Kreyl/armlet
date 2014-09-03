@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-08-30 23:10:28
+ * Generated at 2014-09-03 03:35:46
  */
 #ifndef EMOTIONS_H
 #define EMOTIONS_H
@@ -152,7 +152,7 @@ extern Emotion_t emotions[];
 typedef struct Reason {
     const char* name;
     int weight;
-    signed long age;
+    long age;
     int eID;
 } Reason_t;
 
@@ -361,15 +361,15 @@ extern Reason_t reasons[];
 #define REASON_ADDICTION           186
 #define REASON_WEED                187
 #define REASON_LSD                 188
-#define REASON_HEROIN              189
-#define REASON_KRAYK               190
-#define REASON_DEATH               191
-#define REASON_MIST                192
-#define REASON_FEAR                193
-#define REASON_MSOURCE             194
-#define REASON_MPROJECT            195
+#define REASON_PEJOTL              189
+#define REASON_HEROIN              190
+#define REASON_KRAYK               191
+#define REASON_DEATH               192
+#define REASON_MIST                193
+#define REASON_FEAR                194
+#define REASON_MSOURCE             195
+#define REASON_MPROJECT            196
 	// end of intentions
-#define REASON_R196                196
 #define REASON_R197                197
 #define REASON_R198                198
 #define REASON_R199                199

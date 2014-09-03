@@ -8,8 +8,8 @@ from functools import partial
 
 from MeshView import CONST, RAW, PROC
 
-NUM_DEVICES = 300
-NUM_STATIC_DEVICES = 100
+NUM_DEVICES = 350
+NUM_STATIC_DEVICES = 200
 
 EMOTIONS_CSV = '../MusicProcessor/Emotions.csv'
 REASONS_CSV = '../MusicProcessor/Reasons.csv'
@@ -49,7 +49,8 @@ def getColumnsData(processor):
         (True, RAW, True, True, 'Reason', 'Actual reason', 'reason', len(REASONS)),
         (True, RAW, True, False, 'ReasonN', 'Actual reason', 'reason', LONGEST_REASON, partial(getItem, REASONS)),
         (True, RAW, True, True, 'Emotion', 'Emotion', 'emotion', len(EMOTIONS)),
-        (True, RAW, True, False, 'EmotionN', 'Emotion', 'emotion', LONGEST_EMOTION, partial(getItem, EMOTIONS))
+        (True, RAW, True, False, 'EmotionN', 'Emotion', 'emotion', LONGEST_EMOTION, partial(getItem, EMOTIONS)),
+        (True, RAW, True, False, 'Energy', 'Energy', 'energy', 100)
     )
 
 class Device(object): # pylint: disable=R0902
@@ -71,9 +72,10 @@ class Device(object): # pylint: disable=R0902
         self.location = None
         self.reason = None
         self.emotion = None
+        self.energy = None
 
     def update(self, *args):
-        (self.hops, self.time, self.td, self.location, self.reason, self.emotion) = ((int(arg) if arg != 'None' else None) for arg in args)
+        (self.hops, self.time, self.td, self.location, self.reason, self.emotion, self.energy) = ((int(arg) if arg != 'None' else None) for arg in args)
 
     def settings(self):
-        return ' '.join(str(x) for x in (self.hops, self.time, self.td, self.location, self.reason, self.emotion)) if self.time else ''
+        return ' '.join(str(x) for x in (self.hops, self.time, self.td, self.location, self.reason, self.emotion, self.energy)) if self.time else ''

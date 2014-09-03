@@ -83,7 +83,7 @@ public:
     uint8_t ParseCsvFileToEmotions(const char* filename);
     void WriteInentionStringToData(char * int_name, int int_val, char * emo_name);
 
-    void UpdateLocation();
+    void UpdateState();
     //void GetDataFileName();
    char DataFileBuff[33];
 

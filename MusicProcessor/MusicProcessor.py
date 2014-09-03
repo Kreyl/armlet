@@ -89,6 +89,8 @@ MUSIC_MARK = 'music_here'
 
 RESULT_MARKS = { True: 'music_errors', False: 'music_ok' }
 
+CRITICAL_EMOTIONS = ('fon', 'seks', 'draka', 'ubijstvo', 'sozidanie', 'razrushenie', 'zavisimost\'')
+
 INVALID_FILENAME_CHARS = '<>:"/\\|?*' # for file names, to be replaced with _
 def cleanupFileName(fileName):
     return ''.join('_' if c in INVALID_FILENAME_CHARS else c for c in fileName)
@@ -243,6 +245,7 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
                 raise ProcessException("Existing record mentions total file size %d bytes, while actual total size is %d bytes" % (okSize, sum(getsize(f) for f in musicFiles)))
             # Verify existing music files
             print "Veryfying files",
+            foundEmotions = set()
             for fileName in listdir(musicDir):
                 stdout.write('.')
                 stdout.flush()
@@ -257,6 +260,7 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
                     tail = convert(groups[TAIL] or '')
                     if emotion not in emotions:
                         raise ProcessException("\nUnknown emotion: %d" % emotion)
+                    foundEmotions.add(emotion)
                 else:
                     raise ProcessException("\nBad file name: %s" % fileName)
                 if verifyFiles:
@@ -264,6 +268,8 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
                     if e:
                         raise ProcessException("\nError processing: %s" % e)
             print
+            for emotion in (e for e in CRITICAL_EMOTIONS if e not in foundEmotions):
+                print "WARNING: Critical emotion %s is missing" % emotion.upper()
         except ProcessException, e:
             print "%s, reprocessing" % e
             resultMark(baseDir, None)
@@ -280,6 +286,7 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
         # Process source music
         files = deepListDir(sourceDir)
         hasMusic = bool(files)
+        foundEmotions = set()
         if not hasMusic:
             log(True, None, "No music files found in source directory: %s" % sourceDir)
         else:
@@ -307,6 +314,7 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
                     if emotion not in emotions:
                         log(True, fileName, "Unknown emotion")
                         dumpToErrors = True
+                    foundEmotions.add(emotion)
                     newFileNamePrefix = SEPARATOR.join((emotion, name))
                     for s in (artist, title, tail):
                         if s:
@@ -344,6 +352,8 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
             numProcessed = len(processedFiles)
             if numProcessed != len(files):
                 log(True, None, "Processed file number mismatch: %d, expected %d" % (numProcessed, len(files)))
+            for emotion in (e for e in CRITICAL_EMOTIONS if e not in foundEmotions):
+                print "WARNING: Critical emotion %s is missing" % emotion.upper()
             processedSize = sum(getsize(f) for f in processedFiles)
             resultMark(baseDir, hasErrors[0], numProcessed if hasMusic else None, processedSize if hasMusic else None, ''.join(messages))
             if numProcessed:

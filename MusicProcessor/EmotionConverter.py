@@ -20,12 +20,16 @@ TRANSLIFY_PATCHES = {
 }
 
 EMOTION_PATCHES = {
-    #'somneniya': 'somnenie',
-    #'sex': 'seks',
     'napryazhenie': 'napryazhennost\'',
-    #'nastol\'giya': 'nostal\'giya',
-    #'sostrodanie': 'sostradanie',
-    'udovletvorennost': 'udovletvorenie'
+    'nastol\'giya': 'nostal\'giya',
+    'sex': 'seks',
+    'somneniya': 'somnenie',
+    'sostrodanie': 'sostradanie',
+    'trevoga': 'trevozhnost\'',
+    'udovletvorennost': 'udovletvorenie',
+    'udvoletvorenie': 'udovletvorenie',
+    'umrovotvorenie': 'umirotvorenie',
+    'voodushevlennost\'': 'voodushevlenie'
 }
 
 def convert(s):

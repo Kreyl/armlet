@@ -32,7 +32,7 @@
 
 
 // ==== MESH PARAMS ====
-#define MAX_ABONENTS            300   /* max ID, started from 1 */
+#define MAX_ABONENTS            350   /* max ID, started from 1 */
 #define MESH_CHANNEL            1     /* mesh RF channel */
 #define MESH_PKT_TIME           1     /* ms */
 #define MESH_GUARD_TIME         1     /* ms */
@@ -72,6 +72,7 @@ struct state_t {
     uint16_t    Location;
     uint16_t    Reason;
     uint8_t     Emotion;
+    uint8_t     Energy;
 }__attribute__ ((__packed__));
 
 struct sender_mesh_t {
