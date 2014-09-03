@@ -305,6 +305,20 @@ void App_t::Task() {
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
 
             Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
+            //pseudotable
+#if 0
+            int timesec=chTimeNow()/1000;
+
+            int timeseccut= timesec% 150; //2.5 минутыцикл
+            //сдвиг каждые 2секунды
+            int move_indx= timeseccut/2;
+
+            int last_reason=15;
+            int first_reason=4;
+
+#endif
+            //
+
             /*
         for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
             Uart.Printf("\r\nID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
