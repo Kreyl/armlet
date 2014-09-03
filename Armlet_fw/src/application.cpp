@@ -561,7 +561,7 @@ void App_t::Init() {
     InitButtonsToUserReasons();
     LoadCharacterSettings();
     LoadData();
-    Uart.Printf("\APP::INIt, stotal=%d",Time.S_total);
+    Uart.Printf("\r APP::INIt, stotal=%d",Time.S_total);
 }
 
 void App_t::SaveData()

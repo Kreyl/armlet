@@ -2,7 +2,7 @@
 #define intention_h__
 //#include "emotions.h"
 #include "atlantis_music_tree.h"
-#define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 10
+#define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 100
 #define MAX_USER_INTENTIONS_ARRAY_SIZE 16
 #define INTENTIONS_ARRAY_SIZE 5
 #define WINING_INTEGRAL_SWITCH_LIMIT 500
@@ -75,6 +75,8 @@ typedef struct UserIntentions {
     void TurnOff();
     void TurnOn();
     void NormalizeToDefEnergy();
+    void OnChangedEmo();// if changed after winning - change time to end of plateau
+    void OnTurnOffManually(bool short_or_long, int SI_indx); //true - short, false - long
     //bool is_on_tail();
 } UserIntentions;
 

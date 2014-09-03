@@ -74,13 +74,14 @@ struct SeekRecentlyPlayedFilesEmo SRPFESingleton
 };
 
 //DYNAMIC ARRAY SIZE
-struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRAY_SIZE]={
-		{1,2},{4,3},
-		{1,2},{4,3},
-		{1,2},{4,3},
-		{1,2},{4,3},
-		{1,2},{4,3}
-};
+struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRAY_SIZE];
+//                                                    ={
+//		{1,2},{4,3},
+//		{1,2},{4,3},
+//		{1,2},{4,3},
+//		{1,2},{4,3},
+//		{1,2},{4,3}
+//};
 
 void UserIntentions::TurnOn()
 {
@@ -561,6 +562,22 @@ int MainCalculateReasons() {
 int GetPersentage100(int curval,int maxval)
 {
     return (curval*100)/maxval;
+}
+void UserIntentions::OnChangedEmo()
+{
+    if(was_winning)
+    {
+        this->current_time=Energy.GetEnergyScaleValMore(time_on_plateau)+1;
+    }
+}
+void UserIntentions::OnTurnOffManually(bool short_or_long,int SI_indx)
+{
+    if(short_or_long==false)
+    {
+
+
+    }
+
 }
 void UserIntentions::NormalizeToDefEnergy()
 {
