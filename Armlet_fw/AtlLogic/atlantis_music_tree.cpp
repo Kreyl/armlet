@@ -136,17 +136,33 @@ int GetFileNumerForEmoToPlay(int emo_id)
 {
     if(emo_id<0 || emo_id>NUMBER_OF_EMOTIONS)
     {
-        Uart.Printf("GetFileNumerForEmoToPlay emo_id out of range\r");
+        Uart.Printf("\rGetFileNumerForEmoToPlay emo_id out of range\r");
         return -1;
     }
     //if no file available for this emo, play from top emo
     if(emotions[emo_id].numTracks==0)
     {
-        Uart.Printf("no files for emo %s \r", emotions[emo_id]);
+        Uart.Printf("\rno files for emo %s \r", emotions[emo_id]);
         return GetFileNumerForEmoToPlay(emotions[emo_id].parent);
     }
     else
         return emotions[emo_id].numTracks;
+}
+int GetRealEmoForEmoToPlay(int emo_id)
+{
+    if(emo_id<0 || emo_id>NUMBER_OF_EMOTIONS)
+    {
+        Uart.Printf("\r GetRealEmoForEmoToPlay emo_id out of range\r");
+        return -1;
+    }
+    //if no file available for this emo, play from top emo
+    if(emotions[emo_id].numTracks==0)
+    {
+        Uart.Printf("\r GetRealEmoForEmoToPlayno files for emo %s \r", emotions[emo_id]);
+        return GetRealEmoForEmoToPlay(emotions[emo_id].parent);
+    }
+    else
+        return emo_id;
 }
 char * GetFileNameToPlayFromEmoId(int emo_id) {
 	//TODO error to log here!
@@ -198,12 +214,11 @@ char * GetFileNameToPlayFromEmoId(int emo_id) {
 #endif
 	return GetMusicFileNameFromList(emo_id, track_num_calculated);
 }
+
 void PlayNewEmo(int emo_id, int err_id, bool is_gs) {
 
     if(SICD.is_global_stop_active && !is_gs)
     {
-        //во время глобального останова рассчетов играть одну и ту-же эмоцию
-        //PlayNewEmo(SICD.last_played_emo,5); - endless cycle
         Uart.Printf("PlayNewEmo called on globalstop,playing same emo");
         emo_id=SICD.last_played_emo;
     }
@@ -314,11 +329,12 @@ void Init_emotionTreeMusicNode() {
         // Count files available
         char *S = nullptr;
         while(SD.GetNext(&S) == FR_OK) {
+            Uart.Printf("\rFilename: %S,",S);
             int emo_id = GetEmoIndxFromFileString(S);
             if(emo_id >= 0)
                 {
                 emotions[emo_id].numTracks++;
-               // Uart.Printf("\rFilename: %S, emo id %d, NumTracks %d", S,emo_id, emotions[emo_id].numTracks);
+                Uart.Printf("\rFilename: %S, emo id %d, NumTracks %d", S,emo_id, emotions[emo_id].numTracks);
                 }
            // else
            // Uart.Printf("\rFilename: %S, emo id %d", S,emo_id);

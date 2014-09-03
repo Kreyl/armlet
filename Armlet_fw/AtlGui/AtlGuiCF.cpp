@@ -189,7 +189,10 @@ int bReasonGetState(int screen_id, int button_id)
            {
                if(ButtonsToUserReasons[i].BtoR[button_id]>=0)
                {
-                  if(ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time>=0)
+                   int aui_indx=ButtonsToUserReasons[i].BtoR[button_id];
+                  //если прошли плато - игрок не видит что намерение еще включено
+
+                  if(UIIsONTail(aui_indx))
                   {
                       Uart.Printf("\rbReasonGetState ENABLED, time %d , B%d",ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time,button_id);
                       return BUTTON_ENABLED;
@@ -221,7 +224,6 @@ int bReasonChange(int screen_id, int button_id ,int press_mode)
                    return BUTTON_ERROR;
                }
                int user_reason_indx=ButtonsToUserReasons[i].BtoR[button_id];
-              // if(GetPlayerReasonCurrentPower(reason_id)<0) true
                if(ArrayOfUserIntentions[user_reason_indx].current_time==-1)
                {
                    //setup reason
