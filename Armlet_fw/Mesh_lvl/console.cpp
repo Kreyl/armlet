@@ -7,7 +7,7 @@
 
 #include "console.h"
 
-//#define PRINT
+#define PRINT
 
 Console_t Console;
 
@@ -15,14 +15,15 @@ void Console_t::Send_Info(uint16_t ID, AlienInfo_t *Ptr) {
     Cnt++;
     if(Cnt == SEND_IN_COUNT) {
 #ifdef PRINT
-        Uart.Printf("\r\n#Node %u %u %u %d %u %u %u",
+        Uart.Printf("\r\n#Node %u %u %u %d %u %u %u %u",
                 ID,
                 Ptr->Mesh.Hops,
                 Ptr->Mesh.Timestamp,
                 Ptr->Mesh.TimeDiff,
                 Ptr->State.Location,
                 Ptr->State.Reason,
-                Ptr->State.Emotion);
+                Ptr->State.Emotion,
+                Ptr->State.Energy);
         Cnt = 0;
 #endif
     }

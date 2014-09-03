@@ -41,12 +41,10 @@ static void MeshPktHandlerThd(void *arg) {
     while(1) {
         mshMsg_t MeshPkt;
         chEvtWaitAny(EVTMSK_MESH_PKT_RDY);
-        do {
-            if(Mesh.MsgBox.TryFetchMsg(&MeshPkt) == OK) {
-                Mesh.PktBucket.WritePkt(MeshPkt);
-                Mesh.SendEvent(EVTMSK_MESH_PKR_HDL);
-            }
-        } while(Radio.Valets.InRx);
+        while(Radio.Valets.InRx) {
+            if(Mesh.MsgBox.TryFetchMsg(&MeshPkt) == OK) Mesh.PktBucket.WritePkt(MeshPkt);
+        }
+        Mesh.SendEvent(EVTMSK_MESH_PKT_ENDS);
     }
 }
 #endif
@@ -91,7 +89,7 @@ void Mesh_t::ITask() {
 
     if(EvtMsk & EVTMSK_MESH_RX_END) IUpdateTimer();
 
-    if(EvtMsk & EVTMSK_MESH_PKR_HDL) IPktHandler();
+    if(EvtMsk & EVTMSK_MESH_PKT_ENDS) IPktHandler();
 }
 
 #if 1 // ==== Inner functions ====
@@ -114,7 +112,6 @@ void Mesh_t::INewCycle() {
 
 void Mesh_t::IPktHandler(){
     PriorityID = IGetTimeOwner();
-    if(PktBucket.GetFilledSlots() == 0) return;
     while(PktBucket.GetFilledSlots() != 0) {
         PktBucket.ReadPkt(&MeshMsg); /* Read Pkt from Buffer */
         /* Put information from Pkt */

@@ -41,9 +41,9 @@ typedef struct Table_t {
     uint32_t Size;
     RxTableRow_t Row[RX_TABLE_SZ];
     void Print() {
-        Uart.Printf("\rTbl Sz=%u; ID, Level, Loc, Rea, Emo", Size);
+        Uart.Printf("\rTbl Sz=%u; ID, Level, Loc, Rea, Emo, Eng", Size);
         for(uint32_t i=0; i<Size; i++) {
-            Uart.Printf("\r %u; %u;   %u; %u; %u", Row[i].ID, Row[i].Level, Row[i].State.Location, Row[i].State.Reason, Row[i].State.Emotion);
+            Uart.Printf("\r %u; %u;   %u; %u; %u; %u", Row[i].ID, Row[i].Level, Row[i].State.Location, Row[i].State.Reason, Row[i].State.Emotion, Row[i].State.Energy);
         }
     }
 }Table_t;
