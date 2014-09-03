@@ -301,14 +301,13 @@ void App_t::Task() {
         }
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
+//            Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
 /*
-            Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
-
         for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
             Uart.Printf("\r\nID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
         }
 */
-        UpdateLocation();
+            UpdateState();
 
             int val1= MIN((uint32_t)NUMBER_OF_REASONS, RxTable.PTable->Size);
             CurrentIntentionArraySize = val1;
@@ -481,7 +480,7 @@ void App_t::Task() {
 #endif
     } // while true
 }
-void App_t::UpdateLocation() {
+void App_t::UpdateState() {
     uint8_t SignalPwr = 0;
     uint8_t LocationID = 0;
     uint16_t tmpID=0;

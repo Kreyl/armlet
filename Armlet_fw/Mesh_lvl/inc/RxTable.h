@@ -21,7 +21,7 @@
 #ifdef ARMLET
 #define RX_TABLE_SZ             MAX_ABONENTS
 #else
-#define RX_TABLE_SZ             200 // Lowered to fit in memory
+#define RX_TABLE_SZ             150 // Lowered to fit in memory
 #endif
 
 #define RESULT                  uint8_t
