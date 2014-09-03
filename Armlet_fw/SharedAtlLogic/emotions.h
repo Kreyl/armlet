@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-09-03 03:35:46
+ * Generated at 2014-09-03 21:42:52
  */
 #ifndef EMOTIONS_H
 #define EMOTIONS_H
@@ -164,25 +164,26 @@ extern Reason_t reasons[];
 	// Locations
 #define REASON_HUB                  1
 #define REASON_DEAD                 2
-#define REASON_HERMIT               3
-#define REASON_SQUARE               4
-#define REASON_FACTORY              5
-#define REASON_CITYHALL             6
-#define REASON_STATION              7
-#define REASON_BAR                  8
-#define REASON_COFFEE               9
-#define REASON_DETSKAYA            10
-#define REASON_TENT                11
-#define REASON_HOSPITAL            12
-#define REASON_UNIVERSITY          13
-#define REASON_REDROOM             14
-#define REASON_SHOP                15
-#define REASON_BLACKHOUSE          16
-#define REASON_HOME                17
-#define REASON_TRENCH              18
-#define REASON_CINEMA              19
+#define REASON_BG                   3
+#define REASON_HERMIT               4
+#define REASON_SQUARE               5
+#define REASON_FACTORY              6
+#define REASON_CITYHALL             7
+#define REASON_STATION              8
+#define REASON_BAR                  9
+#define REASON_COFFEE              10
+#define REASON_DETSKAYA            11
+#define REASON_TENT                12
+#define REASON_HOSPITAL            13
+#define REASON_UNIVERSITY          14
+#define REASON_REDROOM             15
+#define REASON_SHOP                16
+#define REASON_BLACKHOUSE          17
+#define REASON_HOME                18
+#define REASON_TRENCH              19
+#define REASON_CINEMA              20
 	// end of locations
-#define REASON_R020                20
+
 	// Forest
 #define REASON_FA21                21
 #define REASON_FA22                22
