@@ -15,6 +15,11 @@
 #define START_ENERGY 50
 #define STANDART_TOUGHNESS 3
 #define REASON_FAIL_ENERGY_CHANGE -5
+#define REASON_SUCESS_ENERGY_CHANGE 5
+#define ENERGY_SEC_IGNORE_SHUTDOWN 10
+#define ENERGY_VALUE_ON_DEATH_SHUTDOWN 10
+#define ENERGY_SEC_SAFE_ON_DEATH_SHUTDOWN 60
+
 #define ETS 50 //если это маленькое число - надо вводить вес для равномерного деления!
 class Energy_t
 {
@@ -65,7 +70,9 @@ public:
         //return( (val_to_scale*100)/( (   1+ energy_lvl/50)  *100));
     }
     int GetEnergy(){return energy_lvl;}
-    void SetEnergy(int val_in){energy_lvl=val_in;}
+    void SetEnergy(int val_in);
+    //{
+      //  energy_lvl=val_in;}
     void LoadToughness(){};//TODO
 };
 

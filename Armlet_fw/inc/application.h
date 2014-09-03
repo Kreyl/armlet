@@ -82,7 +82,7 @@ public:
     void SaveData();
     uint8_t ParseCsvFileToEmotions(const char* filename);
     void WriteInentionStringToData(char * int_name, int int_val, char * emo_name);
-
+    void CheckUserIntentionsOnSwitchToTail(int reason_id);//проверяем, не выперли ли кого с музыки, причина - музыка играет не та, что должна на этот резон!
     void UpdateState();
     //void GetDataFileName();
    char DataFileBuff[33];

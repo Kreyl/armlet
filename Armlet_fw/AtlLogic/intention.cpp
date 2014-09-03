@@ -4,6 +4,7 @@
 #include "Sound.h"
 #include "energy.h"
 #include "gui.h"
+
 //TODO move it right
 
 #define AGE_WEIGHT_SCALE_REDUCE 1
@@ -50,12 +51,12 @@ void OnGetTumanMessage()
     if(ArrayOfUserIntentions[SI_TUMAN].current_time>=0)// || ArrayOfUserIntentions[SI_STRAH].current_time>=0)
         return;
     else if( ArrayOfUserIntentions[SI_STRAH].current_time>=0)
-        ArrayOfUserIntentions[SI_STRAH].current_time=0;
+        ArrayOfUserIntentions[SI_STRAH].TurnOn();
     else
     {
         //включить туман и страх
-        ArrayOfUserIntentions[SI_TUMAN].current_time=0;
-        ArrayOfUserIntentions[SI_STRAH].current_time=0;
+        ArrayOfUserIntentions[SI_TUMAN].TurnOn();
+        ArrayOfUserIntentions[SI_STRAH].TurnOn();
     }
 }
 struct SeekRecentlyPlayedFilesEmo SRPFESingleton
@@ -85,8 +86,9 @@ struct IncomingIntentions ArrayOfIncomingIntentions[MAX_INCOMING_INTENTIONS_ARRA
 
 void UserIntentions::TurnOn()
 {
-
+    //включить с начала! плато не пройдено!
     this->current_time=0;
+    this->was_winning=false;
 }
 //int CurrentUserIntentionsArraySize=6;
 #if 0
@@ -237,7 +239,7 @@ void InitArrayOfUserIntentions()
     WriteTailTime(5,SI_STRAH);
 #if 1
     WriteFrontTime(5,SI_SEX);
-    WriteMidTime(5,SI_SEX);
+    WriteMidTime(15,SI_SEX);
     WriteTailTime(20,SI_SEX);
 #endif
     for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
@@ -324,13 +326,40 @@ void GlobalStopCalculationSupport::BeginStopCalculations(GlobalStopType_t stop_r
     SICD.is_global_stop_active=true;
     Uart.Printf("\rGlobalStopCalculationSupport::BeginStopCalculations()");
 }
-void GlobalStopCalculationSupport::FinishStopCalculation()
+//если пользователь пытается вырубить драку, возвращяет
+int GlobalStopCalculationSupport::TryDrakaShutdown()
 {
+    if(timer<draka_fight_length)
+    {
+        FinishStopCalculation(gsDraka);
+        return BUTTON_NORMAL;
+    }
+    return BUTTON_ENABLED;
+}
+int GlobalStopCalculationSupport::FinishStopCalculation(GlobalStopType_t stop_reason_type_in)
+{
+    Uart.Printf("\rGlobalStopCalculationSupport::FinishStopCalculation() START");
+    int return_val= BUTTON_NORMAL;
+    if(stop_reason_type_in==gsDraka)
+    {
+        Uart.Printf("\rGlobalStopCalculationSupport::FinishStopCalculation TURN OFF");
+        Energy.AddEnergy(REASON_SUCESS_ENERGY_CHANGE);
+            ArrayOfUserIntentions[SI_FIGHT].TurnOff();
+    }
+
     this->timer=-1;
     SICD.is_global_stop_active=false;
+
+    SICD.last_reason_active_armlet=last_reason_active_armlet_backup;
+    PlayNewEmo(SICD.last_reason_active_armlet,8,false);//уже остановились!!
+    //NEW EMO????
+    //поменять last_indx_winner???
+    //PlayNewEmo(0,8,true);// ТУТ подумать!! //TODO
     Uart.Printf("\rGlobalStopCalculationSupport::FinishStopCalculation()");
+
+    return return_val;
 }
-void GlobalStopCalculationSupport::OnNewSec()
+bool GlobalStopCalculationSupport::OnNewSec()
 {
     if(this->stop_reason_type==gsDraka)
     {
@@ -339,6 +368,7 @@ void GlobalStopCalculationSupport::OnNewSec()
             draka_fight_length=GetDrakaTime();
             draka_heart_length= HEART_PLAYING_TIME_SEC;
             PlayNewEmo(reasons[ArrayOfUserIntentions[SI_FIGHT].reason_indx].eID,6,true);
+            last_reason_active_armlet_backup=SICD.last_reason_active_armlet;
             SICD.last_reason_active_armlet=ArrayOfUserIntentions[SI_FIGHT].reason_indx;
             //TODO проверить что сюда пишется!!
         }
@@ -350,16 +380,13 @@ void GlobalStopCalculationSupport::OnNewSec()
 
         if(timer==draka_fight_length+draka_heart_length)
         {
-            ArrayOfUserIntentions[SI_FIGHT].TurnOff();
-            PlayNewEmo(0,8,true);// ТУТ подумать!! //TODO
-            //поменять last_indx_winner???
-            FinishStopCalculation();
-            return;
+            FinishStopCalculation(gsDraka);
+            return true;
         }
     }
     this->timer++;
     Uart.Printf("\rGlobalStopCalculationSupport::OnNewSec() timer %d",timer);
-
+    return false;
 }
 void SeekRecentlyPlayedFilesEmo::IncrementArrayId()
 {
@@ -487,22 +514,28 @@ void CalculateIntentionsRadioChange() {
 }
 bool UpdateUserIntentionsTime(int add_time_sec)
 {
+    //перерисовки выше! в app
     int return_value=false;
-
-    //TODO REDO!!! oldcode!!!!!!!!
     for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
        {
            if(ArrayOfUserIntentions[i].current_time>=0)
            {
+               bool is_on_plateau_last_sec=UIIsOnPlateau(i);
                ArrayOfUserIntentions[i].current_time+=add_time_sec;
-               int slower_time=Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[i].current_time);
-               if(slower_time>ArrayOfUserIntentions[i].time_to_plateau+ArrayOfUserIntentions[i].time_on_plateau+ArrayOfUserIntentions[i].time_after_plateau)//после плато, на спуске
-               {
-                   Uart.Printf("\rTURN_OFF_REASON2 tp%d op %d ap %d curr %d" ,ArrayOfUserIntentions[i].time_to_plateau ,ArrayOfUserIntentions[i].time_on_plateau ,ArrayOfUserIntentions[i].time_after_plateau,slower_time );
-                   ArrayOfUserIntentions[i].TurnOff();//current_time=-1;
-                   CallReasonFalure(i);
+               bool is_after_plateau_last_sec=UIIsONTail(i);
+               //TODO тут должна быть перерисовка отдельной кнопки, но поскольку я не знаю отсюда какая то должна быть кнопка - рисуем всё
+               if(is_on_plateau_last_sec==true &&is_after_plateau_last_sec==true)
                    return_value=true;
-               }
+                  // AtlGui.RenderFullScreen(AtlGui.current_state);
+                  // AtlGui.RenderSingleButton(AtlGui.current_state,i,BUTTON_NORMAL);
+
+               //пересчитываем для отрисовки
+               //в момент перехода с плато на суффикс - перерисовываем экран.
+
+               //выключаем намерение если оно пролетело
+               if(CalculateCurrentPowerOfPlayerReason(i,true)==-1)
+                   return_value=true;
+
            }
        }
     return return_value;
@@ -515,6 +548,7 @@ void PushPlayerReasonToArrayOfIntentions()
     {
         if(ArrayOfUserIntentions[i].current_time>=0)
         {
+            Uart.Printf("\rPushPlayerReasonToArrayOfIntentions Int_ indx%d",i);
             int curr_power=CalculateCurrentPowerOfPlayerReason(i);
             if(curr_power>=0)
             {
@@ -543,6 +577,7 @@ void UserReasonFlagRecalc(int reason_id)
                ArrayOfUserIntentions[i].was_winning=true;
        }
 }
+
 int MainCalculateReasons() {
     //return valie:
     //-1; low winner intergral to play new
@@ -573,8 +608,6 @@ void UserIntentions::OnChangedEmo()
 }
 void UserIntentions::OnTurnOffManually(bool short_or_long,int SI_indx)
 {
-    // CallReasonSuccess
-    //CallReasonFalure
     if(short_or_long==false)
     {
         CallReasonSuccess(SI_indx);
@@ -585,6 +618,7 @@ void UserIntentions::OnTurnOffManually(bool short_or_long,int SI_indx)
     {
         if(UIIsONTail(SI_indx))
         {
+            this->was_winning=false;
             this->current_time=Energy.GetEnergyScaleValLess(time_to_plateau)/2;
             return;
         }
@@ -625,11 +659,22 @@ bool UIIsONTail(int array_indx)
             return true;
     return false;
 }
+bool UIIsOnPlateau(int array_indx)
+{
+    if(ArrayOfUserIntentions[array_indx].current_time<0)//не активировано
+        return false;
+    int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time);
+    int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time);
+    if(slower_time<ArrayOfUserIntentions[array_indx].time_on_plateau)// на плато [tp-op] not passed
+                if(faster_time>ArrayOfUserIntentions[array_indx].time_to_plateau) //[0-tp] passed
+                return true;
+        return false;
+}
 
 int CalculateCurrentPowerOfPlayerReason(int array_indx, bool is_change)
 {//TODO normal func
 
-    Energy.SetEnergy(50);
+   // Energy.SetEnergy(50);
     Energy.human_support=ArrayOfUserIntentions[array_indx].human_support_number;
     //всё удлинняет
     int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time);//>current_time
@@ -664,62 +709,87 @@ void UserIntentions::TurnOff()
 }
 void CallReasonFalure(int user_reason_id)
 {
-    if(user_reason_id==SI_SEX) //здесь еше должна быть драка, но она в другом pipeline
+    ArrayOfUserIntentions[user_reason_id].was_winning=false;
+    if(user_reason_id==SI_SEX) //здесь еше должна быть драка, но она в другом pipeline???
     {
-        Uart.Printf("CALL REASON FALURE SEX %d\r",user_reason_id);
+        Uart.Printf("\rCALL REASON FALURE SEX %d\r",user_reason_id);
         // не прерванный секс всегда успешен! ^_^
+        //CallReasonSuccess сам обрабатывает выключения!
         CallReasonSuccess(user_reason_id);
         return;
     }
-    Uart.Printf("CALL REASON FALURE reason %d\r",user_reason_id);
+    if(user_reason_id==SI_FIGHT) //здесь еше должна быть драка, но она в другом pipeline???
+       {
+           Uart.Printf("\rCALL REASON FALURE FIGHT %d\r",user_reason_id);
+           CallReasonSuccess(user_reason_id);
+           return;
+       }
+    Uart.Printf("\rCALL REASON FALURE reason %d\r",user_reason_id);
     //если это одно из включаемых намеряний - сфейлить.
-    if( ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NORMAL)
+    if( ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NORMAL && ArrayOfUserIntentions[user_reason_id].current_time>ENERGY_SEC_IGNORE_SHUTDOWN)
     Energy.AddEnergy(REASON_FAIL_ENERGY_CHANGE);
 
-   // если кайф перестает действовать. включается ломка
+   // если кайф перестает действовать. включается ломка кайф выключается!
     if(user_reason_id==SI_KRAYK || user_reason_id==SI_MANIAC ||user_reason_id==SI_HER)
     {
         ArrayOfUserIntentions[user_reason_id].current_time=-2;
-        ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
+        ArrayOfUserIntentions[SI_WITHDRAWAL].TurnOn();
     }
-    // маньяки и крайк неизлечимо наркозависимы
-    if( user_reason_id==SI_PROJECT)
+    // маньяки и крайк неизлечимо наркозависимы - при окончании ломки включить её еще. а героин просто проходит
+    if( user_reason_id==SI_WITHDRAWAL)
     {
         if(ArrayOfUserIntentions[SI_KRAYK].current_time==-2 || ArrayOfUserIntentions[SI_KRAYK].current_time>=0)
-            ArrayOfUserIntentions[user_reason_id].current_time=0;
+            ArrayOfUserIntentions[user_reason_id].TurnOn();
         if(ArrayOfUserIntentions[SI_MANIAC].current_time==-2 || ArrayOfUserIntentions[SI_MANIAC].current_time>=0)
-            ArrayOfUserIntentions[user_reason_id].current_time=0;
+            ArrayOfUserIntentions[user_reason_id].TurnOn();
+        return;
     }
+    //если это смерть - сбросить нергию в 10
+    if(user_reason_id==SI_DEATH && ArrayOfUserIntentions[user_reason_id].current_time>ENERGY_SEC_SAFE_ON_DEATH_SHUTDOWN)
+        Energy.SetEnergy(ENERGY_VALUE_ON_DEATH_SHUTDOWN);
+
+    //для всех нормальных - выключиться.
+    ArrayOfUserIntentions[user_reason_id].TurnOff();
+
     return;
 }
-
+//вызывается только пользовательскими резонами!!!! при ручном отключении/ после секса/драки
 void CallReasonSuccess(int user_reason_id)
 {
+    ArrayOfUserIntentions[user_reason_id].was_winning=false;
     //если наркозависимость - перезапустить!
     //подумать над размерамиинтервалов! PROCESS_NARCO
 
-    //маньяк и крайк неизлечимы - при окончании ломки перезапускается ломка
+    //ok
+    //маньяк и крайк неизлечимы - при окончании кайфа перезапускается ломка
         if(user_reason_id==SI_KRAYK || user_reason_id==SI_MANIAC)
-            ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
-
+        {
+            ArrayOfUserIntentions[SI_WITHDRAWAL].TurnOn();
+        }
+    //ok маньяк получает за убийство.
     //если маньяк убил кого-то - вырубить ему намеряние заново. если не нашел - также вырубить, онять нергию.
     if((ArrayOfUserIntentions[SI_MANIAC].current_time>=0 || ArrayOfUserIntentions[SI_MANIAC].current_time==-2) && user_reason_id==SI_MURDER)
     {
-        ArrayOfUserIntentions[SI_MANIAC].current_time=0;//включить кайф
-        ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
+        ArrayOfUserIntentions[SI_MANIAC].TurnOn();//включить кайф
+        ArrayOfUserIntentions[SI_WITHDRAWAL].TurnOn();
     }
     //если крайк что-то сделал - перезапустить его зависимость
-    //TODO заменить процессы на SI
+    //ok крайкполучает за обычне как и все
     if((ArrayOfUserIntentions[SI_KRAYK].current_time>=0 || ArrayOfUserIntentions[SI_KRAYK].current_time==-2) &&
             (ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NORMAL ||
              ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_FIGHT)
        )
     {
-        ArrayOfUserIntentions[SI_KRAYK].current_time=0; //включить кайф
-        ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
+        ArrayOfUserIntentions[SI_KRAYK].TurnOn(); //включить кайф
+        ArrayOfUserIntentions[SI_WITHDRAWAL].TurnOn();
     }
-    Energy.AddEnergy(5);
+    if( ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NORMAL && ArrayOfUserIntentions[user_reason_id].current_time>ENERGY_SEC_IGNORE_SHUTDOWN)
+        Energy.AddEnergy(REASON_SUCESS_ENERGY_CHANGE);
 
+    //если это смерть - сбросить нергию в 10
+    if(user_reason_id==SI_DEATH && ArrayOfUserIntentions[user_reason_id].current_time>ENERGY_SEC_SAFE_ON_DEATH_SHUTDOWN)
+        Energy.SetEnergy(ENERGY_VALUE_ON_DEATH_SHUTDOWN);
+    ArrayOfUserIntentions[user_reason_id].TurnOff();
    return;
 }
 void ReasonAgeModifyChangeMelody()

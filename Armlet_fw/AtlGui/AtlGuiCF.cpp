@@ -189,27 +189,109 @@ int bReasonGetState(int screen_id, int button_id)
            {
                if(ButtonsToUserReasons[i].BtoR[button_id]>=0)
                {
-                   int aui_indx=ButtonsToUserReasons[i].BtoR[button_id];
-                  //если прошли плато - игрок не видит что намерение еще включено
+                    int aui_indx=ButtonsToUserReasons[i].BtoR[button_id];
+                    //если прошли плато - игрок не видит что намерение еще включено
+                    if(aui_indx==SI_FIGHT)
+                    {
+                        if(GSCS.timer<0)
+                            return BUTTON_NORMAL;
+                        else return BUTTON_ENABLED;
 
-                  if(UIIsONTail(aui_indx))
-                  {
-                      Uart.Printf("\rbReasonGetState ENABLED, time %d , B%d",ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time,button_id);
-                      return BUTTON_ENABLED;
-                  }
-                   //TODO сюда надо вставлять проверку на неотключаемые резоны???
-                  Uart.Printf("\rbReasonGetState BUTTON_NORMAL, time %d , B%d",ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time,button_id);
-                   return BUTTON_NORMAL;
+                    }
+                    if(UIIsONTail(aui_indx)==false)
+                    {
+                        if(ArrayOfUserIntentions[aui_indx].current_time<0)
+                        {
+                            Uart.Printf("\rbReasonGetState BUTTON_NORMAL; NOT ACTIVE, time %d , B%d",ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time,button_id);
+                                               return BUTTON_NORMAL;
+                        }
+                        Uart.Printf("\rbReasonGetState ENABLED, time %d , B%d",ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time,button_id);
+                        return BUTTON_ENABLED;
+                    }
+                    //TODO сюда надо вставлять проверку на неотключаемые резоны??? - нет таких.
+                    Uart.Printf("\rbReasonGetState BUTTON_NORMAL, ACTIVE, time %d , B%d",ArrayOfUserIntentions[ButtonsToUserReasons[i].BtoR[button_id]].current_time,button_id);
+                    return BUTTON_NORMAL;
                }
            }
 
        }
+    Uart.Printf("\rbReasonGetState return BUTTON_ERROR");
        return BUTTON_ERROR; //error??
 }
 int bReasonChange(int screen_id, int button_id ,int press_mode)
 {
-    if(press_mode!=0)
+    Uart.Printf("\rCALL bReasonChange REASON sid %d, bid%d, mod %d",screen_id,button_id,press_mode);
+    Uart.Printf("\r bReasonChange MODE %d ",press_mode);
+    if(press_mode!=0 && press_mode!=2)
         return BUTTON_NO_REDRAW;
+    Uart.Printf("\r bReasonChange MODE11 %d ",press_mode);
+    if(AtlGui.ReasonFlag==false)
+        return BUTTON_NO_REDRAW;
+    else
+        AtlGui.ReasonFlag=false;
+    Uart.Printf("\r bReasonChange MODE22 %d ",press_mode);
+    int reason_id=-1;
+    int user_reason_indx=-1;
+
+    //общте данные + включение - одинаково по лонгу и шорту
+    for(int i=0;i<SCREENS_WITH_REASONS;i++)
+    {
+        if(ButtonsToUserReasons[i].is_this_screen_with_reasons(screens[screen_id].name))
+        {
+            reason_id=ButtonsToUserReasons[i].BtoR[button_id];
+            if(reason_id<0)
+            {
+                Uart.Printf("\rCALL bReasonChange REASON ERROR");
+                return BUTTON_ERROR;
+            }
+            user_reason_indx=ButtonsToUserReasons[i].BtoR[button_id];
+            if(ArrayOfUserIntentions[user_reason_indx].current_time==-1)
+            {
+                //setup reason
+                ArrayOfUserIntentions[user_reason_indx].TurnOn();
+                if(user_reason_indx==SI_FIGHT)
+                    GSCS.BeginStopCalculations(gsDraka);
+                Uart.Printf("\rCALL bReasonChange REASON IS ON THE RUN");
+                //return red
+                return BUTTON_ENABLED;
+            }
+        }
+    }
+    if(reason_id==-1 || user_reason_indx==-1)
+    {
+        Uart.Printf("\rCALL bReasonChange REASON ERROR2");
+        return BUTTON_ERROR;
+    }
+    //ВЫКЛЮЧЕНИЕ!
+    if(press_mode==0)
+    {
+
+        Uart.Printf("\rCALL bReasonChange STOPPED OR FAILED");
+
+        if(user_reason_indx==SI_FIGHT)
+            return GSCS.TryDrakaShutdown();
+        ArrayOfUserIntentions[user_reason_indx].OnTurnOffManually(true,user_reason_indx);
+        return BUTTON_NORMAL;
+    }
+    if(press_mode==2)
+    {
+        Uart.Printf("\rCALL bReasonChange TURNED OFF2");
+        if(user_reason_indx==SI_FIGHT)
+            return GSCS.TryDrakaShutdown();
+        ArrayOfUserIntentions[user_reason_indx].OnTurnOffManually(false,user_reason_indx);
+        return BUTTON_NORMAL;
+    }
+
+//    int kmode=-1;
+//    if(Type==keRelease)
+//        kmode=0;
+//    if(Type==keLongPress)
+//        kmode=2;
+//    if(Type==keRepeat)
+//        kmode=3;
+
+    //old one
+#if 0
    // Uart.Printf("CALL bReasonChange \r");
     //button is available, so just get it
     for(int i=0;i<SCREENS_WITH_REASONS;i++)
@@ -227,7 +309,7 @@ int bReasonChange(int screen_id, int button_id ,int press_mode)
                if(ArrayOfUserIntentions[user_reason_indx].current_time==-1)
                {
                    //setup reason
-                   ArrayOfUserIntentions[user_reason_indx].current_time=0;
+                   ArrayOfUserIntentions[user_reason_indx].TurnOn();
                    if(user_reason_indx==SI_FIGHT)
                        GSCS.BeginStopCalculations(gsDraka);
                    Uart.Printf("\rCALL bReasonChange REASON IS ON THE RUN");
@@ -259,8 +341,11 @@ int bReasonChange(int screen_id, int button_id ,int press_mode)
                }
            }
        }
+
+#endif
     //get reason state
     //return state depends on reason state- if pseudo lamp is presented -
+    Uart.Printf("\rCALL bReasonChange REASON ERROR3");
     return BUTTON_ERROR;
 }
 void CheckAndRedrawFinishedReasons()

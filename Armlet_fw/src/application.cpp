@@ -205,6 +205,8 @@ static inline void KeysHandler() {
         {
             if(AtlGui.is_locked)//если не лок и залочена - вернуться
                     continue;
+
+            AtlGui.ReasonFlag=false;
             //    void EnterStandby();
             //void Reset()
            // Программное включение, выключение (длинная А)+
@@ -304,7 +306,7 @@ void App_t::Task() {
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
 
-            Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
+           // Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
             //pseudotable
 #if 0
             int timesec=chTimeNow()/1000;
@@ -336,8 +338,8 @@ void App_t::Task() {
                 Table_buff.PTable->Row[0].ID=20;
                 Table_buff.PTable->Row[0].Level=100;
                 Table_buff.PTable->Row[0].Reason=0;
-                Uart.Printf("\r No signals, add fon to incoming reasons!");
-                \
+              //  Uart.Printf("\r No signals, add fon to incoming reasons!");
+
             }
 //RxTable
             int val1= MIN(NUMBER_OF_REASONS, Table_buff.PTable->current_row_size);
@@ -422,6 +424,8 @@ void App_t::Task() {
                         UserReasonFlagRecalc(SICD.last_intention_index_winner);//тут должэн стоять прошлый победитель!!
                         PlayNewEmo(reasons[reason_id].eID,3);
                         SICD.last_reason_active_armlet=reason_id;
+                        //send to tail and redraw any not tailed active user intention
+                        CheckUserIntentionsOnSwitchToTail(reason_id);
                     }
                 }
                 if(reason_id==-3) {
@@ -452,8 +456,8 @@ void App_t::Task() {
                     Uart.Printf("\renergy self reduced, stotal=%d",Time.S_total);
                 }
             }
-            else
-                GSCS.OnNewSec();
+            else if(GSCS.OnNewSec())
+                CheckAndRedrawFinishedReasons();
             if(Time.S_total % 300 ==0)
             {
                 App.SaveData();
@@ -704,6 +708,8 @@ void App_t::DropData()
 }
 void App_t::LoadData()
 {
+    //TEST!!
+    Energy.SetEnergy(START_ENERGY);
     FIL file;
        int open_code= f_open (
                &file,
@@ -993,5 +999,22 @@ void RxTableSt_t::Init(){
     RxStorageResult.current_row_size=0;
     this->PTable =&RxStorageResult;
 }
+void App_t::CheckUserIntentionsOnSwitchToTail(int reason_id)
+{
+    bool is_need_redraw=false;
+    for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
+        if(ArrayOfUserIntentions[i].process_type==PROCESS_NORMAL && i!=SI_DEATH && i!=SI_FIGHT)
+        if(ArrayOfUserIntentions[i].current_time>0)
+        if(UIIsONTail(i)==true)
+        {
+            ArrayOfUserIntentions[i].OnChangedEmo();
+            is_need_redraw=true;
+            //пользовательское, не выключено, не в хвосте
+            //move to tail, redraw
+            Uart.Printf("\rCheckUserIntentionsOnSwitchToTail MOVED TO TAIL SI %d",i);
+        }
+    if(is_need_redraw)
+        CheckAndRedrawFinishedReasons();
 
+}
 #endif
