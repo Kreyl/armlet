@@ -489,6 +489,7 @@ bool UpdateUserIntentionsTime(int add_time_sec)
 {
     int return_value=false;
 
+    //TODO REDO!!! oldcode!!!!!!!!
     for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
        {
            if(ArrayOfUserIntentions[i].current_time>=0)
@@ -572,10 +573,26 @@ void UserIntentions::OnChangedEmo()
 }
 void UserIntentions::OnTurnOffManually(bool short_or_long,int SI_indx)
 {
+    // CallReasonSuccess
+    //CallReasonFalure
     if(short_or_long==false)
     {
+        CallReasonSuccess(SI_indx);
+        return;
 
-
+    }
+    else
+    {
+        if(UIIsONTail(SI_indx))
+        {
+            this->current_time=Energy.GetEnergyScaleValLess(time_to_plateau)/2;
+            return;
+        }
+        else
+        {
+            CallReasonFalure(SI_indx);
+            return;
+        }
     }
 
 }
@@ -593,6 +610,7 @@ void UserIntentions::NormalizeToDefEnergy()
     this->time_to_plateau=tp;
     this->time_on_plateau=op;
     this->time_after_plateau=ap;
+
 
 }
 bool UIIsONTail(int array_indx)

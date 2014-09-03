@@ -303,9 +303,9 @@ void App_t::Task() {
         }
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
-/*
-            Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
 
+            Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
+            /*
         for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
             Uart.Printf("\r\nID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
         }
@@ -339,7 +339,7 @@ void App_t::Task() {
                     continue;
                 }
                 //init tuman
-                Uart.Printf("\rREASON_ON_TABLE: %d indx %d id %d",Table_buff.PTable->Row[i].Reason,i,Table_buff.PTable->Row[i].ID);
+             //   Uart.Printf("\rREASON_ON_TABLE: %d indx %d id %d",Table_buff.PTable->Row[i].Reason,i,Table_buff.PTable->Row[i].ID);
                 if(Table_buff.PTable->Row[i].Reason ==(uint16_t)REASON_MSOURCE || Table_buff.PTable->Row[i].Reason== REASON_MPROJECT)
                     OnGetTumanMessage();
                 //location reduce75
