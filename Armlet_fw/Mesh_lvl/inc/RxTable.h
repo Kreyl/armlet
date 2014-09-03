@@ -21,7 +21,7 @@
 #ifdef ARMLET
 #define RX_TABLE_SZ             MAX_ABONENTS
 #else
-#define RX_TABLE_SZ             200 // Lowered to fit in memory
+#define RX_TABLE_SZ             150 // Lowered to fit in memory
 #endif
 
 #define RESULT                  uint8_t
@@ -37,16 +37,16 @@ struct RxTableRow_t {
     state_t     State;
 };
 
-struct Table_t {
+typedef struct Table_t {
     uint32_t Size;
     RxTableRow_t Row[RX_TABLE_SZ];
     void Print() {
-        Uart.Printf("\rTbl Sz=%u; ID, Level, Loc, Rea, Emo", Size);
+        Uart.Printf("\rTbl Sz=%u; ID, Level, Loc, Rea, Emo, Eng", Size);
         for(uint32_t i=0; i<Size; i++) {
-            Uart.Printf("\r %u; %u;   %u; %u; %u", Row[i].ID, Row[i].Level, Row[i].State.Location, Row[i].State.Reason, Row[i].State.Emotion);
+            Uart.Printf("\r %u; %u;   %u; %u; %u; %u", Row[i].ID, Row[i].Level, Row[i].State.Location, Row[i].State.Reason, Row[i].State.Emotion, Row[i].State.Energy);
         }
     }
-};
+}Table_t;
 
 class RSSI {
 public:

@@ -44,6 +44,8 @@ App_t App;
 
 #define MAX_RECIEVE_ARRAY_SIZE 100
 #define NUMBER_RECIEVE_ARRAYS 4
+#define CHARACTER_MS_DIFF_SILENCE 1200000
+#define CHARACTER_MS_DIFF_MEETING   60000
 //============================csv dirs==========================================
 static const char* FDirList2[] = {
         "/",
@@ -301,16 +303,30 @@ void App_t::Task() {
         }
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
-/*
-            Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
 
+            Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
+            /*
         for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
             Uart.Printf("\r\nID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
         }
 */
-        UpdateLocation();
+        UpdateState();//эта штука берет локацию из таблицы
 
-            int val1= MIN((uint32_t)NUMBER_OF_REASONS, RxTable.PTable->Size);
+            //а весь оставшийся код - из суммы таблиц
+
+            Table_buff.Recalc_storage();
+            //подстановка фиктивного фона!
+            if(Table_buff.PTable->current_row_size==0)
+            {
+                Table_buff.PTable->current_row_size=1;
+                Table_buff.PTable->Row[0].ID=20;
+                Table_buff.PTable->Row[0].Level=100;
+                Table_buff.PTable->Row[0].Reason=0;
+                Uart.Printf("\r No signals, add fon to incoming reasons!");
+                \
+            }
+//RxTable
+            int val1= MIN(NUMBER_OF_REASONS, Table_buff.PTable->current_row_size);
             CurrentIntentionArraySize = val1;
             int j=0;
             //сбрасываем  human syupport
@@ -318,31 +334,50 @@ void App_t::Task() {
                 ArrayOfUserIntentions[kl].human_support_number=0;
 
             for(int i=0; i<val1; i++) {
-                if(RxTable.PTable->Row[i].ID >= NUMBER_OF_REASONS || (RxTable.PTable->Row[i].ID < 0) /*|| (SnsTable.PTable->Row[i].Level < 70)*/ ) {
+                if(Table_buff.PTable->Row[i].ID >= NUMBER_OF_REASONS || (Table_buff.PTable->Row[i].ID < 0) /*|| (SnsTable.PTable->Row[i].Level < 70)*/ ) {
                     CurrentIntentionArraySize--;
                     continue;
                 }
                 //init tuman
-                Uart.Printf("\rREASON_ON_TABLE: %d indx %d id %d",RxTable.PTable->Row[i].State.Reason,i,RxTable.PTable->Row[i].ID);
-                if(RxTable.PTable->Row[i].State.Reason ==(uint16_t)REASON_MSOURCE || RxTable.PTable->Row[i].State.Reason== REASON_MPROJECT)
+             //   Uart.Printf("\rREASON_ON_TABLE: %d indx %d id %d",Table_buff.PTable->Row[i].Reason,i,Table_buff.PTable->Row[i].ID);
+                if(Table_buff.PTable->Row[i].Reason ==(uint16_t)REASON_MSOURCE || Table_buff.PTable->Row[i].Reason== REASON_MPROJECT)
                     OnGetTumanMessage();
                 //location reduce75
 
                 if(
-                        (RxTable.PTable->Row[i].ID>=LOCATION_ID_START && RxTable.PTable->Row[i].ID<=LOCATIONS_ID_END) ||
-                        (RxTable.PTable->Row[i].ID>=EMOTION_FIX_ID_START && RxTable.PTable->Row[i].ID<=EMOTION_FIX_ID_END)
+                        (Table_buff.PTable->Row[i].ID>=LOCATION_ID_START && Table_buff.PTable->Row[i].ID<=LOCATIONS_ID_END) ||
+                        (Table_buff.PTable->Row[i].ID>=EMOTION_FIX_ID_START && Table_buff.PTable->Row[i].ID<=EMOTION_FIX_ID_END)
                   )
-                        ArrayOfIncomingIntentions[j].power256=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->locationThreshold);//4*(RxTable.PTable->Row[i].Level-75);
+                        ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->locationThreshold);//4*(RxTable.PTable->Row[i].Level-75);
 
-                else if(RxTable.PTable->Row[i].ID>=FOREST_ID_START && RxTable.PTable->Row[i].ID<=FOREST_ID_END)
-                    ArrayOfIncomingIntentions[j].power256=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->forestTheshold);
-                else if(RxTable.PTable->Row[i].ID>=CHARACTER_ID_START && RxTable.PTable->Row[i].ID<=CHARACTER_ID_END)
-                    ArrayOfIncomingIntentions[j].power256=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->characterThreshold);
-                else if(RxTable.PTable->Row[i].ID>=MIST_ID_START && RxTable.PTable->Row[i].ID<=MIST_ID_END)
-                    ArrayOfIncomingIntentions[j].power256=recalc_signal_pw_thr(RxTable.PTable->Row[i].Level,this->mistThreshold);
+                else if(Table_buff.PTable->Row[i].ID>=FOREST_ID_START && Table_buff.PTable->Row[i].ID<=FOREST_ID_END)
+                    ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->forestTheshold);
+                else if(Table_buff.PTable->Row[i].ID>=CHARACTER_ID_START && Table_buff.PTable->Row[i].ID<=CHARACTER_ID_END)
+                {
+                    ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->characterThreshold);
+                    //manipulate with power on people, 1 min to play, 20 min Silence begin
+                    int rid=Table_buff.PTable->Row[i].ID;
+                    //init age
+                    int32_t curr_time_ms=Mesh.GetAbsTimeMS();
+
+// #define CHARACTER_MS_DIFF_SILENCE 1200000
+// #define CHARACTER_MS_DIFF_MEETING   60000
+
+                    //init //TODO test it!!
+                    if( reasons[rid].age==0)
+                        reasons[rid].age=curr_time_ms;
+                    //if d>20m-restart!
+                    if( reasons[rid].age-curr_time_ms>CHARACTER_MS_DIFF_SILENCE)
+                        reasons[rid].age=curr_time_ms;
+                    if(reasons[rid].age-curr_time_ms>=CHARACTER_MS_DIFF_MEETING)
+                        ArrayOfIncomingIntentions[j].power512=0;
+                    //manipulate with power on people, 1 min to play, 20 min Silence end
+                }
+                else if(Table_buff.PTable->Row[i].ID>=MIST_ID_START && Table_buff.PTable->Row[i].ID<=MIST_ID_END)
+                    ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->mistThreshold);
                 else
-                ArrayOfIncomingIntentions[j].power256 = RxTable.PTable->Row[i].Level/*-70*/;
-                ArrayOfIncomingIntentions[j].reason_indx = RxTable.PTable->Row[i].ID;
+                ArrayOfIncomingIntentions[j].power512 = Table_buff.PTable->Row[i].Level/*-70*/;
+                ArrayOfIncomingIntentions[j].reason_indx = Table_buff.PTable->Row[i].ID;
                 //если входной резон пользователя - пользовательский, добавляем его в челподдержку
                 for(int kk=0;kk<MAX_USER_INTENTIONS_ARRAY_SIZE;kk++)
                 {
@@ -366,8 +401,8 @@ void App_t::Task() {
 
                 if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3) {
                     Uart.Printf("\rID to play=%d",reason_id);
-                    //new reason to play!
-                    if(reasons[reason_id].eID != SICD.last_played_emo)
+                    //new reason to play!remade on absent files!!
+                    if(GetRealEmoForEmoToPlay(reasons[reason_id].eID) != SICD.last_played_emo)
                     {
                         //check if it's user reason,if any, set already played flag
                         UserReasonFlagRecalc(SICD.last_intention_index_winner);//тут должэн стоять прошлый победитель!!
@@ -400,7 +435,7 @@ void App_t::Task() {
                 if(Time.S_total% SEC_TO_SELF_REDUCE ==0)
                 {
                     Energy.AddEnergy(-1);
-                    Uart.Printf("\renergy self reduced");
+                    Uart.Printf("\renergy self reduced, stotal=%d",Time.S_total);
                 }
             }
             else
@@ -481,7 +516,7 @@ void App_t::Task() {
 #endif
     } // while true
 }
-void App_t::UpdateLocation() {
+void App_t::UpdateState() {
     uint8_t SignalPwr = 0;
     uint8_t LocationID = 0;
     uint16_t tmpID=0;
@@ -519,13 +554,14 @@ void App_t::Init() {
 //        // Count files available
 //        char *S = nullptr;
 //        while(SD.GetNext(&S) == FR_OK)
-
+    Table_buff.Init();
     Uart.Printf("\rCharacter file: %s", S);
     ParseCsvFileToEmotions(S);
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
     LoadCharacterSettings();
     LoadData();
+    Uart.Printf("\r APP::INIt, stotal=%d",Time.S_total);
 }
 
 void App_t::SaveData()
@@ -865,4 +901,83 @@ void App_t::OnUartCmd(Cmd_t *PCmd) {
     else if(*PCmd->Name == '#') Uart.Ack(CMD_UNKNOWN);  // reply only #-started stuff
 }
 #endif
+
+void TableSt_t::ParseTableToStorage()
+{
+    int val1= MIN((uint32_t)NUMBER_OF_REASONS, RxTable.PTable->Size);
+    current_row_size=0;
+    //цикл по входной таблице!
+    for(int i=0;i<val1;i++)
+    {
+
+        if(current_row_size==COPY_RX_TABLE_SZ)//полностью заполненная таблица, надеюсь никогда не будет.
+        {
+            int id_found=-1;
+            for(int mm=0;mm<current_row_size;mm++)
+                if(this->Row[mm].Level<RxTable.PTable->Row[i].Level)
+                {
+                    id_found=mm;
+                    break;
+                }
+            if(id_found>=0)
+            {
+                this->Row[id_found].ID=RxTable.PTable->Row[i].ID;
+                this->Row[id_found].Level=RxTable.PTable->Row[i].Level;
+                this->Row[id_found].Reason=RxTable.PTable->Row[i].State.Reason;
+            }
+            continue;
+        }
+
+       //notmal turn
+       this->Row[i].ID=RxTable.PTable->Row[i].ID;
+       this->Row[i].Level=RxTable.PTable->Row[i].Level;
+       this->Row[i].Reason=RxTable.PTable->Row[i].State.Reason;
+       current_row_size++;
+    }
+}
+void RxTableSt_t::Recalc_storage()
+{    //move id
+    current_table_id++;
+    if(current_table_id>=NUM_ROWS_COPY_RX_TABLE)
+        current_table_id=0;
+    RxStorageResult.current_row_size=0;
+    //get data
+    this->RxStorage[current_table_id].ParseTableToStorage();
+    //calculate_summary
+    for(int i=0;i<NUM_ROWS_COPY_RX_TABLE;i++)
+        for( int j=0;j<RxStorage[i].current_row_size;j++)
+        {
+            int val_pos=RxStorageResult.current_row_size;
+            for(int mm=0;mm<RxStorageResult.current_row_size;mm++)
+                if(RxStorage[i].Row[j].ID==RxStorageResult.Row[mm].ID)
+                {
+                    val_pos=mm;
+                    break;
+                }
+            if(val_pos<COPY_RX_TABLE_SZ)
+            {
+                if(val_pos==RxStorageResult.current_row_size)//новое поле
+                {
+                    RxStorageResult.current_row_size++;
+                    memcpy(&(RxStorageResult.Row[val_pos]),&(RxStorage[i].Row[j]),sizeof(RowSt_t));
+                }
+                else if(RxStorageResult.Row[val_pos].Level<RxStorage[i].Row[j].Level)//если новое поле сильнее старого - писать новое
+                    memcpy(&(RxStorageResult.Row[val_pos]),&(RxStorage[i].Row[j]),sizeof(RowSt_t));
+            }
+            else//если места нет - находим ближайший слабее и пишем поверх него??
+            {
+                for(int mm=0;mm<RxStorageResult.current_row_size;mm++)
+                    if(RxStorageResult.Row[mm].Level<RxStorage[i].Row[j].Level)//если новое поле сильнее старого - писать новое
+                         memcpy(&(RxStorageResult.Row[mm]),&(RxStorage[i].Row[j]),sizeof(RowSt_t));
+            }
+        }
+}
+void RxTableSt_t::Init(){
+    for(int i=0;i<NUM_ROWS_COPY_RX_TABLE;i++)
+        this->RxStorage[i].current_row_size=0;
+    this->current_table_id=0;
+    RxStorageResult.current_row_size=0;
+    this->PTable =&RxStorageResult;
+}
+
 #endif

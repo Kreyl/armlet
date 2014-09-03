@@ -141,8 +141,6 @@ void AtlGui_t::AddSuspendScreenTimer(int sec_to_add)
 {
     if(is_screen_suspended)
         return;
-
-
     if(is_suspend_timer_run)
     {
         this->screen_suspend_timer=0;
@@ -338,48 +336,8 @@ bool AtlGui_t::ButtonIsClicked(int button_id)
         }
         else return false;
       // else return; // если нет действия на кнопке - ничего не делаем
-
     }
     else return false; // если мы вне автомата состояний - ошибка!
-
-
-    // если есть изменение экрана, меняем экран??
-
-    //отрисовываем изменения??
-
-//
-//    //вызываем геттер кнопки
-//    if(current_state>=0 && current_state<screens_number)
-//    {
-//       if( gui_states[current_state].sptr_button_state[button_id]->fptr_on_press()!=NULL)
-//       {
-//           int button_state_val=*(gui_states[current_state].sptr_button_state[button_id]->fptr_on_press());
-//           if(button_state_val>0)
-//           {
-//               //on red andgreenchange state
-//               //если геттер успешен,и можем что-то сделать,вызываем сеттер кнопки
-//               gui_states[current_state].sptr_button_state[button_id]->fptr_change_state_id();
-//
-//           }
-//       }
-//       //вызываем смену крана,если есть
-//       if( gui_states[current_state].gui_state_array_switch[button_id]>=0)
-//       {
-//           if(gui_states[current_state].fptr_gui_state_array_switch_functions[button_id]!= NULL)
-//               gui_states[current_state].fptr_gui_state_array_switch_functions[button_id]();
-//       }
-//
-//
-//
-//      // else return; // если нет действия на кнопке - ничего не делаем
-//
-//    }
-//    else return; // если мы вне автомата состояний - ошибка!
-//
-//
-//    // если есть изменение экрана, меняем экран??
-//
-//    //отрисовываем изменения??
 }
 void AtlGui_t::RenderNameTimeBat()
 {
@@ -389,11 +347,9 @@ void AtlGui_t::RenderNameTimeBat()
 
     Lcd.Printf(B52,1, 0, clAtltopstr, clAtlBack, "%s",char_name);
     Lcd.Printf(B52,96-2, 0, clAtltopstr, clAtlBack, " %s",timechar);
-
 }
 void AtlGui_t::GetCharname()
 {
-    //ID
     int chsize=sizeof(reasons[App.ID])/sizeof(char);
     if(chsize>MAX_CHARNAME_LCD_SIZE)
         chsize=MAX_CHARNAME_LCD_SIZE;
@@ -410,22 +366,6 @@ void AtlGui_t::DrawSondLvlMark()
 }
 void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
 {
-    //getfilename
-    //get filename
-    //absent 4
-    //disabled
-    //enabled
-    //normal 1
-    //not
-    //pressed
-
-//#define BUTTON_NOT_PRESSED 0
-//#define BUTTON_NORMAL 1
-//#define BUTTON_ENABLED 2
-//#define BUTTON_DISABLED 3
-//#define BUTTON_ABSENT 4
-//#define BUTTON_PRESSED 5
-//#define BUTTON_ERROR 6
         strcpy(bmp_filename,PATH_TO_GUI);
         strcat(bmp_filename,screens[screen_id].name);
         strcat(bmp_filename,PATH_FOLDER_STR);
@@ -445,15 +385,6 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
             strcat(bmp_filename,"pressed");
 
         strcat(bmp_filename,PATH_FOLDER_STR);
-       // strcat(bmp_filename,buttons_arr.[button_id]);
-        //говнокод!
-       // char bstr[sizeof(BUTTONS)];
-        //char bstr1[1];
-        //memcpy(bstr,BUTTONS,sizeof(BUTTONS));
-        //memcpy(bstr1,&bstr+button_id,1);
-        //говнокод конец
-        //не пашет (
-        //strcat(bmp_filename,bstr1);
 
         //кривокот
         //#define BUTTONS "ABCLERXYZ"
@@ -476,15 +407,12 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
         else if(button_id==8)
             strcat(bmp_filename,"R");
         //кривокод конец
-
-      // strchr(BUTTONS,'B');
         strcat(bmp_filename,GUI_PATH_EXT);
 //        Uart.Printf("\rRenderSingleButton %s left %d Bot %d",bmp_filename,screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom);
         // render it
         Lcd.DrawBmpFile(screens[screen_id].buttons[button_id].left,screens[screen_id].buttons[button_id].bottom,bmp_filename);
 
         //is_lock_redraw_active
-
         if(screens[screen_id].buttons[button_id].press==bLockChange)
         {
             if(is_locked==true)
@@ -504,10 +432,4 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
             //
 
         }
-//        if(screens[screen_id].buttons[button_id].press==bSoundUpChange || screens[screen_id].buttons[button_id].press==bSoundDownChange)
-//        {
-//            DrawSondLvlMark();
-//           // RenderFullScreen(screen_id);
-//
-//        }
 }

@@ -18,7 +18,8 @@ void AppInit();
 #define NARCO_IS_OFF_STATE 0
 #define NARCO_IS_ON_STATE 1
 
-
+#define COPY_RX_TABLE_SZ 100
+#define NUM_ROWS_COPY_RX_TABLE 3
 #if 1 // ==== Timings ====
 #define T_PILL_CHECK_MS         360  // Check if pill connected every TM_PILL_CHECK
 #define T_MEASUREMENT_MS        5004 // Battery measurement
@@ -40,7 +41,26 @@ struct Pill_t {
 #if UART_RX_ENABLED
 void TmrUartRxCallback(void *p);
 #endif
-
+struct RowSt_t
+{
+    int ID;
+    int Level;
+    int Reason;
+};
+struct TableSt_t {
+    RowSt_t Row[COPY_RX_TABLE_SZ];
+    int current_row_size;
+    void ParseTableToStorage();
+    //RxTableRow_t * ptr_curr_row;
+};
+struct RxTableSt_t{
+    TableSt_t RxStorage[NUM_ROWS_COPY_RX_TABLE];
+    void Recalc_storage();//get new and get new result!
+    void Init();
+    TableSt_t RxStorageResult; //сюдарезультаты
+    int current_table_id;// сюда парсим приходящее
+    TableSt_t * PTable; //для простоты копипасты, мб встроим это дело в основное, чтобы небыло n+1
+};
 #define CSV_SEPARATOR_CHAR ','
 enum AppState_t {asIdle, asCurrent};
 
@@ -50,6 +70,7 @@ public:
     Pill_t Pill;
     Thread *PThd;
     state_t CurrInfo;
+    RxTableSt_t Table_buff;
     // Timers
     VirtualTimer TmrPillCheck, TmrUartRx;
     void Init();
@@ -62,7 +83,7 @@ public:
     uint8_t ParseCsvFileToEmotions(const char* filename);
     void WriteInentionStringToData(char * int_name, int int_val, char * emo_name);
 
-    void UpdateLocation();
+    void UpdateState();
     //void GetDataFileName();
    char DataFileBuff[33];
 

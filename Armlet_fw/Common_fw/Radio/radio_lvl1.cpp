@@ -106,7 +106,6 @@ void rLevel1_t::IMeshRx() {
 #endif
         } // Pkt Ok
     } while(Radio.Valets.InRx);
-    Mesh.SendEvent(EVTMSK_MESH_RX_END);
 }
 #endif
 
