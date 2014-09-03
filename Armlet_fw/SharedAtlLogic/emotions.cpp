@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-09-03 02:21:35
+ * Generated at 2014-09-03 21:42:52
  */
 #include "emotions.h"
 
@@ -111,25 +111,26 @@ Reason_t reasons[] = {
 	// Locations
  /*   1 */ { "hub", 240, 0, 2 },        /* masterka */
  /*   2 */ { "dead", 240, 0, 6 },       /* mertvyak */
- /*   3 */ { "hermit", 40, 0, 71 },     /* umirotvorenie */
- /*   4 */ { "square", 40, 0, 59 },     /* vdohnovenie */
- /*   5 */ { "factory", 40, 0, 12 },    /* skuka */
- /*   6 */ { "cityhall", 40, 0, 49 },   /* gordost' */
- /*   7 */ { "station", 40, 0, 67 },    /* predvkushenie */
- /*   8 */ { "bar", 40, 0, 45 },        /* vesel'e */
- /*   9 */ { "coffee", 40, 0, 52 },     /* interes */
- /*  10 */ { "detskaya", 40, 0, 72 },   /* nostal'giya */
- /*  11 */ { "tent", 40, 0, 14 },       /* depressiya */
- /*  12 */ { "hospital", 40, 0, 21 },   /* obrechennost' */
- /*  13 */ { "university", 40, 0, 64 }, /* vozhdelenie */
- /*  14 */ { "redroom", 40, 0, 85 },    /* trans */
- /*  15 */ { "shop", 40, 0, 38 },       /* neudovletvorennost' */
- /*  16 */ { "blackhouse", 40, 0, 32 }, /* fobiya */
- /*  17 */ { "home", 40, 0, 65 },       /* umilenie */
- /*  18 */ { "trench", 40, 0, 88 },     /* prosvetlenie */
- /*  19 */ { "cinema", 40, 0, 52 },     /* interes */
+ /*   3 */ { "bg", 40, 0, 0 },          /* fon */
+ /*   4 */ { "hermit", 40, 0, 71 },     /* umirotvorenie */
+ /*   5 */ { "square", 40, 0, 59 },     /* vdohnovenie */
+ /*   6 */ { "factory", 40, 0, 12 },    /* skuka */
+ /*   7 */ { "cityhall", 40, 0, 49 },   /* gordost' */
+ /*   8 */ { "station", 40, 0, 67 },    /* predvkushenie */
+ /*   9 */ { "bar", 40, 0, 45 },        /* vesel'e */
+ /*  10 */ { "coffee", 40, 0, 52 },     /* interes */
+ /*  11 */ { "detskaya", 40, 0, 72 },   /* nostal'giya */
+ /*  12 */ { "tent", 40, 0, 14 },       /* depressiya */
+ /*  13 */ { "hospital", 40, 0, 21 },   /* obrechennost' */
+ /*  14 */ { "university", 40, 0, 64 }, /* vozhdelenie */
+ /*  15 */ { "redroom", 40, 0, 85 },    /* trans */
+ /*  16 */ { "shop", 40, 0, 38 },       /* neudovletvorennost' */
+ /*  17 */ { "blackhouse", 40, 0, 32 }, /* fobiya */
+ /*  18 */ { "home", 40, 0, 65 },       /* umilenie */
+ /*  19 */ { "trench", 40, 0, 88 },     /* prosvetlenie */
+ /*  20 */ { "cinema", 40, 0, 52 },     /* interes */
 	// end of locations
- /*  20 */ { "fon_tech", 0, 0, 0 },         /* neverno */
+
 	// Forest
  /*  21 */ { "FA21", 40, 0, 9 },        /* les */
  /*  22 */ { "FA22", 40, 0, 9 },        /* les */
