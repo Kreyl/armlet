@@ -551,6 +551,7 @@ void App_t::UpdateState() {
     if(LocationID) CurrInfo.Location = LocationID;
     CurrInfo.Emotion=SICD.last_played_emo;
     CurrInfo.Reason=SICD.last_reason_active_armlet;
+    CurrInfo.Energy=Energy.GetEnergy();
 
 }
 void App_t::Init() {
