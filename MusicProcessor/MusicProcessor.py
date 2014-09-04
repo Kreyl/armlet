@@ -14,6 +14,7 @@
 # - python MusicProcessor.py [-v|--verify] [musicDirectory]
 #
 from codecs import open as codecsOpen
+from datetime import datetime
 from errno import ENOENT
 from getopt import getopt
 from itertools import chain, count
@@ -22,6 +23,7 @@ from os.path import basename, expanduser, getmtime, getsize, isdir, isfile, isli
 from re import compile as reCompile
 from shutil import copy, copytree, rmtree
 from sys import argv, platform, stdout
+from time import mktime
 from traceback import format_exc
 
 try:
@@ -100,6 +102,13 @@ CONSOLE_ENCODING = stdout.encoding or ('cp866' if isWindows else 'UTF-8')
 def encodeForConsole(s):
     return s.encode(CONSOLE_ENCODING, 'replace')
 
+def getFileModificationTime(fileName):
+    t = getmtime(fileName)
+    dt = datetime.fromtimestamp(t)
+    if dt.year > 2050:
+        return mktime(dt.replace(year = dt.year - 100).timetuple()) # sorry, no easier way to do it
+    return t
+
 def silentRemove(filename):
     try:
         remove(filename)
@@ -166,7 +175,7 @@ def resultMark(targetDir, result, okNum = None, okSize = None, errorText = None)
 
 def checkResultMark(targetDir):
     okMark = join(targetDir, RESULT_MARKS[False])
-    okDate = getmtime(okMark) if isfile(okMark) else 0
+    okDate = getFileModificationTime(okMark) if isfile(okMark) else 0
     okText = ''
     if okDate:
         with open(okMark) as f:
@@ -176,7 +185,7 @@ def checkResultMark(targetDir):
     else:
         okNum = okSize = None
     errorMark = join(targetDir, RESULT_MARKS[True])
-    errorDate = getmtime(errorMark) if isfile(errorMark) else 0
+    errorDate = getFileModificationTime(errorMark) if isfile(errorMark) else 0
     errorText = ''
     if errorDate:
         with codecsOpen(errorMark, 'r', 'utf-8') as f:
@@ -235,7 +244,7 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
     if markDate:
         try:
             # Verify that status mark is still actual
-            if any(date > markDate for date in (getmtime(f) for f in chain((sourceDir, musicDir), sourceFiles, musicFiles, errorFiles))):
+            if any(date > markDate for date in (getFileModificationTime(f) for f in chain((sourceDir, musicDir), sourceFiles, musicFiles, errorFiles))):
                 raise ProcessException("Status mark obsolete, newer music files exist")
             if okNum is None:
                 raise ProcessException("No music files found")
