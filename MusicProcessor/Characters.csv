@@ -8,12 +8,12 @@
 #
 # !!! DO NOT EDIT !!!
 #
-# Generated at 2014-09-03 19:58:55
+# Generated at 2014-09-04 04:01:23
 #
 101,PAdams,Mr. Peter Adams,3,900,5,0,,0
 102,DAllgood,Mr. David Allgood,9,20,30,0,,1
-103,MBanks,Ms. Marian Banks,3,900,5,0,,1
-104,BBernhard,Ms. Brenda Bernhard,3,900,5,0,,1
+103,MBanks,Ms. Marian Banks,3,900,20,0,,1
+104,BBernhard,Ms. Brenda Bernhard,2,1800,5,0,,1
 105,ABrown,Ms. Anna Brown,3,900,5,0,,1
 106,FBuster,Mr. Frank Buster,3,20,30,0,,1
 107,ZCampbell,Mr. Zack Campbell,3,20,30,0,,1
@@ -24,7 +24,7 @@
 112,CComes,Ms. Carol Comes,3,900,5,0,,1
 113,RConnor,Ms. Alicia Randall Connor,3,900,5,0,,0
 114,GCross,Ms. Gina Cross,3,900,5,0,,1
-115,FCunningham,Ms. Fannie Queen Cunningham,3,900,5,0,,1
+115,FCunningham,Ms. Fannie Queen Cunningham,3,300,10,0,,1
 116,MDawkins,Mr. Matthew Dawkins,3,20,30,0,,0
 117,JDawson,Ms. Jane Dawson,3,20,30,0,,1
 118,GDay,Ms. Gian Day,3,20,30,0,,1
@@ -34,44 +34,44 @@
 122,MDurden,Mr. Mark Lee Durden,3,900,5,0,,1
 123,DElis,Ms. Daisy Elis,3,900,5,0,vozhdelenie,0
 124,NEpstein,Ms. Nina Epstein,3,900,5,0,,1
-125,CFranklin,Ms. Charity Franklin,3,900,5,0,,0
+125,CFranklin,Ms. Charity Franklin,2,900,5,0,,0
 126,LGeertz,Ms. Lilian Geertz,3,900,5,0,,0
 127,AGraywood,Ms. Anna Maria Graywood,3,900,5,0,,1
-128,KGreenhall,Ms. Kayla Greenhall,3,900,5,0,,1
+128,KGreenhall,Ms. Kayla Greenhall,2,1800,5,0,,1
 129,AGrissom,Mr. Anthony Grissom,3,900,5,0,,0
 130,Guide,Mr. Guide,3,0,5,5,,0
 131,MHailey,Ms. Maria Hailey,3,900,5,0,,1
 132,ZHarriot,Ms. Zoe Harriot,3,20,30,0,,1
 133,MHarvent,Ms. Miria Harvent,3,20,30,0,,1
-134,BHeart,Ms. Bonnie Heart,1,20,30,0,,1
+134,BHeart,Ms. Bonnie Heart,2,900,10,0,,1
 135,BHill,Ms. Bridget Hill,3,900,5,0,,1
 136,CHonzo,Mr. Corian Honzo,3,900,5,0,,0
 137,AHuxley,Ms. Angelica Huxley,3,900,5,0,,1
-138,AJane,Ms. Ayita Jane,1,900,5,0,,0
+138,AJane,Ms. Ayita Jane,2,300,15,0,,0
 139,AJones,Ms. Anna Jones,3,900,5,0,,1
 140,EJones,Mr. Ezra Jones,6,20,30,0,,0
 141,SKendall,Ms. Sarah Kendall,3,900,5,0,,0
 142,LLane,Mr. Lloyd Lewis Lane,3,900,5,0,,0
 143,SLarken,Ms. Sheila Larken,3,900,5,0,,0
 144,ALee,Ms. Alice Lee,3,900,5,0,,1
-145,CLefebvre,Ms. Celine Lefebvre,3,20,30,0,,1
-146,VLehndorff,Ms. Vera von Lehndorff,3,900,5,0,,1
-147,TMalone,Ms. Trinity Malone,3,900,5,0,,1
+145,CLefebvre,Ms. Celine Lefebvre,3,60,30,0,,1
+146,VLehndorff,Ms. Vera von Lehndorff,4,300,15,0,,1
+147,TMalone,Ms. Trinity Malone,2,900,5,0,,1
 148,AMay,Ms. Agatha May,1,900,5,0,,1
 149,UMcGee,Ms. Unity McGee,1,900,5,0,,1
 150,FMilligan,Ms. Francine Milligan,3,900,5,0,,1
-151,AMorientes,Mr. Agosto Morientes,3,20,30,0,,1
-152,MNovak,Mr. Martin Novak,3,900,5,0,,1
-153,SOReilly,Ms. Sinead O'Reilly,3,20,30,0,,1
-154,JOSullivan,Mr. Jack O'Sullivan,3,900,5,0,,0
+151,AMorientes,Mr. Agosto Morientes,6,30,15,0,,1
+152,MNovak,Mr. Martin Novak,4,900,10,0,,1
+153,SOReilly,Ms. Sinead O'Reilly,3,900,10,0,,1
+154,JOSullivan,Mr. Jack O'Sullivan,3,300,5,0,,0
 155,MParcs,Mr. Mitchell Parcs,3,900,5,0,,1
 156,SRandom,Ms. Samantha Random,3,900,5,0,,0
-157,RRay,Mr. Robert Ray,3,900,5,0,,1
-158,MReed,Ms. Morgan Reed,1,900,5,0,,1
+157,RRay,Mr. Robert Ray,4,300,20,0,,1
+158,MReed,Ms. Morgan Reed,2,900,5,0,,1
 159,MRose,Ms. Margareth Rose,1,900,5,0,,1
 160,DSeldon,Mr. Derrick John Seldon,1,20,30,0,,1
 161,PShannon,Mr. Paul Shannon,3,900,5,0,,1
-162,JSherman,Ms. Julia Sherman,3,20,30,0,,0
+162,JSherman,Ms. Julia Sherman,2,300,5,0,,0
 163,DSilverstone,Mr. David Silverstone,3,20,30,0,,0
 164,RSoyfer,Ms. Raquel Soyfer,3,900,5,0,,1
 165,JSpencer,Mr. Jason Spencer,3,20,30,0,,1
@@ -79,13 +79,13 @@
 167,DStanley,Ms. Dana Stanley,3,20,30,0,,0
 168,JSullivan,Mr. Jack Sullivan,3,900,5,0,,1
 169,SSummer,Mr. Stephen Summer,3,900,5,0,,0
-170,TSunday,Mr. Trey Sunday,3,900,5,0,,1
+170,TSunday,Mr. Trey Sunday,6,30,30,0,,1
 171,WThomas,Mr. Wystan Hugh Thomas,3,900,5,0,,0
 172,EThorp,Mr. Edward Thorp,3,900,5,0,,1
 173,EWilliams,Ms. Emmy Williams,3,20,30,0,,1
 174,HWilliams,Mr. Herbert Williams,3,900,5,0,,1
 175,MWright,Ms. Mary-Ann Wright,3,900,5,0,,1
 176,LYoung,Mr. Lester Young,3,900,5,0,,1
-177,NYoung,Mr. Neil Young,3,900,5,0,,1
+177,NYoung,Mr. Neil Young,8,60,20,0,,1
 178,ATest,Mr. Alpha Test,3,900,5,0,,0
 179,BTest,Ms. Beta Test,3,900,5,0,,0
