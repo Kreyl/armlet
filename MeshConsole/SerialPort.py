@@ -67,8 +67,8 @@ class SerialPort(object):
                         elif self.ready and self.readCallBack:
                             self.readCallBack(line)
             except Exception:
-                from traceback import format_exc
-                print format_exc()
+                #from traceback import format_exc
+                #print format_exc()
                 self.logger.warning("connection broken")
                 self.reset()
             sleep(DT)
