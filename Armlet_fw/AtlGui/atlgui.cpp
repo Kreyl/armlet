@@ -148,7 +148,7 @@ void AtlGui_t::AddSuspendScreenTimer(int sec_to_add)
         return;
     }
     screen_suspend_timer+=sec_to_add;
-   // Uart.Printf("AtlGui_t::AddSuspendScreenTimer  screen_suspend_timer %d \r",screen_suspend_timer);
+    Uart.Printf("AtlGui_t::AddSuspendScreenTimer  screen_suspend_timer %d \r",screen_suspend_timer);
     if(screen_suspend_timer>=SUSPEND_SCREEN_SEC)
         TurnOffScreen();
 };
@@ -227,12 +227,12 @@ void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
         kmode=3;
 
    // Uart.Printf()
-    is_suspend_timer_run=false;
-    if(is_screen_suspended)
-    {
-        this->TurnOnScreen();
-        return;
-    }
+//    is_suspend_timer_run=false;
+//    if(is_screen_suspended)
+//    {
+//        this->TurnOnScreen();
+//        return;
+//    }
     if(is_locked && button_id!=6)//если не лок и залочена - вернуться
         return;
 

@@ -13,7 +13,7 @@
 #define SEC_TO_SELF_REDUCE 5700
 
 #define START_ENERGY 50
-#define STANDART_TOUGHNESS 3
+//#define STANDART_TOUGHNESS 3
 #define REASON_FAIL_ENERGY_CHANGE -5
 #define REASON_SUCESS_ENERGY_CHANGE 5
 #define ENERGY_SEC_IGNORE_SHUTDOWN 10
@@ -25,12 +25,12 @@ class Energy_t
 {
 private:
    int energy_lvl;
-   int toughness;
+
 public:
    int human_support;
-    Energy_t(){energy_lvl=START_ENERGY;toughness=STANDART_TOUGHNESS;};
+    Energy_t(){energy_lvl=START_ENERGY;is_default_cfg=false;};
     void AddEnergy(int value);
-
+    bool is_default_cfg;
     //зависимость динамики персонажа от уровня энергии
     //[1-4]
   //  int GetEnergyScale(){return 1+ (energy_lvl)/30;};
@@ -71,9 +71,6 @@ public:
     }
     int GetEnergy(){return energy_lvl;}
     void SetEnergy(int val_in);
-    //{
-      //  energy_lvl=val_in;}
-    void LoadToughness(){};//TODO
 };
 
 

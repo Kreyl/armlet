@@ -270,16 +270,16 @@ int bReasonChange(int screen_id, int button_id ,int press_mode)
 
         if(user_reason_indx==SI_FIGHT)
             return GSCS.TryDrakaShutdown();
-        ArrayOfUserIntentions[user_reason_indx].OnTurnOffManually(true,user_reason_indx);
-        return BUTTON_NORMAL;
+        return ArrayOfUserIntentions[user_reason_indx].OnTurnOffManually(true,user_reason_indx);
+
     }
     if(press_mode==2)
     {
         Uart.Printf("\rCALL bReasonChange TURNED OFF2");
         if(user_reason_indx==SI_FIGHT)
             return GSCS.TryDrakaShutdown();
-        ArrayOfUserIntentions[user_reason_indx].OnTurnOffManually(false,user_reason_indx);
-        return BUTTON_NORMAL;
+        return ArrayOfUserIntentions[user_reason_indx].OnTurnOffManually(false,user_reason_indx);
+
     }
 
 //    int kmode=-1;
@@ -377,8 +377,14 @@ int bChangeMelodyCheck(int screen_id, int button_id)
         return BUTTON_PRESSABLE;
     int emonum=GetFileNumerForEmoToPlay(SICD.last_played_emo);
     Uart.Printf("bChangeMelodyCheck File numbers %d,emo_id %d \r",emonum,SICD.last_played_emo);
-    if(emonum<=1)
+
+    if(emonum<1)
         return BUTTON_LOCKED;
+    else if(emonum==1)
+    {
+        PlayNewEmo(SICD.last_played_emo,10,0);
+        return BUTTON_LOCKED;
+    }
     else
         return BUTTON_PRESSABLE;
     //get this emo file numbers

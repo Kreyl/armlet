@@ -215,7 +215,7 @@ char * GetFileNameToPlayFromEmoId(int emo_id) {
 	return GetMusicFileNameFromList(emo_id, track_num_calculated);
 }
 
-void PlayNewEmo(int emo_id, int err_id, bool is_gs) {
+void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos) {
 
     if(SICD.is_global_stop_active && !is_gs)
     {
@@ -266,6 +266,11 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs) {
        //проверили новые emo id file id
        Uart.Printf("\rMID_SEEK_SUPPORT CheckIfRecent: emo indx %d, file_indx: %d",SRPFESingleton.last_played_emo_imdx,SRPFESingleton.last_played_file_indx);
        int seek_pos_old=SRPFESingleton.CheckIfRecent(SRPFESingleton.last_played_emo_imdx,SRPFESingleton.last_played_file_indx);
+       if(ignore_play_pos)
+       {
+           Uart.Printf("\r PlayNewEmo SEEKPOS IGNORE");
+           seek_pos_old=0;
+       }
        Sound.Play(PlayEmoBuffTmp,seek_pos_old);
        Uart.Printf(PlayEmoBuffTmp);
        Uart.Printf("\r");
