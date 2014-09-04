@@ -5,9 +5,11 @@
  *      Author: USER
  */
 #include "energy.h"
-
+#include "cmd_uart.h"
 Energy_t Energy;
-
+void Energy_t::SetEnergy(int val_in){
+    Uart.Printf("\r ENERGY CURRENT SET %d",val_in);
+    energy_lvl=val_in;}
 void Energy_t::AddEnergy(int value)
 {
     if(value>ENERGY_MAX_CHANGE_STEP)
@@ -20,4 +22,6 @@ void Energy_t::AddEnergy(int value)
         energy_lvl= MIN_ENERGY_LVL;
     if(energy_lvl>MAX_ENERGY_LVL)
         energy_lvl= MAX_ENERGY_LVL;
+
+    Uart.Printf("\r ENERGY CURRENT %d",energy_lvl);
 }

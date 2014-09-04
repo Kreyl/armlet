@@ -30,6 +30,7 @@ void AtlGui_t::Init()
     is_screen_suspended=false;
     is_suspend_timer_run=false;
     is_lock_redraw_active=false;
+    ReasonFlag=false;
     //init gui pos andfunc arrays
 
     //get screen ptrs
@@ -225,6 +226,7 @@ void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
     if(Type==keRepeat)
         kmode=3;
 
+   // Uart.Printf()
     is_suspend_timer_run=false;
     if(is_screen_suspended)
     {
@@ -320,7 +322,12 @@ bool AtlGui_t::ButtonIsClicked(int button_id)
     {
         if( screens[current_state].buttons[button_id].isPressable!= nullptr)
         {
-           int button_state_val=screens[current_state].buttons[button_id].isPressable(current_state,button_id);//sptr_button_state[button_id]->fptr_on_press());
+            //по нажатию на резон - выставляем флаг
+           if(screens[current_state].buttons[button_id].isPressable==bReasonCheck)
+               this->ReasonFlag=true;
+
+           int button_state_val=screens[current_state].buttons[button_id].isPressable(current_state,button_id);
+
            Uart.Printf("\rbutton_state_val3 %d",button_state_val);
            if(button_state_val==BUTTON_PRESSABLE)
            {
@@ -385,7 +392,7 @@ void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
             strcat(bmp_filename,"pressed");
 
         strcat(bmp_filename,PATH_FOLDER_STR);
-
+        Uart.Printf("\rRenderSingleButton bstate %d",button_state);
         //кривокот
         //#define BUTTONS "ABCLERXYZ"
         if(button_id==0)

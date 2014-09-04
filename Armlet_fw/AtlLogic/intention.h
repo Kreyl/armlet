@@ -103,7 +103,7 @@ typedef struct IntentionCalculationData
     bool is_last_played_id_recent;//???
     bool is_global_stop_active;
     bool is_everysec_calculation_active;//???
-    int last_reason_active_armlet;// последний активный резон с точки зрения игрока
+    int last_reason_active_armlet;// последний активный резон с точки зрения игрока нужен для выдачи на базу.
 }IntentionCalculationData;
 
 #define HEART_PLAYING_TIME_SEC 20
@@ -117,9 +117,13 @@ typedef struct GlobalStopCalculationSupport
 
     int draka_fight_length;
     int draka_heart_length;
+    int last_reason_active_armlet_backup;//этой штукой заводим заново музыку после конца остановки!
 
-    void FinishStopCalculation();
-    void OnNewSec();
+    //return visual on button!
+    int FinishStopCalculation(GlobalStopType_t stop_reason_type_in);
+    int TryDrakaShutdown();
+    //false if no need redraw, true if redraw needed
+    bool OnNewSec();
     void BeginStopCalculations(GlobalStopType_t stop_reason_type_in);
 } GlobalStopCalculationSupport;
 
@@ -157,6 +161,7 @@ void CalculateIntentionsRadioChange();
 //returns -1 if winner does not over switch limit, else return reason id
 
 bool UIIsONTail(int array_indx);
+bool UIIsOnPlateau(int array_indx);
 
 int CalculateCurrentPowerOfPlayerReason(int array_indx, bool is_change=true); //считаеттекущую мощность позаданному стандартному алгоритму, if(is_change) - меняет состояние
 //Obsolete??
@@ -178,6 +183,7 @@ void PrintSCIDToUart();
 
 //user intentions array funcs
 void InitArrayOfUserIntentions();
+
 void UserReasonFlagRecalc(int reason_id);
 
 void ReasonAgeModifyChangeMelody();

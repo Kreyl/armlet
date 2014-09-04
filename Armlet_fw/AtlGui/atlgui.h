@@ -111,6 +111,7 @@ public:
     int GetScreenIndxFromName(char* name);
 
 
+    bool ReasonFlag;
 };
 
 extern AtlGui_t AtlGui;
