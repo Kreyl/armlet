@@ -148,7 +148,7 @@ void AtlGui_t::AddSuspendScreenTimer(int sec_to_add)
         return;
     }
     screen_suspend_timer+=sec_to_add;
-    Uart.Printf("AtlGui_t::AddSuspendScreenTimer  screen_suspend_timer %d \r",screen_suspend_timer);
+    //Uart.Printf("\rAtlGui_t::AddSuspendScreenTimer  screen_suspend_timer %d \r",screen_suspend_timer);
     if(screen_suspend_timer>=SUSPEND_SCREEN_SEC)
         TurnOffScreen();
 };
