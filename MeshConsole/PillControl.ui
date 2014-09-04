@@ -250,6 +250,13 @@
         </widget>
        </item>
        <item>
+        <widget class="CommandButton" name="peyoteButton">
+         <property name="text">
+          <string>Peyote</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="CommandButton" name="heroinButton">
          <property name="text">
           <string>Heroin</string>
@@ -376,6 +383,7 @@
   <tabstop>dontWritePillButton</tabstop>
   <tabstop>weedButton</tabstop>
   <tabstop>lsdButton</tabstop>
+  <tabstop>peyoteButton</tabstop>
   <tabstop>heroinButton</tabstop>
   <tabstop>resetButton</tabstop>
   <tabstop>logTextEdit</tabstop>

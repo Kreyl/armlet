@@ -277,8 +277,10 @@ SMERT = convertEmotion(u'смерть')
 MERTV = convertEmotion(u'мертвяк')
 HEARTBEAT = convertEmotion(u'сердцебиение')
 TRIP = convertEmotion(u'трип')
+CACTUS = convertEmotion(u'кактус')
+NARKOMAN = convertEmotion(u'наркоман')
 LES = convertEmotion(u'лес')
-ADDITIONAL_EMOTIONS = (WRONG, MASTER, SILENCE, TUMAN, SMERT, MERTV, HEARTBEAT, TRIP, LES)
+ADDITIONAL_EMOTIONS = (WRONG, MASTER, SILENCE, TUMAN, SMERT, MERTV, HEARTBEAT, TRIP, CACTUS, NARKOMAN, LES)
 
 EMOTION_ACCEPT_RANGE = 1
 EMOTION_GUESS_RANGE = 3
