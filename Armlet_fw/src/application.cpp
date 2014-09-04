@@ -164,6 +164,15 @@ static inline void KeysHandler() {
         Uart.Printf("\rKeyEvtType=%u; Keys: ", Evt.Type);
         for(uint8_t i=0; i<Evt.NKeys; i++) Uart.Printf("%u ", Evt.KeyID[i]);
 
+        //drop suspend timer!
+        //AtlGui.screen_suspend_timer=0;
+        AtlGui.is_suspend_timer_run=false;
+        AtlGui.screen_suspend_timer=0;
+        if(AtlGui.is_screen_suspended)
+        {
+            AtlGui.TurnOnScreen();
+            return;
+        }
         if(Evt.Type==kePress) {
             // Beep/Vibrate if click succeeded
             if(AtlGui.ButtonIsClicked(Evt.KeyID[0])) {
@@ -295,6 +304,7 @@ void App_t::Task() {
 
         if(EvtMsk & EVTMSK_KEYS) {
 //            Uart.Printf("\rApp Keys");
+
             KeysHandler();
         }
 
