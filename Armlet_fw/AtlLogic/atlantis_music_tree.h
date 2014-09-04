@@ -64,6 +64,6 @@ int GetRealEmoForEmoToPlay(int emo_id);//checker for emo
 int GetFileNumerForEmoToPlay(int emo_id);
 char * GetFileNameToPlayFromEmoId(int emo_id);
 void RebuildReasons();
-void PlayNewEmo(int emo_id,int err_id, bool is_gs=false/*is global stop on!*/);
+void PlayNewEmo(int emo_id,int err_id, bool is_gs=false/*is global stop on!*/, bool ignore_play_pos=false);
 
 #endif /* ATLANTIS_MUSIC_TREE_H_ */

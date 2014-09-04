@@ -45,8 +45,11 @@ void WriteTailTime(int val_in,int array_indx)
 {
     ArrayOfUserIntentions[array_indx].time_after_plateau=val_in;
 }
-void OnGetTumanMessage()
+void OnGetTumanMessage(int appid)
 {
+    //если леноран - забить болт !
+    if(appid==REASON_RRAY)
+        return;
     //если туман или страх активны - ничего не делать
     if(ArrayOfUserIntentions[SI_TUMAN].current_time>=0)// || ArrayOfUserIntentions[SI_STRAH].current_time>=0)
         return;
@@ -199,7 +202,7 @@ void InitArrayOfUserIntentions()
             Uart.Printf("CRITICAL ERROR User intention not inited %d , rn %d !!!!\r",i,NUMBER_OF_REASONS);
         else//переносим вес в мощность сигнала
         {
-            ArrayOfUserIntentions[i].power512_plateau=reasons[ArrayOfUserIntentions[i].reason_indx].weight;
+            ArrayOfUserIntentions[i].power512_plateau=reasons[ArrayOfUserIntentions[i].reason_indx].weight*SICD.Intention_weight_cost/SICD.Signal_power_weight_cost;
             reasons[ArrayOfUserIntentions[i].reason_indx].weight=0;
             //инициализируем хвост!
             WriteTailTime(300,i);
@@ -412,7 +415,7 @@ void PrintSCIDToUart()
 	}
 
 int GetNotNormalizedIntegral(int power, int reason_id) {
-    //Uart.Printf("reas_id=%d, power=%d\r", reason_id, power);
+    //Uart.Printf("\rGetNotNormalizedIntegral reas_id=%d, power=%d\r", reason_id, power);
     int res = SICD.Intention_weight_cost*reasons[reason_id].weight+power*SICD.Signal_power_weight_cost;
     //Uart.Printf("rRslt=%d\r", res);
     return res;
@@ -548,17 +551,18 @@ void PushPlayerReasonToArrayOfIntentions()
     {
         if(ArrayOfUserIntentions[i].current_time>=0)
         {
-            Uart.Printf("\rPushPlayerReasonToArrayOfIntentions Int_ indx%d",i);
+            //Uart.Printf("\rPushPlayerReasonToArrayOfIntentions Int_ indx%d",i);
             int curr_power=CalculateCurrentPowerOfPlayerReason(i);
             if(curr_power>=0)
             {
-                if(curr_power>512)
-                    curr_power=512;
+                if(curr_power>512*SICD.Intention_weight_cost/SICD.Signal_power_weight_cost)
+                    curr_power=512*SICD.Intention_weight_cost/SICD.Signal_power_weight_cost;
                 //перезаписываем силу, если есть место в массиве!
                 //иначе предупреждение о переполнении
                    if(CurrentIntentionArraySize < MAX_INCOMING_INTENTIONS_ARRAY_SIZE)
                    {
                        //добавляем во входящие
+                       //Uart.Printf("\rPushPlayerReasonToArrayOfIntentions PW%d RI %d",curr_power,ArrayOfUserIntentions[i].reason_indx);
                        ArrayOfIncomingIntentions[CurrentIntentionArraySize].power512=curr_power;
                        ArrayOfIncomingIntentions[CurrentIntentionArraySize].reason_indx=ArrayOfUserIntentions[i].reason_indx;
                        CurrentIntentionArraySize++;
@@ -566,6 +570,8 @@ void PushPlayerReasonToArrayOfIntentions()
                    else
                        Uart.Printf("WARNING PushPlayerReasonToArrayOfIntentions ArrayOfIncomingIntentions is to small for total incoming intentions\r");
             }
+            //else
+                //Uart.Printf("\rPushPlayerReasonToArrayOfIntentions EMPTY");//
         }
     }
 }
@@ -606,12 +612,12 @@ void UserIntentions::OnChangedEmo()
         this->current_time=Energy.GetEnergyScaleValMore(time_on_plateau)+1;
     }
 }
-void UserIntentions::OnTurnOffManually(bool short_or_long,int SI_indx)
+int UserIntentions::OnTurnOffManually(bool short_or_long,int SI_indx)
 {
     if(short_or_long==false)
     {
         CallReasonSuccess(SI_indx);
-        return;
+        return BUTTON_NORMAL;
 
     }
     else
@@ -620,12 +626,12 @@ void UserIntentions::OnTurnOffManually(bool short_or_long,int SI_indx)
         {
             this->was_winning=false;
             this->current_time=Energy.GetEnergyScaleValLess(time_to_plateau)/2;
-            return;
+            return BUTTON_ENABLED;
         }
         else
         {
             CallReasonFalure(SI_indx);
-            return;
+            return BUTTON_NORMAL;
         }
     }
 

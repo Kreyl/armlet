@@ -336,7 +336,7 @@ void App_t::Task() {
             {
                 Table_buff.PTable->current_row_size=1;
                 Table_buff.PTable->Row[0].ID=REASON_BG;
-                Table_buff.PTable->Row[0].Level=100;
+                Table_buff.PTable->Row[0].Level=1;
                 Table_buff.PTable->Row[0].Reason=0;
               //  Uart.Printf("\r No signals, add fon to incoming reasons!");
 
@@ -357,7 +357,7 @@ void App_t::Task() {
                 //init tuman
              //   Uart.Printf("\rREASON_ON_TABLE: %d indx %d id %d",Table_buff.PTable->Row[i].Reason,i,Table_buff.PTable->Row[i].ID);
                 if(Table_buff.PTable->Row[i].Reason ==(uint16_t)REASON_MSOURCE || Table_buff.PTable->Row[i].Reason== REASON_MPROJECT)
-                    OnGetTumanMessage();
+                    OnGetTumanMessage(App.ID);
                 //location reduce75
 
                 if(
@@ -595,6 +595,7 @@ void App_t::SaveData()
    // UINT bw;
    // int buff_size;
 #if 0
+//#0 is not, 1 is yes
 #energy
 50
 #narcograss
@@ -607,10 +608,12 @@ void App_t::SaveData()
 0
 #nacroManiac
 0
+#isdefault
 #endif
     //klfprintf
     //energy to buff
     //energy to file
+    f_printf(&file,"#0 is not, 1 is yes");
     f_printf(&file,"#energy");
     f_printf(&file,"\r\n%d",Energy.GetEnergy());
     //weed, lambda welcome!
@@ -644,6 +647,10 @@ void App_t::SaveData()
     else
         f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
+    if(Energy.is_default_cfg==true)
+        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
+     else
+         f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
    // f_write(&file, DataFileBuff, buff_size, &bw);
     f_close(&file);
     Uart.Printf("\r!!!ArrayOfUserIntentions[SI_MANIAC].current_time%d",ArrayOfUserIntentions[SI_MANIAC].current_time);
@@ -687,7 +694,8 @@ void App_t::LoadCharacterSettings()
 }
 void App_t::DropData()
 {
-    Energy.SetEnergy(START_ENERGY);
+    //Energy.SetEnergy(START_ENERGY);
+    Energy.is_default_cfg=true;
     int32_t addict;
     SD.iniReadInt32("character", "addict", "settings.ini", &addict);
     if(addict==1)
@@ -720,6 +728,8 @@ void App_t::LoadData()
            return;
        //till file end
        int line_num=0;
+       int data_rdy[6];
+       int st_en=START_ENERGY;
        while(f_gets(DataFileBuff, SD_STRING_SZ, &file) != nullptr)
        {
            if(strncmp(DataFileBuff,"#",1)==0)
@@ -729,27 +739,58 @@ void App_t::LoadData()
            int int_val;
            int_val=strtol(DataFileBuff,NULL,10);
            if(line_num==1)
+               st_en=int_val;
+//           if(line_num==1)
+//           {
+//               if(int_val==START_ENERGY)
+//               {
+//                   Uart.Printf("\rApp_t::LoadData()  Default energy found, loading stopped");
+//                   return;
+//               }
+//               else
+//                   Uart.Printf("\rApp_t::LoadData()   energy found %d, loading",int_val);
+//               Energy.SetEnergy(int_val);
+//           }
+           if(line_num>=2 && line_num<=7)
            {
-               if(int_val==START_ENERGY)
+               if(int_val==1)//weed
+                   data_rdy[line_num-2]=0;
+               else
+                   data_rdy[line_num-2]=-1;
+           }
+           //default!
+           if( line_num==7)
+           {
+               if(data_rdy[5]==0)
                {
-                   Uart.Printf("\rApp_t::LoadData()  Default energy found, loading stopped");
+                   Uart.Printf("\rApp_t::LoadData()  Default marker found, loading stopped");
                    return;
                }
                else
-                   Uart.Printf("\rApp_t::LoadData()   energy found %d, loading",int_val);
-               Energy.SetEnergy(int_val);
+                   Uart.Printf("\rApp_t::LoadData()   Default marker found negative %d, loading",int_val);
            }
-           if(line_num==2 && int_val==1)//weed
-               ArrayOfUserIntentions[SI_WEED].current_time=0;
-           if(line_num==3 && int_val==1)//her
-               ArrayOfUserIntentions[SI_HER].current_time=0;
-           if(line_num==4 && int_val==1)//lsd
-               ArrayOfUserIntentions[SI_LSD].current_time=0;
-           if(line_num==5 && int_val==1)//krayk
-               ArrayOfUserIntentions[SI_KRAYK].current_time=0;
-           if(line_num==6 && int_val==1)//manyac
-               ArrayOfUserIntentions[SI_MANIAC].current_time=0;
+           if( line_num==7)
+           {
+               ArrayOfUserIntentions[SI_WEED].current_time=data_rdy[0];
+               ArrayOfUserIntentions[SI_HER].current_time=data_rdy[1];
+               ArrayOfUserIntentions[SI_LSD].current_time=data_rdy[2];
+               ArrayOfUserIntentions[SI_KRAYK].current_time=data_rdy[3];
+               ArrayOfUserIntentions[SI_MANIAC].current_time=data_rdy[4];
+               Energy.SetEnergy(st_en);
+           }
+//           if(line_num==2 && int_val==1)//weed
+//               ArrayOfUserIntentions[SI_WEED].current_time=0;
+//           if(line_num==3 && int_val==1)//her
+//               ArrayOfUserIntentions[SI_HER].current_time=0;
+//           if(line_num==4 && int_val==1)//lsd
+//               ArrayOfUserIntentions[SI_LSD].current_time=0;
+//           if(line_num==5 && int_val==1)//krayk
+//               ArrayOfUserIntentions[SI_KRAYK].current_time=0;
+//           if(line_num==6 && int_val==1)//manyac
+//               ArrayOfUserIntentions[SI_MANIAC].current_time=0;
        }
+       if(line_num!=7)
+           Uart.Printf("\rApp_t::LoadData()  No line fore default marker - load default values ");
 
      //  UINT bw;
      //  int buff_size;

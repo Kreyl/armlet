@@ -76,7 +76,8 @@ typedef struct UserIntentions {
     void TurnOn();
     void NormalizeToDefEnergy();
     void OnChangedEmo();// if changed after winning - change time to end of plateau
-    void OnTurnOffManually(bool short_or_long, int SI_indx); //true - short, false - long
+    //return new visual state of button
+    int OnTurnOffManually(bool short_or_long, int SI_indx); //true - short, false - long
     //bool is_on_tail();
 } UserIntentions;
 
@@ -193,7 +194,7 @@ void WriteFrontTime(int val_in,int array_indx);
 void WriteMidTime(int val_in,int array_indx);
 void WriteTailTime(int val_in,int array_indx);
 
-void OnGetTumanMessage();
+void OnGetTumanMessage(int appid);
 
 //в структуре рассчета будет индекс текущего победителя мощности,
 //индекс предыдущего победителя мощности,
