@@ -117,23 +117,6 @@ char * p_int_name;//button name if available
 
 #endif
 
-//TEST VALUES
-//{-1,25,30,30,30,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_MURDER)},//murder 0
-//{-1,25,1,30,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_CREATION)},//creation 1
-//{-1,25,1,30,2,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_DESTR)},//destruction 2
-//{-1,250,1,20,15,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_SEX)},//sex 3
-//{-1,250,1,60,120,-1,false,0,PROCESS_FIGHT,const_cast<char *> (RNAME_FIGHT)},//fight 4
-//{-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 5 weed
-//{-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 6 heroin
-//{-1,250,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 7 lsd
-//{-1,250,1200,2000,400,-1,false,0,PROCESS_KRAYK,nullptr},//narco 8 krayk
-//{-1,250,1200,2000,400,-1,false,0,PROCESS_DEATH,const_cast<char *> (RNAME_DEATH)},//death 9
-//{-1,250,1200,2000,400,-1,false,0,PROCESS_MANIAC,nullptr},//maniac 10
-//{-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//tuman 11
-//{-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//strah 12
-//{-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mSource 13
-//{-1,250,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mProject 14
-//{-1,250,1200,2000,400,-1,false,0,PROCESS_LOMKA,nullptr},//narco 15 lomka
 //ARRAY, inits inside, all external are in InitArrayOfUserIntentions
 struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
         {-1,-1,-1,-1,-1,-1,false,0,PROCESS_NORMAL,const_cast<char *> (RNAME_MURDER)},//murder 0     INITED
@@ -145,6 +128,7 @@ struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 5 weed     INITED
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 6 heroin     INITED
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 7 lsd     INITED
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 7 kakt     INITED
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_KRAYK,nullptr},//narco 8 krayk
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_DEATH,const_cast<char *> (RNAME_DEATH)},//death 9
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_MANIAC,nullptr},//maniac 10
@@ -154,21 +138,6 @@ struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mProject 14
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_LOMKA,nullptr},//narco 15 lomka
 };
-//#define SI_MURDER 0
-//#define SI_CREATION 1
-//#define SI_DESTRUCTION 2
-//#define SI_SEX 3
-//#define SI_FIGHT 4
-//#define SI_WEED 5
-//#define SI_HER 6
-//#define SI_LSD 7
-//#define SI_KRAYK 8
-//#define SI_DEATH 9
-//#define SI_MANIAC 10
-//#define SI_TUMAN 11
-//#define SI_STRAH 12
-//#define SI_MSOURCE 13
-//#define SI_PROJECT 14
 void InitArrayOfUserIntentions()
 {
    // for(int i=0;i<NUMBER_OF_REASONS;i++)
@@ -184,6 +153,7 @@ void InitArrayOfUserIntentions()
              ArrayOfUserIntentions[SI_WEED].reason_indx=REASON_WEED;
              ArrayOfUserIntentions[SI_HER].reason_indx=REASON_HEROIN;
              ArrayOfUserIntentions[SI_LSD].reason_indx=REASON_LSD;
+             ArrayOfUserIntentions[SI_KAKT].reason_indx=REASON_PEJOTL;
          //маньяк и крайк слышат в ушах одно и то-же, если успешно делают своё дело - ничего, 0 силы.
 
              ArrayOfUserIntentions[SI_KRAYK].reason_indx=REASON_KRAYK;
@@ -229,6 +199,9 @@ void InitArrayOfUserIntentions()
 
     WriteFrontTime(7*60,SI_LSD);
     WriteMidTime(25*60,SI_LSD);
+
+    WriteFrontTime(7*60,SI_KAKT);
+    WriteMidTime(25*60,SI_KAKT);
 
     WriteFrontTime(0,SI_DEATH);
     WriteFrontTime(0,SI_TUMAN);
@@ -345,9 +318,15 @@ int GlobalStopCalculationSupport::FinishStopCalculation(GlobalStopType_t stop_re
     int return_val= BUTTON_NORMAL;
     if(stop_reason_type_in==gsDraka)
     {
-        Uart.Printf("\rGlobalStopCalculationSupport::FinishStopCalculation TURN OFF");
+        Uart.Printf("\rGlobalStopCalculationSupport::FinishStopCalculation DRAKA TURN OFF");
         Energy.AddEnergy(REASON_SUCESS_ENERGY_CHANGE);
             ArrayOfUserIntentions[SI_FIGHT].TurnOff();
+    }
+    if(stop_reason_type_in==gsHerInfo)
+    {
+        Uart.Printf("\rGlobalStopCalculationSupport::FinishStopCalculation HERINFO TURN OFF");
+        ArrayOfUserIntentions[SI_HER].TurnOn();
+
     }
 
     this->timer=-1;
@@ -451,7 +430,7 @@ void CalculateIntentionsRadioChange() {
         }
 
         SICD.is_empty_fon=false;
-        Uart.Printf("\r\ninput reas_id=%d, power=%d", ArrayOfIncomingIntentions[0].reason_indx,  ArrayOfIncomingIntentions[0].power512);
+        //Uart.Printf("\r\ninput reas_id=%d, power=%d", ArrayOfIncomingIntentions[0].reason_indx,  ArrayOfIncomingIntentions[0].power512);
 
         if(CurrentIntentionArraySize == 1) {
             if(SICD.last_intention_index_winner != ArrayOfIncomingIntentions[0].reason_indx) SICD.winning_integral=0;
@@ -791,6 +770,8 @@ void CallReasonSuccess(int user_reason_id)
     }
     if( ArrayOfUserIntentions[user_reason_id].process_type==PROCESS_NORMAL && ArrayOfUserIntentions[user_reason_id].current_time>ENERGY_SEC_IGNORE_SHUTDOWN)
         Energy.AddEnergy(REASON_SUCESS_ENERGY_CHANGE);
+    else
+        Uart.Printf("\r CallReasonSuccess ENERGY_NOT_ADDED, rid %d",user_reason_id);
 
     //если это смерть - сбросить нергию в 10
     if(user_reason_id==SI_DEATH && ArrayOfUserIntentions[user_reason_id].current_time>ENERGY_SEC_SAFE_ON_DEATH_SHUTDOWN)

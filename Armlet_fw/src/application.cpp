@@ -40,7 +40,8 @@ App_t App;
 
 #define PILLTYPEWEED 1
 #define PILLTYPELSD 2
-#define PILLTYPEHER 3
+#define PILLTYPEKAKT 3
+#define PILLTYPEHER 4
 
 #define MAX_RECIEVE_ARRAY_SIZE 100
 #define NUMBER_RECIEVE_ARRAYS 4
@@ -316,7 +317,7 @@ void App_t::Task() {
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
 
-           // Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
+            Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
             //pseudotable
 #if 0
             int timesec=chTimeNow()/1000;
@@ -346,7 +347,7 @@ void App_t::Task() {
             {
                 Table_buff.PTable->current_row_size=1;
                 Table_buff.PTable->Row[0].ID=REASON_BG;
-                Table_buff.PTable->Row[0].Level=1;
+                Table_buff.PTable->Row[0].Level=1;//100
                 Table_buff.PTable->Row[0].Reason=0;
               //  Uart.Printf("\r No signals, add fon to incoming reasons!");
 
@@ -517,7 +518,10 @@ void App_t::Task() {
                                 ArrayOfUserIntentions[SI_WEED].TurnOn();
                             else if(Pill.Type==PILLTYPELSD)
                                 ArrayOfUserIntentions[SI_LSD].TurnOn();
+                            else if(Pill.Type==PILLTYPEKAKT)
+                                ArrayOfUserIntentions[SI_KAKT].TurnOn();
                             else if(Pill.Type==PILLTYPEHER)
+                                //TODO move here start of gsherinfo
                                 ArrayOfUserIntentions[SI_HER].TurnOn();
                         } // if rslt ok
                         else Beeper.Beep(BeepPillBad);  // Pill write failed
@@ -722,6 +726,7 @@ void App_t::DropData()
     ArrayOfUserIntentions[SI_WEED].current_time=-1;
     ArrayOfUserIntentions[SI_HER].current_time=-1;
     ArrayOfUserIntentions[SI_LSD].current_time=-1;
+    ArrayOfUserIntentions[SI_KAKT].current_time=-1;
     ArrayOfUserIntentions[SI_KRAYK].current_time=-1;
     ArrayOfUserIntentions[SI_MANIAC].current_time=-1;
 }
@@ -785,20 +790,11 @@ void App_t::LoadData()
                ArrayOfUserIntentions[SI_WEED].current_time=data_rdy[0];
                ArrayOfUserIntentions[SI_HER].current_time=data_rdy[1];
                ArrayOfUserIntentions[SI_LSD].current_time=data_rdy[2];
+               ArrayOfUserIntentions[SI_KAKT].current_time=-1;
                ArrayOfUserIntentions[SI_KRAYK].current_time=data_rdy[3];
                ArrayOfUserIntentions[SI_MANIAC].current_time=data_rdy[4];
                Energy.SetEnergy(st_en);
            }
-//           if(line_num==2 && int_val==1)//weed
-//               ArrayOfUserIntentions[SI_WEED].current_time=0;
-//           if(line_num==3 && int_val==1)//her
-//               ArrayOfUserIntentions[SI_HER].current_time=0;
-//           if(line_num==4 && int_val==1)//lsd
-//               ArrayOfUserIntentions[SI_LSD].current_time=0;
-//           if(line_num==5 && int_val==1)//krayk
-//               ArrayOfUserIntentions[SI_KRAYK].current_time=0;
-//           if(line_num==6 && int_val==1)//manyac
-//               ArrayOfUserIntentions[SI_MANIAC].current_time=0;
        }
        if(line_num!=7)
            Uart.Printf("\rApp_t::LoadData()  No line fore default marker - load default values ");

@@ -3,7 +3,7 @@
 //#include "emotions.h"
 #include "atlantis_music_tree.h"
 #define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 100
-#define MAX_USER_INTENTIONS_ARRAY_SIZE 16
+#define MAX_USER_INTENTIONS_ARRAY_SIZE 17
 #define INTENTIONS_ARRAY_SIZE 5
 #define WINING_INTEGRAL_SWITCH_LIMIT 500
 #define FON_RELAX_SPEED 500
@@ -37,6 +37,7 @@
 #define SI_MSOURCE 13
 #define SI_PROJECT 14
 #define SI_WITHDRAWAL 15
+#define SI_KAKT 16
 
 /*typedef struct Intention {
 	int weight1000;	//константа, определ€юща€ степень и врем€ роста
@@ -110,19 +111,29 @@ typedef struct IntentionCalculationData
 #define HEART_PLAYING_TIME_SEC 20
 
 //альтернативна€ ветка рассчетов того, что играть, со своим таймером дл€ каждого отдельного включени€. пока используетс€ только в драке
-enum GlobalStopType_t {gsDraka, gsNotInited};
+enum GlobalStopType_t {gsDraka, gsNotInited, gsHerInfo};
 typedef struct GlobalStopCalculationSupport
 {
     GlobalStopType_t stop_reason_type; //0 - draka
     int timer; //-1 - inactive, else move by sec
 
+//herinfo support
+    int herinfo_length;
+    // filename!! "common/narkoman-.mp3"NARKOMAN
+//herinfo support end
+
+
+//draka support
     int draka_fight_length;
     int draka_heart_length;
+    int TryDrakaShutdown();
+//draka support end
+
     int last_reason_active_armlet_backup;//этой штукой заводим заново музыку после конца остановки!
 
     //return visual on button!
     int FinishStopCalculation(GlobalStopType_t stop_reason_type_in);
-    int TryDrakaShutdown();
+
     //false if no need redraw, true if redraw needed
     bool OnNewSec();
     void BeginStopCalculations(GlobalStopType_t stop_reason_type_in);
