@@ -186,6 +186,19 @@ public:
         return Diff;
     }
     void Init();
+    void Halt() {
+        CycleTmr.Disable();
+        IsInit = false;
+    }
+    void Resume() {
+        CycleTmr.Enable();
+        IsInit = true;
+    }
+    void UpdatePrescaler() {
+        if(Clk.AHBFreqHz == 12000000) CycleTmr.SetupPrescaler(1000);
+        else if(Clk.AHBFreqHz == 48000000) CycleTmr.SetupPrescaler(500);
+        else CycleTmr.SetupPrescaler(1000);
+    }
 
     MeshPkt_t PktRx, PktTx;
     MsgBox_t<mshMsg_t, MESH_PKT_SZ> MsgBox;

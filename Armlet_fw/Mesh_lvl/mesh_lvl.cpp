@@ -70,7 +70,7 @@ void Mesh_t::Init() {
 
     nvicEnableVector(MESH_TIM_IRQ, CORTEX_PRIORITY_MASK(IRQ_PRIO_HIGH));
     CycleTmr.Init(MESH_TIM);
-    CycleTmr.SetupPrescaler(1000);
+    UpdatePrescaler();
     CycleTmr.SetTopValue(CYCLE_TIME-1);
     CycleTmr.SetCounter(0);
     CycleTmr.IrqOnTriggerEnable();
@@ -99,6 +99,7 @@ void Mesh_t::INewCycle() {
     IIncCurrCycle();
     ITimeAgeCounter();
     AlienTable.UpdateSelf(AbsCycle);  /* Timestamp = AbsCycle; Send info to console */
+    Uart.Printf("\r\nCycle=%u, t=%u", AbsCycle, chTimeNow());
     // ==== RX ====
     if(CurrCycle == RxCycleN) chEvtSignal(Radio.rThd, EVTMSK_MESH_RX);
     // ==== TX ====
@@ -135,6 +136,7 @@ void Mesh_t::IPktHandler(){
         }
     }
     SendEvent(EVTMSK_MESH_RX_END);
+    Uart.Printf("\r\nSendEvtAppTab=%u, t=%u", AbsCycle, chTimeNow());
 }
 
 void Mesh_t::IUpdateTimer() {

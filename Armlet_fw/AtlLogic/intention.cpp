@@ -153,7 +153,7 @@ void InitArrayOfUserIntentions()
              ArrayOfUserIntentions[SI_WEED].reason_indx=REASON_WEED;
              ArrayOfUserIntentions[SI_HER].reason_indx=REASON_HEROIN;
              ArrayOfUserIntentions[SI_LSD].reason_indx=REASON_LSD;
-             ArrayOfUserIntentions[SI_KAKT].reason_indx=REASON_PEJOTL;
+//             ArrayOfUserIntentions[SI_KAKT].reason_indx=REASON_PEJOTL;
          //маньяк и крайк слышат в ушах одно и то-же, если успешно делают своё дело - ничего, 0 силы.
 
              ArrayOfUserIntentions[SI_KRAYK].reason_indx=REASON_KRAYK;
