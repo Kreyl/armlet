@@ -13,6 +13,7 @@
 #include "MassStorage.h"
 #include "evt_mask.h"
 #include "application.h"
+#include "mesh_lvl.h"
 
 // Entering standby, shutdown everything
 #include "cc1101.h"
@@ -87,10 +88,13 @@ void Pwr_t::Task() {
 #ifdef USB_ENABLED
             Usb.Shutdown();
             MassStorage.Reset();
+            Mesh.Halt();
             chSysLock();
             Clk.SetFreq12Mhz();
             Clk.InitSysTick();
+            Mesh.UpdatePrescaler();
             chSysUnlock();
+            Mesh.Resume();
 #endif
             Uart.Printf("\rExtPwr Off");
             if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
@@ -98,13 +102,16 @@ void Pwr_t::Task() {
         else if(!WasExternal and ExternalPwrOn()) {
             WasExternal = true;
 #ifdef USB_ENABLED
+            Mesh.Halt();
             chSysLock();
             Clk.SetFreq48Mhz();
             Clk.InitSysTick();
+            Mesh.UpdatePrescaler();
             chSysUnlock();
             Usb.Init();
             chThdSleepMilliseconds(540);
             Usb.Connect();
+            Mesh.Resume();
 #endif
             Uart.Printf("\rExtPwr On");
             if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
