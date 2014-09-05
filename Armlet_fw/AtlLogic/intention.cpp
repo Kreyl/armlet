@@ -214,6 +214,7 @@ void InitArrayOfUserIntentions()
 
     WriteTailTime(5,SI_TUMAN);
     WriteTailTime(5,SI_STRAH);
+
 #ifdef BRACELET_TEST_MODE_VALS
     WriteFrontTime(5,SI_SEX);
     WriteMidTime(15,SI_SEX);

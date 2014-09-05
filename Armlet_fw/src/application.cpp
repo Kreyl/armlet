@@ -44,9 +44,14 @@ App_t App;
 #define PILLTYPELSD 2
 #define PILLTYPEKAKT 3
 #define PILLTYPEHER 4
-
+#ifndef BRACELET_TEST_MODE_VALS
 #define CHARACTER_MS_DIFF_SILENCE 1200000
 #define CHARACTER_MS_DIFF_MEETING   60000
+#endif
+#ifdef BRACELET_TEST_MODE_VALS
+#define CHARACTER_MS_DIFF_SILENCE   30000
+#define CHARACTER_MS_DIFF_MEETING   10000
+#endif
 //============================csv dirs==========================================
 static const char* FDirList2[] = {
         "/",
@@ -341,12 +346,12 @@ void App_t::Task() {
 
             Table_buff.Recalc_storage();
             //подстановка фиктивного фона!
-            if(Table_buff.PTable->current_row_size==0)
+            if(Table_buff.PTable->current_row_size<COPY_RX_TABLE_SZ-1)//0
             {
-                Table_buff.PTable->current_row_size=1;
-                Table_buff.PTable->Row[0].ID=REASON_BG;
-                Table_buff.PTable->Row[0].Level=1;//100
-                Table_buff.PTable->Row[0].Reason=0;
+                Table_buff.PTable->current_row_size++; //1
+                Table_buff.PTable->Row[Table_buff.PTable->current_row_size-1].ID=REASON_BG; //0
+                Table_buff.PTable->Row[Table_buff.PTable->current_row_size-1].Level=this->locationThreshold+1;//100
+                Table_buff.PTable->Row[Table_buff.PTable->current_row_size-1].Reason=0;
               //  Uart.Printf("\r No signals, add fon to incoming reasons!");
 
             }
@@ -387,15 +392,30 @@ void App_t::Task() {
 
 // #define CHARACTER_MS_DIFF_SILENCE 1200000
 // #define CHARACTER_MS_DIFF_MEETING   60000
-
+                    //Uart.Printf("\rMEET HUMAN rid %d",rid);
                     //init //TODO test it!!
                     if( reasons[rid].age==0)
+                    {
+                       // Uart.Printf("\rMEET HUMAN ZERO AGE rid %d",rid);
                         reasons[rid].age=curr_time_ms;
+                    }
+                    uint32_t d1=curr_time_ms-reasons[rid].age;
+
                     //if d>20m-restart!
-                    if( reasons[rid].age-curr_time_ms>CHARACTER_MS_DIFF_SILENCE)
+                    if(curr_time_ms-reasons[rid].age>CHARACTER_MS_DIFF_SILENCE)
+                    {
+                       // Uart.Printf("\rMEET HUMAN CHARACTER>_MS_DIFF_SILENCE rid %d",rid);
                         reasons[rid].age=curr_time_ms;
-                    if(reasons[rid].age-curr_time_ms>=CHARACTER_MS_DIFF_MEETING)
-                        ArrayOfIncomingIntentions[j].power512=0;
+                    }
+                    else if(curr_time_ms-reasons[rid].age>=CHARACTER_MS_DIFF_MEETING)
+                    {
+                       // Uart.Printf("\rMEET HUMAN CHARACTER>CHARACTER_MS_DIFF_MEETING rid %d",rid);
+                       // ArrayOfIncomingIntentions[j].power512=0;
+                        CurrentIntentionArraySize--;
+                        continue;
+                        //не делать силу 0,инорировать!
+                    }
+                   // Uart.Printf("\rMEET HUMAN AGE %u CT%uD1 %u POWER %d",reasons[rid].age,curr_time_ms,d1, ArrayOfIncomingIntentions[j].power512);
                     //manipulate with power on people, 1 min to play, 20 min Silence end
                 }
                 else if(Table_buff.PTable->Row[i].ID>=MIST_ID_START && Table_buff.PTable->Row[i].ID<=MIST_ID_END)
@@ -416,6 +436,9 @@ void App_t::Task() {
 
                 j++;
             }
+            for(int ik=0;ik<CurrentIntentionArraySize;ik++)
+                Uart.Printf("\rCURRENT_INCOMING_ARRAY_WEIGHTED rid %d, whgt%d, size %d",ArrayOfIncomingIntentions[ik].reason_indx,ArrayOfIncomingIntentions[ik].power512,CurrentIntentionArraySize);
+
             //добавляем массив игроцких резонов в общий
             PushPlayerReasonToArrayOfIntentions();
                // сюда - все массивы резонов с других источников!
@@ -471,12 +494,10 @@ void App_t::Task() {
             if(Time.S_total==5)
             {
                 Uart.Printf("\rTEST HERINfO");
-                GSCS.BeginStopCalculations(gsHerInfo);
-               // ArrayOfUserIntentions[SI_HER].TurnOn();
-                Uart.Printf("\r ENERGY T1 %d",Energy.GetEnergy());
-                //PlayNewEmo(43,14);
-                //Sound.Play("music/razrushenie-AMorientes-THE ROLLING STONES-I Can't Get No Satisfa.mp3");
-                Uart.Printf("\r ENERGY T2 %d",Energy.GetEnergy());
+                //тест зависимости
+                //GSCS.BeginStopCalculations(gsHerInfo);
+                //ArrayOfUserIntentions[SI_HER].TurnOn();
+                //тестважныхлюдей
 
             }
 #endif
@@ -976,6 +997,7 @@ uint8_t App_t::ParseCsvFileToEmotions(const char* filename)
             int_val=strtol(toiintstr,NULL,10);
             Uart.Printf("\rParseCsvFileToEmotions emoint !%d! ",int_val);
             WriteInentionStringToData(reasonstr,int_val,emostr);
+            //WriteInentionStringToData(reasonstr,int_val*10,emostr);
 #endif
            // Uart.Printf("\rParseCsvFileToEmotions sep1 %d sep2 %d eol !%d!",sep1,sep2,strlen);
 #if 0
