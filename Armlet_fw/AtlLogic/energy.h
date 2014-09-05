@@ -69,7 +69,7 @@ public:
         return val_to_scale*ETS/(ETS+human_support_percentage*energy_lvl/100);
         //return( (val_to_scale*100)/( (   1+ energy_lvl/50)  *100));
     }
-    int GetEnergy(){return energy_lvl;}
+    int GetEnergy();//{return energy_lvl;}
     void SetEnergy(int val_in);
 };
 

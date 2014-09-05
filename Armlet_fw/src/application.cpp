@@ -471,10 +471,10 @@ void App_t::Task() {
             if(Time.S_total==5)
             {
                 Uart.Printf("\rTEST HERINfO");
-                //GSCS.BeginStopCalculations(gsHerInfo);
+                GSCS.BeginStopCalculations(gsHerInfo);
                // ArrayOfUserIntentions[SI_HER].TurnOn();
                 Uart.Printf("\r ENERGY T1 %d",Energy.GetEnergy());
-                PlayNewEmo(43,13);
+                //PlayNewEmo(43,14);
                 //Sound.Play("music/razrushenie-AMorientes-THE ROLLING STONES-I Can't Get No Satisfa.mp3");
                 Uart.Printf("\r ENERGY T2 %d",Energy.GetEnergy());
 
@@ -566,7 +566,8 @@ void App_t::UpdateState() {
     uint16_t tmpID=0;
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
         tmpID = RxTable.PTable->Row[i].ID;
-        if( (tmpID >= LOCATION_ID_START && tmpID <= FOREST_ID_END) ||
+        if( (tmpID >= LOCATION_ID_START && tmpID <= LOCATIONS_ID_END) ||
+            (tmpID >= FOREST_ID_START && tmpID <= FOREST_ID_END) ||
             (tmpID >= EMOTION_FIX_ID_START && tmpID <= EMOTION_FIX_ID_END) )    {
             if(RxTable.PTable->Row[i].Level > SignalPwr) {
                 SignalPwr = RxTable.PTable->Row[i].Level;
@@ -651,27 +652,45 @@ void App_t::SaveData()
         f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
     f_printf(&file,"\r\n#narcoher");
-    if(ArrayOfUserIntentions[SI_HER].current_time>=0)
-        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
-    else
-        f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
-
-    f_printf(&file,"\r\n#narcolsd");
-    if(ArrayOfUserIntentions[SI_LSD].current_time>=0)
-        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
-    else
+    //если -2  - пишем windrawal time от !![2.)
+    //если -1 пишем NARCO_IS_OFF_STATE
+    //если >=0 - пишем windrawal time=2
+    if(ArrayOfUserIntentions[SI_HER].current_time==-2)
+    {
+        if(ArrayOfUserIntentions[SI_WITHDRAWAL].current_time>2)
+            f_printf(&file,"\r\n%d",ArrayOfUserIntentions[SI_WITHDRAWAL].current_time);
+        else
+            f_printf(&file,"\r\n%d",2);
+    }
+    else if(ArrayOfUserIntentions[SI_HER].current_time>=0)
+        f_printf(&file,"\r\n%d",2);
+    else //-1
         f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
     f_printf(&file,"\r\n#narcoTrain");
-    if(ArrayOfUserIntentions[SI_KRAYK].current_time>=0)
-        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
-    else
+    if(ArrayOfUserIntentions[SI_KRAYK].current_time==-2)
+    {
+        if(ArrayOfUserIntentions[SI_WITHDRAWAL].current_time>2)
+            f_printf(&file,"\r\n%d",ArrayOfUserIntentions[SI_WITHDRAWAL].current_time);
+        else
+            f_printf(&file,"\r\n%d",2);
+    }
+    else if(ArrayOfUserIntentions[SI_KRAYK].current_time>=0)
+        f_printf(&file,"\r\n%d",2);
+    else //-1
         f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
     f_printf(&file,"\r\n#nacroManiac");
-    if(ArrayOfUserIntentions[SI_MANIAC].current_time>=0)
-        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
-    else
+    if(ArrayOfUserIntentions[SI_MANIAC].current_time==-2)
+    {
+        if(ArrayOfUserIntentions[SI_WITHDRAWAL].current_time>2)
+            f_printf(&file,"\r\n%d",ArrayOfUserIntentions[SI_WITHDRAWAL].current_time);
+        else
+            f_printf(&file,"\r\n%d",2);
+    }
+    else if(ArrayOfUserIntentions[SI_MANIAC].current_time>=0)
+        f_printf(&file,"\r\n%d",2);
+    else //-1
         f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
 
@@ -713,17 +732,26 @@ void App_t::LoadCharacterSettings()
     if(addict==1)
             ArrayOfUserIntentions[SI_WEED].current_time=0;
     if(addict==2)
-            ArrayOfUserIntentions[SI_HER].current_time=0;
+    {
+            ArrayOfUserIntentions[SI_HER].current_time=-2;
+            ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
+    }
     if(addict==3)
             ArrayOfUserIntentions[SI_LSD].current_time=0;
     if(addict==4)
-            ArrayOfUserIntentions[SI_MANIAC].current_time=0;
+    {
+            ArrayOfUserIntentions[SI_MANIAC].current_time=-2;
+            ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
+    }
     if(addict==5)
-            ArrayOfUserIntentions[SI_KRAYK].current_time=0;
+    {
+            ArrayOfUserIntentions[SI_KRAYK].current_time=-2;
+            ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
+    }
 }
 void App_t::DropData()
 {
-    //Energy.SetEnergy(START_ENERGY);
+    Energy.SetEnergy(START_ENERGY);
     Energy.is_default_cfg=true;
     int32_t addict;
     SD.iniReadInt32("character", "addiction", "settings.ini", &addict);
@@ -781,12 +809,22 @@ void App_t::LoadData()
 //                   Uart.Printf("\rApp_t::LoadData()   energy found %d, loading",int_val);
 //               Energy.SetEnergy(int_val);
 //           }
+
+           //если -2  - пишем windrawal time от !![2.)
+           //если -1 пишем NARCO_IS_OFF_STATE
+           //если >=0 - пишем windrawal time=2
            if(line_num>=2 && line_num<=7)
            {
-               if(int_val==1)//weed
+               if(int_val==NARCO_IS_ON_STATE)//weed
                    data_rdy[line_num-2]=0;
-               else
+               else if(int_val==NARCO_IS_OFF_STATE)
                    data_rdy[line_num-2]=-1;
+               else
+                   data_rdy[line_num-2]=int_val;
+
+               //ERROR
+               if(data_rdy[line_num-2]<-2)
+                   int_val=NARCO_IS_OFF_STATE;
            }
            //default!
            if( line_num==7)
@@ -802,11 +840,31 @@ void App_t::LoadData()
            if( line_num==7)
            {
                ArrayOfUserIntentions[SI_WEED].current_time=data_rdy[0];
-               ArrayOfUserIntentions[SI_HER].current_time=data_rdy[1];
+               if(data_rdy[1] == 0 || data_rdy[1]==-1)
+                   ArrayOfUserIntentions[SI_HER].current_time=data_rdy[1];
+               else
+               {
+                   ArrayOfUserIntentions[SI_HER].current_time=-2;
+                   ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=data_rdy[1];
+               }
                ArrayOfUserIntentions[SI_LSD].current_time=data_rdy[2];
                ArrayOfUserIntentions[SI_KAKT].current_time=-1;
-               ArrayOfUserIntentions[SI_KRAYK].current_time=data_rdy[3];
-               ArrayOfUserIntentions[SI_MANIAC].current_time=data_rdy[4];
+              // ArrayOfUserIntentions[SI_KRAYK].current_time=data_rdy[3];
+              // ArrayOfUserIntentions[SI_MANIAC].current_time=data_rdy[4];
+               if(data_rdy[3] == 0 || data_rdy[3]==-1)
+                   ArrayOfUserIntentions[SI_KRAYK].current_time=data_rdy[3];
+               else
+               {
+                   ArrayOfUserIntentions[SI_KRAYK].current_time=-2;
+                   ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=data_rdy[3];
+               }
+               if(data_rdy[4] == 0 || data_rdy[4]==-1)
+                   ArrayOfUserIntentions[SI_MANIAC].current_time=data_rdy[4];
+               else
+               {
+                   ArrayOfUserIntentions[SI_MANIAC].current_time=-2;
+                   ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=data_rdy[4];
+               }
                Energy.SetEnergy(st_en);
            }
        }
