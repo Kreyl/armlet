@@ -4,9 +4,7 @@
 #include "gui.h"
 #include "intention.h"
 #include "sound.h"
-#define SOUND_STEP 25
-#define MAX_VOL_CONST 256
-#define MIN_VOL_CONST 25
+
 
 #define SCREENS_WITH_REASONS 2
 typedef struct t_scrbtoarr

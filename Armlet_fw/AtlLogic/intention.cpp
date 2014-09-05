@@ -224,6 +224,7 @@ void InitArrayOfUserIntentions()
 
     WriteFrontTime(5,SI_HER);
     WriteMidTime(20,SI_HER);
+    WriteTailTime(20,SI_HER);
 #endif
     for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
         if(i!=SI_FIGHT)
@@ -401,6 +402,7 @@ bool GlobalStopCalculationSupport::OnNewSec()
 
     if(this->stop_reason_type==gsHerInfo)
     {
+       // Uart.Printf("\rGlobalStopCalculationSupport EmoHerInfoIsOnTheRun TIMER=%d",timer);
         if(timer==0)
         {
             PlayNewEmo(EMOTION_NARKOMAN,12,true);
@@ -744,6 +746,7 @@ void UserIntentions::TurnOff()
 }
 void CallReasonFalure(int user_reason_id)
 {
+    Uart.Printf("\rCALL REASON FALURE RID %d",user_reason_id);
     ArrayOfUserIntentions[user_reason_id].was_winning=false;
     if(user_reason_id==SI_SEX) //здесь еше должна быть драка, но она в другом pipeline???
     {
@@ -767,6 +770,7 @@ void CallReasonFalure(int user_reason_id)
    // если кайф перестает действовать. включается ломка кайф выключается!
     if(user_reason_id==SI_KRAYK || user_reason_id==SI_MANIAC ||user_reason_id==SI_HER)
     {
+        Uart.Printf("\rKAIFOFF LOMKA ON reason %d\r",user_reason_id);
         ArrayOfUserIntentions[user_reason_id].current_time=-2;
         ArrayOfUserIntentions[SI_WITHDRAWAL].TurnOn();
     }

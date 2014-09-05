@@ -15,7 +15,7 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pySerial v2.6 or later: http://pypi.python.org/pypi/pyserial\n" % (ex.__class__.__name__, ex))
 
-BAUD_RATES = (512000, 256000, 230400, 115200, 57600, 38400, 28800, 19200, 14400, 9600, 4800, 2400, 1200, 300)
+BAUD_RATES = (256000,)#(512000, 256000, 230400, 115200, 57600, 38400, 28800, 19200, 14400, 9600, 4800, 2400, 1200, 300)
 NUM_CONNECT_ATTEMPTS = 3
 TIMEOUT = 1
 DT = 0.1

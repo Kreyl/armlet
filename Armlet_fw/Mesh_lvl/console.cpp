@@ -7,7 +7,7 @@
 
 #include "console.h"
 
-//#define PRINT
+#define PRINT
 
 Console_t Console;
 
@@ -15,7 +15,7 @@ void Console_t::Send_Info(uint16_t ID, AlienInfo_t *Ptr) {
     Cnt++;
     if(Cnt == SEND_IN_COUNT) {
 #ifdef PRINT
-        Uart.Printf("\r\n#Node %u %u %u %d %u %u %u %u",
+        Uart.Printf("\r\n#Node %u %u %u %d %u %u %u %u\n",
                 ID,
                 Ptr->Mesh.Hops,
                 Ptr->Mesh.Timestamp,
@@ -31,14 +31,14 @@ void Console_t::Send_Info(uint16_t ID, AlienInfo_t *Ptr) {
 
 void Console_t::SetTime_Ack(int32_t NewCycDiff) {
 #ifdef PRINT
-    Uart.Printf("\r\n#MeshCycle %d", NewCycDiff);
+    Uart.Printf("\r\n#MeshCycle %d\n", NewCycDiff);
 #endif
 }
 
 void Console_t::GetMeshInfo_Ack(uint32_t Rslt) {
     if(Rslt == OK) {
 #ifdef PRINT
-        Uart.Printf("\r\n#MeshInfo %u %u", MAX_ABONENTS, CYCLE_TIME);
+        Uart.Printf("\r\n#MeshInfo %u %u\n", MAX_ABONENTS, CYCLE_TIME);
 #endif
     }
     else Uart.Ack(Rslt);

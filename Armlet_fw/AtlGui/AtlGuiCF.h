@@ -2,7 +2,10 @@
 #define ATLGUICF_H_
 
 #define START_VOL_CONST 202
-
+// fix void AtlGui_t::DrawSondLvlMark() if change this part
+#define SOUND_STEP 13
+#define MAX_VOL_CONST 256
+#define MIN_VOL_CONST 125
 void CallMainToReason();
 void CallReasonToMain();
 //init array-button to reason converts

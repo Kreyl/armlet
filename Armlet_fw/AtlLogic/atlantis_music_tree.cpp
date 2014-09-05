@@ -40,8 +40,8 @@ static char PrintFileToUARTbuffer[512];
 //static char GMFNFLbuffer[512];
 static char emonamebuffer[129];
 static char EmoNamebuffer[MAX_EMO_NAME_CHAR];
-static char MusicFileNamebuffer[MAX_MUSIC_FILENAME_CHAR_SIZE];
-static char PlayEmoBuffTmp[MAX_MUSIC_FILENAME_CHAR_SIZE];
+static char MusicFileNamebuffer[MAX_NAME_LEN];
+static char PlayEmoBuffTmp[MAX_NAME_LEN];
 //полное дерево музыки
 Emotion * EmotionTreeGetParent(Emotion tree_node)
 {
@@ -187,7 +187,7 @@ char * GetFileNameToPlayFromEmoId(int emo_id) {
        SRPFESingleton.last_played_emo_imdx=emo_id;
        SRPFESingleton.last_played_file_indx=0;
 #endif
-		return GetMusicFileNameFromList(emo_id, 0);//"TODO get full filename";// emotionTreeMusicNodeFiles[emo_id].music_files[0].full_filename;
+		return GetMusicFileNameFromList(emo_id, 0);
 	}
 #ifdef UART_EMOTREE_DEBUG
 	else
@@ -215,9 +215,8 @@ char * GetFileNameToPlayFromEmoId(int emo_id) {
 	return GetMusicFileNameFromList(emo_id, track_num_calculated);
 }
 
-void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos) {
-
-    Uart.Printf("\r ENERGY T3 %d",Energy.GetEnergy());
+void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos)
+{
     if(SICD.is_global_stop_active && !is_gs)
     {
         Uart.Printf("PlayNewEmo called on globalstop,playing same emo");
@@ -239,10 +238,7 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos) {
             SRD.overthrower_reason_id=-1;
             SRD.weight_reduced=0;
         }
-
-
     }
-    Uart.Printf("\r ENERGY T4 %d",Energy.GetEnergy());
     //если гавно, то фон
     if(emo_id < 0) {
         Uart.Printf("\rEmo_id <0 %d", emo_id);
@@ -255,11 +251,9 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos) {
     if(emo_id!=SRPFESingleton.last_played_emo_imdx)
         Uart.Printf("\rMID_SEEK_SUPPORT warning! possible differ: emo play %d, rmo stored: %d",emo_id,SRPFESingleton.last_played_emo_imdx);
     //записали старые emo id file id
-    Uart.Printf("\r ENERGY T51 %d",Energy.GetEnergy());
     SRPFESingleton.OnCallStopPlay(SRPFESingleton.last_played_emo_imdx,SRPFESingleton.last_played_file_indx,old_pos);
 
 #endif
-    Uart.Printf("\r ENERGY T5 %d",Energy.GetEnergy());
     SICD.last_played_emo=emo_id;
     char * fname = GetFileNameToPlayFromEmoId(SICD.last_played_emo);
     if(fname != nullptr) {
@@ -273,12 +267,10 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos) {
            Uart.Printf("\r PlayNewEmo SEEKPOS IGNORE");
            seek_pos_old=0;
        }
-       Uart.Printf("\r ENERGY T6 %d",Energy.GetEnergy());
        Sound.Play(PlayEmoBuffTmp,seek_pos_old);
        Uart.Printf(PlayEmoBuffTmp);
        Uart.Printf("\r");
        Uart.Printf("\r PlayNewEmo SEEKPOS %d errid%d",seek_pos_old,err_id);
-       Uart.Printf("\r ENERGY T7 %d",Energy.GetEnergy());
 
 #else
        Sound.Play(PlayEmoBuffTmp);
@@ -319,7 +311,7 @@ int Init_emotionTreeMusicNodeFiles_FromFile(const char * filename)
 	    }
 	 while(f_eof(&file)==0)
 	 {
-		 f_gets(MusicFileNamebuffer, MAX_MUSIC_FILENAME_CHAR_SIZE, &file);
+		 f_gets(MusicFileNamebuffer, MAX_NAME_LEN, &file);
 		 int emo_id=GetEmoIndxFromFileString(MusicFileNamebuffer);
 //		 Uart.Printf("emo id found1: %d \r",emo_id);
 		 if(emo_id>=0)

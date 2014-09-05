@@ -14,8 +14,6 @@
 
 
 #define ROOT_ELEMENT_INDX -1
-#define MAX_MUSIC_FILENAME_CHAR_SIZE 40
-#define MAX_NUMBER_MUSIC_FILES_ON_NODE 30
 
 //extern const MusList_t MusicList;
 
@@ -37,15 +35,13 @@ typedef struct filedatalimited
 	}filedatalimited;
 typedef struct emotionMusicFile
 {
-	char full_filename[MAX_MUSIC_FILENAME_CHAR_SIZE];
+	char full_filename[MAX_NAME_LEN];
 	}emotionMusicFile;
 
 typedef struct emotionMusicNodeFiles {
 	int node_indx;//+
 	int node_weight;//+
 	int num_files_at_node;//+
-	emotionMusicFile music_files[MAX_NUMBER_MUSIC_FILES_ON_NODE];//solved
-	int float1000_file_weight[MAX_NUMBER_MUSIC_FILES_ON_NODE];//solved
 } emotionMusicNodeFiles;
 
 //в +1 будут храниться файлы, для которых не нашлось соответствия.

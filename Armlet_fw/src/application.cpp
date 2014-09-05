@@ -886,8 +886,8 @@ void App_t::WriteInentionStringToData(char * int_name, int int_val, char * emo_n
     int reason_id=-1;
     if(int_val<0)
         int_val=0;
-    if(int_val>256)
-        int_val=256;
+    if(int_val>512)
+        int_val=512;
 
     for(int i=0;i<NUMBER_OF_REASONS;i++)
         if(strcmp(reasons[i].name,int_name)==0)

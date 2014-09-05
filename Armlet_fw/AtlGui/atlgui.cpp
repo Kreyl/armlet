@@ -387,7 +387,7 @@ void AtlGui_t::DrawBigLockMark()
 void AtlGui_t::DrawSondLvlMark()
 {
     Lcd.DrawBmpFile(155,60,"/GUI/main/volume.bmp");
-    Lcd.DrawBmpFile(157,125 - (6 * current_volume_lvl/25),"GUI/main/mark.bmp");
+    Lcd.DrawBmpFile(157,125 - (6 * (current_volume_lvl-122)/13),"GUI/main/mark.bmp");
 }
 void AtlGui_t::RenderSingleButton(int screen_id,int button_id,int button_state)
 {
