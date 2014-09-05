@@ -233,8 +233,17 @@ void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
 //        this->TurnOnScreen();
 //        return;
 //    }
-    if(is_locked && button_id!=6)//если не лок и залочена - вернуться
+    if(is_locked && button_id!=6)
+    {
+        bool is_uda=false;
+        if(screens[current_state].buttons[button_id].isPressable!= nullptr)
+            if(screens[current_state].buttons[button_id].isPressable ==bSoundUpCheck ||
+                    screens[current_state].buttons[button_id].isPressable ==bSoundDownCheck ||
+                    screens[current_state].buttons[button_id].isPressable ==bChangeMelodyCheck )
+                is_uda=true;
+        if(!is_uda)
         return;
+    }
 
     if(current_state>=0 && current_state<screens_number)
     {
@@ -315,7 +324,16 @@ bool AtlGui_t::ButtonIsClicked(int button_id)
     is_suspend_timer_run=true;
 
     if(is_locked && button_id!=6)
+    {
+        bool is_uda=false;
+        if(screens[current_state].buttons[button_id].isPressable!= nullptr)
+            if(screens[current_state].buttons[button_id].isPressable ==bSoundUpCheck ||
+                    screens[current_state].buttons[button_id].isPressable ==bSoundDownCheck ||
+                    screens[current_state].buttons[button_id].isPressable ==bChangeMelodyCheck )
+                is_uda=true;
+        if(!is_uda)
         return false;
+    }
     //вызываем геттер кнопки
     Uart.Printf("\rcurrent_state %d screens_number %d button id %d",current_state,screens_number,button_id);
     if(current_state>=0 && current_state<screens_number)

@@ -99,12 +99,10 @@ typedef struct IntentionCalculationData
 	int last_intention_index_winner;//reason_indx
 	int winning_integral;//NORMALIZED
 	int winning_integral_top_limit_normalizer;
-	bool is_empty_fon;
+	bool is_empty_fon; //TODO removefonkostil and check ifit works
     int last_played_emo;
     int last_played_file;
-    bool is_last_played_id_recent;//???
     bool is_global_stop_active;
-    bool is_everysec_calculation_active;//???
     int last_reason_active_armlet;// последний активный резон с точки зрения игрока нужен для выдачи на базу.
 }IntentionCalculationData;
 
@@ -118,7 +116,7 @@ typedef struct GlobalStopCalculationSupport
     int timer; //-1 - inactive, else move by sec
 
 //herinfo support
-    int herinfo_length;
+    bool EmoHerInfoIsOnTheRun;
     // filename!! "common/narkoman-.mp3"NARKOMAN
 //herinfo support end
 
@@ -128,7 +126,7 @@ typedef struct GlobalStopCalculationSupport
     int draka_heart_length;
     int TryDrakaShutdown();
 //draka support end
-
+    void OnMusicStopHerInfo();
     int last_reason_active_armlet_backup;//этой штукой заводим заново музыку после конца остановки!
 
     //return visual on button!

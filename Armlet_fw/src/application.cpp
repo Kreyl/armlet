@@ -82,7 +82,8 @@ static void TimeTmrCallback(void *p);
 
 class Time_t {
 public:
-    uint8_t H, M, S,S_total;
+    uint8_t H, M, S;
+    int S_total;
     VirtualTimer ITimer;
     void Reset() {
         chVTReset(&ITimer);
@@ -198,6 +199,8 @@ static inline void KeysHandler() {
                 App.SaveData();
                 Log.Shutdown( );
                 chThdSleepMilliseconds(250);
+                AtlGui.ShowSplashscreen();
+                chThdSleepMilliseconds(1000);
                 Power.EnterStandby();
             }
             AtlGui.ButtonIsReleased(Evt.KeyID[0],keLongPress);
@@ -231,6 +234,8 @@ static inline void KeysHandler() {
                    Uart.Printf(" GO REBOOT  %d\r", Evt.NKeys);
                    Log.Shutdown( );
                    chThdSleepMilliseconds(250);
+                   AtlGui.ShowSplashscreen();
+                   chThdSleepMilliseconds(1000);
                    Power.Reset();
 
                }
@@ -245,6 +250,8 @@ static inline void KeysHandler() {
                    Log.Shutdown( );
                    chThdSleepMilliseconds(250);
                    Uart.Printf(" GO BOOTLOADER %d\r", Evt.NKeys);
+                   AtlGui.ShowSplashscreen();
+                   chThdSleepMilliseconds(1000);
                    Bootloader.dfuJumpIn(wdg_ON);
                }
                if(
@@ -262,6 +269,8 @@ static inline void KeysHandler() {
                    //TODO drop character to initial here
                    Log.Shutdown( );
                    chThdSleepMilliseconds(250);
+                   AtlGui.ShowSplashscreen();
+                   chThdSleepMilliseconds(1000);
                    Power.Reset();
                }
         }
@@ -311,6 +320,9 @@ void App_t::Task() {
 
         if(EvtMsk & EVTMASK_PLAY_ENDS) {
             Uart.Printf("\rApp PlayEnd");
+            if(SICD.is_global_stop_active && GSCS.stop_reason_type==gsHerInfo)
+                GSCS.OnMusicStopHerInfo();
+            else
             //играть музыку по текущей эмоции
             PlayNewEmo(SICD.last_played_emo,1);
         }
@@ -460,15 +472,15 @@ void App_t::Task() {
             {
                 if(UpdateUserIntentionsTime(1))
                     CheckAndRedrawFinishedReasons();
-
-                if(Time.S_total% SEC_TO_SELF_REDUCE ==0)
-                {
-                    Energy.AddEnergy(-1);
-                    Uart.Printf("\renergy self reduced, stotal=%d",Time.S_total);
-                }
             }
             else if(GSCS.OnNewSec())
                 CheckAndRedrawFinishedReasons();
+            //too rare to stop
+            if(Time.S_total % SEC_TO_SELF_REDUCE ==0)
+            {
+                Energy.AddEnergy(-1);
+                Uart.Printf("\renergy self reduced, stotal=%d",Time.S_total);
+            }
             if(Time.S_total % 300 ==0)
             {
                 App.SaveData();
@@ -712,7 +724,7 @@ void App_t::DropData()
     //Energy.SetEnergy(START_ENERGY);
     Energy.is_default_cfg=true;
     int32_t addict;
-    SD.iniReadInt32("character", "addict", "settings.ini", &addict);
+    SD.iniReadInt32("character", "addiction", "settings.ini", &addict);
     if(addict==1)
         ArrayOfUserIntentions[SI_WEED].current_time=0;
     if(addict==2)

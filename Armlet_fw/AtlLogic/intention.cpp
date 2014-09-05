@@ -153,7 +153,7 @@ void InitArrayOfUserIntentions()
              ArrayOfUserIntentions[SI_WEED].reason_indx=REASON_WEED;
              ArrayOfUserIntentions[SI_HER].reason_indx=REASON_HEROIN;
              ArrayOfUserIntentions[SI_LSD].reason_indx=REASON_LSD;
-//             ArrayOfUserIntentions[SI_KAKT].reason_indx=REASON_PEJOTL;
+             ArrayOfUserIntentions[SI_KAKT].reason_indx=REASON_PEYOTE;
          //маньяк и крайк слышат в ушах одно и то-же, если успешно делают своё дело - ничего, 0 силы.
 
              ArrayOfUserIntentions[SI_KRAYK].reason_indx=REASON_KRAYK;
@@ -228,6 +228,7 @@ struct GlobalStopCalculationSupport GSCS=
 {
         gsNotInited,
         -1, //timer
+       false, //EmoHerInfoIsOnTheRun
         -1,-1 //draka
 
 };
@@ -243,9 +244,7 @@ struct IntentionCalculationData SICD=
       false,
       -1,
       -1,
-      false,
       false, //global stop
-      false, //is_everysec_calculation_active
       -1
         /* DO NOT DELETE
 		10,//int Intention_weight_cost;
@@ -297,6 +296,8 @@ int SeekRecentlyPlayedFilesEmo::CheckIfRecent(int emo_id,int file_id)
 }
 void GlobalStopCalculationSupport::BeginStopCalculations(GlobalStopType_t stop_reason_type_in)
 {
+    if(stop_reason_type_in==gsHerInfo)
+        EmoHerInfoIsOnTheRun=false;
     this->stop_reason_type=stop_reason_type_in;
     this->timer=0;
     SICD.is_global_stop_active=true;
@@ -312,6 +313,19 @@ int GlobalStopCalculationSupport::TryDrakaShutdown()
     }
     return BUTTON_ENABLED;
 }
+void GlobalStopCalculationSupport::OnMusicStopHerInfo()
+{
+    if(EmoHerInfoIsOnTheRun==true && timer>3)
+    {
+        EmoHerInfoIsOnTheRun=false;
+        //turnoff!
+        FinishStopCalculation(gsHerInfo);
+    }
+    else
+        EmoHerInfoIsOnTheRun=false;
+    Uart.Printf("\rOnMusicStopHerInfo CALLED");
+
+}
 int GlobalStopCalculationSupport::FinishStopCalculation(GlobalStopType_t stop_reason_type_in)
 {
     Uart.Printf("\rGlobalStopCalculationSupport::FinishStopCalculation() START");
@@ -326,7 +340,6 @@ int GlobalStopCalculationSupport::FinishStopCalculation(GlobalStopType_t stop_re
     {
         Uart.Printf("\rGlobalStopCalculationSupport::FinishStopCalculation HERINFO TURN OFF");
         ArrayOfUserIntentions[SI_HER].TurnOn();
-
     }
 
     this->timer=-1;
@@ -343,6 +356,7 @@ int GlobalStopCalculationSupport::FinishStopCalculation(GlobalStopType_t stop_re
 }
 bool GlobalStopCalculationSupport::OnNewSec()
 {
+    bool is_redraw=false;
     if(this->stop_reason_type==gsDraka)
     {
         if(timer==0)
@@ -353,6 +367,17 @@ bool GlobalStopCalculationSupport::OnNewSec()
             last_reason_active_armlet_backup=SICD.last_reason_active_armlet;
             SICD.last_reason_active_armlet=ArrayOfUserIntentions[SI_FIGHT].reason_indx;
             //TODO проверить что сюда пишется!!
+
+            //turn offotheruserintentions,without energy changes
+            if(ArrayOfUserIntentions[SI_MURDER].current_time>=0)
+                ArrayOfUserIntentions[SI_MURDER].TurnOff();
+            if(ArrayOfUserIntentions[SI_CREATION].current_time>=0)
+                ArrayOfUserIntentions[SI_CREATION].TurnOff();
+            if(ArrayOfUserIntentions[SI_DESTRUCTION].current_time>=0)
+                ArrayOfUserIntentions[SI_DESTRUCTION].TurnOff();
+            if(ArrayOfUserIntentions[SI_SEX].current_time>=0)
+                ArrayOfUserIntentions[SI_SEX].TurnOff();
+            is_redraw=true;
         }
         if(timer==draka_fight_length)
         {
@@ -366,8 +391,26 @@ bool GlobalStopCalculationSupport::OnNewSec()
             return true;
         }
     }
+
+    if(this->stop_reason_type==gsHerInfo)
+    {
+        if(timer==0)
+        {
+            PlayNewEmo(EMOTION_NARKOMAN,12,true);
+            last_reason_active_armlet_backup=SICD.last_reason_active_armlet;
+            SICD.last_reason_active_armlet=ArrayOfUserIntentions[SI_FIGHT].reason_indx;
+        }
+        else if(EmoHerInfoIsOnTheRun==false) //backup code,ifemostoppedandfail
+        {
+            Uart.Printf("\rGlobalStopCalculationSupport EmoHerInfoIsOnTheRun==false");
+            FinishStopCalculation(gsHerInfo);
+        }
+    }
+
     this->timer++;
     Uart.Printf("\rGlobalStopCalculationSupport::OnNewSec() timer %d",timer);
+    if(is_redraw)
+        return true;
     return false;
 }
 void SeekRecentlyPlayedFilesEmo::IncrementArrayId()
