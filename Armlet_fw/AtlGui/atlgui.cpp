@@ -251,7 +251,7 @@ void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
         {
             int button_state_val=screens[current_state].buttons[button_id].isPressable(current_state,button_id);//sptr_button_state[button_id]->fptr_on_press());
             Uart.Printf("\rbutton_state_val %d",button_state_val);
-            if(button_state_val==BUTTON_PRESSABLE)
+            if(button_state_val==BUTTON_PRESSABLE || (screens[current_state].buttons[button_id].isPressable==bChangeMelodyCheck))
             {
                 //вызываем функцию кнопки, если есть
                 //если геттер успешен,и можем что-то сделать,вызываем сеттер кнопки

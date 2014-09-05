@@ -7,7 +7,7 @@
 #include "kl_sd.h"
 #include "Sound.h"
 #include "kl_lib_f2xx.h" //random
-
+#include"energy.h"
 
 #define MUSIC_FILE_EMO_INFO_SEPARATOR -
 #define MUSIC_FILE_EMO_INFO_SEPARATOR_STRING "-"
@@ -217,6 +217,7 @@ char * GetFileNameToPlayFromEmoId(int emo_id) {
 
 void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos) {
 
+    Uart.Printf("\r ENERGY T3 %d",Energy.GetEnergy());
     if(SICD.is_global_stop_active && !is_gs)
     {
         Uart.Printf("PlayNewEmo called on globalstop,playing same emo");
@@ -241,7 +242,7 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos) {
 
 
     }
-
+    Uart.Printf("\r ENERGY T4 %d",Energy.GetEnergy());
     //если гавно, то фон
     if(emo_id < 0) {
         Uart.Printf("\rEmo_id <0 %d", emo_id);
@@ -249,15 +250,16 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos) {
     }
     //Uart.Printf("")
 #ifdef MID_SEEK_SUPPORT
-       //get old position
-       int old_pos=Sound.GetPosition();
-       if(emo_id!=SRPFESingleton.last_played_emo_imdx)
-           Uart.Printf("\rMID_SEEK_SUPPORT warning! possible differ: emo play %d, rmo stored: %d",emo_id,SRPFESingleton.last_played_emo_imdx);
-      //записали старые emo id file id
-       SRPFESingleton.OnCallStopPlay(SRPFESingleton.last_played_emo_imdx,SRPFESingleton.last_played_file_indx,old_pos);
+    //get old position
+    int old_pos=Sound.GetPosition();
+    if(emo_id!=SRPFESingleton.last_played_emo_imdx)
+        Uart.Printf("\rMID_SEEK_SUPPORT warning! possible differ: emo play %d, rmo stored: %d",emo_id,SRPFESingleton.last_played_emo_imdx);
+    //записали старые emo id file id
+    Uart.Printf("\r ENERGY T51 %d",Energy.GetEnergy());
+    SRPFESingleton.OnCallStopPlay(SRPFESingleton.last_played_emo_imdx,SRPFESingleton.last_played_file_indx,old_pos);
 
 #endif
-
+    Uart.Printf("\r ENERGY T5 %d",Energy.GetEnergy());
     SICD.last_played_emo=emo_id;
     char * fname = GetFileNameToPlayFromEmoId(SICD.last_played_emo);
     if(fname != nullptr) {
@@ -271,10 +273,13 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos) {
            Uart.Printf("\r PlayNewEmo SEEKPOS IGNORE");
            seek_pos_old=0;
        }
+       Uart.Printf("\r ENERGY T6 %d",Energy.GetEnergy());
        Sound.Play(PlayEmoBuffTmp,seek_pos_old);
        Uart.Printf(PlayEmoBuffTmp);
        Uart.Printf("\r");
-       Uart.Printf("\r PlayNewEmo SEEKPOS %d",seek_pos_old);
+       Uart.Printf("\r PlayNewEmo SEEKPOS %d errid%d",seek_pos_old,err_id);
+       Uart.Printf("\r ENERGY T7 %d",Energy.GetEnergy());
+
 #else
        Sound.Play(PlayEmoBuffTmp);
        Uart.Printf(PlayEmoBuffTmp);

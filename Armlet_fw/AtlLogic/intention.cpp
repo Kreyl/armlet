@@ -195,6 +195,7 @@ void InitArrayOfUserIntentions()
     WriteMidTime(600,SI_HER);
 
     WriteFrontTime(3600*5,SI_WITHDRAWAL);
+    WriteFrontTime(3600+1800,SI_WITHDRAWAL);
     //TODO mid time!
 
     WriteFrontTime(7*60,SI_LSD);
@@ -213,10 +214,16 @@ void InitArrayOfUserIntentions()
 
     WriteTailTime(5,SI_TUMAN);
     WriteTailTime(5,SI_STRAH);
-#if 1
+#ifdef BRACELET_TEST_MODE_VALS
     WriteFrontTime(5,SI_SEX);
     WriteMidTime(15,SI_SEX);
     WriteTailTime(20,SI_SEX);
+
+    WriteFrontTime(30,SI_WITHDRAWAL);
+    WriteMidTime(30,SI_WITHDRAWAL);
+
+    WriteFrontTime(5,SI_HER);
+    WriteMidTime(20,SI_HER);
 #endif
     for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
         if(i!=SI_FIGHT)
@@ -297,7 +304,7 @@ int SeekRecentlyPlayedFilesEmo::CheckIfRecent(int emo_id,int file_id)
 void GlobalStopCalculationSupport::BeginStopCalculations(GlobalStopType_t stop_reason_type_in)
 {
     if(stop_reason_type_in==gsHerInfo)
-        EmoHerInfoIsOnTheRun=false;
+        EmoHerInfoIsOnTheRun=true;
     this->stop_reason_type=stop_reason_type_in;
     this->timer=0;
     SICD.is_global_stop_active=true;

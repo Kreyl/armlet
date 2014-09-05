@@ -38,13 +38,13 @@
 App_t App;
 //#define SCREEN_SUSPEND_TIMER
 
+
+
 #define PILLTYPEWEED 1
 #define PILLTYPELSD 2
 #define PILLTYPEKAKT 3
 #define PILLTYPEHER 4
 
-#define MAX_RECIEVE_ARRAY_SIZE 100
-#define NUMBER_RECIEVE_ARRAYS 4
 #define CHARACTER_MS_DIFF_SILENCE 1200000
 #define CHARACTER_MS_DIFF_MEETING   60000
 //============================csv dirs==========================================
@@ -329,21 +329,7 @@ void App_t::Task() {
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
 
-            Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
-            //pseudotable
-#if 0
-            int timesec=chTimeNow()/1000;
-
-            int timeseccut= timesec% 150; //2.5 минутыцикл
-            //сдвиг каждые 2секунды
-            int move_indx= timeseccut/2;
-
-            int last_reason=15;
-            int first_reason=4;
-
-#endif
-            //
-
+            //Uart.Printf("\r\nApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
             /*
         for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
             Uart.Printf("\r\nID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
@@ -479,14 +465,28 @@ void App_t::Task() {
             if(Time.S_total % SEC_TO_SELF_REDUCE ==0)
             {
                 Energy.AddEnergy(-1);
-                Uart.Printf("\renergy self reduced, stotal=%d",Time.S_total);
+              //  Uart.Printf("\renergy self reduced, stotal=%d",Time.S_total);
             }
+#ifdef BRACELET_TEST_MODE_VALS
+            if(Time.S_total==5)
+            {
+                Uart.Printf("\rTEST HERINfO");
+                //GSCS.BeginStopCalculations(gsHerInfo);
+               // ArrayOfUserIntentions[SI_HER].TurnOn();
+                Uart.Printf("\r ENERGY T1 %d",Energy.GetEnergy());
+                PlayNewEmo(43,13);
+                //Sound.Play("music/razrushenie-AMorientes-THE ROLLING STONES-I Can't Get No Satisfa.mp3");
+                Uart.Printf("\r ENERGY T2 %d",Energy.GetEnergy());
+
+            }
+#endif
+#ifndef BRACELET_TEST_MODE_VALS
             if(Time.S_total % 300 ==0)
             {
                 App.SaveData();
                 chThdSleepMilliseconds(250);
             }
-
+#endif
             if(Time.S_total % 6 ==0)
             {
                 AtlGui.RenderNameTimeBat();
@@ -533,8 +533,8 @@ void App_t::Task() {
                             else if(Pill.Type==PILLTYPEKAKT)
                                 ArrayOfUserIntentions[SI_KAKT].TurnOn();
                             else if(Pill.Type==PILLTYPEHER)
-                                //TODO move here start of gsherinfo
-                                ArrayOfUserIntentions[SI_HER].TurnOn();
+                                GSCS.BeginStopCalculations(gsHerInfo);
+                                //ArrayOfUserIntentions[SI_HER].TurnOn();
                         } // if rslt ok
                         else Beeper.Beep(BeepPillBad);  // Pill write failed
                     } // if chargecnt > 0
@@ -606,7 +606,7 @@ void App_t::Init() {
     InitButtonsToUserReasons();
     LoadCharacterSettings();
     LoadData();
-    Uart.Printf("\r APP::INIt, stotal=%d",Time.S_total);
+    //Uart.Printf("\r APP::INIt, stotal=%d",Time.S_total);
 }
 
 void App_t::SaveData()
@@ -641,7 +641,7 @@ void App_t::SaveData()
     //energy to buff
     //energy to file
     f_printf(&file,"#0 is not, 1 is yes");
-    f_printf(&file,"#energy");
+    f_printf(&file,"\r\n#energy");
     f_printf(&file,"\r\n%d",Energy.GetEnergy());
     //weed, lambda welcome!
     f_printf(&file,"\r\n#narcograss");
@@ -674,6 +674,8 @@ void App_t::SaveData()
     else
         f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
+
+    f_printf(&file,"\r\n#Default marker , 1 if default, 0 otherwise");
     if(Energy.is_default_cfg==true)
         f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
      else
@@ -939,12 +941,17 @@ int App_t::recalc_signal_pw_thr(int pw,int thr)
         Uart.Printf("App_t::recalc_signal_pw_thr error: pw=%d,thr=%d",pw,thr);
         return 0;
     }
+    if(thr>=100)
+        return 0;
     if(thr==0)
         return pw;
     if(pw<thr)
         return 0;
     if(pw>100)
+    {
+        Uart.Printf("App_t::recalc_signal_pw_thr pw>100!, %d, thr %d",pw, thr );
         return 100;
+    }
     return (pw-thr)*100/(100-thr);
 
 }

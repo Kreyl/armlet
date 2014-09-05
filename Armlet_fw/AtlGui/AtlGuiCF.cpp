@@ -378,13 +378,9 @@ int bChangeMelodyCheck(int screen_id, int button_id)
     int emonum=GetFileNumerForEmoToPlay(SICD.last_played_emo);
     Uart.Printf("bChangeMelodyCheck File numbers %d,emo_id %d \r",emonum,SICD.last_played_emo);
 
-    if(emonum<1)
+    if(emonum<=1)
         return BUTTON_LOCKED;
-    else if(emonum==1)
-    {
-        PlayNewEmo(SICD.last_played_emo,10,0);
-        return BUTTON_LOCKED;
-    }
+
     else
         return BUTTON_PRESSABLE;
     //get this emo file numbers
@@ -396,16 +392,17 @@ int bChangeMelody(int screen_id, int button_id,int press_mode)
     Uart.Printf("bChangeMelodyCheck press_mode%d \r",press_mode);
     if(press_mode!=0)
         return BUTTON_NO_REDRAW;
-    //TODO make extra func!!
-
     ReasonAgeModifyChangeMelody();
+    int emonum=GetFileNumerForEmoToPlay(SICD.last_played_emo);
 
+    if(emonum==1)
+    {
+        Uart.Printf("bChangeMelodyCheck EMONUM1 press_mode%d \r",press_mode);
+        PlayNewEmo(SICD.last_played_emo,10,false,true);
+    }
+    else
+        Sound.Stop();
 
-
-    //age weight reduce end
-
-
-    Sound.Stop();
     return bChangeMelodyCheck(screen_id,button_id);
     //тут кодзавязан на события в application - там вызывается играть ту же эмоцию, если старая кончилась
 }

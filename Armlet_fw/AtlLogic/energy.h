@@ -33,7 +33,7 @@ public:
     bool is_default_cfg;
     //зависимость динамики персонажа от уровня энергии
     //[1-4]
-  //  int GetEnergyScale(){return 1+ (energy_lvl)/30;};
+  //  int GetEnergyScale(){return 1+ (energy_lvl)/50;};
 
     //TODO - make it smoother!!!
     //increase value due to energy
