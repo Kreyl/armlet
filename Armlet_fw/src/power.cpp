@@ -54,6 +54,7 @@ static const mVPercent_t mVPercentTable[] = {
 
 // ============================== Implementation ===============================
 static WORKING_AREA(waPwrThread, 256);
+__attribute__((__noreturn__))
 static void PwrThread(void *arg) {
     chRegSetThreadName("Pwr");
     Power.Task();

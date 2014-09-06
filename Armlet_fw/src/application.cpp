@@ -375,7 +375,7 @@ void App_t::Task() {
                   )
                         ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->locationThreshold);//4*(RxTable.PTable->Row[i].Level-75);
 
-                else if(Table_buff.PTable->Row[i].ID>=FOREST_ID_START && Table_buff.PTable->Row[i].ID<=FOREST_ID_END)
+                else if(Table_buff.PTable->Row[i].ID>=FORESTA_ID_START && Table_buff.PTable->Row[i].ID<=FORESTA_ID_END) // FIXME: @KL
                     ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->forestTheshold);
                 else if(Table_buff.PTable->Row[i].ID>=CHARACTER_ID_START && Table_buff.PTable->Row[i].ID<=CHARACTER_ID_END)
                 {
@@ -546,9 +546,7 @@ void App_t::Task() {
 #endif
 
 #if 1 // ==== New battery state ====
-        if(EvtMsk & EVTMSK_NEW_POWER_STATE) {
-            Lcd.DrawBatteryState();
-        }
+        if(EvtMsk & EVTMSK_NEW_POWER_STATE) Lcd.DrawBatteryState();
 #endif
 
 #if 1 // == Uart Rx ==
@@ -567,7 +565,7 @@ void App_t::UpdateState() {
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
         tmpID = RxTable.PTable->Row[i].ID;
         if( (tmpID >= LOCATION_ID_START && tmpID <= LOCATIONS_ID_END) ||
-            (tmpID >= FOREST_ID_START && tmpID <= FOREST_ID_END) ||
+            (tmpID >= FORESTA_ID_START && tmpID <= FORESTA_ID_END) ||       // FIXME: @KL
             (tmpID >= EMOTION_FIX_ID_START && tmpID <= EMOTION_FIX_ID_END) )    {
             if(RxTable.PTable->Row[i].Level > SignalPwr) {
                 SignalPwr = RxTable.PTable->Row[i].Level;
