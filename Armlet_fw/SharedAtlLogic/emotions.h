@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-09-06 17:18:23
+ * Generated at 2014-09-07 03:21:55
  */
 #ifndef EMOTIONS_H
 #define EMOTIONS_H
@@ -27,25 +27,25 @@
 
 #define PLACEHOLDER_ID_START 11
 #define PLACEHOLDER_ID_END 40
-//loc
+
 #define LOCATION_ID_START 41
 #define LOCATIONS_ID_END 47
-//for
+
 #define FORESTA_ID_START 48
 #define FORESTA_ID_END 89
-//loc
+
 #define LODGE_ID_START 90
 #define LODGE_ID_END 99
-//loc
+
 #define EMOTION_FIX_ID_START 100
 #define EMOTION_FIX_ID_END 190
-//mist
+
 #define MIST_ID_START 191
 #define MIST_ID_END 200
-//loc
+
 #define CHARACTER_ID_START 201
 #define CHARACTER_ID_END 279
-//for
+
 #define FORESTBC_ID_START 280
 #define FORESTBC_ID_END 299
 
