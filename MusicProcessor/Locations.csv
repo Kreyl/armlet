@@ -1,15 +1,11 @@
 #
 # Locations.csv
 #
-# Location RID->EID table for a generic character.
+# City locations RID->EID table for a generic character.
 #
 # Processed by EmotionProcessor.py and integrated into ArmLet firmware.
 #
 
-hub,240,masterka
-dead,240,mertvyak
-
-bg,40,fon
 hermit,40,umirotvorenie
 square,40,vdohnovenie
 factory,40,skuka
@@ -17,14 +13,3 @@ cityhall,40,gordost'
 station,40,predvkushenie
 bar,40,vesel'e
 coffee,40,interes
-
-detskaya,40,nostal'giya
-tent,40,depressiya
-hospital,40,obrechennost'
-university,40,vozhdelenie
-redroom,40,trans
-shop,40,neudovletvorennost'
-blackhouse,40,fobiya
-home,40,umilenie
-trench,40,prosvetlenie
-cinema,40,interes
