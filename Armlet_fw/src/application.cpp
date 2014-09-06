@@ -368,30 +368,57 @@ void App_t::Task() {
                     CurrentIntentionArraySize--;
                     continue;
                 }
+                //call reboot or reset
+                if(Table_buff.PTable->Row[i].ID==REASON_REBOOT)
+                    CallLustraReboot();
+                if(Table_buff.PTable->Row[i].ID==REASON_RESET)
+                    CallLustraReset();
                 //init tuman
                 Uart.Printf("\rREASON_ON_TABLE: %d indx %d id %d",Table_buff.PTable->Row[i].Reason,i,Table_buff.PTable->Row[i].ID);
                 if(Table_buff.PTable->Row[i].Reason ==(uint16_t)REASON_MSOURCE || Table_buff.PTable->Row[i].Reason== REASON_MPROJECT)
                     OnGetTumanMessage(App.ID);
+
                 //location reduce75
 
-                if(
-                        (Table_buff.PTable->Row[i].ID>=LOCATION_ID_START && Table_buff.PTable->Row[i].ID<=LOCATIONS_ID_END) ||
-                        (Table_buff.PTable->Row[i].ID>=EMOTION_FIX_ID_START && Table_buff.PTable->Row[i].ID<=EMOTION_FIX_ID_END)
-                  )
-                        ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->locationThreshold);//4*(RxTable.PTable->Row[i].Level-75);
+                if((Table_buff.PTable->Row[i].ID>=LOCATION_ID_START && Table_buff.PTable->Row[i].ID<=LOCATIONS_ID_END))
+                {
+                    ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->locationThreshold);
+                    if(zero_signal_incoming_cut(j)) continue;
+                }
 
-                else if(Table_buff.PTable->Row[i].ID>=FOREST_ID_START && Table_buff.PTable->Row[i].ID<=FOREST_ID_END)
+                else if((Table_buff.PTable->Row[i].ID>=FORESTA_ID_START && Table_buff.PTable->Row[i].ID<=FORESTA_ID_END) ||
+                        (Table_buff.PTable->Row[i].ID>=FORESTBC_ID_START && Table_buff.PTable->Row[i].ID<=FORESTBC_ID_END))
+                {
                     ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->forestTheshold);
+                    if(zero_signal_incoming_cut(j)) continue;
+                }
+                else if(Table_buff.PTable->Row[i].ID>=EMOTION_FIX_ID_START && Table_buff.PTable->Row[i].ID<=EMOTION_FIX_ID_END)
+
+                {
+                    ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->emotionFixTheshold);
+                    if(zero_signal_incoming_cut(j)) continue;
+                }
+                else if(Table_buff.PTable->Row[i].ID>=LODGE_ID_START && Table_buff.PTable->Row[i].ID<=LODGE_ID_END)
+
+                {
+                    ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->lodgeTheshold);
+                    if(zero_signal_incoming_cut(j)) continue;
+                }
+                else if(Table_buff.PTable->Row[i].ID>=MOB_ID_START && Table_buff.PTable->Row[i].ID<=MOB_ID_END)
+
+                {
+                    ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->mobThreshold);
+                    if(zero_signal_incoming_cut(j)) continue;
+                }
                 else if(Table_buff.PTable->Row[i].ID>=CHARACTER_ID_START && Table_buff.PTable->Row[i].ID<=CHARACTER_ID_END)
                 {
                     ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->characterThreshold);
+                    if(zero_signal_incoming_cut(j)) continue;
                     //manipulate with power on people, 1 min to play, 20 min Silence begin
                     int rid=Table_buff.PTable->Row[i].ID;
                     //init age
                     int32_t curr_time_ms=Mesh.GetAbsTimeMS();
 
-// #define CHARACTER_MS_DIFF_SILENCE 1200000
-// #define CHARACTER_MS_DIFF_MEETING   60000
                     //Uart.Printf("\rMEET HUMAN rid %d",rid);
                     //init //TODO test it!!
                     if( reasons[rid].age==0)
@@ -399,7 +426,7 @@ void App_t::Task() {
                        // Uart.Printf("\rMEET HUMAN ZERO AGE rid %d",rid);
                         reasons[rid].age=curr_time_ms;
                     }
-                    uint32_t d1=curr_time_ms-reasons[rid].age;
+                   // uint32_t d1=curr_time_ms-reasons[rid].age;
 
                     //if d>20m-restart!
                     if(curr_time_ms-reasons[rid].age>CHARACTER_MS_DIFF_SILENCE)
@@ -419,7 +446,10 @@ void App_t::Task() {
                     //manipulate with power on people, 1 min to play, 20 min Silence end
                 }
                 else if(Table_buff.PTable->Row[i].ID>=MIST_ID_START && Table_buff.PTable->Row[i].ID<=MIST_ID_END)
+                {
                     ArrayOfIncomingIntentions[j].power512=recalc_signal_pw_thr(Table_buff.PTable->Row[i].Level,this->mistThreshold);
+                    if(zero_signal_incoming_cut(j)) continue;
+                }
                 else
                 ArrayOfIncomingIntentions[j].power512 = Table_buff.PTable->Row[i].Level/*-70*/;
                 ArrayOfIncomingIntentions[j].reason_indx = Table_buff.PTable->Row[i].ID;
@@ -589,9 +619,7 @@ void App_t::UpdateState() {
     uint16_t tmpID=0;
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
         tmpID = RxTable.PTable->Row[i].ID;
-        if( (tmpID >= LOCATION_ID_START && tmpID <= LOCATIONS_ID_END) ||
-            (tmpID >= FOREST_ID_START && tmpID <= FOREST_ID_END) ||
-            (tmpID >= EMOTION_FIX_ID_START && tmpID <= EMOTION_FIX_ID_END) )    {
+        if( tmpID<CHARACTER_ID_START || CHARACTER_ID_END>tmpID )    {
             if(RxTable.PTable->Row[i].Level > SignalPwr) {
                 SignalPwr = RxTable.PTable->Row[i].Level;
                 LocationID = tmpID;
@@ -771,6 +799,7 @@ void App_t::LoadCharacterSettings()
             ArrayOfUserIntentions[SI_KRAYK].current_time=-2;
             ArrayOfUserIntentions[SI_WITHDRAWAL].current_time=0;
     }
+    Energy.SetEnergy(START_ENERGY);
 }
 void App_t::DropData()
 {
@@ -1016,6 +1045,15 @@ uint8_t App_t::ParseCsvFileToEmotions(const char* filename)
         f_close(&file);
       return OK;
 }
+bool  App_t::zero_signal_incoming_cut(int AOII_indx)
+{
+    if(ArrayOfIncomingIntentions[AOII_indx].power512<=0)
+    {
+        CurrentIntentionArraySize--;
+        return true;
+    }
+    return false;
+}
 int App_t::recalc_signal_pw_thr(int pw,int thr)
 {
     if(pw<0 || thr<0)
@@ -1037,7 +1075,34 @@ int App_t::recalc_signal_pw_thr(int pw,int thr)
     return (pw-thr)*100/(100-thr);
 
 }
+void App_t::CallLustraReboot()
+{
+    if(Time.S_total<60)
+        return;
+    App.SaveData();
+    chThdSleepMilliseconds(250);
+    Uart.Printf("\r GO REBOOT  LUSTRA\r");
+    Log.Shutdown( );
+    chThdSleepMilliseconds(250);
+    AtlGui.ShowSplashscreen();
+    chThdSleepMilliseconds(1000);
+    Power.Reset();
 
+}
+void App_t::CallLustraReset()
+{
+    if(Time.S_total<60)
+        return;
+    App.DropData();
+    App.SaveData();
+    Uart.Printf("\r GO REBOOT ( &DROP state!) LUSTRA \r");
+    chThdSleepMilliseconds(250);
+    Log.Shutdown( );
+    chThdSleepMilliseconds(250);
+    AtlGui.ShowSplashscreen();
+    chThdSleepMilliseconds(1000);
+    Power.Reset();
+}
 #if 1 // ======================= Command processing ============================
 #if UART_RX_ENABLED
 void App_t::OnUartCmd(Cmd_t *PCmd) {

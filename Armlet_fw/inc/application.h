@@ -101,7 +101,25 @@ public:
     int32_t mistThreshold;
     int32_t characterThreshold;
     int32_t IRlevel;
+    int32_t lodgeTheshold;
+    int32_t emotionFixTheshold;
+    int32_t mobThreshold;
+    //masterThreshold=60
+//    mobThreshold=60+
+//    placeholderThreshold=60
+//    locationThreshold=60+
+//    forestTheshold=60+
+//    lodgeTheshold=60+
+//    emotionFixTheshold=60+
+//    mistThreshold=0+
+//    characterThreshold=0+
+//    IRlevel=75
+
+    //routine
     int recalc_signal_pw_thr(int pw,int thr);
+    bool zero_signal_incoming_cut(int AOII_indx);
+    void CallLustraReboot();
+    void CallLustraReset();
 };
 
 extern App_t App;
