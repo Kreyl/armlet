@@ -294,11 +294,18 @@ void Lcd_t::Printf(const tFont &Font, uint8_t x, uint8_t y, Color_t ForeClr, Col
 
 void Lcd_t::DrawBatteryState() {
 //    Uart.Printf("\rCapacity=%u", Power.CapacityPercent);
+    uint8_t clr1bHi, clr1bLo, clr2bHi, clr2bLo;
     // Colors' components
-    uint8_t clr1bHi = (BAT_RECT_FORE_CLR >> 8) & 0x00FF;
-    uint8_t clr1bLo = BAT_RECT_FORE_CLR & 0x00FF;
-    uint8_t clr2bHi = (BAT_RECT_BACK_CLR >> 8) & 0x00FF;
-    uint8_t clr2bLo = BAT_RECT_BACK_CLR & 0x00FF;
+    if(Power.IsCharging()) {    // Draw with other color
+        clr1bHi = (BAT_RECT_CHARGE_CLR >> 8) & 0x00FF;
+        clr1bLo = BAT_RECT_CHARGE_CLR & 0x00FF;
+    }
+    else {
+        clr1bHi = (BAT_RECT_FORE_CLR >> 8) & 0x00FF;
+        clr1bLo = BAT_RECT_FORE_CLR & 0x00FF;
+    }
+    clr2bHi = (BAT_RECT_BACK_CLR >> 8) & 0x00FF;
+    clr2bLo = BAT_RECT_BACK_CLR & 0x00FF;
     // Edge of color
     int Edge = BAT_RECT_WIDTH - (Power.CapacityPercent / (BAT_RECT_WIDTH + 1));
     // Draw the rectangle

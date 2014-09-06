@@ -67,6 +67,7 @@ struct FontParams_t {
 #define BAT_RECT_HEIGHT     4
 #define BAT_RECT_FORE_CLR   COLOR_RGB_TO_565(0x61, 0x3E, 0x10)
 #define BAT_RECT_BACK_CLR   COLOR_RGB_TO_565(0xFF, 0xEE, 0xAF)
+#define BAT_RECT_CHARGE_CLR COLOR_RGB_TO_565(0x00, 0xFF, 0x00)
 
 class Lcd_t {
 private:

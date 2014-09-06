@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-09-06 08:01:27
+ * Generated at 2014-09-06 17:18:23
  */
 #include "emotions.h"
 
@@ -334,20 +334,20 @@ Reason_t reasons[] = {
  /* 205 */ { "ABrown", 0, 0, 0 },
  /* 206 */ { "FBuster", 0, 0, 0 },
  /* 207 */ { "ZCampbell", 0, 0, 0 },
- /* 208 */ { "NCassidy", 0, 0, 0 },
+ /* 208 */ { "NCassidy", 80, 0, 53 },   /* lyubopyitstvo */
  /* 209 */ { "SClayton", 0, 0, 0 },
  /* 210 */ { "JCollins", 0, 0, 0 },
  /* 211 */ { "VCollins", 0, 0, 0 },
  /* 212 */ { "CComes", 0, 0, 0 },
- /* 213 */ { "RConnor", 0, 0, 0 },
+ /* 213 */ { "RConnor", 80, 0, 57 },    /* voodushevlenie */
  /* 214 */ { "GCross", 0, 0, 0 },
  /* 215 */ { "FCunningham", 0, 0, 0 },
- /* 216 */ { "MDawkins", 0, 0, 0 },
+ /* 216 */ { "MDawkins", 80, 0, 48 },   /* radost' */
  /* 217 */ { "JDawson", 0, 0, 0 },
  /* 218 */ { "GDay", 0, 0, 0 },
- /* 219 */ { "ADecker", 0, 0, 0 },
+ /* 219 */ { "ADecker", 80, 0, 46 },    /* pozitiv */
  /* 220 */ { "CDeLorean", 0, 0, 0 },
- /* 221 */ { "JDoe", 0, 0, 0 },
+ /* 221 */ { "JDoe", 80, 0, 21 },       /* grust' */
  /* 222 */ { "MDurden", 0, 0, 0 },
  /* 223 */ { "DElis", 80, 0, 66 },      /* vozhdelenie */
  /* 224 */ { "NEpstein", 0, 0, 0 },
@@ -356,10 +356,10 @@ Reason_t reasons[] = {
  /* 227 */ { "AGraywood", 0, 0, 0 },
  /* 228 */ { "KGreenhall", 0, 0, 0 },
  /* 229 */ { "AGrissom", 0, 0, 0 },
- /* 230 */ { "Guide", 0, 0, 0 },
+ /* 230 */ { "Guide", 80, 0, 68 },      /* nadezhda */
  /* 231 */ { "MHailey", 0, 0, 0 },
  /* 232 */ { "ZHarriot", 0, 0, 0 },
- /* 233 */ { "MHarvent", 0, 0, 0 },
+ /* 233 */ { "MHarvent", 80, 0, 56 },   /* azart */
  /* 234 */ { "BHeart", 0, 0, 0 },
  /* 235 */ { "BHill", 0, 0, 0 },
  /* 236 */ { "CHonzo", 0, 0, 0 },
@@ -371,8 +371,8 @@ Reason_t reasons[] = {
  /* 242 */ { "LLane", 0, 0, 0 },
  /* 243 */ { "SLarken", 0, 0, 0 },
  /* 244 */ { "ALee", 0, 0, 0 },
- /* 245 */ { "CLefebvre", 0, 0, 0 },
- /* 246 */ { "VLehndorff", 0, 0, 0 },
+ /* 245 */ { "CLefebvre", 80, 0, 80 },  /* vlechenie */
+ /* 246 */ { "VLehndorff", 80, 0, 79 }, /* zhelanie */
  /* 247 */ { "TMalone", 0, 0, 0 },
  /* 248 */ { "AMay", 0, 0, 0 },
  /* 249 */ { "UMcGee", 0, 0, 0 },
@@ -383,13 +383,13 @@ Reason_t reasons[] = {
  /* 254 */ { "JOSullivan", 0, 0, 0 },
  /* 255 */ { "MParcs", 0, 0, 0 },
  /* 256 */ { "SRandom", 0, 0, 0 },
- /* 257 */ { "RRay", 0, 0, 0 },
+ /* 257 */ { "RRay", 80, 0, 87 },       /* trans */
  /* 258 */ { "MReed", 0, 0, 0 },
- /* 259 */ { "MRose", 0, 0, 0 },
+ /* 259 */ { "MRose", 80, 0, 74 },      /* nostal'giya */
  /* 260 */ { "DSeldon", 0, 0, 0 },
  /* 261 */ { "PShannon", 0, 0, 0 },
  /* 262 */ { "JSherman", 0, 0, 0 },
- /* 263 */ { "DSilverstone", 0, 0, 0 },
+ /* 263 */ { "DSilverstone", 80, 0, 36 }, /* nepriyazn' */
  /* 264 */ { "RSoyfer", 0, 0, 0 },
  /* 265 */ { "JSpencer", 0, 0, 0 },
  /* 266 */ { "CStanfield", 0, 0, 0 },
@@ -400,7 +400,7 @@ Reason_t reasons[] = {
  /* 271 */ { "WThomas", 0, 0, 0 },
  /* 272 */ { "EThorp", 0, 0, 0 },
  /* 273 */ { "EWilliams", 0, 0, 0 },
- /* 274 */ { "HWilliams", 0, 0, 0 },
+ /* 274 */ { "HWilliams", 80, 0, 30 },  /* trevozhnost' */
  /* 275 */ { "MWright", 0, 0, 0 },
  /* 276 */ { "LYoung", 0, 0, 0 },
  /* 277 */ { "NYoung", 0, 0, 0 },
