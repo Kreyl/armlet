@@ -369,7 +369,7 @@ void App_t::Task() {
                     continue;
                 }
                 //init tuman
-             //   Uart.Printf("\rREASON_ON_TABLE: %d indx %d id %d",Table_buff.PTable->Row[i].Reason,i,Table_buff.PTable->Row[i].ID);
+                Uart.Printf("\rREASON_ON_TABLE: %d indx %d id %d",Table_buff.PTable->Row[i].Reason,i,Table_buff.PTable->Row[i].ID);
                 if(Table_buff.PTable->Row[i].Reason ==(uint16_t)REASON_MSOURCE || Table_buff.PTable->Row[i].Reason== REASON_MPROJECT)
                     OnGetTumanMessage(App.ID);
                 //location reduce75
@@ -493,12 +493,14 @@ void App_t::Task() {
 #ifdef BRACELET_TEST_MODE_VALS
             if(Time.S_total==5)
             {
+
                 Uart.Printf("\rTEST HERINfO");
                 //тест зависимости
                 //GSCS.BeginStopCalculations(gsHerInfo);
                 //ArrayOfUserIntentions[SI_HER].TurnOn();
                 //тестважныхлюдей
-
+                //тесттумана
+                OnGetTumanMessage(App.ID);
             }
 #endif
 #ifndef BRACELET_TEST_MODE_VALS

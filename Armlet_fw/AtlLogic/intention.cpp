@@ -47,6 +47,7 @@ void WriteTailTime(int val_in,int array_indx)
 }
 void OnGetTumanMessage(int appid)
 {
+    Uart.Printf("\rTEST OnGetTumanMessage");
     //если леноран - забить болт !
     if(appid==REASON_RRAY)
         return;
@@ -226,6 +227,12 @@ void InitArrayOfUserIntentions()
     WriteFrontTime(5,SI_HER);
     WriteMidTime(20,SI_HER);
     WriteTailTime(20,SI_HER);
+
+    WriteFrontTime(0,SI_TUMAN);
+    WriteFrontTime(11,SI_STRAH);
+
+    WriteMidTime(15,SI_TUMAN);
+    WriteMidTime(20,SI_STRAH);
 #endif
     for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
         if(i!=SI_FIGHT)
