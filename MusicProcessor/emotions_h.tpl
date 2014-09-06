@@ -34,11 +34,14 @@
 #define FORESTA_ID_START %d
 #define FORESTA_ID_END %d
 
+#define LODGE_ID_START %d
+#define LODGE_ID_END %d
+
 #define EMOTION_FIX_ID_START %d
 #define EMOTION_FIX_ID_END %d
 
-#define LODGE_ID_START %d
-#define LODGE_ID_END %d
+#define MIST_ID_START %d
+#define MIST_ID_END %d
 
 #define CHARACTER_ID_START %d
 #define CHARACTER_ID_END %d
@@ -46,8 +49,7 @@
 #define FORESTBC_ID_START %d
 #define FORESTBC_ID_END %d
 
-#define MIST_ID_START %d
-#define MIST_ID_END %d
+#define MAX_MEsH_ID %d
 
 #define INTENTION_ID_START %d
 #define INTENTION_ID_END %d
@@ -97,16 +99,16 @@ extern Reason_t reasons[];
 %%s	// end of city locations
 %%s	// Forest A lights
 %%s	// end of forest A lights
-%%s	// Emotion fixes
-%%s	// end of emotion fixes
 %%s	// Lodge locations
 %%s	// end of lodge locations
+%%s	// Emotion fixes
+%%s	// end of emotion fixes
+%%s	// Mist sources
+%%s	// end of mist sources
 %%s	// Characters
 %%s	// end of characters
 %%s	// Forest BC lights
 %%s	// end of forest BC lights
-%%s	// Mist sources
-%%s	// end of mist sources
 %%s	// Intentions
 %%s	// end of intentions
 

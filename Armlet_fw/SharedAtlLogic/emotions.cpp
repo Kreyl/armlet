@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-09-06 07:22:19
+ * Generated at 2014-09-06 08:01:27
  */
 #include "emotions.h"
 
@@ -109,7 +109,7 @@ Emotion_t emotions[] = {
 
 // RIDs are indexes in this array.
 Reason_t reasons[] = {
- /*   0 */ { "R000", 0, 0, 0 },         /* fon */
+ /*   0 */ { "ZER0", 0, 0, 0 },         /* fon */
 	// Master locations
  /*   1 */ { "hub", 0, 0, 0 },          /* fon */
  /*   2 */ { "master", 240, 0, 2 },     /* masterka */
@@ -208,17 +208,19 @@ Reason_t reasons[] = {
  /*  87 */ { "FA87", 40, 0, 11 },       /* les */
  /*  88 */ { "FA88", 40, 0, 11 },       /* les */
  /*  89 */ { "FA89", 40, 0, 11 },       /* les */
- /*  90 */ { "FA90", 40, 0, 11 },       /* les */
- /*  91 */ { "FA91", 40, 0, 11 },       /* les */
- /*  92 */ { "FA92", 40, 0, 11 },       /* les */
- /*  93 */ { "FA93", 40, 0, 11 },       /* les */
- /*  94 */ { "FA94", 40, 0, 11 },       /* les */
- /*  95 */ { "FA95", 40, 0, 11 },       /* les */
- /*  96 */ { "FA96", 40, 0, 11 },       /* les */
- /*  97 */ { "FA97", 40, 0, 11 },       /* les */
- /*  98 */ { "FA98", 40, 0, 11 },       /* les */
- /*  99 */ { "FA99", 40, 0, 11 },       /* les */
 	// end of forest A lights
+	// Lodge locations
+ /*  90 */ { "detskaya", 40, 0, 74 },   /* nostal'giya */
+ /*  91 */ { "tent", 40, 0, 16 },       /* depressiya */
+ /*  92 */ { "hospital", 40, 0, 23 },   /* obrechennost' */
+ /*  93 */ { "university", 40, 0, 66 }, /* vozhdelenie */
+ /*  94 */ { "redroom", 40, 0, 87 },    /* trans */
+ /*  95 */ { "shop", 40, 0, 40 },       /* neudovletvorennost' */
+ /*  96 */ { "blackhouse", 40, 0, 34 }, /* fobiya */
+ /*  97 */ { "home", 40, 0, 67 },       /* umilenie */
+ /*  98 */ { "trench", 40, 0, 90 },     /* prosvetlenie */
+ /*  99 */ { "cinema", 40, 0, 54 },     /* interes */
+	// end of lodge locations
 	// Emotion fixes
  /* 100 */ { "xFon", 40, 0, 0 },        /* fon */
  /* 101 */ { "xNeverno", 40, 0, 1 },    /* neverno */
@@ -312,18 +314,18 @@ Reason_t reasons[] = {
  /* 189 */ { "xEkzal'tatsiya", 40, 0, 89 }, /* ekzal'tatsiya */
  /* 190 */ { "xProsvetlenie", 40, 0, 90 }, /* prosvetlenie */
 	// end of emotion fixes
-	// Lodge locations
- /* 191 */ { "detskaya", 40, 0, 74 },   /* nostal'giya */
- /* 192 */ { "tent", 40, 0, 16 },       /* depressiya */
- /* 193 */ { "hospital", 40, 0, 23 },   /* obrechennost' */
- /* 194 */ { "university", 40, 0, 66 }, /* vozhdelenie */
- /* 195 */ { "redroom", 40, 0, 87 },    /* trans */
- /* 196 */ { "shop", 40, 0, 40 },       /* neudovletvorennost' */
- /* 197 */ { "blackhouse", 40, 0, 34 }, /* fobiya */
- /* 198 */ { "home", 40, 0, 67 },       /* umilenie */
- /* 199 */ { "trench", 40, 0, 90 },     /* prosvetlenie */
- /* 200 */ { "cinema", 40, 0, 54 },     /* interes */
-	// end of lodge locations
+	// Mist sources
+ /* 191 */ { "M191", 0, 0, 0 },         /* fon */
+ /* 192 */ { "M192", 0, 0, 0 },         /* fon */
+ /* 193 */ { "M193", 0, 0, 0 },         /* fon */
+ /* 194 */ { "M194", 0, 0, 0 },         /* fon */
+ /* 195 */ { "M195", 0, 0, 0 },         /* fon */
+ /* 196 */ { "M196", 0, 0, 0 },         /* fon */
+ /* 197 */ { "M197", 0, 0, 0 },         /* fon */
+ /* 198 */ { "M198", 0, 0, 0 },         /* fon */
+ /* 199 */ { "M199", 0, 0, 0 },         /* fon */
+ /* 200 */ { "M200", 0, 0, 0 },         /* fon */
+	// end of mist sources
 	// Characters
  /* 201 */ { "PAdams", 0, 0, 0 },
  /* 202 */ { "DAllgood", 0, 0, 0 },
@@ -426,58 +428,26 @@ Reason_t reasons[] = {
  /* 297 */ { "FC297", 40, 0, 11 },      /* les */
  /* 298 */ { "FB298", 40, 0, 11 },      /* les */
  /* 299 */ { "FC299", 40, 0, 11 },      /* les */
- /* 300 */ { "FB300", 40, 0, 11 },      /* les */
- /* 301 */ { "FC301", 40, 0, 11 },      /* les */
- /* 302 */ { "FB302", 40, 0, 11 },      /* les */
- /* 303 */ { "FC303", 40, 0, 11 },      /* les */
- /* 304 */ { "FB304", 40, 0, 11 },      /* les */
- /* 305 */ { "FC305", 40, 0, 11 },      /* les */
- /* 306 */ { "FB306", 40, 0, 11 },      /* les */
- /* 307 */ { "FC307", 40, 0, 11 },      /* les */
- /* 308 */ { "FB308", 40, 0, 11 },      /* les */
- /* 309 */ { "FC309", 40, 0, 11 },      /* les */
- /* 310 */ { "FB310", 40, 0, 11 },      /* les */
- /* 311 */ { "FC311", 40, 0, 11 },      /* les */
- /* 312 */ { "FB312", 40, 0, 11 },      /* les */
- /* 313 */ { "FC313", 40, 0, 11 },      /* les */
- /* 314 */ { "FB314", 40, 0, 11 },      /* les */
- /* 315 */ { "FC315", 40, 0, 11 },      /* les */
- /* 316 */ { "FB316", 40, 0, 11 },      /* les */
- /* 317 */ { "FC317", 40, 0, 11 },      /* les */
- /* 318 */ { "FB318", 40, 0, 11 },      /* les */
- /* 319 */ { "FC319", 40, 0, 11 },      /* les */
 	// end of forest BC lights
-	// Mist sources
- /* 320 */ { "M320", 0, 0, 0 },         /* fon */
- /* 321 */ { "M321", 0, 0, 0 },         /* fon */
- /* 322 */ { "M322", 0, 0, 0 },         /* fon */
- /* 323 */ { "M323", 0, 0, 0 },         /* fon */
- /* 324 */ { "M324", 0, 0, 0 },         /* fon */
- /* 325 */ { "M325", 0, 0, 0 },         /* fon */
- /* 326 */ { "M326", 0, 0, 0 },         /* fon */
- /* 327 */ { "M327", 0, 0, 0 },         /* fon */
- /* 328 */ { "M328", 0, 0, 0 },         /* fon */
- /* 329 */ { "M329", 0, 0, 0 },         /* fon */
-	// end of mist sources
 	// Intentions
- /* 330 */ { "murder", 120, 0, 45 },    /* ubijstvo */
- /* 331 */ { "creation", 120, 0, 77 },  /* sozidanie */
- /* 332 */ { "destruction", 120, 0, 43 }, /* razrushenie */
- /* 333 */ { "sex", 130, 0, 78 },       /* seks */
- /* 334 */ { "fight", 0, 0, 44 },       /* draka */
- /* 335 */ { "heartbeat", 0, 0, 7 },    /* serdtsebienie */
- /* 336 */ { "addiction", 155, 0, 85 }, /* zavisimost' */
- /* 337 */ { "weed", 160, 0, 77 },      /* sozidanie */
- /* 338 */ { "lsd", 160, 0, 8 },        /* trip */
- /* 339 */ { "peyote", 160, 0, 9 },     /* kaktus */
- /* 340 */ { "heroin", 160, 0, 43 },    /* razrushenie */
- /* 341 */ { "krayk", 0, 0, 0 },        /* fon */
- /* 342 */ { "death", 280, 0, 5 },      /* smert' */
- /* 343 */ { "mist", 200, 0, 4 },       /* tuman */
- /* 344 */ { "fear", 199, 0, 31 },      /* strah */
- /* 345 */ { "mSource", 0, 0, 1 },      /* neverno */
- /* 346 */ { "mProject", 0, 0, 1 },     /* neverno */
- /* 347 */ { "bg", 40, 0, 0 },          /* fon */
+ /* 300 */ { "murder", 120, 0, 45 },    /* ubijstvo */
+ /* 301 */ { "creation", 120, 0, 77 },  /* sozidanie */
+ /* 302 */ { "destruction", 120, 0, 43 }, /* razrushenie */
+ /* 303 */ { "sex", 130, 0, 78 },       /* seks */
+ /* 304 */ { "fight", 0, 0, 44 },       /* draka */
+ /* 305 */ { "heartbeat", 0, 0, 7 },    /* serdtsebienie */
+ /* 306 */ { "addiction", 155, 0, 85 }, /* zavisimost' */
+ /* 307 */ { "weed", 160, 0, 77 },      /* sozidanie */
+ /* 308 */ { "lsd", 160, 0, 8 },        /* trip */
+ /* 309 */ { "peyote", 160, 0, 9 },     /* kaktus */
+ /* 310 */ { "heroin", 160, 0, 43 },    /* razrushenie */
+ /* 311 */ { "krayk", 0, 0, 0 },        /* fon */
+ /* 312 */ { "death", 280, 0, 5 },      /* smert' */
+ /* 313 */ { "mist", 200, 0, 4 },       /* tuman */
+ /* 314 */ { "fear", 199, 0, 31 },      /* strah */
+ /* 315 */ { "mSource", 0, 0, 1 },      /* neverno */
+ /* 316 */ { "mProject", 0, 0, 1 },     /* neverno */
+ /* 317 */ { "bg", 40, 0, 0 },          /* fon */
 	// end of intentions
 };
 

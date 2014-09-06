@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-09-06 07:22:19
+ * Generated at 2014-09-06 08:01:27
  */
 #ifndef EMOTIONS_H
 #define EMOTIONS_H
@@ -32,27 +32,29 @@
 #define LOCATIONS_ID_END 47
 
 #define FORESTA_ID_START 48
-#define FORESTA_ID_END 99
+#define FORESTA_ID_END 89
+
+#define LODGE_ID_START 90
+#define LODGE_ID_END 99
 
 #define EMOTION_FIX_ID_START 100
 #define EMOTION_FIX_ID_END 190
 
-#define LODGE_ID_START 191
-#define LODGE_ID_END 200
+#define MIST_ID_START 191
+#define MIST_ID_END 200
 
 #define CHARACTER_ID_START 201
 #define CHARACTER_ID_END 279
 
 #define FORESTBC_ID_START 280
-#define FORESTBC_ID_END 319
+#define FORESTBC_ID_END 299
 
-#define MIST_ID_START 320
-#define MIST_ID_END 329
+#define MAX_MEsH_ID 299
 
-#define INTENTION_ID_START 330
-#define INTENTION_ID_END 349
+#define INTENTION_ID_START 300
+#define INTENTION_ID_END 320
 
-#define MAX_ID 349
+#define MAX_ID 320
 
 //
 // Emotions
@@ -175,9 +177,9 @@ typedef struct Reason {
 
 extern Reason_t reasons[];
 
-#define NUMBER_OF_REASONS         348
+#define NUMBER_OF_REASONS         318
 
-#define REASON_R000                 0
+#define REASON_ZER0                 0
 	// Master locations
 #define REASON_HUB                  1
 #define REASON_MASTER               2
@@ -276,17 +278,19 @@ extern Reason_t reasons[];
 #define REASON_FA87                87
 #define REASON_FA88                88
 #define REASON_FA89                89
-#define REASON_FA90                90
-#define REASON_FA91                91
-#define REASON_FA92                92
-#define REASON_FA93                93
-#define REASON_FA94                94
-#define REASON_FA95                95
-#define REASON_FA96                96
-#define REASON_FA97                97
-#define REASON_FA98                98
-#define REASON_FA99                99
 	// end of forest A lights
+	// Lodge locations
+#define REASON_DETSKAYA            90
+#define REASON_TENT                91
+#define REASON_HOSPITAL            92
+#define REASON_UNIVERSITY          93
+#define REASON_REDROOM             94
+#define REASON_SHOP                95
+#define REASON_BLACKHOUSE          96
+#define REASON_HOME                97
+#define REASON_TRENCH              98
+#define REASON_CINEMA              99
+	// end of lodge locations
 	// Emotion fixes
 #define REASON_XFON                100
 #define REASON_XNEVERNO            101
@@ -380,18 +384,18 @@ extern Reason_t reasons[];
 #define REASON_XEKZALTATSIYA       189
 #define REASON_XPROSVETLENIE       190
 	// end of emotion fixes
-	// Lodge locations
-#define REASON_DETSKAYA            191
-#define REASON_TENT                192
-#define REASON_HOSPITAL            193
-#define REASON_UNIVERSITY          194
-#define REASON_REDROOM             195
-#define REASON_SHOP                196
-#define REASON_BLACKHOUSE          197
-#define REASON_HOME                198
-#define REASON_TRENCH              199
-#define REASON_CINEMA              200
-	// end of lodge locations
+	// Mist sources
+#define REASON_M191                191
+#define REASON_M192                192
+#define REASON_M193                193
+#define REASON_M194                194
+#define REASON_M195                195
+#define REASON_M196                196
+#define REASON_M197                197
+#define REASON_M198                198
+#define REASON_M199                199
+#define REASON_M200                200
+	// end of mist sources
 	// Characters
 #define REASON_PADAMS              201
 #define REASON_DALLGOOD            202
@@ -494,58 +498,26 @@ extern Reason_t reasons[];
 #define REASON_FC297               297
 #define REASON_FB298               298
 #define REASON_FC299               299
-#define REASON_FB300               300
-#define REASON_FC301               301
-#define REASON_FB302               302
-#define REASON_FC303               303
-#define REASON_FB304               304
-#define REASON_FC305               305
-#define REASON_FB306               306
-#define REASON_FC307               307
-#define REASON_FB308               308
-#define REASON_FC309               309
-#define REASON_FB310               310
-#define REASON_FC311               311
-#define REASON_FB312               312
-#define REASON_FC313               313
-#define REASON_FB314               314
-#define REASON_FC315               315
-#define REASON_FB316               316
-#define REASON_FC317               317
-#define REASON_FB318               318
-#define REASON_FC319               319
 	// end of forest BC lights
-	// Mist sources
-#define REASON_M320                320
-#define REASON_M321                321
-#define REASON_M322                322
-#define REASON_M323                323
-#define REASON_M324                324
-#define REASON_M325                325
-#define REASON_M326                326
-#define REASON_M327                327
-#define REASON_M328                328
-#define REASON_M329                329
-	// end of mist sources
 	// Intentions
-#define REASON_MURDER              330
-#define REASON_CREATION            331
-#define REASON_DESTRUCTION         332
-#define REASON_SEX                 333
-#define REASON_FIGHT               334
-#define REASON_HEARTBEAT           335
-#define REASON_ADDICTION           336
-#define REASON_WEED                337
-#define REASON_LSD                 338
-#define REASON_PEYOTE              339
-#define REASON_HEROIN              340
-#define REASON_KRAYK               341
-#define REASON_DEATH               342
-#define REASON_MIST                343
-#define REASON_FEAR                344
-#define REASON_MSOURCE             345
-#define REASON_MPROJECT            346
-#define REASON_BG                  347
+#define REASON_MURDER              300
+#define REASON_CREATION            301
+#define REASON_DESTRUCTION         302
+#define REASON_SEX                 303
+#define REASON_FIGHT               304
+#define REASON_HEARTBEAT           305
+#define REASON_ADDICTION           306
+#define REASON_WEED                307
+#define REASON_LSD                 308
+#define REASON_PEYOTE              309
+#define REASON_HEROIN              310
+#define REASON_KRAYK               311
+#define REASON_DEATH               312
+#define REASON_MIST                313
+#define REASON_FEAR                314
+#define REASON_MSOURCE             315
+#define REASON_MPROJECT            316
+#define REASON_BG                  317
 	// end of intentions
 
 #endif // ifdef EMOTIONS_H

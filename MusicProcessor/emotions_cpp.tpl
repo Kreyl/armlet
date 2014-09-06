@@ -29,16 +29,16 @@ Reason_t reasons[] = {
 %%s	// end of city locations
 %%s	// Forest A lights
 %%s	// end of forest A lights
-%%s	// Emotion fixes
-%%s	// end of emotion fixes
 %%s	// Lodge locations
 %%s	// end of lodge locations
+%%s	// Emotion fixes
+%%s	// end of emotion fixes
+%%s	// Mist sources
+%%s	// end of mist sources
 %%s	// Characters
 %%s	// end of characters
 %%s	// Forest BC lights
 %%s	// end of forest BC lights
-%%s	// Mist sources
-%%s	// end of mist sources
 %%s	// Intentions
 %%s	// end of intentions
 };

@@ -33,15 +33,15 @@ from Settings import MOB_ID_START, MOB_ID_END, MOB_IDS
 from Settings import PLACEHOLDER_ID_START, PLACEHOLDER_ID_END, PLACEHOLDER_IDS
 from Settings import LOCATION_ID_START, LOCATION_ID_END, LOCATION_IDS
 from Settings import FORESTA_ID_START, FORESTA_ID_END, FORESTA_IDS
-from Settings import EMOTION_FIX_ID_START, EMOTION_FIX_ID_END, EMOTION_FIX_IDS
 from Settings import LODGE_ID_START, LODGE_ID_END, LODGE_IDS
+from Settings import EMOTION_FIX_ID_START, EMOTION_FIX_ID_END, EMOTION_FIX_IDS
+from Settings import MIST_ID_START, MIST_ID_END, MIST_IDS
 from Settings import CHARACTER_ID_START, CHARACTER_ID_END, CHARACTER_IDS
 from Settings import FORESTBC_ID_START, FORESTBC_ID_END, FORESTBC_IDS
-from Settings import MIST_ID_START, MIST_ID_END, MIST_IDS
 from Settings import INTENTION_ID_START, INTENTION_ID_END, INTENTION_IDS
-from Settings import MAX_ID
+from Settings import MAX_MESH_ID, MAX_ID
 
-from Settings import RESERVED_WEIGHT, LOCATION_WEIGHT, CHARACTER_WEIGHT, FOREST_WEIGHT, DEATH_WEIGHT
+from Settings import RESERVED_WEIGHT, LOCATION_WEIGHT, FOREST_WEIGHT, CHARACTER_WEIGHT, DEATH_WEIGHT
 
 from CharacterProcessor import CHARACTERS_CSV, currentTime, getFileName, updateCharacters
 
@@ -78,10 +78,10 @@ C_CONTENT = open('emotions_cpp.tpl').read() % ', '.join(SOURCE_CSVS)
 H_CONTENT = open('emotions_h.tpl').read() % (', '.join(SOURCE_CSVS),
        MASTER_ID_START, MASTER_ID_END, MOB_ID_START, MOB_ID_END,
        PLACEHOLDER_ID_START, PLACEHOLDER_ID_END, LOCATION_ID_START, LOCATION_ID_END,
-       FORESTA_ID_START, FORESTA_ID_END, EMOTION_FIX_ID_START, EMOTION_FIX_ID_END,
-       LODGE_ID_START, LODGE_ID_END, CHARACTER_ID_START, CHARACTER_ID_END,
-       FORESTBC_ID_START, FORESTBC_ID_END, MIST_ID_START, MIST_ID_END,
-       INTENTION_ID_START, INTENTION_ID_END, MAX_ID)
+       FORESTA_ID_START, FORESTA_ID_END, LODGE_ID_START, LODGE_ID_END,
+       EMOTION_FIX_ID_START, EMOTION_FIX_ID_END, MIST_ID_START, MIST_ID_END,
+       CHARACTER_ID_START, CHARACTER_ID_END, FORESTBC_ID_START, FORESTBC_ID_END,
+       MAX_MESH_ID, INTENTION_ID_START, INTENTION_ID_END, MAX_ID)
 
 REASONS_CSV_HEADER = open('reasons_csv.tpl').read() % ', '.join(SOURCE_CSVS)
 
@@ -239,7 +239,7 @@ def processReasons(emotions):
         return (eid + EMOTION_FIX_ID_START, EMOTION_FIX_REASON % firstCapital(emotion), LOCATION_WEIGHT, 0, eid, emotion)
     reasons = []
     num = 0
-    r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, MASTER_ID_START))
+    r = tuple(reserveReason('ZER%d', rid) for rid in xrange(num, MASTER_ID_START))
     reasons.append(r)
     num += len(r)
     r = processReasonRange(emotions, getFileName(MASTER_CSV), 'master', MASTER_ID_START, len(MASTER_IDS))
@@ -269,16 +269,22 @@ def processReasons(emotions):
     r = tuple(forestReason(rid) for rid in FORESTA_IDS)
     reasons.append(r)
     num += len(r)
+    r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, LODGE_ID_START))
+    reasons.append(r)
+    num += len(r)
+    r = processReasonRange(emotions, getFileName(LODGES_CSV), 'lodge', LODGE_ID_START, len(LODGE_IDS))
+    reasons.append(r)
+    num += len(r)
     r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, EMOTION_FIX_ID_START))
     reasons.append(r)
     num += len(r)
     r = tuple(emotionFixReason(eid, emotion) for (eid, emotion) in sorted((eid, emotion) for (emotion, eid) in emotions.iteritems()))
     reasons.append(r)
     num += len(r)
-    r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, LODGE_ID_START))
+    r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, MIST_ID_START))
     reasons.append(r)
     num += len(r)
-    r = processReasonRange(emotions, getFileName(LODGES_CSV), 'lodge', LODGE_ID_START, len(LODGE_IDS))
+    r = tuple(reserveReason(MIST_REASON, rid) for rid in MIST_IDS)
     reasons.append(r)
     num += len(r)
     r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, CHARACTER_ID_START))
@@ -291,12 +297,6 @@ def processReasons(emotions):
     reasons.append(r)
     num += len(r)
     r = tuple(forestReason(rid) for rid in FORESTBC_IDS)
-    reasons.append(r)
-    num += len(r)
-    r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, MIST_ID_START))
-    reasons.append(r)
-    num += len(r)
-    r = tuple(reserveReason(MIST_REASON, rid) for rid in MIST_IDS)
     reasons.append(r)
     num += len(r)
     r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, INTENTION_ID_START))
