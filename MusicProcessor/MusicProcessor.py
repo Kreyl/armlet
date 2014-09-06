@@ -354,8 +354,9 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
             print
             obsoleteFiles = tuple(f for f in listdir(musicDir) if f.lower() not in newFileNameSet)
             if obsoleteFiles:
-                print "Obsolete files found (%d), removing" % len(obsoleteFiles)
+                print "Obsolete files found (%d), removing:" % len(obsoleteFiles)
                 for fileName in obsoleteFiles:
+                    print encodeForConsole(fileName)
                     remove(join(musicDir, fileName))
             processedFiles = getFiles(musicDir)
             numProcessed = len(processedFiles)
