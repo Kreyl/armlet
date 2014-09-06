@@ -26,7 +26,7 @@ EMOTION_PATCHES = {
     'somneniya': 'somnenie',
     'sostrodanie': 'sostradanie',
     'trevoga': 'trevozhnost\'',
-    'udovletvorennost': 'udovletvorenie',
+    'udovletvorennost\'': 'udovletvorenie',
     'udvoletvorenie': 'udovletvorenie',
     'umrovotvorenie': 'umirotvorenie',
     'voodushevlennost\'': 'voodushevlenie'

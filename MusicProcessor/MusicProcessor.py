@@ -45,21 +45,8 @@ SD_DIR = '_SD'
 EXCLUDE_DIRS = (SD_DIR,)
 
 INI_FILE = 'settings.ini'
-INI_CONTENT = '''\
-[radio]
-id=%d
-locationThreshold=60
-forestTheshold=60
-mistThreshold=0
-characterThreshold=0
-IRlevel=75
 
-[character]
-fightPower=%d
-readyToKillInSeconds=%d
-readyToKillForMinutes=%d
-addiction=%d
-'''.replace('\r\n', '\n').replace('\n', '\r\n')
+INI_CONTENT = open('settings_ini.tpl').read().replace('\r\n', '\n').replace('\n', '\r\n')
 
 CHARACTER_CSV = 'character.csv'
 
@@ -103,6 +90,8 @@ def encodeForConsole(s):
     return s.encode(CONSOLE_ENCODING, 'replace')
 
 def getFileModificationTime(fileName):
+    if not isfile(fileName):
+        return None
     t = getmtime(fileName)
     dt = datetime.fromtimestamp(t)
     if dt.year > 2050:
