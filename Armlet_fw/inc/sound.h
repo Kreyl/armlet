@@ -128,6 +128,7 @@ public:
     void Shutdown();
     void Play(const char* AFilename, uint32_t StartPosition = 0) {
         IFilename = AFilename;
+        if(StartPosition & 1) StartPosition--;
         IStartPosition = StartPosition;
         chEvtSignal(PThread, VS_EVT_STOP);
     }
