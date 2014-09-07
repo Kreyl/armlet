@@ -56,7 +56,13 @@ void OnGetTumanMessage(int appid)
     if(ArrayOfUserIntentions[SI_TUMAN].current_time>=0)// || ArrayOfUserIntentions[SI_STRAH].current_time>=0)
         return;
     else if( ArrayOfUserIntentions[SI_STRAH].current_time>=0)
-        ArrayOfUserIntentions[SI_STRAH].TurnOn();
+    {
+        //ArrayOfUserIntentions[SI_STRAH].TurnOn();
+        //если туман уже прошел, а страх еще играет, включить страх на плато
+        ArrayOfUserIntentions[SI_STRAH].was_winning=true;
+        ArrayOfUserIntentions[SI_STRAH].current_time=Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[SI_STRAH].time_to_plateau)+1;
+        // Energy.GetEnergyScaleValMoreDefault(int1)
+    }
     else
     {
         //включить туман и страх
