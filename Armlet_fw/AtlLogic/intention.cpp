@@ -14,7 +14,7 @@ int CurrentIntentionArraySize=2;
 #define DRAKA_MIN_SEC 10
 #define DRAKA_MAX_SEC 60
 #define DRAKA_STEP ((DRAKA_MAX_SEC-DRAKA_MIN_SEC)/10)
-#define DRAKA_RANDOM_SEC_RANGE 8
+#define DRAKA_RANDOM_SEC_RANGE 7
 int GetDrakaTime()
 {
 
@@ -60,11 +60,14 @@ void OnGetTumanMessage(int appid)
         //ArrayOfUserIntentions[SI_STRAH].TurnOn();
         //если туман уже прошел, а страх еще играет, включить страх на плато
         ArrayOfUserIntentions[SI_STRAH].was_winning=true;
-        ArrayOfUserIntentions[SI_STRAH].current_time=Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[SI_STRAH].time_to_plateau)+1;
+        ArrayOfUserIntentions[SI_STRAH].current_time=Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[SI_STRAH].time_to_plateau)+1;
+                //Energy.GetEnergyScaleValMore(Energy.GetEnergyScaleValLessDefault(ArrayOfUserIntentions[SI_STRAH].time_to_plateau))+1;
+        //Uart.Printf("\r TUMAN OFF STRAH ON , ctime= %d", ArrayOfUserIntentions[SI_STRAH].current_time);
         // Energy.GetEnergyScaleValMoreDefault(int1)
     }
     else
     {
+        //Uart.Printf("\r TUMAN OFF STRAH OFF INITIAL START");
         //включить туман и страх
         ArrayOfUserIntentions[SI_TUMAN].TurnOn();
         ArrayOfUserIntentions[SI_STRAH].TurnOn();
@@ -183,6 +186,7 @@ void InitArrayOfUserIntentions()
             ArrayOfUserIntentions[i].power512_plateau=reasons[ArrayOfUserIntentions[i].reason_indx].weight*SICD.Intention_weight_cost/SICD.Signal_power_weight_cost;
             reasons[ArrayOfUserIntentions[i].reason_indx].weight=0;
             //инициализируем хвост!
+            if(i!=SI_MURDER);
             WriteTailTime(300,i);
         }
     }
@@ -575,9 +579,6 @@ bool UpdateUserIntentionsTime(int add_time_sec)
                //TODO тут должна быть перерисовка отдельной кнопки, но поскольку я не знаю отсюда какая то должна быть кнопка - рисуем всё
                if(is_on_plateau_last_sec==true &&is_after_plateau_last_sec==true)
                    return_value=true;
-                  // AtlGui.RenderFullScreen(AtlGui.current_state);
-                  // AtlGui.RenderSingleButton(AtlGui.current_state,i,BUTTON_NORMAL);
-
                //пересчитываем для отрисовки
                //в момент перехода с плато на суффикс - перерисовываем экран.
 
@@ -696,7 +697,7 @@ void UserIntentions::NormalizeToDefEnergy()
     this->time_to_plateau=tp;
     this->time_on_plateau=op;
     this->time_after_plateau=ap;
-
+    //Uart.Printf("\r NORMALIZE %d %d %d, in data %d,%d,%d", tp,op,ap,etp,eop,eap );
 
 }
 bool UIIsONTail(int array_indx)
