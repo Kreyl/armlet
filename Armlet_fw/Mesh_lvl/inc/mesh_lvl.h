@@ -110,7 +110,6 @@ private:
     uint16_t PriorityID;
     uint32_t NewCycleN, *PNewCycleN;
     uint32_t TimeToWakeUp, *PTimeToWakeUp;
-
     Timer_t CycleTmr;
     CircBufString_t MeshMsg;
 
@@ -168,10 +167,12 @@ public:
                 PTimeToWakeUp(&TimeToWakeUp),
                 IPThread(NULL),
                 IPPktHanlderThread(NULL),
-                IsInit(false)  {}
+                IsInit(false),
+                UndispathedPktCnt(0) {}
 
     Thread *IPThread, *IPPktHanlderThread;
     bool IsInit;
+    uint16_t UndispathedPktCnt;
 
     void UpdateSleepTime()              { SleepTime = ((App.SelfID-1)*SLOT_TIME); }
     uint32_t GetCycleN()                { return (AbsCycle);             }
