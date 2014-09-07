@@ -21,9 +21,22 @@
  *  in Buf. (Pwr is power level).
  */
 
-// Address space
-#define IR_ADDR_CONST       74  // Lustras transmit IDs [75;127]. Const moves this to [1; 53]
+// ==== Address space modification ====
+// Lustras transmit IDs [75;127].
+#define LUSTRA_MIN_ID       75
+#define LUSTRA_MAX_ID       127
+// Atlantis: LOCATION_ID_START <= x <= LOCATION_ID_END and EMOTION_FIX_ID_START <= x.
+#include "emotions.h"
+static inline uint8_t IrIdTransform(uint16_t InID, uint16_t *POutID) {
+    if(InID < LUSTRA_MIN_ID or InID > LUSTRA_MAX_ID) return FAILURE;
+    // Transform ID to LocationID
+    *POutID = (InID - LUSTRA_MIN_ID) + LOCATION_ID_START;
+    // if rslt is out of range, Transform ID to EmotionID
+    if(*POutID > LOCATIONS_ID_END) *POutID += (EMOTION_FIX_ID_START - LOCATIONS_ID_END - 1);
+    return OK;
+}
 
+// ==== IR communication parameters ====
 #define IR_CARRIER_HZ       56000
 #define IR_BIT_CNT          14
 
