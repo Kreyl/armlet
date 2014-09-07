@@ -200,11 +200,15 @@ static inline void KeysHandler() {
                     continue;
             if(Evt.KeyID[0] == KEY_PWRON)
             {
+#ifdef                BRACELET_TEST_MODE_VALS
+                App.DropData();
+#endif
                 //выключение
                 App.SaveData();
                 Log.Shutdown( );
                 chThdSleepMilliseconds(250);
                 AtlGui.ShowSplashscreen();
+
                 chThdSleepMilliseconds(1000);
                 Power.EnterStandby();
             }
@@ -530,7 +534,7 @@ void App_t::Task() {
                 //ArrayOfUserIntentions[SI_HER].TurnOn();
                 //тестважныхлюдей
                 //тесттумана
-                OnGetTumanMessage(App.SelfID);
+                //OnGetTumanMessage(App.SelfID);
             }
 #endif
 #ifndef BRACELET_TEST_MODE_VALS

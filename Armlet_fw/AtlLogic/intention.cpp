@@ -14,12 +14,13 @@ int CurrentIntentionArraySize=2;
 #define DRAKA_MIN_SEC 10
 #define DRAKA_MAX_SEC 60
 #define DRAKA_STEP ((DRAKA_MAX_SEC-DRAKA_MIN_SEC)/10)
+#define DRAKA_RANDOM_SEC_RANGE 8
 int GetDrakaTime()
 {
 
     int static_char_timing= ArrayOfUserIntentions[SI_FIGHT].time_on_plateau; //[16-60]
     int energy_bonus= DRAKA_STEP*(Energy.GetEnergy()-START_ENERGY)/(MAX_ENERGY_LVL-MIN_ENERGY_LVL);
-    int random_bonus=Random(DRAKA_STEP*2)-DRAKA_STEP;
+    int random_bonus=Random(DRAKA_RANDOM_SEC_RANGE*2)-DRAKA_RANDOM_SEC_RANGE;
     int summ_fight_time=static_char_timing+energy_bonus+random_bonus;
     Uart.Printf("GetDrakaTime result uncropped:%d", summ_fight_time);
     if(summ_fight_time>DRAKA_MAX_SEC)
@@ -229,9 +230,9 @@ void InitArrayOfUserIntentions()
     WriteTailTime(20,SI_HER);
 
     WriteFrontTime(0,SI_TUMAN);
-    WriteFrontTime(11,SI_STRAH);
+    WriteFrontTime(21,SI_STRAH);
 
-    WriteMidTime(15,SI_TUMAN);
+    WriteMidTime(25,SI_TUMAN);
     WriteMidTime(20,SI_STRAH);
 #endif
     for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
