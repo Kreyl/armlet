@@ -117,7 +117,7 @@ void rLevel1_t::Init() {
 #endif
     // Init radioIC
     CC.Init();
-    CC.SetTxPower(CC_Pwr0dBm);
+    CC.SetTxPower(CC_PwrPlus10dBm);
     CC.SetChannel(MESH_CHANNEL);
     CC.SetPktSize(MESH_PKT_SZ);
     // Thread
