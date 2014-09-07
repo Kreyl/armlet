@@ -90,8 +90,11 @@ void Infrared_t::IRxTask() {
                 // Leave only ID: 0xxx xxxx 0000 01**, xxx is ID
                 RxWord >>= 8;
                 //Uart.Printf("\rIR: %u", RxWord);
-                // Add ID to table; increase to fit in address space
-                RxTable.PutRxInfo(RxWord - IR_ADDR_CONST, App.IRlevel, nullptr);
+                // Add ID to table if it fits to address space
+                uint16_t TransformedID = 0;
+                if(IrIdTransform(RxWord, &TransformedID) == OK) {
+                    RxTable.PutRxInfo(TransformedID, App.IRlevel, nullptr);
+                }
                 // Rise evt
 //                if(App.PThd != nullptr) {
 //                    chSysLock();

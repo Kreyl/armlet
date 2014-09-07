@@ -658,9 +658,10 @@ void App_t::Init() {
     Table_buff.Init();
     Uart.Printf("\rCharacter file: %s", S);
     ParseCsvFileToEmotions(S);
+    LoadCharacterSettings();
     InitArrayOfUserIntentions();
     InitButtonsToUserReasons();
-    LoadCharacterSettings();
+
     LoadData();
     //Uart.Printf("\r APP::INIt, stotal=%d",Time.S_total);
 }
@@ -778,6 +779,7 @@ void App_t::LoadCharacterSettings()
 
 
     WriteDrakaTimeFromPower(pwr);//TODO test
+    //Uart.Printf("\r PWR%u, RKT %u, RK %u, RKT*60 %u , drop%d",pwr,rkt,rk,rkt*60, ArrayOfUserIntentions[SI_FIGHT].time_on_plateau);
    // WriteReadyToKillTimer(rkt*60);//TODO test
     WriteFrontTime(rk,SI_MURDER);//TODO test
     WriteMidTime(rkt*60,SI_MURDER);//TODO test
