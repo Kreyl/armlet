@@ -84,11 +84,15 @@ int main() {
     // Report problem with clock if any
     if(ClkResult) Uart.Printf("Clock failure\r");
 
+    bool IsPressed = false;
     while(TRUE) {
         chThdSleepMilliseconds(99);
-        if(!PinIsSet(KeyData[keyA].PGpio, KeyData[keyA].Pin)) {
+        if(!PinIsSet(KeyData[keyA].PGpio, KeyData[keyA].Pin) and !IsPressed) {
+            IsPressed = true;
             Sound.Play("moon.mp3");
-            chThdSleepMilliseconds(5004);
+        }
+        else if(PinIsSet(KeyData[keyA].PGpio, KeyData[keyA].Pin) and IsPressed) {
+            IsPressed = false;
         }
     }
 }
