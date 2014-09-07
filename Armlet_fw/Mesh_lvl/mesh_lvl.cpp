@@ -40,10 +40,17 @@ static void MeshPktHandlerThd(void *arg) {
     chRegSetThreadName("MeshPktThd");
     while(1) {
         mshMsg_t MeshPkt;
-        chEvtWaitAny(EVTMSK_MESH_PKT_RDY);
-        while(Radio.Valets.InRx) {
-            if(Mesh.MsgBox.TryFetchMsg(&MeshPkt) == OK) Mesh.PktBucket.WritePkt(MeshPkt);
+        chEvtWaitAny(EVTMSK_MESH_PREPARE);
+//        Uart.Printf("\r\n-- Wait pkts -- ");
+        while(true) {
+            if(Mesh.MsgBox.TryFetchMsg(&MeshPkt) == OK) {
+                Mesh.PktBucket.WritePkt(MeshPkt);
+                Mesh.UndispathedPktCnt--;
+            }
+            if(Mesh.UndispathedPktCnt == 0 && !Radio.Valets.InRx) break;
+
         }
+//        Uart.Printf("\r\n-- BucketEnd, pkts= %u, t=%u --", Mesh.UndispathedPktCnt, chTimeNow());
         Mesh.SendEvent(EVTMSK_MESH_PKT_ENDS);
     }
 }
@@ -132,11 +139,10 @@ void Mesh_t::IPktHandler(){
             PriorityID = pSM->TimeOwnerID;
             IResetTimeAge(PriorityID, pSM->TimeAge);
             *PNewCycleN = pSM->CycleN + 1;   // TODO: cycle number increment: nedeed of not? Seems to be needed.
-            *PTimeToWakeUp = MeshMsg.Timestamp - MESH_PKT_TIME - (SLOT_TIME*(PriorityID-1)) + CYCLE_TIME;
+            *PTimeToWakeUp = MeshMsg.Timestamp - MESH_PKT_TIME - (SLOT_TIME*(PriorityID)) + CYCLE_TIME;
         }
     }
     SendEvent(EVTMSK_MESH_RX_END);
-    Uart.Printf("\r\nSendEvtAppTab=%u, t=%u", AbsCycle, chTimeNow());
 }
 
 void Mesh_t::IUpdateTimer() {
