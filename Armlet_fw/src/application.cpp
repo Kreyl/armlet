@@ -376,7 +376,7 @@ void App_t::Task() {
                 //init tuman
                 Uart.Printf("\rREASON_ON_TABLE: %d indx %d id %d",Table_buff.PTable->Row[i].Reason,i,Table_buff.PTable->Row[i].ID);
                 if(Table_buff.PTable->Row[i].Reason ==(uint16_t)REASON_MSOURCE || Table_buff.PTable->Row[i].Reason== REASON_MPROJECT)
-                    OnGetTumanMessage(App.ID);
+                    OnGetTumanMessage(App.SelfID);
 
                 //location reduce75
 
@@ -530,7 +530,7 @@ void App_t::Task() {
                 //ArrayOfUserIntentions[SI_HER].TurnOn();
                 //тестважныхлюдей
                 //тесттумана
-                OnGetTumanMessage(App.ID);
+                OnGetTumanMessage(App.SelfID);
             }
 #endif
 #ifndef BRACELET_TEST_MODE_VALS

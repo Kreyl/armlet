@@ -124,7 +124,7 @@ void Init() {
     SD.Init();
     Log.Init();
     // Read config
-    SD.iniReadInt32("Radio", "id", "settings.ini", &App.ID);
+    SD.iniReadInt32("Radio", "id", "settings.ini", &App.SelfID);
     SD.iniReadInt32("Radio", "locationThreshold", "settings.ini", &App.locationThreshold);
     SD.iniReadInt32("Radio", "forestTheshold", "settings.ini", &App.forestTheshold);
     SD.iniReadInt32("Radio", "mistThreshold", "settings.ini", &App.mistThreshold);
@@ -133,8 +133,8 @@ void Init() {
     SD.iniReadInt32("Radio", "lodgeTheshold", "settings.ini", &App.lodgeTheshold);
     SD.iniReadInt32("Radio", "emotionFixTheshold", "settings.ini", &App.emotionFixTheshold);
     SD.iniReadInt32("Radio", "mobThreshold", "settings.ini", &App.mobThreshold);
-    Uart.Printf("\rID=%u", App.ID);
-    Log.Printf("ID=%u", App.ID);
+    Uart.Printf("\rID=%u", App.SelfID);
+    Log.Printf("ID=%u", App.SelfID);
 
     Lcd.Init();
     Lcd.Cls(clAtlBack);
