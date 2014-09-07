@@ -25,7 +25,7 @@ RESULT RxTable_t::PutRxInfo(uint16_t ID, int8_t RSSI, state_t *P) {
     chSemWait(&WriteFlag);
     RESULT rslt = OK;
     uint8_t Level = 0;
-    if(ID == App.ID) goto lblPutRxEnd;  // Do not add self ID
+    if(ID == App.SelfID) goto lblPutRxEnd;  // Do not add self ID
     if(PCurrTbl->Size >= RX_TABLE_SZ) goto lblPutRxEnd; // Table is full
     /* Get Level (in %) from RSSI (in dBm) */
     RSSI::Cut(RSSI, &RSSI);

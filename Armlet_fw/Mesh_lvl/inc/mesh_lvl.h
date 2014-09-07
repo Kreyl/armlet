@@ -129,7 +129,7 @@ private:
         }
     }
     void IGenerateRandomTable(uint32_t Size) {
-        srand(App.ID);
+        srand(App.SelfID);
         RndTableBuf[0] = 1;
         for(uint8_t i=1; i<RND_TBL_BUFFER_SZ; i++) {
             RndTableBuf[i] = GET_RND_VALUE(MESH_COUNT_OF_CYCLES);
@@ -146,7 +146,7 @@ private:
     void ITimeAgeCounter() {
         if(PktTx.SenderInfo.Mesh.SelfID != PktTx.SenderInfo.Mesh.TimeOwnerID) {
             PktTx.SenderInfo.Mesh.TimeAge++;
-            if(PktTx.SenderInfo.Mesh.TimeAge > TIME_AGE_THRESHOLD) IResetTimeAge(App.ID, 0);
+            if(PktTx.SenderInfo.Mesh.TimeAge > TIME_AGE_THRESHOLD) IResetTimeAge(App.SelfID, 0);
         }
     }
     void IResetTimeAge(uint16_t NewID, uint8_t TA)  { PktTx.SenderInfo.Mesh.TimeAge = TA; PktTx.SenderInfo.Mesh.TimeOwnerID = NewID; }
@@ -173,7 +173,7 @@ public:
     Thread *IPThread, *IPPktHanlderThread;
     bool IsInit;
 
-    void UpdateSleepTime()              { SleepTime = ((App.ID-1)*SLOT_TIME); }
+    void UpdateSleepTime()              { SleepTime = ((App.SelfID-1)*SLOT_TIME); }
     uint32_t GetCycleN()                { return (AbsCycle);             }
     uint32_t GetAbsTimeMS()             { return (AbsCycle*CYCLE_TIME);  }
     uint8_t GetAstronomicTime(char *PToStr, uint8_t MaxLen);

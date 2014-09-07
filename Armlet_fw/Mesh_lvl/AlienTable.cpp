@@ -24,7 +24,7 @@ AlienTable_t AlienTable;
  */
 ret_Err AlienTable_t::PutAlien(uint16_t ID, int32_t TimeStampDiff, AlienInfo_t *Ptr) {
     if(ID > ALIEN_BUF_SIZE) return CMD_ERROR;
-    else if(ID == App.ID) {
+    else if(ID == App.SelfID) {
 //        Uart.Printf("\r\n[AlienTable.cpp] rcv SelfID");
         return OK;
     }

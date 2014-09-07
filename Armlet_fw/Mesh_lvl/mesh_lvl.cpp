@@ -50,7 +50,7 @@ static void MeshPktHandlerThd(void *arg) {
 #endif
 
 void Mesh_t::Init() {
-    if(App.ID == 0) {
+    if(App.SelfID == 0) {
         Uart.Printf("\rMsh: WrongID");
         return;
     }
@@ -60,7 +60,7 @@ void Mesh_t::Init() {
     MsgBox.Init();
     IGenerateRandomTable(RND_TBL_BUFFER_SZ);
 
-    IResetTimeAge(App.ID, 0);   /* TimeAge = 0; TimeOwner = App.ID */
+    IResetTimeAge(App.SelfID, 0);   /* TimeAge = 0; TimeOwner = App.ID */
     IPktPutCycle(AbsCycle);     /* CycleN = AbsCycle */
     AlienTable.UpdateSelf(AbsCycle);  /* Timestamp = AbsCycle; Send info to console */
     PreparePktPayload();
@@ -79,7 +79,7 @@ void Mesh_t::Init() {
     chThdSleepMilliseconds(121); /* Do radio thd sleep 41 */  //TODO: define sleep time
 
     CycleTmr.Enable();           /* Enable Cycle Timer */
-    Uart.Printf("\r\n[mesh_lvl.cpp] initID=%u", App.ID);
+    Uart.Printf("\r\n[mesh_lvl.cpp] initID=%u", App.SelfID);
 }
 
 void Mesh_t::ITask() {
@@ -158,7 +158,7 @@ void Mesh_t::IUpdateTimer() {
 }
 
 void Mesh_t::PreparePktPayload() {
-    PktTx.SenderInfo.Mesh.SelfID = App.ID;         /* need if App.ID changed by the Uart command */
+    PktTx.SenderInfo.Mesh.SelfID = App.SelfID;         /* need if App.ID changed by the Uart command */
     PktTx.SenderInfo.State = App.CurrInfo;
     IPktPutCycle(AbsCycle);
     AlienInfo_t *AlienDataStr;

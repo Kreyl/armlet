@@ -67,10 +67,10 @@ public:
     }
 
     void UpdateSelf(uint32_t NewCycle) {
-        if(App.ID > ALIEN_BUF_SIZE) return;
-        Buf[App.ID].Mesh.Timestamp = NewCycle;
-        Buf[App.ID].State = App.CurrInfo;
-        Console.Send_Info(App.ID, &Buf[App.ID]);
+        if(App.SelfID > ALIEN_BUF_SIZE) return;
+        Buf[App.SelfID].Mesh.Timestamp = NewCycle;
+        Buf[App.SelfID].State = App.CurrInfo;
+        Console.Send_Info(App.SelfID, &Buf[App.SelfID]);
     }
 
     void TimeCorrection(uint32_t CorrValueMS);
