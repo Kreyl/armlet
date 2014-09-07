@@ -117,7 +117,11 @@ void rLevel1_t::Init() {
 #endif
     // Init radioIC
     CC.Init();
+#ifdef ARMLET
     CC.SetTxPower(CC_PwrPlus10dBm);
+#else
+    CC.SetTxPower(CC_Pwr0dBm);
+#endif
     CC.SetChannel(MESH_CHANNEL);
     CC.SetPktSize(MESH_PKT_SZ);
     // Thread
