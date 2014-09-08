@@ -378,7 +378,7 @@ void App_t::Task() {
                 if(Table_buff.PTable->Row[i].ID==REASON_RESET)
                     CallLustraReset();
                 //init tuman
-                Uart.Printf("\rREASON_ON_TABLE: %d indx %d id %d",Table_buff.PTable->Row[i].Reason,i,Table_buff.PTable->Row[i].ID);
+                //Uart.Printf("\rREASON_ON_TABLE: %d indx %d id %d",Table_buff.PTable->Row[i].Reason,i,Table_buff.PTable->Row[i].ID);
                 if(Table_buff.PTable->Row[i].Reason ==(uint16_t)REASON_MSOURCE || Table_buff.PTable->Row[i].Reason== REASON_MPROJECT)
                     OnGetTumanMessage(App.SelfID);
 
@@ -470,8 +470,8 @@ void App_t::Task() {
 
                 j++;
             }
-            for(int ik=0;ik<CurrentIntentionArraySize;ik++)
-                Uart.Printf("\rCURRENT_INCOMING_ARRAY_WEIGHTED rid %d, whgt%d, size %d",ArrayOfIncomingIntentions[ik].reason_indx,ArrayOfIncomingIntentions[ik].power512,CurrentIntentionArraySize);
+           // for(int ik=0;ik<CurrentIntentionArraySize;ik++)
+            //    Uart.Printf("\rCURRENT_INCOMING_ARRAY_WEIGHTED rid %d, whgt%d, size %d",ArrayOfIncomingIntentions[ik].reason_indx,ArrayOfIncomingIntentions[ik].power512,CurrentIntentionArraySize);
 
             //добавляем массив игроцких резонов в общий
             PushPlayerReasonToArrayOfIntentions();
@@ -533,7 +533,7 @@ void App_t::Task() {
 
                 Uart.Printf("\rTEST HERINfO");
                 //тест зависимости
-                //GSCS.BeginStopCalculations(gsHerInfo);
+                GSCS.BeginStopCalculations(gsHerInfo);
                 //ArrayOfUserIntentions[SI_HER].TurnOn();
                 //тестважныхлюдей
                 //тесттумана
