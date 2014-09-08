@@ -373,7 +373,7 @@ int GlobalStopCalculationSupport::FinishStopCalculation(GlobalStopType_t stop_re
     SICD.is_global_stop_active=false;
 
     SICD.last_reason_active_armlet=last_reason_active_armlet_backup;
-    PlayNewEmo(SICD.last_reason_active_armlet,8,false);//уже остановились!!
+    PlayNewEmo(reasons[SICD.last_reason_active_armlet].eID,8,false);//уже остановились!!
     //NEW EMO????
     //поменять last_indx_winner???
     //PlayNewEmo(0,8,true);// ТУТ подумать!! //TODO

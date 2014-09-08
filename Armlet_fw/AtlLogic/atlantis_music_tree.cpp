@@ -423,11 +423,14 @@ int PrintFileToUART(char* filename)
 
 void DrawReasonToPlay(int reason_id){
 
+    if(reason_id>0 && reason_id<NUMBER_OF_REASONS)
     Lcd.Printf(B52,15, 20, clAtltopstr, clAtlBack, "%s",reasons[reason_id].name);
 };
 void DrawEmoToPlay(int Emo_id){
+    if(Emo_id>0 && Emo_id<NUMBER_OF_EMOTIONS)
     Lcd.Printf(B52,15, 30, clAtltopstr, clAtlBack, "%s",emotions[Emo_id].name);
 };
 void DrawEmoPlaying(int Emo_id){
+    if(Emo_id>0 && Emo_id<NUMBER_OF_EMOTIONS )
     Lcd.Printf(B52,15, 40, clAtltopstr, clAtlBack, "%s",emotions[Emo_id].name);
 };
