@@ -8,7 +8,7 @@
 #
 # !!! DO NOT EDIT !!!
 #
-# Generated at 2014-09-07 03:21:55
+# Generated at 2014-09-08 05:10:58
 #
 201,PAdams,Mr. Peter Adams,7,10,15,0,,0
 202,DAllgood,Mr. David Allgood,7,20,10,0,,1
@@ -32,7 +32,7 @@
 220,CDeLorean,Ms. Cynthia DeLorean,2,10,40,0,,1
 221,JDoe,Mr. John Doe,8,10,10,0,grust',0
 222,MDurden,Mr. Mark Lee Durden,6,60,10,0,,1
-223,DElis,Ms. Daisy Elis,2,900,20,0,vozhdelenie,0
+223,DElis,Ms. Daisy Elis,2,900,20,0,vozhdelenie,1
 224,NEpstein,Ms. Nina Epstein,3,900,5,0,,1
 225,CFranklin,Ms. Charity Franklin,2,1800,5,0,,0
 226,LGeertz,Ms. Lilian Geertz,1,60,10,0,,0
@@ -72,7 +72,7 @@
 260,DSeldon,Mr. Derrick John Seldon,1,20,15,0,,1
 261,PShannon,Mr. Paul Shannon,2,0,10,0,,1
 262,JSherman,Ms. Julia Sherman,2,300,5,0,,0
-263,DSilverstone,Mr. David Silverstone,3,10,5,0,nepriyazn',0
+263,DSilverstone,Mr. David Silverstone,3,10,5,0,nepriyazn',1
 264,RSoyfer,Ms. Raquel Soyfer,4,30,15,0,,1
 265,JSpencer,Mr. Jason Spencer,5,20,10,0,,1
 266,CStanfield,Ms. Claire Stanfield,2,3000,60,0,,1
