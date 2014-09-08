@@ -118,7 +118,7 @@ def getFiles(dirName):
 def deepGetFiles(dirName):
     return tuple(join(d, f) for (d, f) in deepListDir(dirName)) if isdir(dirName) else ()
 
-def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion, artist, title, tail):
+def processFile(fullName, newFullName, playerID = None, albumName = None, trackNumber = None, emotion = None, artist = None, title = None, tail = None):
     try:
         sourceAudio = AudioSegment.from_file(fullName)
         if sourceAudio.duration_seconds < 4:
@@ -128,7 +128,8 @@ def processFile(fullName, newFullName, playerID, albumName, trackNumber, emotion
         processedAudio = sourceAudio.normalize() # pylint: disable=E1103
         if processedAudio.duration_seconds != sourceAudio.duration_seconds:
             return "Normalized audio duration mismatch: %d seconds, expected %d seconds" % (processedAudio.duration_seconds, sourceAudio.duration_seconds)
-        TAGS.update({'disc': playerID, 'album': albumName, 'track': trackNumber, 'artist': artist, 'title': title, 'genre': emotion, 'comment': tail, 'comments': tail})
+        if playerID:
+            TAGS.update({'disc': playerID, 'album': albumName, 'track': trackNumber, 'artist': artist, 'title': title, 'genre': emotion, 'comment': tail, 'comments': tail})
         processedAudio.export(newFullName, format = NEW_FORMAT, bitrate = '256k', tags = TAGS)
         if not isfile(newFullName) or getsize(newFullName) < 0.1 * getsize(fullName):
             return "Processed file is too small: %d bytes, while original file was %d bytes" % (getsize(newFullName), getsize(fullName))

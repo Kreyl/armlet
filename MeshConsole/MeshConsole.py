@@ -113,12 +113,15 @@ class MeshConsole(QMainWindow):
         uic.loadUi(MAIN_UI_FILE_NAME, self)
         self.emulated = False
         self.needLoadSettings = True
-        (options, _parameters) = getopt(args, 'er', ('emulated', 'reset'))
+        self.slave = False
+        (options, _parameters) = getopt(args, 'ers', ('emulated', 'reset', 'slave'))
         for (option, _value) in options:
             if option in ('-e', '--emulated'):
                 self.emulated = True
             elif option in ('-r', '--reset'):
                 self.needLoadSettings = False
+            elif option in ('-s', '--slave'):
+                self.slave = True
 
     def configure(self):
         # Setting window size
@@ -171,6 +174,7 @@ class MeshConsole(QMainWindow):
             self.columnActions.append(action)
         # Starting up!
         self.loadSettings()
+        self.logger.info("Running in %s mode" % ('SLAVE' if self.slave else 'MASTER'))
         self.playing = False # will be toggled immediately by pause()
         self.comConnect.connect(self.processConnect)
         self.comInput.connect(self.processInput)
@@ -229,7 +233,7 @@ class MeshConsole(QMainWindow):
             self.error("Cycle number overflow, aborting")
         if self.playing:
             self.dateTimeValueLabel.setValue(now, self.currentCycle)
-        if self.startTime and self.port.ready and (not self.previousTimeSet or self.previousTimeSet.msecsTo(now) >= self.timeSetInterval):
+        if not self.slave and self.startTime and self.port.ready and (not self.previousTimeSet or self.previousTimeSet.msecsTo(now) >= self.timeSetInterval):
             self.previousTimeSet = now
             self.logger.info("Setting mesh time to %d", self.currentCycle)
             data = self.port.command(meshSetCycleCommand.encode(self.currentCycle), meshSetCycleResponse.prefix, QApplication.processEvents)
