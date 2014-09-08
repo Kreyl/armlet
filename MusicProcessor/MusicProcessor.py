@@ -42,7 +42,8 @@ MUSIC_DIR = 'music'
 ERROR_DIR = 'errors'
 
 SD_DIR = '_SD'
-EXCLUDE_DIRS = (SD_DIR,)
+COMMON_DIR = '_COMMON'
+EXCLUDE_DIRS = (SD_DIR, COMMON_DIR)
 
 INI_FILE = 'settings.ini'
 
@@ -196,6 +197,7 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
     messages = []
     hasErrors = [False]
     sdDir = join(unicode(baseDir), SD_DIR)
+    commonDir = join(unicode(baseDir), COMMON_DIR)
     baseDir = join(unicode(baseDir), name)
     sourceDir = join(baseDir, SOURCE_DIR)
     errorDir = join(baseDir, ERROR_DIR)
@@ -212,10 +214,18 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
             rmtree(fileName)
         else:
             remove(fileName)
-    # Copying common files
+    # Copying SD files
     for fileName in listdir(sdDir):
         src = join(sdDir, fileName)
         dst = join(armletDir, fileName)
+        if isdir(src):
+            copytree(src, dst)
+        else:
+            copy(src, dst)
+    # Copying common files
+    for fileName in listdir(commonDir):
+        src = join(commonDir, fileName)
+        dst = join(armletDir, 'common', fileName)
         if isdir(src):
             copytree(src, dst)
         else:
