@@ -1227,7 +1227,7 @@ void App_t::CheckUserIntentionsOnSwitchToTail(int reason_id)
         if(ArrayOfUserIntentions[i].current_time>0)
         if(UIIsONTail(i)==true)
         {
-            ArrayOfUserIntentions[i].OnChangedEmo();
+            ArrayOfUserIntentions[i].OnChangedEmo(i);
             is_need_redraw=true;
             //пользовательское, не выключено, не в хвосте
             //move to tail, redraw

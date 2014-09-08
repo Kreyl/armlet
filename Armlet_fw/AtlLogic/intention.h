@@ -76,7 +76,8 @@ typedef struct UserIntentions {
     void TurnOff();
     void TurnOn();
     void NormalizeToDefEnergy();
-    void OnChangedEmo();// if changed after winning - change time to end of plateau
+    void OnChangedEmo(int UI_indx);// if changed after winning - change time to end of plateau
+    void PrintTimingsForEnergy(int en_val);
     //return new visual state of button
     int OnTurnOffManually(bool short_or_long, int SI_indx); //true - short, false - long
     //bool is_on_tail();
@@ -172,6 +173,7 @@ void CalculateIntentionsRadioChange();
 
 bool UIIsONTail(int array_indx);
 bool UIIsOnPlateau(int array_indx);
+
 
 int CalculateCurrentPowerOfPlayerReason(int array_indx, bool is_change=true); //считаеттекущую мощность позаданному стандартному алгоритму, if(is_change) - меняет состояние
 //Obsolete??

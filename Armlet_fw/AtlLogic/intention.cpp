@@ -60,7 +60,7 @@ void OnGetTumanMessage(int appid)
         //ArrayOfUserIntentions[SI_STRAH].TurnOn();
         //если туман уже прошел, а страх еще играет, включить страх на плато
         ArrayOfUserIntentions[SI_STRAH].was_winning=true;
-        ArrayOfUserIntentions[SI_STRAH].current_time=Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[SI_STRAH].time_to_plateau)+1;
+        ArrayOfUserIntentions[SI_STRAH].current_time=Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[SI_STRAH].time_to_plateau,SI_STRAH)+1;
                 //Energy.GetEnergyScaleValMore(Energy.GetEnergyScaleValLessDefault(ArrayOfUserIntentions[SI_STRAH].time_to_plateau))+1;
         //Uart.Printf("\r TUMAN OFF STRAH ON , ctime= %d", ArrayOfUserIntentions[SI_STRAH].current_time);
         // Energy.GetEnergyScaleValMoreDefault(int1)
@@ -211,10 +211,10 @@ void InitArrayOfUserIntentions()
     //TODO mid time!
 
     WriteFrontTime(7*60,SI_LSD);
-    WriteMidTime(25*60,SI_LSD);
+    WriteMidTime(15*60,SI_LSD);
 
     WriteFrontTime(7*60,SI_KAKT);
-    WriteMidTime(25*60,SI_KAKT);
+    WriteMidTime(15*60,SI_KAKT);
 
     WriteFrontTime(0,SI_DEATH);
     WriteFrontTime(0,SI_TUMAN);
@@ -652,11 +652,19 @@ int GetPersentage100(int curval,int maxval)
 {
     return (curval*100)/maxval;
 }
-void UserIntentions::OnChangedEmo()
+void PrintTimingsForEnergy(int en_val)
+{
+    int energy_backup=Energy.GetEnergy();
+    Energy.SetEnergy(en_val);
+
+
+    Energy.SetEnergy(energy_backup);
+}
+void UserIntentions::OnChangedEmo(int UI_indx)
 {
     if(was_winning)
     {
-        this->current_time=Energy.GetEnergyScaleValMore(time_on_plateau)+1;
+        this->current_time=Energy.GetEnergyScaleValMore(time_on_plateau,UI_indx)+1;
     }
 }
 int UserIntentions::OnTurnOffManually(bool short_or_long,int SI_indx)
@@ -672,7 +680,7 @@ int UserIntentions::OnTurnOffManually(bool short_or_long,int SI_indx)
         if(UIIsONTail(SI_indx))
         {
             this->was_winning=false;
-            this->current_time=Energy.GetEnergyScaleValLess(time_to_plateau)/2;
+            this->current_time=Energy.GetEnergyScaleValLess(time_to_plateau,SI_indx)/2;
             return BUTTON_ENABLED;
         }
         else
@@ -697,15 +705,14 @@ void UserIntentions::NormalizeToDefEnergy()
     this->time_to_plateau=tp;
     this->time_on_plateau=op;
     this->time_after_plateau=ap;
-    //Uart.Printf("\r NORMALIZE %d %d %d, in data %d,%d,%d", tp,op,ap,etp,eop,eap );
-
+   // Uart.Printf("\r NORMALIZE %d %d %d, in data %d,%d,%d en %d", tp,op,ap,etp,eop,eap, Energy.GetEnergy());
 }
 bool UIIsONTail(int array_indx)
 {
     if(ArrayOfUserIntentions[array_indx].current_time<0)//не активировано
         return false;
-    int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time);
-    int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time);//<current_time
+    int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time,array_indx);
+    int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time,array_indx);//<current_time
     if(slower_time<ArrayOfUserIntentions[array_indx].time_after_plateau)// хвост не кончился [op-ap] notpassed
         if(slower_time>=ArrayOfUserIntentions[array_indx].time_on_plateau)//уже были на плато [tp-op]pass
             if(faster_time>ArrayOfUserIntentions[array_indx].time_to_plateau) //[0-tp] pass
@@ -716,8 +723,8 @@ bool UIIsOnPlateau(int array_indx)
 {
     if(ArrayOfUserIntentions[array_indx].current_time<0)//не активировано
         return false;
-    int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time);
-    int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time);
+    int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time,array_indx);
+    int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time,array_indx);
     if(slower_time<ArrayOfUserIntentions[array_indx].time_on_plateau)// на плато [tp-op] not passed
                 if(faster_time>ArrayOfUserIntentions[array_indx].time_to_plateau) //[0-tp] passed
                 return true;
@@ -730,8 +737,8 @@ int CalculateCurrentPowerOfPlayerReason(int array_indx, bool is_change)
    // Energy.SetEnergy(50);
     Energy.human_support=ArrayOfUserIntentions[array_indx].human_support_number;
     //всё удлинняет
-    int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time);//>current_time
-    int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time);//<current_time
+    int faster_time= Energy.GetEnergyScaleValMore(ArrayOfUserIntentions[array_indx].current_time,array_indx);//>current_time
+    int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time,array_indx);//<current_time
 
     Uart.Printf("\r EN %d tp%d OP%d AP%d",Energy.GetEnergy(),ArrayOfUserIntentions[array_indx].time_to_plateau,ArrayOfUserIntentions[array_indx].time_on_plateau,ArrayOfUserIntentions[array_indx].time_after_plateau);
   //  Uart.Printf("\r FT %d LT %d,CT%d FLT %d, LFT%d",faster_time,slower_time, ArrayOfUserIntentions[array_indx].current_time,Energy.GetEnergyScaleValMore(slower_time),Energy.GetEnergyScaleValLess(faster_time));

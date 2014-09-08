@@ -6,6 +6,7 @@
  */
 #include "energy.h"
 #include "cmd_uart.h"
+#include "intention.h"
 Energy_t Energy;
 int Energy_t::GetEnergy()
 {
@@ -13,7 +14,6 @@ int Energy_t::GetEnergy()
     {
         Uart.Printf("\r GetEnergy E<MIN_ENERGY_LVL ERROR SET E=MIN_ENERGY_LVL %d",energy_lvl);
         energy_lvl=MIN_ENERGY_LVL;
-
     }
     if(energy_lvl>MAX_ENERGY_LVL)
     {
@@ -21,6 +21,12 @@ int Energy_t::GetEnergy()
         energy_lvl=MAX_ENERGY_LVL;
     }
     return energy_lvl;
+}
+bool Energy_t::CheckEnergyDependency(int UI_indx)
+{
+    if(UI_indx==SI_WEED || UI_indx==SI_KAKT)
+        return false;
+    return true;
 }
 void Energy_t::SetEnergy(int val_in){
 
