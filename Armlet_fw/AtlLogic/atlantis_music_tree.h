@@ -62,4 +62,8 @@ char * GetFileNameToPlayFromEmoId(int emo_id);
 void RebuildReasons();
 void PlayNewEmo(int emo_id,int err_id, bool is_gs=false/*is global stop on!*/, bool ignore_play_pos=false);
 
+void DrawReasonToPlay(int reason_id){};
+void DrawEmoToPlay(int Emo_id){};
+void DrawEmoPlaying(int Emo_id){};
+
 #endif /* ATLANTIS_MUSIC_TREE_H_ */
