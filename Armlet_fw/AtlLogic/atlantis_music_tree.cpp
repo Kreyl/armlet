@@ -25,7 +25,7 @@
 
 static const char* FDirList[] = {
         "music",
-        "music/common",
+        "common",
 };
 
 MusList_t MusList = {
@@ -337,14 +337,13 @@ void Init_emotionTreeMusicNode() {
         while(SD.GetNext(&S) == FR_OK) {
             Uart.Printf("\rFilename: %S,",S);
             int emo_id = GetEmoIndxFromFileString(S);
-            if(emo_id >= 0)
-                {
+            if(emo_id >= 0) {
                 emotions[emo_id].numTracks++;
-                Uart.Printf("\rFilename: %S, emo id %d, NumTracks %d", S,emo_id, emotions[emo_id].numTracks);
-                }
-           // else
-           // Uart.Printf("\rFilename: %S, emo id %d", S,emo_id);
-        } // if GetNext
+//                Uart.Printf("\rFilename: %S, emo id %d, NumTracks %d", S,emo_id, emotions[emo_id].numTracks);
+                chThdSleepMilliseconds(11);
+            }
+        } // while
+//        Uart.Printf("\rFileSearch end");
     } // if PrepareToReadDirs
 }
 

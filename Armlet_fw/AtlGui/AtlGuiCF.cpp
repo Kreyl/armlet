@@ -191,7 +191,7 @@ int bReasonGetState(int screen_id, int button_id)
                     //если прошли плато - игрок не видит что намерение еще включено
                     if(aui_indx==SI_FIGHT)
                     {
-                        if(GSCS.timer<0)
+                        if(GSCS.timer<0 && GSCS.stop_reason_type==gsDraka)
                             return BUTTON_NORMAL;
                         else return BUTTON_ENABLED;
 

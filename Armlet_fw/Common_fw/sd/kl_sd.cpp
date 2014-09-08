@@ -94,7 +94,10 @@ FRESULT sd_t::GetNext(char** PPName) {
                 FileInfo.lfname = &LongFileName[i];
                 FileInfo.lfsize = MAX_NAME_LEN - i;
                 r = f_opendir(&Directory, DirPath); // Try to open the folder
-                if(r != FR_OK) return r;
+                if(r != FR_OK) {
+//                    Uart.Printf("\rOpenDir err=%d; %S", r, DirPath);
+                    return r;
+                }
             }
             else return FR_NO_FILE; // no more dirs left
         }

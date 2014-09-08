@@ -66,7 +66,7 @@ MusList_t CSVList = {
 // Pill check
 void TmrPillCheckCallback(void *p) {
     chSysLockFromIsr();
-    chEvtSignalI(App.PThd, EVTMSK_PILL_CHECK);
+    if(App.PThd != nullptr) chEvtSignalI(App.PThd, EVTMSK_PILL_CHECK);
     chVTSetI(&App.TmrPillCheck, MS2ST(T_PILL_CHECK_MS), TmrPillCheckCallback, nullptr);
     chSysUnlockFromIsr();
 }
@@ -74,7 +74,7 @@ void TmrPillCheckCallback(void *p) {
 // Uart Rx
 void TmrUartRxCallback(void *p) {
     chSysLockFromIsr();
-    chEvtSignalI(App.PThd, EVTMSK_UART_RX_POLL);
+    if(App.PThd != nullptr) chEvtSignalI(App.PThd, EVTMSK_UART_RX_POLL);
     chVTSetI(&App.TmrUartRx, MS2ST(UART_RX_POLLING_MS), TmrUartRxCallback, nullptr);
     chSysUnlockFromIsr();
 }
@@ -115,7 +115,7 @@ void TimeTmrCallback(void *p) {
         }
     }
     Time.S_total++;
-    chEvtSignalI(App.PThd, EVTMSK_NEWSECOND);
+    if(App.PThd != nullptr) chEvtSignalI(App.PThd, EVTMSK_NEWSECOND);
     chSysUnlockFromIsr();
 }
 #endif
@@ -141,9 +141,9 @@ public:
 
 // Timer callback
 void KeylockTmrCallback(void *p) {  // FIXME: is it still in use?
-    chSysLockFromIsr();
+//    chSysLockFromIsr();
 //    chEvtSignalI(App.PThd, EVTMASK_KEYLOCK);
-    chSysUnlockFromIsr();
+//    chSysUnlockFromIsr();
 }
 
 void Keylock_t::Lock() {
@@ -533,6 +533,7 @@ void App_t::Task() {
 
                 Uart.Printf("\rTEST HERINfO");
                 //тест зависимости
+                Energy.SetEnergy(10);
                 GSCS.BeginStopCalculations(gsHerInfo);
                 //ArrayOfUserIntentions[SI_HER].TurnOn();
                 //тестважныхлюдей
