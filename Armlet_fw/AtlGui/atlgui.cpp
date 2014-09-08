@@ -14,6 +14,7 @@
 #include "AtlGuiCF.h"
 #include "mesh_lvl.h"
 #include "application.h"
+#include "intention.h"
 AtlGui_t AtlGui;
 #define PATH_FOLDER_STR "\\"
 #define PATH_TO_GUI "\\GUI\\"
@@ -214,6 +215,10 @@ void AtlGui_t::RenderFullScreen(int screen_id)
     }
     // Draw battery
     Lcd.DrawBatteryState();
+#ifdef BRACELET_TEST_MODE_VALS
+                    DrawReasonToPlay(SICD.last_intention_index_winner);
+                    DrawEmoToPlay(SICD.last_played_emo);
+#endif
 }
 void AtlGui_t::ButtonIsReleased(int button_id ,KeyEvt_t Type)
 {
