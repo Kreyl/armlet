@@ -22,7 +22,7 @@
  * .
  * n - Every n cycle
  */
-#define SEND_IN_COUNT   5
+#define SEND_IN_COUNT   1
 
 class Console_t {
 private:
