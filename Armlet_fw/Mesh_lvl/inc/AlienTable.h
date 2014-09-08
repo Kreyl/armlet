@@ -52,12 +52,11 @@ public:
             PNext++;
             if(PNext >= (Buf + ALIEN_BUF_SIZE)) {
                 if(Cnt++ > FINDER_COUNTER) {
-//                    Uart.Printf("\rAlienTable EmptyBuf");
                     return 0;
                 }
                 PNext = Buf;
             }
-        } while(PNext->Mesh.Timestamp == 0);
+        } while((PNext->Mesh.Timestamp == 0) || (PNext-Buf) == App.SelfID);
         return (uint16_t)(PNext - Buf);
     }
     // UpdateState
