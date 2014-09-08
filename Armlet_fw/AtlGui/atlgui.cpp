@@ -380,7 +380,7 @@ void AtlGui_t::RenderNameTimeBat()
 }
 void AtlGui_t::GetCharname()
 {
-    int chsize=sizeof(reasons[App.SelfID])/sizeof(char);
+    int chsize=sizeof(reasons[App.SelfID].name)/sizeof(char);
     if(chsize>MAX_CHARNAME_LCD_SIZE)
         chsize=MAX_CHARNAME_LCD_SIZE;
     strncpy(char_name,reasons[App.SelfID].name,chsize);
