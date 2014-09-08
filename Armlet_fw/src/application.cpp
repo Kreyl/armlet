@@ -483,6 +483,9 @@ void App_t::Task() {
 
                 if(reason_id!=-1 && reason_id!=-2 &&  reason_id!=-3) {
                     Uart.Printf("\rID to play=%d",reason_id);
+#ifdef BRACELET_TEST_MODE_VALS
+                    DrawReasonToPlay(reason_id);
+#endif
                     //new reason to play!remade on absent files!!
                     if(GetRealEmoForEmoToPlay(reasons[reason_id].eID) != SICD.last_played_emo)
                     {

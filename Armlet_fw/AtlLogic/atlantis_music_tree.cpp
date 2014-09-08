@@ -8,6 +8,7 @@
 #include "Sound.h"
 #include "kl_lib_f2xx.h" //random
 #include"energy.h"
+#include "lcd2630.h"
 
 #define MUSIC_FILE_EMO_INFO_SEPARATOR -
 #define MUSIC_FILE_EMO_INFO_SEPARATOR_STRING "-"
@@ -255,6 +256,9 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos)
 
 #endif
     SICD.last_played_emo=emo_id;
+#ifdef BRACELET_TEST_MODE_VALS
+    DrawEmoToPlay(SICD.last_played_emo);
+#endif
     char * fname = GetFileNameToPlayFromEmoId(SICD.last_played_emo);
     if(fname != nullptr) {
        strcpy(PlayEmoBuffTmp,fname);
@@ -416,3 +420,14 @@ int PrintFileToUART(char* filename)
 	 f_close(&file);
 	 return 1;
 }
+
+void DrawReasonToPlay(int reason_id){
+
+    Lcd.Printf(B52,15, 20, clAtltopstr, clAtlBack, "%s",reasons[reason_id].name);
+};
+void DrawEmoToPlay(int Emo_id){
+    Lcd.Printf(B52,15, 30, clAtltopstr, clAtlBack, "%s",emotions[Emo_id].name);
+};
+void DrawEmoPlaying(int Emo_id){
+    Lcd.Printf(B52,15, 40, clAtltopstr, clAtlBack, "%s",emotions[Emo_id].name);
+};
