@@ -8,9 +8,9 @@
 #
 # !!! DO NOT EDIT !!!
 #
-# Generated at 2014-09-08 05:10:58
+# Generated at 2014-09-09 18:56:23
 #
-201,PAdams,Mr. Peter Adams,7,10,15,0,,0
+201,PAdams,Mr. Peter Adams,7,10,15,0,,1
 202,DAllgood,Mr. David Allgood,7,20,10,0,,1
 203,MBanks,Ms. Marian Banks,3,300,20,0,,1
 204,BBernhard,Ms. Brenda Bernhard,2,3000,5,0,,1
@@ -45,12 +45,12 @@
 233,MHarvent,Ms. Miria Harvent,5,10,15,0,azart,1
 234,BHeart,Ms. Bonnie Heart,2,900,10,0,,1
 235,BHill,Ms. Bridget Hill,3,1800,5,0,,1
-236,CHonzo,Mr. Corian Honzo,2,20,5,3,,0
+236,CHonzo,Mr. Corian Honzo,2,20,5,3,,1
 237,AHuxley,Ms. Angelica Huxley,3,900,5,0,,1
-238,AJane,Ms. Ayita Jane,2,300,15,0,,0
+238,AJane,Ms. Ayita Jane,2,300,15,0,,1
 239,AJones,Ms. Anna Jones,3,900,10,0,,1
 240,EJones,Mr. Ezra Jones,6,20,15,0,,1
-241,SKendall,Ms. Sarah Kendall,2,900,5,0,,0
+241,SKendall,Ms. Sarah Kendall,2,900,5,0,,1
 242,LLane,Mr. Lloyd Lewis Lane,5,60,10,0,,0
 243,SLarken,Ms. Sheila Larken,3,900,5,0,,0
 244,ALee,Ms. Alice Lee,3,900,10,0,,1
@@ -71,7 +71,7 @@
 259,MRose,Ms. Margareth Rose,1,300,5,0,nostal'giya,1
 260,DSeldon,Mr. Derrick John Seldon,1,20,15,0,,1
 261,PShannon,Mr. Paul Shannon,2,0,10,0,,1
-262,JSherman,Ms. Julia Sherman,2,300,5,0,,0
+262,JSherman,Ms. Julia Sherman,2,300,5,0,,1
 263,DSilverstone,Mr. David Silverstone,3,10,5,0,nepriyazn',1
 264,RSoyfer,Ms. Raquel Soyfer,4,30,15,0,,1
 265,JSpencer,Mr. Jason Spencer,5,20,10,0,,1
