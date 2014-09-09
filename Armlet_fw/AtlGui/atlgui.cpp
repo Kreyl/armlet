@@ -310,7 +310,7 @@ void AtlGui_t::RenderSingleButtonStateCheck(int screen_id,int button_id)
            if( screens[current_state].buttons[button_id].isPressable!= nullptr)
            {
               int button_state_val=screens[current_state].buttons[button_id].isPressable(current_state,button_id);//sptr_button_state[button_id]->fptr_on_press());
-              Uart.Printf("\r RenderSingleButtonStateCheck button_state_val3 %d",button_state_val);
+//              Uart.Printf("\r RenderSingleButtonStateCheck button_state_val3 %d",button_state_val);
               if(button_state_val==BUTTON_PRESSABLE)
               {
                   Uart.Printf("\r RenderSingleButtonStateCheck button%d on screen %d is pressable %d",button_id,current_state );

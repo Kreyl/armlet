@@ -139,7 +139,6 @@ struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 5 weed     INITED
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 6 heroin     INITED
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 7 lsd     INITED
-        {-1,-1,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 7 kakt     INITED
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_KRAYK,nullptr},//narco 8 krayk
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_DEATH,const_cast<char *> (RNAME_DEATH)},//death 9
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_MANIAC,nullptr},//maniac 10
@@ -148,6 +147,7 @@ struct UserIntentions ArrayOfUserIntentions[MAX_USER_INTENTIONS_ARRAY_SIZE]={
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mSource 13
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_TUMAN,nullptr},//mProject 14
         {-1,-1,1200,2000,400,-1,false,0,PROCESS_LOMKA,nullptr},//narco 15 lomka
+        {-1,-1,1200,2000,400,-1,false,0,PROCESS_NARCO,nullptr},//narco 7 kakt     INITED
 };
 void InitArrayOfUserIntentions()
 {

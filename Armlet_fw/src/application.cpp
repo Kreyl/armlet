@@ -168,8 +168,8 @@ static inline void KeysHandler() {
 
     while((rslt = Keys.EvtBuf.Get(&Evt)) == OK) {
         // Debug
-        Uart.Printf("\rKeyEvtType=%u; Keys: ", Evt.Type);
-        for(uint8_t i=0; i<Evt.NKeys; i++) Uart.Printf("%u ", Evt.KeyID[i]);
+//        Uart.Printf("\rKeyEvtType=%u; Keys: ", Evt.Type);
+//        for(uint8_t i=0; i<Evt.NKeys; i++) Uart.Printf("%u ", Evt.KeyID[i]);
 
         //drop suspend timer!
         //AtlGui.screen_suspend_timer=0;
@@ -185,10 +185,9 @@ static inline void KeysHandler() {
             if(AtlGui.ButtonIsClicked(Evt.KeyID[0])) {
 //                Beeper.Beep(ShortBeep);
                 Vibro.Vibrate(ShortBrr);
-                Uart.Printf("\rAtlGui.ButtonIsClicked(Evt.KeyID[0]) TRUE ");
+//                Uart.Printf("\rAtlGui.ButtonIsClicked(Evt.KeyID[0]) TRUE ");
             }
-            else
-                Uart.Printf("\rAtlGui.ButtonIsClicked(Evt.KeyID[0]) FALSE ");
+//            else Uart.Printf("\rAtlGui.ButtonIsClicked(Evt.KeyID[0]) FALSE ");
         }
         else if(Evt.Type==keRelease)
         {
@@ -298,11 +297,6 @@ static inline void KeysHandler() {
         //                    Uart.Printf(" !!!AtlGui.ButtonIsClicked\r");
         //key debug info end
     }
-}
-#endif
-#if 1 // ========================== OnPillConnect ==============================
-static void OnPillConnect() {
-
 }
 #endif
 
@@ -621,7 +615,6 @@ void App_t::Task() {
                         if(rslt == OK) {
                             Uart.Printf("\rConnect: %d", Pill.ChargeCnt);
                             Beeper.Beep(BeepPillOk);
-                            OnPillConnect();
                             //1 - марихуана, 2 - лсд, 3 - героин
                             if(Pill.Type==PILLTYPEWEED)
                                 ArrayOfUserIntentions[SI_WEED].TurnOn();
