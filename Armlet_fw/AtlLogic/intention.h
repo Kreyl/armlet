@@ -18,7 +18,7 @@
 #define PROCESS_KRAYK  6
 #define PROCESS_LOMKA  6
 
-#define BRACELET_TEST_MODE_VALS
+//#define BRACELET_TEST_MODE_VALS
 //ArrayOfUserIntentions id defines, not buttons, user intentions itself
 
 #define SI_MURDER 0
