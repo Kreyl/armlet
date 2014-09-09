@@ -216,11 +216,13 @@ void InitArrayOfUserIntentions()
     WriteFrontTime(7*60,SI_KAKT);
     WriteMidTime(15*60,SI_KAKT);
 
-    WriteFrontTime(0,SI_DEATH);
+
     WriteFrontTime(0,SI_TUMAN);
     WriteFrontTime(0,SI_STRAH);
 
+    WriteFrontTime(0,SI_DEATH);
     WriteMidTime(60000,SI_DEATH);
+
     WriteMidTime(60,SI_TUMAN);
     WriteMidTime(600,SI_STRAH);
 
@@ -229,21 +231,45 @@ void InitArrayOfUserIntentions()
 
 #ifdef BRACELET_TEST_MODE_VALS
     WriteFrontTime(5,SI_SEX);
-    WriteMidTime(15,SI_SEX);
+    WriteMidTime(150,SI_SEX);
     WriteTailTime(20,SI_SEX);
+
+    WriteFrontTime(5,SI_CREATION);
+    WriteMidTime(150,SI_CREATION);
+    WriteTailTime(20,SI_CREATION);
+
+    WriteFrontTime(5,SI_DESTRUCTION);
+    WriteMidTime(150,SI_DESTRUCTION);
+    WriteTailTime(20,SI_DESTRUCTION);
 
     WriteFrontTime(30,SI_WITHDRAWAL);
     WriteMidTime(30,SI_WITHDRAWAL);
+    WriteTailTime(30,SI_WITHDRAWAL);
 
     WriteFrontTime(5,SI_HER);
     WriteMidTime(20,SI_HER);
     WriteTailTime(20,SI_HER);
+
+    WriteFrontTime(10,SI_LSD);
+    WriteMidTime(40,SI_LSD);
+    WriteTailTime(20,SI_LSD);
+
+    WriteFrontTime(10,SI_WEED);
+    WriteMidTime(40,SI_WEED);
+    WriteTailTime(20,SI_WEED);
+
+    WriteFrontTime(10,SI_KAKT);
+    WriteMidTime(40,SI_KAKT);
+    WriteTailTime(20,SI_KAKT);
 
     WriteFrontTime(0,SI_TUMAN);
     WriteFrontTime(21,SI_STRAH);
 
     WriteMidTime(25,SI_TUMAN);
     WriteMidTime(20,SI_STRAH);
+
+    WriteFrontTime(0,SI_DEATH);
+    WriteMidTime(200,SI_DEATH);
 #endif
     for(int i=0;i<MAX_USER_INTENTIONS_ARRAY_SIZE;i++)
         if(i!=SI_FIGHT)
@@ -609,7 +635,7 @@ void PushPlayerReasonToArrayOfIntentions()
                    if(CurrentIntentionArraySize < MAX_INCOMING_INTENTIONS_ARRAY_SIZE)
                    {
                        //добавляем во входящие
-                       //Uart.Printf("\rPushPlayerReasonToArrayOfIntentions PW%d RI %d",curr_power,ArrayOfUserIntentions[i].reason_indx);
+                       Uart.Printf("\rPushPlayerReasonToArrayOfIntentions PW%d RI %d",curr_power,ArrayOfUserIntentions[i].reason_indx);
                        ArrayOfIncomingIntentions[CurrentIntentionArraySize].power512=curr_power;
                        ArrayOfIncomingIntentions[CurrentIntentionArraySize].reason_indx=ArrayOfUserIntentions[i].reason_indx;
                        CurrentIntentionArraySize++;
@@ -741,7 +767,7 @@ int CalculateCurrentPowerOfPlayerReason(int array_indx, bool is_change)
     int slower_time= Energy.GetEnergyScaleValLess(ArrayOfUserIntentions[array_indx].current_time,array_indx);//<current_time
 
     Uart.Printf("\r EN %d tp%d OP%d AP%d",Energy.GetEnergy(),ArrayOfUserIntentions[array_indx].time_to_plateau,ArrayOfUserIntentions[array_indx].time_on_plateau,ArrayOfUserIntentions[array_indx].time_after_plateau);
-  //  Uart.Printf("\r FT %d LT %d,CT%d FLT %d, LFT%d",faster_time,slower_time, ArrayOfUserIntentions[array_indx].current_time,Energy.GetEnergyScaleValMore(slower_time),Energy.GetEnergyScaleValLess(faster_time));
+    Uart.Printf("\r FT %d LT %d,CT%d FLT %d, LFT%d",faster_time,slower_time, ArrayOfUserIntentions[array_indx].current_time,Energy.GetEnergyScaleValMore(slower_time,array_indx),Energy.GetEnergyScaleValLess(faster_time,array_indx));
     if(ArrayOfUserIntentions[array_indx].current_time>=0)
     {
         if(faster_time<ArrayOfUserIntentions[array_indx].time_to_plateau)//перед плато

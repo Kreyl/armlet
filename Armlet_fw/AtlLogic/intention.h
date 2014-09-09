@@ -2,7 +2,7 @@
 #define intention_h__
 //#include "emotions.h"
 #include "atlantis_music_tree.h"
-#define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 100
+#define MAX_INCOMING_INTENTIONS_ARRAY_SIZE 120
 #define MAX_USER_INTENTIONS_ARRAY_SIZE 17
 #define INTENTIONS_ARRAY_SIZE 5
 #define WINING_INTEGRAL_SWITCH_LIMIT 500

@@ -201,7 +201,7 @@ static inline void KeysHandler() {
             if(Evt.KeyID[0] == KEY_PWRON)
             {
 #ifdef                BRACELET_TEST_MODE_VALS
-                App.DropData();
+               // App.DropData();
 #endif
                 //выключение
                 App.SaveData();
@@ -460,17 +460,17 @@ void App_t::Task() {
                 //если входной резон пользователя - пользовательский, добавляем его в челподдержку
                 for(int kk=0;kk<MAX_USER_INTENTIONS_ARRAY_SIZE;kk++)
                 {
-                    int PTABLE_REASON =-1;
-                    if(PTABLE_REASON==ArrayOfUserIntentions[kk].reason_indx)
+                    //int PTABLE_REASON =-1;
+                   // if(PTABLE_REASON==ArrayOfUserIntentions[kk].reason_indx)
+                    if( kk== SI_CREATION|| kk== SI_DESTRUCTION)
                     {
                         ArrayOfUserIntentions[kk].human_support_number++;
                         break;
                     }
                 }
-
                 j++;
             }
-           // for(int ik=0;ik<CurrentIntentionArraySize;ik++)
+            //for(int ik=0;ik<CurrentIntentionArraySize;ik++)
             //    Uart.Printf("\rCURRENT_INCOMING_ARRAY_WEIGHTED rid %d, whgt%d, size %d",ArrayOfIncomingIntentions[ik].reason_indx,ArrayOfIncomingIntentions[ik].power512,CurrentIntentionArraySize);
 
             //добавляем массив игроцких резонов в общий
@@ -491,6 +491,42 @@ void App_t::Task() {
                     {
                         //check if it's user reason,if any, set already played flag
                         UserReasonFlagRecalc(SICD.last_intention_index_winner);//тут должэн стоять прошлый победитель!!
+                        //если новый победитель - намерение, то выключить все остальные намеряния кроме зависимости, маньяка и крайка.
+                        //TODO CUT REASONS
+//                        if(ArrayOfUserIntentions[SI_MURDER].current_time>=0)
+//                            ArrayOfUserIntentions[SI_MURDER].TurnOff();
+//                        if(ArrayOfUserIntentions[SI_CREATION].current_time>=0)
+//                            ArrayOfUserIntentions[SI_CREATION].TurnOff();
+//                        if(ArrayOfUserIntentions[SI_DESTRUCTION].current_time>=0)
+//                            ArrayOfUserIntentions[SI_DESTRUCTION].TurnOff();
+//                        if(ArrayOfUserIntentions[SI_SEX].current_time>=0)
+//                            ArrayOfUserIntentions[SI_SEX].TurnOff();
+                        int UI_indx=-1;
+                        for( int ism=0;ism<MAX_USER_INTENTIONS_ARRAY_SIZE;ism++)
+                            if(SICD.last_intention_index_winner==ArrayOfUserIntentions[ism].reason_indx && CalculateCurrentPowerOfPlayerReason(ism,false)>0)
+                            {
+                                UI_indx=ism;
+                                break;
+                            }
+                        bool is_redraw_needed1=false;
+                        if(UI_indx!=-1)
+                        for( int ism=0;ism<MAX_USER_INTENTIONS_ARRAY_SIZE;ism++)
+                            if(ism!=UI_indx && ArrayOfUserIntentions[ism].current_time>0)
+                            {
+                               if(ism== SI_MURDER || ism==SI_CREATION  || ism==SI_DESTRUCTION    || ism==SI_SEX    || ism==SI_WEED    || ism== SI_LSD   || ism== SI_KAKT)
+                               {
+                                   Uart.Printf("\rCUT  STOP RE%d, STOPPED %d",UI_indx,ism);
+                                   ArrayOfUserIntentions[ism].TurnOff();
+                               }
+                               if(ism== SI_MURDER || ism==SI_CREATION  || ism==SI_DESTRUCTION    || ism==SI_SEX  )
+                                   is_redraw_needed1=true;
+                            }
+                        if(is_redraw_needed1)
+                        {
+                            Uart.Printf("\rCUT REDRAW=%d",UI_indx);
+                            CheckAndRedrawFinishedReasons();
+                        }
+
                         PlayNewEmo(reasons[reason_id].eID,3);
                         SICD.last_reason_active_armlet=reason_id;
                         //send to tail and redraw any not tailed active user intention
@@ -533,9 +569,9 @@ void App_t::Task() {
 
                 Uart.Printf("\rTEST HERINfO");
                 //тест зависимости
-                Energy.SetEnergy(10);
-                GSCS.BeginStopCalculations(gsHerInfo);
-                //ArrayOfUserIntentions[SI_HER].TurnOn();
+                //Energy.SetEnergy(10);
+             //   GSCS.BeginStopCalculations(gsHerInfo);
+               // ArrayOfUserIntentions[SI_LSD].TurnOn();
                 //тестважныхлюдей
                 //тесттумана
                 //OnGetTumanMessage(App.SelfID);
@@ -676,7 +712,7 @@ void App_t::SaveData()
     int open_code= f_open (
             &file,
        "/state.ini",
-       FA_WRITE
+       FA_CREATE_ALWAYS | FA_WRITE
     );
     if(open_code!=0)
         return;
@@ -715,7 +751,8 @@ void App_t::SaveData()
     //если -2  - пишем windrawal time от !![2.)
     //если -1 пишем NARCO_IS_OFF_STATE
     //если >=0 - пишем windrawal time=2
-    if(ArrayOfUserIntentions[SI_HER].current_time==-2)
+    //если ломка есть, и это не крайк и не маньяк
+    if(ArrayOfUserIntentions[SI_WITHDRAWAL].current_time>0 && ArrayOfUserIntentions[SI_MANIAC].current_time==-1 && ArrayOfUserIntentions[SI_KRAYK].current_time ==-1)
     {
         if(ArrayOfUserIntentions[SI_WITHDRAWAL].current_time>2)
             f_printf(&file,"\r\n%d",ArrayOfUserIntentions[SI_WITHDRAWAL].current_time);
@@ -725,6 +762,12 @@ void App_t::SaveData()
     else if(ArrayOfUserIntentions[SI_HER].current_time>=0)
         f_printf(&file,"\r\n%d",2);
     else //-1
+        f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
+
+    f_printf(&file,"\r\n#narcolsd");
+    if(ArrayOfUserIntentions[SI_LSD].current_time>=0)
+        f_printf(&file,"\r\n%d",NARCO_IS_ON_STATE);
+    else
         f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
 
     f_printf(&file,"\r\n#narcoTrain");
@@ -761,6 +804,8 @@ void App_t::SaveData()
          f_printf(&file,"\r\n%d",NARCO_IS_OFF_STATE);
    // f_write(&file, DataFileBuff, buff_size, &bw);
     f_close(&file);
+    Uart.Printf("\r!!!ArrayOfUserIntentions[SI_HER].current_time%d",ArrayOfUserIntentions[SI_HER].current_time);
+    Uart.Printf("\r!!!ArrayOfUserIntentions[SI_WITHDRAWAL].current_time%d",ArrayOfUserIntentions[SI_WITHDRAWAL].current_time);
     Uart.Printf("\r!!!ArrayOfUserIntentions[SI_MANIAC].current_time%d",ArrayOfUserIntentions[SI_MANIAC].current_time);
     Uart.Printf("App_t::SaveData done");
 }
@@ -858,6 +903,7 @@ void App_t::LoadData()
                line_num++;
            int int_val;
            int_val=strtol(DataFileBuff,NULL,10);
+           Uart.Printf("\rAPP::LOADDATA linenum %d INTVAL %d",line_num,int_val);
            if(line_num==1)
                st_en=int_val;
 //           if(line_num==1)

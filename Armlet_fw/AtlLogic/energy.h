@@ -68,14 +68,23 @@ public:
     //reduce valuedue to energy
     int GetEnergyScaleValLess(int val_to_scale,int UI_indx)
     {
+        bool is_dependable= CheckEnergyDependency(UI_indx);
+        int safe_energy=energy_lvl;
+
+        if(!is_dependable)
+            energy_lvl=START_ENERGY;
+
         if(human_support>4)
             human_support=4;
         int human_support_percentage=100;
         if(human_support_percentage>1)
             human_support_percentage+=(human_support-1)*15;//115 130 145
 
-        return val_to_scale*ETS/(ETS+human_support_percentage*energy_lvl/100);
+        int rval= val_to_scale*ETS/(ETS+human_support_percentage*energy_lvl/100);
         //return( (val_to_scale*100)/( (   1+ energy_lvl/50)  *100));
+        if(!is_dependable)
+            energy_lvl=safe_energy;
+        return rval;
     }
     int GetEnergy();//{return energy_lvl;}
     void SetEnergy(int val_in);

@@ -24,8 +24,13 @@ int Energy_t::GetEnergy()
 }
 bool Energy_t::CheckEnergyDependency(int UI_indx)
 {
-    if(UI_indx==SI_WEED || UI_indx==SI_KAKT ||  UI_indx==SI_HER || UI_indx==SI_WITHDRAWAL || UI_indx==SI_STRAH ||UI_indx==SI_TUMAN)
+    if(UI_indx==SI_LSD || UI_indx==SI_WEED || UI_indx==SI_KAKT ||  UI_indx==SI_HER || UI_indx==SI_WITHDRAWAL || UI_indx==SI_STRAH ||UI_indx==SI_TUMAN)
+
+    {
+       // Uart.Printf( "\rEnergy_t::CheckEnergyDependency FAIL %d,\r", UI_indx);
         return false;
+    }
+   // Uart.Printf( "\rEnergy_t::CheckEnergyDependency TRUE %d,\r", UI_indx);
     return true;
 }
 void Energy_t::SetEnergy(int val_in){

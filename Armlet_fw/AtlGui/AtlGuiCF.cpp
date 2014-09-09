@@ -191,7 +191,7 @@ int bReasonGetState(int screen_id, int button_id)
                     //если прошли плато - игрок не видит что намерение еще включено
                     if(aui_indx==SI_FIGHT)
                     {
-                        if(GSCS.timer<0 && GSCS.stop_reason_type==gsDraka)
+                        if(GSCS.timer<0 || GSCS.stop_reason_type!=gsDraka)
                             return BUTTON_NORMAL;
                         else return BUTTON_ENABLED;
 
@@ -222,12 +222,12 @@ int bReasonChange(int screen_id, int button_id ,int press_mode)
     Uart.Printf("\r bReasonChange MODE %d ",press_mode);
     if(press_mode!=0 && press_mode!=2)
         return BUTTON_NO_REDRAW;
-    Uart.Printf("\r bReasonChange MODE11 %d ",press_mode);
+    //Uart.Printf("\r bReasonChange MODE11 %d ",press_mode);
     if(AtlGui.ReasonFlag==false)
         return BUTTON_NO_REDRAW;
     else
         AtlGui.ReasonFlag=false;
-    Uart.Printf("\r bReasonChange MODE22 %d ",press_mode);
+   // Uart.Printf("\r bReasonChange MODE22 %d ",press_mode);
     int reason_id=-1;
     int user_reason_indx=-1;
 
