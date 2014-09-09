@@ -148,7 +148,7 @@ typedef struct IntentionReduceData
 IntentionReduceData;
 typedef struct SRPFEArrayEl
 {
-    int seek_pos;
+    uint32_t seek_pos;
     int emo_id;
     int file_indx;
  }SRPFEArrayEl;
@@ -158,7 +158,7 @@ typedef struct SeekRecentlyPlayedFilesEmo
     int last_played_file_indx;
     int last_played_emo_imdx; //теоретически то дублирование данных, но тут они нужны в связке, и чтобы 100 раз везде не проверять, пусть лучше safe-load будет в одно изолированное место
     SRPFEArrayEl seek_array[MAX_RECENTLY_PLAYED_ARRAY];
-    void OnCallStopPlay(int emo_id,int file_id, int pos);
+    void OnCallStopPlay(int emo_id,int file_id, uint32_t pos);
     //return -1 if no, pos if yes
     int CheckIfRecent(int emo_id,int file_id);
     void IncrementArrayId();

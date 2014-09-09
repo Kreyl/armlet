@@ -248,7 +248,7 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos)
     //Uart.Printf("")
 #ifdef MID_SEEK_SUPPORT
     //get old position
-    int old_pos=Sound.GetPosition();
+    uint32_t old_pos=Sound.GetPosition();
     if(emo_id!=SRPFESingleton.last_played_emo_imdx)
         Uart.Printf("\rMID_SEEK_SUPPORT warning! possible differ: emo play %d, rmo stored: %d",emo_id,SRPFESingleton.last_played_emo_imdx);
     //записали старые emo id file id

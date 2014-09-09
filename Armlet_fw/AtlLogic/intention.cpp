@@ -316,7 +316,7 @@ struct IntentionReduceData SRD=
         false
 };
 
-void SeekRecentlyPlayedFilesEmo::OnCallStopPlay(int emo_id,int file_id, int pos)
+void SeekRecentlyPlayedFilesEmo::OnCallStopPlay(int emo_id,int file_id, uint32_t pos)
 {
     //this->last_array_id идет в минус по ходу пляски, проверяются в плюс начиная с этого
     //стартовый - ???
@@ -325,10 +325,23 @@ void SeekRecentlyPlayedFilesEmo::OnCallStopPlay(int emo_id,int file_id, int pos)
     if(emotions[emo_id].parent==0 && strcmp(emotions[emo_id].name,"pozitiv")!=0 && strcmp(emotions[emo_id].name,"negativ")!=0 &&
             strcmp(emotions[emo_id].name,"duhovnoe")!=0 && strcmp(emotions[emo_id].name,"zhelanie")!=0)
         return;
+    //Uart.Printf("\r STOPPLAY SEEK emo %d file %d pos %u,",emo_id,file_id,pos);
+    //если уже есть этот файл с этой позицией - значит это конец трека, сбросить ему позицию на ноль и не запоминать!
+    for(int i=0;i<MAX_RECENTLY_PLAYED_ARRAY;i++)
+    {
+        if(seek_array[i].emo_id==emo_id && seek_array[i].file_indx==file_id )//&&seek_array[i].seek_pos==pos)
+        {
+            Uart.Printf("\r STOPPLAY SEEK SAME FILE  emo %d %d file %d pos %u, indx %d,seek_pos %u,",emo_id,file_id,pos,i,seek_array[i].seek_pos);
+           // pos=0;
+            seek_array[i].seek_pos=0;
+            return;
+        }
+    }
     this->IncrementArrayId();
     seek_array[this->last_array_id].emo_id=emo_id;
     seek_array[this->last_array_id].file_indx=file_id;
     seek_array[this->last_array_id].seek_pos=pos;
+    //Uart.Printf("\r STOPPLAY SEEK SAME FILE INCREMENTED  emo %d %d file %d pos %u, indx %d,seek_pos %u,",emo_id,file_id,pos,this->last_array_id,seek_array[this->last_array_id].seek_pos);
 }
 int SeekRecentlyPlayedFilesEmo::CheckIfRecent(int emo_id,int file_id)
 {
