@@ -137,7 +137,7 @@ void Sound_t::IPlayNew() {
 
     FRESULT rslt;
     // Open new file
-    Uart.Printf("\rPlay %S", IFilename);
+    Uart.Printf("\rPlay %S at %u", IFilename, IStartPosition);
     rslt = f_open(&IFile, IFilename, FA_READ+FA_OPEN_EXISTING);
     if (rslt != FR_OK) {
         if (rslt == FR_NO_FILE) Uart.Printf("\r%S: not found", IFilename);

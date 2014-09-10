@@ -271,10 +271,10 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos)
            Uart.Printf("\r PlayNewEmo SEEKPOS IGNORE");
            seek_pos_old=0;
        }
-       Sound.Play(PlayEmoBuffTmp,seek_pos_old);
+       Sound.Play(PlayEmoBuffTmp,0);
        Uart.Printf(PlayEmoBuffTmp);
        Uart.Printf("\r");
-       Uart.Printf("\r PlayNewEmo SEEKPOS %d errid%d",seek_pos_old,err_id);
+       Uart.Printf("\r PlayNewEmo SEEKPOS %d errid%d",seek_pos_old,err_id);//seek_pos_old,err_id);
 
 #else
        Sound.Play(PlayEmoBuffTmp);
