@@ -56,7 +56,7 @@ public:
                 }
                 PNext = Buf;
             }
-        } while((PNext->Mesh.Timestamp == 0) || (PNext-Buf) == App.SelfID);
+        } while((PNext->Mesh.Timestamp == 0) || (uint16_t)(PNext-Buf) == App.SelfID);
         return (uint16_t)(PNext - Buf);
     }
     // UpdateState
