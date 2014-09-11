@@ -547,9 +547,9 @@ void CalculateIntentionsRadioChange() {
 
             SICD.winning_integral+=GetNotNormalizedIntegral(ArrayOfIncomingIntentions[0].power512,ArrayOfIncomingIntentions[0].reason_indx)/SICD.Normalizer;
             if(SICD.winning_integral>25000)
-                SICD.winning_integral=25000)
+                SICD.winning_integral=25000;
         if(SICD.winning_integral<0)
-            SICD.winning_integral=0)
+            SICD.winning_integral=0;
             SICD.last_intention_power_winner=ArrayOfIncomingIntentions[0].power512;//get current power!
             SICD.last_intention_index_winner=ArrayOfIncomingIntentions[0].reason_indx;
             return;
