@@ -49,7 +49,7 @@ INI_FILE = 'settings.ini'
 
 INI_CONTENT = open('settings_ini.tpl').read().replace('\r\n', '\n').replace('\n', '\r\n')
 
-CHARACTER_CSV = 'character.csv'
+CHARACTER_CSV_PATTERN = reCompile(r'character.*\.csv')
 
 FILE_PATTERN = reCompile(r'.*\..*')
 
@@ -209,7 +209,7 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
     errorFiles = getFiles(errorDir)
     newFileNameSet = set()
     # Removing common files
-    for fileName in (join(armletDir, f) for f in listdir(armletDir) if f not in (MUSIC_DIR, CHARACTER_CSV)):
+    for fileName in (join(armletDir, f) for f in listdir(armletDir) if f != MUSIC_DIR and not CHARACTER_CSV_PATTERN.match(f)):
         if isdir(fileName) and not islink(fileName):
             rmtree(fileName)
         else:
@@ -235,10 +235,12 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
         with open(join(armletDir, INI_FILE), 'wb') as f:
             f.write(INI_CONTENT % ((number,) + otherFields[:4]))
     # Processing character.csv
-    characterFile = join(armletDir, CHARACTER_CSV)
-    if isfile(characterFile):
-        print "Character file found, verifying"
-        verifyCharacter(emotions, characterFile)
+    characterFiles = tuple(fileName for fileName in listdir(armletDir) if CHARACTER_CSV_PATTERN.match(fileName))
+    if len(characterFiles) > 1:
+        raise ProcessException("Multiple character files found: %s" % ', '.join(characterFiles))
+    if characterFiles:
+        print "Character file found: %s, verifying" % characterFiles[0]
+        verifyCharacter(emotions, characterFiles[0])
     # Check music status
     (withErrors, markDate, okNum, okSize, errorText) = checkResultMark(baseDir)
     if markDate:
