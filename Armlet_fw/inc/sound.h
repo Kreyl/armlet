@@ -70,7 +70,7 @@ union VsCmd_t {
 #define VS_VOLUME_STEP          4
 #define VS_INITIAL_ATTENUATION  0x33
 #define VS_CMD_BUF_SZ           4       // Number of cmds in buf
-#define VS_DATA_BUF_SZ          8192    // bytes. Must be multiply of 512.
+#define VS_DATA_BUF_SZ          4096    // bytes. Must be multiply of 512.
 
 struct VsBuf_t {
     uint8_t Data[VS_DATA_BUF_SZ], *PData;

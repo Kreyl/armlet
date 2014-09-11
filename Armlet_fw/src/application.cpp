@@ -301,7 +301,7 @@ static inline void KeysHandler() {
 #endif
 
 // ================================= App thread ================================
-static WORKING_AREA(waAppThread, 8192);
+static WORKING_AREA(waAppThread, 16384);
 __attribute__((noreturn))
 static void AppThread(void *arg) {
     chRegSetThreadName("App");
@@ -341,7 +341,7 @@ void App_t::Task() {
         UpdateState();//эта штука берет локацию из таблицы
 
             //а весь оставшийся код - из суммы таблиц
-
+      //  Table_buff.PTable->current_row_size=0;
             Table_buff.Recalc_storage();
             //подстановка фиктивного фона!
             if(Table_buff.PTable->current_row_size<COPY_RX_TABLE_SZ-1)//0
@@ -470,6 +470,10 @@ void App_t::Task() {
             //добавляем массив игроцких резонов в общий
             PushPlayerReasonToArrayOfIntentions();
                // сюда - все массивы резонов с других источников!
+            Uart.Printf("\r CurrentIntentionArraySize %d",CurrentIntentionArraySize);
+            for(int t1=0;t1<CurrentIntentionArraySize;t1++)
+                Uart.Printf("\r CurrentIntentionArraySize %d power %d",ArrayOfIncomingIntentions[t1].reason_indx,ArrayOfIncomingIntentions[t1].power512);
+
             if(!SICD.is_global_stop_active)
             {
                 //пересчитываем резоны
