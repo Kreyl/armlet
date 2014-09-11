@@ -349,7 +349,7 @@ void App_t::Task() {
             {
                 Table_buff.PTable->current_row_size++; //1
                 Table_buff.PTable->Row[Table_buff.PTable->current_row_size-1].ID=REASON_BG; //0
-                Table_buff.PTable->Row[Table_buff.PTable->current_row_size-1].Level=this->locationThreshold+1;//100
+                Table_buff.PTable->Row[Table_buff.PTable->current_row_size-1].Level=1;//this->locationThreshold+1;//100
                 Table_buff.PTable->Row[Table_buff.PTable->current_row_size-1].Reason=0;
               //  Uart.Printf("\r No signals, add fon to incoming reasons!");
 
@@ -465,8 +465,8 @@ void App_t::Task() {
                 }
                 j++;
             }
-            //for(int ik=0;ik<CurrentIntentionArraySize;ik++)
-            //    Uart.Printf("\rCURRENT_INCOMING_ARRAY_WEIGHTED rid %d, whgt%d, size %d",ArrayOfIncomingIntentions[ik].reason_indx,ArrayOfIncomingIntentions[ik].power512,CurrentIntentionArraySize);
+            for(int ik=0;ik<CurrentIntentionArraySize;ik++)
+                 Uart.Printf("\rCURRENT_INCOMING_ARRAY_WEIGHTED rid %d, whgt%d, size %d",ArrayOfIncomingIntentions[ik].reason_indx,ArrayOfIncomingIntentions[ik].power512);
 
             //добавляем массив игроцких резонов в общий
             PushPlayerReasonToArrayOfIntentions();
