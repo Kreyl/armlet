@@ -39,6 +39,14 @@ void CmdUart_t::Printf(const char *format, ...) {
     chSysUnlock();
 }
 
+void CmdUart_t::PrintfI(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    IPrintf(format, args);
+    va_end(args);
+}
+
+
 void CmdUart_t::IPrintf(const char *format, va_list args) {
     int32_t MaxLength = UART_TXBUF_SIZE - IFullSlotsCount;
     IFullSlotsCount += kl_vsprintf(FPutChar, MaxLength, format, args);

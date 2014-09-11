@@ -207,7 +207,6 @@ static inline void KeysHandler() {
                 Log.Shutdown( );
                 chThdSleepMilliseconds(250);
                 AtlGui.ShowSplashscreen();
-
                 chThdSleepMilliseconds(1000);
                 Power.EnterStandby();
             }
@@ -253,8 +252,6 @@ static inline void KeysHandler() {
                   Evt.KeyID[3]==keyX && Evt.KeyID[4]==keyY && Evt.KeyID[5]==keyZ
                )//abc xyz
                {
-
-
                    Log.Shutdown( );
                    chThdSleepMilliseconds(250);
                    Uart.Printf(" GO BOOTLOADER %d\r", Evt.NKeys);
@@ -323,11 +320,15 @@ void App_t::Task() {
 
         if(EvtMsk & EVTMASK_PLAY_ENDS) {
             Uart.Printf("\rApp PlayEnd");
-            if(SICD.is_global_stop_active && GSCS.stop_reason_type==gsHerInfo)
-                GSCS.OnMusicStopHerInfo();
-            else
-            //играть музыку по текущей эмоции
-            PlayNewEmo(SICD.last_played_emo,1);
+            if(SICD.is_global_stop_active && GSCS.stop_reason_type==gsHerInfo) {
+            	Uart.Printf("\rOnMusic stop her info");
+            	GSCS.OnMusicStopHerInfo();
+            }
+            else {
+            	Uart.Printf("\rPlayAnother");
+            	PlayNewEmo(SICD.last_played_emo,1);
+            }
+
         }
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
@@ -506,7 +507,7 @@ void App_t::Task() {
                                 UI_indx=ism;
                                 break;
                             }
-                        bool is_redraw_needed1=false;
+                        bool is_redraw_needed1 = false;
                         if(UI_indx!=-1)
                         for( int ism=0;ism<MAX_USER_INTENTIONS_ARRAY_SIZE;ism++)
                             if(ism!=UI_indx && ArrayOfUserIntentions[ism].current_time>0)
@@ -576,27 +577,19 @@ void App_t::Task() {
             }
 #endif
 #ifndef BRACELET_TEST_MODE_VALS
-            if(Time.S_total % 300 ==0)
-            {
+            if(Time.S_total % 300 ==0) {
                 App.SaveData();
                 chThdSleepMilliseconds(250);
             }
 #endif
-            if(Time.S_total % 6 ==0)
-            {
+            if(Time.S_total % 6 ==0) {
                 AtlGui.RenderNameTimeBat();
-                //CalculateIntentionsRadioChange();
-                //PrintSCIDToUart();
-                //Uart.Printf("every 4 sec\r");
-                //Sound.SetVolume(0);
-              ///  Sound.Stop();
             }
-            if(on_run==0) {
+            if(on_run == 0) {
                 on_run=1;
                 AtlGui.ShowSplashscreen();
             }
-            else if(AtlGui.is_splash_screen_onrun==1 )
-            {
+            else if(AtlGui.is_splash_screen_onrun == 1) {
                 //через секунду включить основной
                 AtlGui.CallStateScreen(0);
                 AtlGui.is_splash_screen_onrun=2;
@@ -1183,6 +1176,12 @@ void App_t::OnUartCmd(Cmd_t *PCmd) {
         Uart.Printf("\rDFU request");
         // Setup TIMER
         Bootloader.dfuJumpIn(wdg_ON);
+    }
+
+    // TODO: debug only
+    else if(PCmd->NameIs("#Splash")) {
+    	Uart.Printf("\rManually splash");
+    	Sound.Play("splash.mp3");
     }
 
     else if(*PCmd->Name == '#') Uart.Ack(CMD_UNKNOWN);  // reply only #-started stuff

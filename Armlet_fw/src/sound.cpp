@@ -55,7 +55,7 @@ void Sound_t::ITask() {
         eventmask_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
         // Play new request
         if(EvtMsk & VS_EVT_COMPLETED) {
-//            Uart.Printf("\rCompleted");
+//        	Uart.Printf("\rComp");
             AddCmd(VS_REG_MODE, 0x0004);    // Soft reset
             if(IFilename != NULL) IPlayNew();
             else if(IPThd != nullptr) chEvtSignal(IPThd, EVTMASK_PLAY_ENDS);  // Raise event if nothing to play
@@ -122,7 +122,7 @@ void Sound_t::Init() {
     IDreq.Setup(VS_GPIO, VS_DREQ, ttRising);
     // ==== Thread ====
     PThread = chThdCreateStatic(waSoundThread, sizeof(waSoundThread), NORMALPRIO, (tfunc_t)SoundThread, NULL);
-    //StartTransmissionIfNotBusy();   // Send init commands
+    StartTransmissionIfNotBusy();   // Send init commands
 }
 
 void Sound_t::Shutdown() {
@@ -190,7 +190,7 @@ void Sound_t::ISendNextData() {
     msg_t msg = chMBFetchI(&CmdBox, &ICmd.Msg);
     chSysUnlockFromIsr();
     if(msg == RDY_OK) {
-//        Uart.Printf("vCmd: %A\r", &ICmd, 4, ' ');
+//        Uart.PrintfI("\rvCmd: %A\r", &ICmd, 4, ' ');
         XCS_Lo();   // Start Cmd transmission
         dmaStreamSetMemory0(VS_DMA, &ICmd);
         dmaStreamSetTransactionSize(VS_DMA, sizeof(VsCmd_t));
@@ -199,7 +199,7 @@ void Sound_t::ISendNextData() {
     }
     // Send next chunk of data if any
     else if(State == sndPlaying) {
-        //Uart.Printf("D");
+//        Uart.PrintfI("\rD");
         // Send data if buffer is not empty
         if(PBuf->DataSz != 0) {
             XDCS_Lo();  // Start data transmission
@@ -226,7 +226,7 @@ void Sound_t::ISendNextData() {
         }
     }
     else if(State == sndWritingZeroes) {
-//        Uart.Printf("Z");
+//        Uart.Printf("\rZ");
         if(ZeroesCount == 0) { // Was writing zeroes, now all over
             State = sndStopped;
             IDmaIdle = true;
@@ -238,7 +238,7 @@ void Sound_t::ISendNextData() {
         else SendZeroes();
     }
     else {
-//        Uart.Printf("I\r");
+//    	Uart.PrintfI("\rI");
         if(!IDreq.IsHi()) IDreq.EnableIrq(IRQ_PRIO_MEDIUM);
         else IDmaIdle = true;
     }
@@ -265,6 +265,7 @@ void Sound_t::SendZeroes() {
 uint8_t ReadWriteByte(uint8_t AByte) {
     VS_SPI->DR = AByte;
     while(!(VS_SPI->SR & SPI_SR_RXNE));
+//    while(!(VS_SPI->SR & SPI_SR_BSY));
     return (uint8_t)(VS_SPI->DR);
 }
 

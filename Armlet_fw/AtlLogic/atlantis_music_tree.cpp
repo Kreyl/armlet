@@ -67,7 +67,7 @@ char * GetMusicFileNameFromList(int emo_id, int file_num) {
     Uart.Printf("\rEmonamebuffer: %s; emotions[emo_id].name: %s",emonamebuffer,emotions[emo_id].name);
     char *S = nullptr;
     SD.GetNthFileByPrefix(&MusList,  emonamebuffer, file_num, &S);
-    Uart.Printf("\r%S; Filename = %S", __FUNCTION__, S);
+//    Uart.Printf("\r%S; Filename = %S", __FUNCTION__, S);
     return S;
 }
 
@@ -77,30 +77,23 @@ int GetEmoIndxFromFileString(char * string)
 	//TODO weight auto rebalancer function to call here
 
 	//getting emo from filename
-	int sep_id=-1;
+	int sep_id = -1;
 	sep_id=strcspn(string,MUSIC_FILE_EMO_INFO_SEPARATOR_STRING);
 //	Uart.Printf("sepid=%d\r", sep_id);
-	if(sep_id > 20) return -3;
-	if(sep_id<=0)
-		return SEPARATOR_NOT_FOUND;
+	if(sep_id > 20) {
+		Uart.Printf("\rsep_id>20");
+		return -3;
+	}
+	if(sep_id <= 0) return SEPARATOR_NOT_FOUND;
 	strncpy(EmoNamebuffer,string,sep_id);
-	//stremobuff=
-	//str
-
-	for(int i=0;i<NUMBER_OF_EMOTIONS;i++)
-	{
-        if((uint32_t)sep_id== strlen(emotions[i].name))
-        {
-            if(strncmp(EmoNamebuffer,emotions[i].name,sep_id)==0)
-            {
-            //	Uart.Printf("GetEmoIndx string %s , EmoNamebuffer  %s, name %s  \r",string,EmoNamebuffer,emotions[i].name);
-                  //  Uart.Printf("String_size %d %d, ",sep_id,strlen(emotions[i].name));
+	for(int i=0;i<NUMBER_OF_EMOTIONS;i++) {
+        if((uint32_t)sep_id== strlen(emotions[i].name)) {
+            if(strncmp(EmoNamebuffer,emotions[i].name,sep_id)==0) {
                 return i;
             }
         }
 	}
 	return EMO_INFO_NOT_FOUND;
-
 }
 //recalculate reasons tree to remove zero file numbers on emo tree to call
 void RebuildReasons()
@@ -218,8 +211,7 @@ char * GetFileNameToPlayFromEmoId(int emo_id) {
 
 void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos)
 {
-    if(SICD.is_global_stop_active && !is_gs)
-    {
+    if(SICD.is_global_stop_active && !is_gs) {
         Uart.Printf("PlayNewEmo called on globalstop,playing same emo");
         emo_id=SICD.last_played_emo;
     }
@@ -271,10 +263,10 @@ void PlayNewEmo(int emo_id, int err_id, bool is_gs, bool ignore_play_pos)
            Uart.Printf("\r PlayNewEmo SEEKPOS IGNORE");
            seek_pos_old=0;
        }
-       Sound.Play(PlayEmoBuffTmp,0);
-       Uart.Printf(PlayEmoBuffTmp);
+       Sound.Play(PlayEmoBuffTmp,seek_pos_old);
        Uart.Printf("\r");
-       Uart.Printf("\r PlayNewEmo SEEKPOS %d errid%d",seek_pos_old,err_id);//seek_pos_old,err_id);
+       Uart.Printf(PlayEmoBuffTmp);
+       Uart.Printf("\r PlayNewEmo SEEKPOS %d errid%d",seek_pos_old,err_id);
 
 #else
        Sound.Play(PlayEmoBuffTmp);
@@ -335,13 +327,11 @@ void Init_emotionTreeMusicNode() {
         // Count files available
         char *S = nullptr;
         while(SD.GetNext(&S) == FR_OK) {
-            Uart.Printf("\rFilename: %S,",S);
+//            Uart.Printf("\rFilename: %S,",S);
             int emo_id = GetEmoIndxFromFileString(S);
-            if(emo_id >= 0) {
-                emotions[emo_id].numTracks++;
+            if(emo_id >= 0) emotions[emo_id].numTracks++;
 //                Uart.Printf("\rFilename: %S, emo id %d, NumTracks %d", S,emo_id, emotions[emo_id].numTracks);
                 chThdSleepMilliseconds(11);
-            }
         } // while
 //        Uart.Printf("\rFileSearch end");
     } // if PrepareToReadDirs
@@ -349,11 +339,7 @@ void Init_emotionTreeMusicNode() {
 
 void Init_emotionTreeMusicNodeFiles_FromFileIterrator() {
     // init zero state
-    for(int i=0;i<music_array_size;i++)
-        {
-            emotions[i].numTracks=0;
-            //Uart.Printf("Init_emotionTreeMusicNodeFiles_FromFileIterrator emo_id %d, trnum %d",i,emotions[i].numTracks )
-        }
+    for(int i=0;i<music_array_size;i++) emotions[i].numTracks=0;
     Init_emotionTreeMusicNode();
 }
 
