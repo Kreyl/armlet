@@ -20,26 +20,21 @@ extern "C" {
 // Dreq IRQ
 CH_IRQ_HANDLER(EXTI0_IRQHandler) {
     CH_IRQ_PROLOGUE();
-   // Uart.PrintNow("I ");
     EXTI->PR = (1 << 0);  // Clean irq flag
 //    Uart.Printf("Irq ");
-    Sound.ISendNextData();
-  //  Uart.PrintNow("i ");
+    chSysLockFromIsr();
+    chEvtSignalI(Sound.PThread, VS_EVT_DREQ_IRQ);
+    chSysUnlockFromIsr();
     CH_IRQ_EPILOGUE();
 }
 // DMA irq
-void SIrqDmaHandler(void *p, uint32_t flags) { Sound.IrqDmaHandler(); }
-} // extern c
-
-void Sound_t::IrqDmaHandler() {
-   // Uart.PrintNow("D ");
-    ISpi.WaitBsyLo();               // Wait SPI transaction end
-    XCS_Hi();                       // }
-    XDCS_Hi();                      // } Stop SPI
-    if(IDreq.IsHi()) ISendNextData();   // More data allowed, send it now
-    else IDreq.EnableIrq(IRQ_PRIO_MEDIUM); // Enable dreq irq
-   // Uart.PrintNow("d ");
+void SIrqDmaHandler(void *p, uint32_t flags) {
+    chSysLockFromIsr();
+    chEvtSignalI(Sound.PThread, VS_EVT_DMA_DONE);
+    chSysUnlockFromIsr();
+    //Sound.IrqDmaHandler();
 }
+} // extern c
 
 // =========================== Implementation ==================================
 static WORKING_AREA(waSoundThread, 512);
@@ -53,6 +48,21 @@ __attribute__((noreturn))
 void Sound_t::ITask() {
     while(true) {
         eventmask_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
+        if(EvtMsk & VS_EVT_DMA_DONE) {
+            ISpi.WaitBsyLo();               // Wait SPI transaction end
+            XCS_Hi();                       // }
+            XDCS_Hi();                      // } Stop SPI
+            if(IDreq.IsHi()) ISendNextData();   // More data allowed, send it now
+            else {
+                chThdSleepMilliseconds(1); // Allow VS to end up with data processing
+                chSysLock();
+                IDreq.EnableIrq(IRQ_PRIO_MEDIUM); // Enable dreq irq
+                chSysUnlock();
+            }
+        }
+
+        if(EvtMsk & VS_EVT_DREQ_IRQ) ISendNextData();
+
         // Play new request
         if(EvtMsk & VS_EVT_COMPLETED) {
 //        	Uart.Printf("\rComp");
@@ -186,9 +196,7 @@ void Sound_t::ISendNextData() {
     dmaStreamDisable(VS_DMA);
     IDmaIdle = false;
     // If command queue is not empty, send command
-    chSysLockFromIsr();
-    msg_t msg = chMBFetchI(&CmdBox, &ICmd.Msg);
-    chSysUnlockFromIsr();
+    msg_t msg = chMBFetch(&CmdBox, &ICmd.Msg, TIME_IMMEDIATE);
     if(msg == RDY_OK) {
 //        Uart.PrintfI("\rvCmd: %A\r", &ICmd, 4, ' ');
         XCS_Lo();   // Start Cmd transmission
@@ -218,9 +226,9 @@ void Sound_t::ISendNextData() {
         if(PBuf->DataSz == 0) {
             // Prepare to read next chunk
 //            Uart.Printf("*");
-            chSysLockFromIsr();
+            chSysLock();
             chEvtSignalI(PThread, VS_EVT_READ_NEXT);
-            chSysUnlockFromIsr();
+            chSysUnlock();
             // Switch to next buf
             PBuf = (PBuf == &Buf1)? &Buf2 : &Buf1;
         }
@@ -231,9 +239,9 @@ void Sound_t::ISendNextData() {
             State = sndStopped;
             IDmaIdle = true;
 //            Uart.Printf("vEnd\r");
-            chSysLockFromIsr();
+            chSysLock();
             chEvtSignalI(PThread, VS_EVT_COMPLETED);
-            chSysUnlockFromIsr();
+            chSysUnlock();
         }
         else SendZeroes();
     }
