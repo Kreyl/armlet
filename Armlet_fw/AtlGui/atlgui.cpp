@@ -378,12 +378,11 @@ void AtlGui_t::RenderNameTimeBat()
     Lcd.Printf(B52,1, 0, clAtltopstr, clAtlBack, "%s",char_name);
     Lcd.Printf(B52,96-2, 0, clAtltopstr, clAtlBack, " %s",timechar);
 }
-void AtlGui_t::GetCharname()
-{
-    int chsize=sizeof(reasons[App.SelfID].name)/sizeof(char);
-    if(chsize>MAX_CHARNAME_LCD_SIZE)
-        chsize=MAX_CHARNAME_LCD_SIZE;
-    strncpy(char_name,reasons[App.SelfID].name,chsize);
+void AtlGui_t::GetCharname() {
+    int chsize = strlen(reasons[App.SelfID].name);
+    TRIM_VALUE(chsize, MAX_CHARNAME_LCD_SIZE);
+    strncpy(char_name, reasons[App.SelfID].name, chsize);
+    char_name[11] = '\0';
 }
 void AtlGui_t::DrawBigLockMark()
 {

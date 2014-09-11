@@ -85,6 +85,8 @@ struct VsBuf_t {
 #define VS_EVT_READ_NEXT    (eventmask_t)1
 #define VS_EVT_STOP         (eventmask_t)2
 #define VS_EVT_COMPLETED    (eventmask_t)4
+#define VS_EVT_DMA_DONE     (eventmask_t)8
+#define VS_EVT_DREQ_IRQ     (eventmask_t)16
 
 class Sound_t {
 private:
@@ -94,7 +96,6 @@ private:
     VsCmd_t ICmd;
     VsBuf_t Buf1, Buf2, *PBuf;
     uint32_t ZeroesCount;
-    Thread *PThread;
     FIL IFile;
     bool IDmaIdle;
     int16_t IAttenuation;
@@ -157,10 +158,10 @@ public:
     uint32_t GetPosition() { return IFile.fptr; }
     // Inner use
     IrqPin_t IDreq;
+    Thread *PThread;
     void IrqDreqHandler();
     void ITask();
     void ISendNextData();
-    void IrqDmaHandler();
 };
 
 extern Sound_t Sound;
