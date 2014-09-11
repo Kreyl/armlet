@@ -85,9 +85,8 @@ struct VsBuf_t {
 #define VS_EVT_READ_NEXT    (eventmask_t)1
 #define VS_EVT_STOP         (eventmask_t)2
 #define VS_EVT_COMPLETED    (eventmask_t)4
-
-#define STOP_TIME			101
-#define DELAY()				for(volatile uint32_t i=0; i<STOP_TIME; i++) __NOP();
+#define VS_EVT_DMA_DONE     (eventmask_t)8
+#define VS_EVT_DREQ_IRQ     (eventmask_t)16
 
 class Sound_t {
 private:
@@ -97,7 +96,6 @@ private:
     VsCmd_t ICmd;
     VsBuf_t Buf1, Buf2, *PBuf;
     uint32_t ZeroesCount;
-    Thread *PThread;
     FIL IFile;
     bool IDmaIdle;
     int16_t IAttenuation;
@@ -107,10 +105,10 @@ private:
     // Pin operations
     inline void Rst_Lo()   { PinClear(VS_GPIO, VS_RST); }
     inline void Rst_Hi()   { PinSet(VS_GPIO, VS_RST); }
-    inline void XCS_Lo()   { PinClear(VS_GPIO, VS_XCS); DELAY() }
-    inline void XCS_Hi()   { PinSet(VS_GPIO, VS_XCS); DELAY() }
-    inline void XDCS_Lo()  { PinClear(VS_GPIO, VS_XDCS); DELAY() }
-    inline void XDCS_Hi()  { PinSet(VS_GPIO, VS_XDCS); DELAY() }
+    inline void XCS_Lo()   { PinClear(VS_GPIO, VS_XCS); }
+    inline void XCS_Hi()   { PinSet(VS_GPIO, VS_XCS); }
+    inline void XDCS_Lo()  { PinClear(VS_GPIO, VS_XDCS); }
+    inline void XDCS_Hi()  { PinSet(VS_GPIO, VS_XDCS); }
     // Cmds
     uint8_t CmdRead(uint8_t AAddr, uint16_t *AData);
     uint8_t CmdWrite(uint8_t AAddr, uint16_t AData);
@@ -161,10 +159,10 @@ public:
     uint32_t GetPosition() { return IFile.fptr; }
     // Inner use
     IrqPin_t IDreq;
+    Thread *PThread;
     void IrqDreqHandler();
     void ITask();
     void ISendNextData();
-    void IrqDmaHandler();
 };
 
 extern Sound_t Sound;
