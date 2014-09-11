@@ -173,7 +173,8 @@ def guessEmotion(emotions, emotion):
 def readCSV(csv): # generator
     with open(csv) as f:
         for row in CSVReader(f):
-            if row and not row[0].startswith('#'):
+            assert row, "Bad file format, empty line: %s" % csv
+            if not row[0].startswith('#'):
                 yield row
 
 def getEmotion(emotions, emotion):

@@ -8,7 +8,7 @@
 #
 # !!! DO NOT EDIT !!!
 #
-# Generated at 2014-09-09 18:56:23
+# Generated at 2014-09-11 20:45:48
 #
 201,PAdams,Mr. Peter Adams,7,10,15,0,,1
 202,DAllgood,Mr. David Allgood,7,20,10,0,,1
@@ -22,7 +22,7 @@
 210,JCollins,Mr. John Collins,2,10,10,0,,1
 211,VCollins,Mr. Vincent Collins,4,20,15,0,,1
 212,CComes,Ms. Carol Comes,3,3000,5,0,,1
-213,RConnor,Ms. Alicia Randall Connor,5,10,10,0,voodushevlenie,0
+213,RConnor,Ms. Alicia Randall Connor,5,10,10,0,voodushevlenie,1
 214,GCross,Ms. Gina Cross,3,900,5,0,,1
 215,FCunningham,Ms. Fannie Queen Cunningham,3,300,10,0,,1
 216,MDawkins,Mr. Matthew Dawkins,7,0,5,0,radost',0
@@ -38,7 +38,7 @@
 226,LGeertz,Ms. Lilian Geertz,1,60,10,0,,0
 227,AGraywood,Ms. Anna Maria Graywood,2,900,5,0,,1
 228,KGreenhall,Ms. Kayla Greenhall,2,1800,5,0,,1
-229,AGrissom,Mr. Anthony Grissom,3,900,5,0,,0
+229,AGrissom,Mr. Anthony Grissom,3,900,5,0,,1
 230,Guide,Mr. Guide,7,30,10,5,nadezhda,1
 231,MHailey,Ms. Maria Hailey,4,60,5,0,,1
 232,ZHarriot,Ms. Zoe Harriot,3,300,5,0,,1
@@ -65,7 +65,7 @@
 253,SOReilly,Ms. Sinead O'Reilly,3,900,10,0,,1
 254,JOSullivan,Mr. Jack O'Sullivan,4,300,5,0,,0
 255,MParcs,Mr. Mitchell Parcs,3,900,5,0,,1
-256,SRandom,Ms. Samantha Random,3,900,5,0,,0
+256,SRandom,Ms. Samantha Random,3,900,5,0,,1
 257,RRay,Mr. Robert Ray,5,10,5,0,trans,1
 258,MReed,Ms. Morgan Reed,2,900,5,0,,1
 259,MRose,Ms. Margareth Rose,1,300,5,0,nostal'giya,1

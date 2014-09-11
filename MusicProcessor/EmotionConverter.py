@@ -29,6 +29,7 @@ EMOTION_PATCHES = {
     'udovletvorennost\'': 'udovletvorenie',
     'udvoletvorenie': 'udovletvorenie',
     'umrovotvorenie': 'umirotvorenie',
+    'umirotvorennost\'': 'umirotvorenie',
     'voodushevlennost\'': 'voodushevlenie'
 }
 
