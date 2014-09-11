@@ -156,7 +156,6 @@ void Init() {
     Sound.SetVolume(START_VOL_CONST);
 
     PillMgr.Init();
-#if 1
     Init_emotionTreeMusicNodeFiles_FromFileIterrator();
     App.Init();
     AtlGui.Init();
@@ -166,6 +165,5 @@ void Init() {
 
     Uart.Printf("\rInit done");
     Log.Printf("Init done");
-#endif
 #endif
 }

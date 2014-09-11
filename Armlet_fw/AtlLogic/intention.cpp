@@ -186,8 +186,7 @@ void InitArrayOfUserIntentions()
             ArrayOfUserIntentions[i].power512_plateau=reasons[ArrayOfUserIntentions[i].reason_indx].weight*SICD.Intention_weight_cost/SICD.Signal_power_weight_cost;
             reasons[ArrayOfUserIntentions[i].reason_indx].weight=0;
             //инициализируем хвост!
-            if(i!=SI_MURDER);
-            WriteTailTime(300,i);
+            if(i!=SI_MURDER) WriteTailTime(300,i);
         }
     }
     //now data!
@@ -545,7 +544,9 @@ void CalculateIntentionsRadioChange() {
         if(CurrentIntentionArraySize == 1) {
             if(SICD.last_intention_index_winner != ArrayOfIncomingIntentions[0].reason_indx) SICD.winning_integral=0;
 
-            SICD.winning_integral+=GetNotNormalizedIntegral(ArrayOfIncomingIntentions[0].power512,ArrayOfIncomingIntentions[0].reason_indx)/SICD.Normalizer;
+            SICD.winning_integral += GetNotNormalizedIntegral(ArrayOfIncomingIntentions[0].power512,ArrayOfIncomingIntentions[0].reason_indx)/SICD.Normalizer;
+            if(SICD.winning_integral < 0) SICD.winning_integral = 0;
+            TRIM_VALUE(SICD.winning_integral, WIINING_INTEGRAL_TRIM_VALUE);
             SICD.last_intention_power_winner=ArrayOfIncomingIntentions[0].power512;//get current power!
             SICD.last_intention_index_winner=ArrayOfIncomingIntentions[0].reason_indx;
             return;

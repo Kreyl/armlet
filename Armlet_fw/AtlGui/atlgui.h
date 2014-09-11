@@ -88,7 +88,7 @@ public:
 
     void RenderNameTimeBat();
     void GetCharname();//getname by id
-    char char_name[MAX_CHARNAME_LCD_SIZE];
+    char char_name[MAX_CHARNAME_LCD_SIZE+1];
     char timechar[5];
     int time1, time2;
 
