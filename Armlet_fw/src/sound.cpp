@@ -55,19 +55,19 @@ void Sound_t::ITask() {
         eventmask_t EvtMsk = chEvtWaitAny(ALL_EVENTS);
         // Play new request
         if(EvtMsk & VS_EVT_COMPLETED) {
-        	Uart.Printf("\rComp");
+//        	Uart.Printf("\rComp");
             AddCmd(VS_REG_MODE, 0x0004);    // Soft reset
             if(IFilename != NULL) IPlayNew();
             else if(IPThd != nullptr) chEvtSignal(IPThd, EVTMASK_PLAY_ENDS);  // Raise event if nothing to play
         }
         // Stop request
         else if(EvtMsk & VS_EVT_STOP) {
-            Uart.Printf("\rStop");
+//            Uart.Printf("\rStop");
             PrepareToStop();
         }
         // Data read request
         else if(EvtMsk & VS_EVT_READ_NEXT) {
-            Uart.Printf("\rreadNext");
+//            Uart.Printf("\rreadNext");
             FRESULT rslt = FR_OK;
             bool EofAtStart = f_eof(&IFile);
             // Read next if not EOF
