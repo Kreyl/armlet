@@ -86,6 +86,9 @@ struct VsBuf_t {
 #define VS_EVT_STOP         (eventmask_t)2
 #define VS_EVT_COMPLETED    (eventmask_t)4
 
+#define STOP_TIME			101
+#define DELAY()				for(volatile uint32_t i=0; i<STOP_TIME; i++) __NOP();
+
 class Sound_t {
 private:
     Spi_t ISpi;
@@ -104,10 +107,10 @@ private:
     // Pin operations
     inline void Rst_Lo()   { PinClear(VS_GPIO, VS_RST); }
     inline void Rst_Hi()   { PinSet(VS_GPIO, VS_RST); }
-    inline void XCS_Lo()   { PinClear(VS_GPIO, VS_XCS); }
-    inline void XCS_Hi()   { PinSet(VS_GPIO, VS_XCS); }
-    inline void XDCS_Lo()  { PinClear(VS_GPIO, VS_XDCS); }
-    inline void XDCS_Hi()  { PinSet(VS_GPIO, VS_XDCS); }
+    inline void XCS_Lo()   { PinClear(VS_GPIO, VS_XCS); DELAY() }
+    inline void XCS_Hi()   { PinSet(VS_GPIO, VS_XCS); DELAY() }
+    inline void XDCS_Lo()  { PinClear(VS_GPIO, VS_XDCS); DELAY() }
+    inline void XDCS_Hi()  { PinSet(VS_GPIO, VS_XDCS); DELAY() }
     // Cmds
     uint8_t CmdRead(uint8_t AAddr, uint16_t *AData);
     uint8_t CmdWrite(uint8_t AAddr, uint16_t AData);
@@ -128,6 +131,7 @@ public:
     void Shutdown();
     void Play(const char* AFilename, uint32_t StartPosition = 0) {
         IFilename = AFilename;
+        Uart.Printf("\rPosition=%u", StartPosition);
         if(StartPosition & 1) StartPosition--;
         IStartPosition = StartPosition;
         chEvtSignal(PThread, VS_EVT_STOP);

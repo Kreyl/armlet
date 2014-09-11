@@ -122,6 +122,7 @@ void Init() {
 #endif
 #if 1
     SD.Init();
+
     Log.Init();
     // Read config
     SD.iniReadInt32("Radio", "id", "settings.ini", &App.SelfID);
