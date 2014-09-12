@@ -25,7 +25,6 @@
 
 #include "ff.h"
 #include "MassStorage.h"
-#include "sd_log.h"
 
 #include "flashloader_support.h"
 
@@ -85,7 +84,6 @@ int main() {
         uint32_t EvtMsk;
         EvtMsk = chEvtWaitAny(ALL_EVENTS);
         if(EvtMsk & EVTMSK_DFU_REQUEST) {
-            Log.Shutdown();
             Usb.Shutdown();
             MassStorage.Reset();
             // execute boot
@@ -123,7 +121,7 @@ void Init() {
 #if 1
     SD.Init();
 
-    Log.Init();
+//    Log.Init();
     // Read config
     SD.iniReadInt32("Radio", "id", "settings.ini", &App.SelfID);
     SD.iniReadInt32("Radio", "locationThreshold", "settings.ini", &App.locationThreshold);
@@ -135,7 +133,7 @@ void Init() {
     SD.iniReadInt32("Radio", "emotionFixTheshold", "settings.ini", &App.emotionFixTheshold);
     SD.iniReadInt32("Radio", "mobThreshold", "settings.ini", &App.mobThreshold);
     Uart.Printf("\rID=%u", App.SelfID);
-    Log.Printf("ID=%u", App.SelfID);
+//    Log.Printf("ID=%u", App.SelfID);
 
     Lcd.Init();
     Lcd.Cls(clAtlBack);
@@ -164,6 +162,6 @@ void Init() {
     Mesh.Init();
 
     Uart.Printf("\rInit done");
-    Log.Printf("Init done");
+//    Log.Printf("Init done");
 #endif
 }

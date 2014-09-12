@@ -31,7 +31,6 @@
 #include "usb_f2.h"
 #include "kl_lib_f2xx.h"
 
-#include "sd_log.h"
 #include "console.h"
 #include "mesh_lvl.h"
 
@@ -204,7 +203,6 @@ static inline void KeysHandler() {
 #endif
                 //выключение
                 App.SaveData();
-                Log.Shutdown( );
                 chThdSleepMilliseconds(250);
                 AtlGui.ShowSplashscreen();
                 chThdSleepMilliseconds(1000);
@@ -239,7 +237,6 @@ static inline void KeysHandler() {
                    App.SaveData();
                    chThdSleepMilliseconds(250);
                    Uart.Printf(" GO REBOOT  %d\r", Evt.NKeys);
-                   Log.Shutdown( );
                    chThdSleepMilliseconds(250);
                    AtlGui.ShowSplashscreen();
                    chThdSleepMilliseconds(1000);
@@ -252,7 +249,6 @@ static inline void KeysHandler() {
                   Evt.KeyID[3]==keyX && Evt.KeyID[4]==keyY && Evt.KeyID[5]==keyZ
                )//abc xyz
                {
-                   Log.Shutdown( );
                    chThdSleepMilliseconds(250);
                    Uart.Printf(" GO BOOTLOADER %d\r", Evt.NKeys);
                    AtlGui.ShowSplashscreen();
@@ -272,7 +268,6 @@ static inline void KeysHandler() {
                    chThdSleepMilliseconds(250);
                  //  Bootloader.dfuJumpIn(wdg_ON);
                    //TODO drop character to initial here
-                   Log.Shutdown( );
                    chThdSleepMilliseconds(250);
                    AtlGui.ShowSplashscreen();
                    chThdSleepMilliseconds(1000);
@@ -1128,7 +1123,6 @@ void App_t::CallLustraReboot()
     App.SaveData();
     chThdSleepMilliseconds(250);
     Uart.Printf("\r GO REBOOT  LUSTRA\r");
-    Log.Shutdown( );
     chThdSleepMilliseconds(250);
     AtlGui.ShowSplashscreen();
     chThdSleepMilliseconds(1000);
@@ -1143,7 +1137,6 @@ void App_t::CallLustraReset()
     App.SaveData();
     Uart.Printf("\r GO REBOOT ( &DROP state!) LUSTRA \r");
     chThdSleepMilliseconds(250);
-    Log.Shutdown( );
     chThdSleepMilliseconds(250);
     AtlGui.ShowSplashscreen();
     chThdSleepMilliseconds(1000);
