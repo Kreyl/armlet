@@ -21,7 +21,6 @@
 #include "sound.h"
 
 #include "kl_sd.h"
-#include "sd_log.h"
 
 #define USB_ENABLED
 
