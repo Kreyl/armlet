@@ -5,7 +5,6 @@
 #
 # Processed by EmotionProcessor.py and integrated into ArmLet firmware.
 #
-
 hub,0,fon
 master,240,masterka
 dead,240,mertvyak

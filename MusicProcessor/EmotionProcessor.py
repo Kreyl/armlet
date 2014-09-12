@@ -17,7 +17,7 @@
 #
 from csv import reader as CSVReader, writer as CSVWriter
 from itertools import chain
-from os.path import join
+from os.path import basename, join
 from platform import system
 from subprocess import Popen, PIPE, STDOUT
 from sys import stdout
@@ -173,7 +173,8 @@ def guessEmotion(emotions, emotion):
 def readCSV(csv): # generator
     with open(csv) as f:
         for row in CSVReader(f):
-            if row and not row[0].startswith('#'):
+            assert row, "Bad file format, empty line: %s" % csv
+            if not row[0].startswith('#'):
                 yield row
 
 def getEmotion(emotions, emotion):
@@ -212,12 +213,12 @@ def processEmotions(fileName = getFileName(EMOTIONS_CSV)):
 def processReasonRange(emotions, fileName, tag, startID, maxLength):
     reasons = []
     for (rid, row) in enumerate(readCSV(fileName), startID):
-        assert len(row) == 3, "Bad %s file format" % tag
+        assert len(row) == 3, "Bad file format: %s" % tag
         (reason, weight, emotion) = row
         eid = getEmotion(emotions, emotion)
         weight = getWeight(weight)
         addReason(reasons, rid, reason, weight, 0, eid, emotion)
-    assert len(reasons) <= maxLength
+    assert maxLength is None or len(reasons) <= maxLength
     return tuple(reasons)
 
 def processCharacters(emotions, fileName = getFileName(CHARACTERS_CSV)):
@@ -316,7 +317,7 @@ def processReasons(emotions):
 def verifyCharacter(emotions, fileName):
     reasons = processReasons(emotions)
     validReasons = tuple(r[1].lower() for r in chain.from_iterable(reasons))
-    characterReasons = processReasonRange(emotions, fileName, None, 0, 0)
+    characterReasons = processReasonRange(emotions, fileName, basename(fileName), 0, None)
     for r in characterReasons:
         assert r[1].lower() in validReasons, "Unknown reason: %s" % r[1]
 
