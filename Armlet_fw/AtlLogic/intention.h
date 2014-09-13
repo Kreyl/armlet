@@ -209,6 +209,10 @@ void WriteTailTime(int val_in,int array_indx);
 
 void OnGetTumanMessage(int appid);
 
+extern uint32_t TimeMsFromLastHLW;
+extern int IndexOfLastHLW;
+extern uint32_t TimeHLWThr;
+
 //в структуре рассчета будет индекс текущего победителя мощности,
 //индекс предыдущего победителя мощности,
 //набранная дельта ( по определению принадлежит предыдущему победителю)

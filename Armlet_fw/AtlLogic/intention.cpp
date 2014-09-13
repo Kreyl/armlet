@@ -15,6 +15,12 @@ int CurrentIntentionArraySize=2;
 #define DRAKA_MAX_SEC 60
 #define DRAKA_STEP ((DRAKA_MAX_SEC-DRAKA_MIN_SEC)/10)
 #define DRAKA_RANDOM_SEC_RANGE 7
+
+
+uint32_t TimeMsFromLastHLW =0;
+int IndexOfLastHLW=-1;
+uint32_t TimeHLWThr =30000;
+
 int GetDrakaTime()
 {
 

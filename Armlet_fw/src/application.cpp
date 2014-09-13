@@ -413,29 +413,44 @@ void App_t::Task() {
                     //init age
                     int32_t curr_time_ms=Mesh.GetAbsTimeMS();
 
+                    //если я не лидер - ничего не делаем!
+                    if(rid!=-1 && rid!=IndexOfLastHLW)
+                    {
+                        CurrentIntentionArraySize--;
+                        continue;
+                    }
+                    //если дилера нет, тоо..
                     //Uart.Printf("\rMEET HUMAN rid %d",rid);
                     //init //TODO test it!!
                     if( reasons[rid].age==0)
                     {
                        // Uart.Printf("\rMEET HUMAN ZERO AGE rid %d",rid);
                         reasons[rid].age=curr_time_ms;
+                        IndexOfLastHLW=rid;
                     }
                    // uint32_t d1=curr_time_ms-reasons[rid].age;
+
 
                     //if d>20m-restart!
                     if(curr_time_ms-reasons[rid].age>CHARACTER_MS_DIFF_SILENCE)
                     {
+                        //выкл
+                        if(IndexOfLastHLW==rid)
+                            IndexOfLastHLW=-1;
                        // Uart.Printf("\rMEET HUMAN CHARACTER>_MS_DIFF_SILENCE rid %d",rid);
                         reasons[rid].age=curr_time_ms;
                     }
                     else if(curr_time_ms-reasons[rid].age>=CHARACTER_MS_DIFF_MEETING)
                     {
+                        if(IndexOfLastHLW==rid)
+                            IndexOfLastHLW=-1;
                        // Uart.Printf("\rMEET HUMAN CHARACTER>CHARACTER_MS_DIFF_MEETING rid %d",rid);
                        // ArrayOfIncomingIntentions[j].power512=0;
                         CurrentIntentionArraySize--;
                         continue;
                         //не делать силу 0,инорировать!
                     }
+
                    // Uart.Printf("\rMEET HUMAN AGE %u CT%uD1 %u POWER %d",reasons[rid].age,curr_time_ms,d1, ArrayOfIncomingIntentions[j].power512);
                     //manipulate with power on people, 1 min to play, 20 min Silence end
                 }
@@ -457,8 +472,19 @@ void App_t::Task() {
                         ArrayOfUserIntentions[kk].human_support_number++;
                         break;
                     }
+
                 }
                 j++;
+            }
+            //IndexOfLastHLW тикает даже если его нет во входном массиве!
+
+            if(IndexOfLastHLW!=-1)
+            {
+                int32_t curr_time_ms=Mesh.GetAbsTimeMS();
+                if(curr_time_ms-reasons[IndexOfLastHLW].age>CHARACTER_MS_DIFF_SILENCE)
+                    IndexOfLastHLW=-1;
+                else if(curr_time_ms-reasons[IndexOfLastHLW].age>=CHARACTER_MS_DIFF_MEETING)
+                    IndexOfLastHLW=-1;
             }
             for(int ik=0;ik<CurrentIntentionArraySize;ik++)
                  Uart.Printf("\rCURRENT_INCOMING_ARRAY_WEIGHTED rid %d, whgt%d, size %d",ArrayOfIncomingIntentions[ik].reason_indx,ArrayOfIncomingIntentions[ik].power512);
