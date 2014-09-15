@@ -102,7 +102,7 @@ int main() {
 }
 
 void Init() {
-    Uart.Init(256000);
+    Uart.Init(115200);
     Uart.Printf("\rAtlantis   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
 
     //in case uart not working 0
