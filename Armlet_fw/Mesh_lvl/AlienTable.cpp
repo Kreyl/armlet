@@ -48,7 +48,7 @@ ret_Err AlienTable_t::PutSender(uint32_t CurrentCycle, SenderInfo_t *Ptr) {
    AlienInfo_t iNewString;
    iNewString.Mesh.Hops         = 1; // cause recipient catched pkt straight from sender
    iNewString.Mesh.Timestamp    = CurrentCycle;
-   iNewString.Mesh.TimeDiff     = (int32_t)(Ptr->Mesh.CycleN - CurrentCycle);
+   iNewString.Mesh.TimeDiff     = CurrentCycle - (int32_t)(Ptr->Mesh.CycleN);
    iNewString.State             = Ptr->State; // copy State part
    write_data(Ptr->Mesh.SelfID, &iNewString);
    Console.Send_Info(Ptr->Mesh.SelfID, &iNewString);
