@@ -137,7 +137,8 @@ void Mesh_t::IPktHandler(){
             GetPrimaryPkt = true;                        // received privilege pkt
             PriorityID = pSM->TimeOwnerID;
             IResetTimeAge(PriorityID, pSM->TimeAge);
-            *PNewCycleN = pSM->CycleN + 1;   // TODO: cycle number increment: nedeed of not? Seems to be needed.
+            NewCycleN = pSM->CycleN + 1;   // TODO: cycle number increment: nedeed of not? Seems to be needed.
+            CycleCorrection = AbsCycle - NewCycleN;
             *PTimeToWakeUp = MeshMsg.Timestamp - MESH_PKT_TIME - (SLOT_TIME*(PriorityID-1)) + CYCLE_TIME;
         }
     }
@@ -150,10 +151,10 @@ void Mesh_t::IUpdateTimer() {
         uint32_t timeNow = chTimeNow();
         while(*PTimeToWakeUp < timeNow) {
             *PTimeToWakeUp += CYCLE_TIME;
-            *PNewCycleN += 1;
+            NewCycleN += 1;
         }
-        SetNewAbsCycleN(*PNewCycleN);
-        AlienTable.TimeCorrection(*PTimeToWakeUp - timeNow);
+        SetNewAbsCycleN(NewCycleN);
+        AlienTable.TimeCorrection(CycleCorrection);
         CycleTmr.SetCounter(0);
         GetPrimaryPkt = false;
         if(*PTimeToWakeUp > chTimeNow()) chThdSleepUntil(*PTimeToWakeUp); /* TODO: Thinking carefully about asynch switch on Timer with Virtual timer */

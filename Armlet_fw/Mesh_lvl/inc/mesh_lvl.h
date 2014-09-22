@@ -109,7 +109,7 @@ private:
     // Time Specific
     char TimeSeparator;
     uint16_t PriorityID;
-    uint32_t NewCycleN, *PNewCycleN;
+    uint32_t NewCycleN, CycleCorrection;
     uint32_t TimeToWakeUp, *PTimeToWakeUp;
     Timer_t CycleTmr;
     CircBufString_t MeshMsg;
@@ -163,7 +163,7 @@ public:
                 TimeSeparator(':'),
                 PriorityID(0),
                 NewCycleN(0),
-                PNewCycleN(&NewCycleN),
+                CycleCorrection(0),
                 TimeToWakeUp(0),
                 PTimeToWakeUp(&TimeToWakeUp),
                 IPThread(NULL),

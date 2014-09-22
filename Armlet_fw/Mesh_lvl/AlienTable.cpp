@@ -28,16 +28,14 @@ ret_Err AlienTable_t::PutAlien(uint16_t ID, int32_t TimeStampDiff, AlienInfo_t *
     else if(ID == App.SelfID) return OK;
     else { // Need to share information to Buf
         Ptr->Mesh.Hops         += 1; // increase Hops
-        // TODO:
-        Ptr->Mesh.Timestamp    -= TimeStampDiff;
-        Ptr->Mesh.TimeDiff     -= TimeStampDiff;
+        Ptr->Mesh.Timestamp    += TimeStampDiff;
+        Ptr->Mesh.TimeDiff     += TimeStampDiff;
         if(Ptr->Mesh.Timestamp < Buf[ID].Mesh.Timestamp) return OK;
         if(Ptr->Mesh.Timestamp == Buf[ID].Mesh.Timestamp && Ptr->Mesh.Hops >= Buf[ID].Mesh.Hops) return OK;
         write_data(ID, Ptr);
         Console.Send_Info(ID, Ptr);
-        return OK;
     }
-    return CMD_UNKNOWN;
+    return OK;
 }
 
 
@@ -58,15 +56,15 @@ ret_Err AlienTable_t::PutSender(uint32_t CurrentCycle, SenderInfo_t *Ptr) {
 }
 
 /* TimeCorrection */
-void AlienTable_t::TimeCorrection(uint32_t CorrValueMS) {
-    uint32_t CorrValueCycle = CorrValueMS/CYCLE_TIME;
-    if(CorrValueCycle == 0) return;
+void AlienTable_t::TimeCorrection(uint32_t Corr) {
+    if(Corr == 0) return;
     for(uint16_t i=0; i<ALIEN_BUF_SIZE; i++) {
         if(Buf[i].Mesh.Timestamp != 0) {
-            Uart.Printf("%u: %u, %u ",i, Buf[i].Mesh.Timestamp, CorrValueCycle);
-            if(CorrValueCycle > Buf[i].Mesh.Timestamp) Buf[i].Mesh.Timestamp = 0;
-            else Buf[i].Mesh.Timestamp   -= CorrValueCycle;
-            Buf[i].Mesh.TimeDiff    -= CorrValueCycle;
+            Uart.Printf("%u: %u, %u ",i, Buf[i].Mesh.Timestamp, Corr);
+            if(Corr > Buf[i].Mesh.Timestamp)
+                 Buf[i].Mesh.Timestamp = 0;
+            else Buf[i].Mesh.Timestamp   -= Corr;
+            Buf[i].Mesh.TimeDiff    -= Corr;
             Uart.Printf(" %u\r", Buf[i].Mesh.Timestamp);
         } // if valid string
     } // for all Buf
