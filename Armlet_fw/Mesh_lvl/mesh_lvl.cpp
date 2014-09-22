@@ -139,7 +139,7 @@ void Mesh_t::IPktHandler(){
             IResetTimeAge(PriorityID, pSM->TimeAge);
             NewCycleN = pSM->CycleN + 1;   // TODO: cycle number increment: nedeed of not? Seems to be needed.
             CycleCorrection = AbsCycle - NewCycleN;
-            *PTimeToWakeUp = MeshMsg.Timestamp - MESH_PKT_TIME - (SLOT_TIME*(PriorityID-1)) + CYCLE_TIME;
+            TimeToWakeUp = MeshMsg.Timestamp - MESH_PKT_TIME - (SLOT_TIME*(PriorityID-1)) + CYCLE_TIME;
         }
     }
     SendEvent(EVTMSK_MESH_RX_END);
@@ -149,15 +149,15 @@ void Mesh_t::IUpdateTimer() {
     RxTable.SendEvtReady();
     if(GetPrimaryPkt) {
         uint32_t timeNow = chTimeNow();
-        while(*PTimeToWakeUp < timeNow) {
-            *PTimeToWakeUp += CYCLE_TIME;
+        while(TimeToWakeUp < timeNow) {
+            TimeToWakeUp += CYCLE_TIME;
             NewCycleN += 1;
         }
         SetNewAbsCycleN(NewCycleN);
         AlienTable.TimeCorrection(CycleCorrection);
         CycleTmr.SetCounter(0);
         GetPrimaryPkt = false;
-        if(*PTimeToWakeUp > chTimeNow()) chThdSleepUntil(*PTimeToWakeUp); /* TODO: Thinking carefully about asynch switch on Timer with Virtual timer */
+        if(TimeToWakeUp > chTimeNow()) chThdSleepUntil(TimeToWakeUp); /* TODO: Thinking carefully about asynch switch on Timer with Virtual timer */
         else Uart.Printf("\r\n[mesh_lvl.cpp] WT!");
         CycleTmr.Enable();
     }
