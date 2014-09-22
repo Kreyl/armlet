@@ -84,6 +84,6 @@ meshGetSettingsResponse = Command(UART_MESH_SETTINGS, 'dd')
 meshSetCycleCommand = Command(UART_MESH_SET_CYCLE, 'd', UART_MESH_CYCLE_SET)
 meshSetCycleResponse = Command(UART_MESH_CYCLE_SET, 'd')
 
-meshNodeInfoResponse = Command(UART_MESH_NODE_INFO, 'dddddddd')
+meshNodeInfoResponse = Command(UART_MESH_NODE_INFO, 'ddddddd')
 
 Command.linkReplies()

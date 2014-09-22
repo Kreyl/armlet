@@ -87,7 +87,7 @@ class EmulatedSerial(object):
             if self.ready and now > self.nextNode:
                 self.nextNode = now + float(randint(0, 1000)) / 1000
                 num = randint(1, 100)
-                data = meshNodeInfoResponse.encode(num, 0 if num == 1 else randint(1, 5), randint(0, 10000), randint(0, 200) - 100, randint(0, 20), randint(0, 20), randint(0, 20), randint(0, 100))
+                data = meshNodeInfoResponse.encode(num, 0 if num == 1 else randint(1, 5), randint(0, 10000), randint(0, 200) - 100, randint(0, 20) + randint(0, 1) * 0x8000, randint(0, 200), randint(0, 100))
                 break
             sleep(DT)
         return data

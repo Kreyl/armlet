@@ -19,6 +19,8 @@ REASONS = tuple(row[1] for row in CSVReader(open(REASONS_CSV)) if row and not ro
 LONGEST_EMOTION = max((len(emotion), n) for (n, emotion) in enumerate(EMOTIONS))[1]
 LONGEST_REASON = max((len(reason), n) for (n, reason) in enumerate(REASONS))[1]
 
+NAL_FLAG = 0x8000 # Non-actual location flag bit
+
 def signedNumber(n):
     return ('%+d' % n) if n else '0'
 
@@ -43,13 +45,12 @@ def getColumnsData(processor):
         (True, RAW, True, True, 'TimeDiffT', 'Time difference as time', 'td', 0, processor.cycleTimeStr),
         (True, PROC, False, True, 'LocalTimeC', 'Device local time in cycles', 'td', 9999, processor.tdTime),
         (True, PROC, False, True, 'LocalTimeD', 'Device local date', 'td', 0, processor.tdDateStr),
-        (True, RAW, True, True, 'Location', 'Device location', 'location', len(REASONS)),
-        (True, RAW, True, False, 'LocationN', 'Device location name', 'location', LONGEST_REASON, partial(getItem, REASONS)),
-        (True, RAW, True, True, 'Reason', 'Actual reason', 'reason', len(REASONS)),
-        (True, RAW, True, False, 'ReasonN', 'Actual reason', 'reason', LONGEST_REASON, partial(getItem, REASONS)),
-        (True, RAW, True, True, 'Emotion', 'Emotion', 'emotion', len(EMOTIONS)),
-        (True, RAW, True, False, 'EmotionN', 'Emotion', 'emotion', LONGEST_EMOTION, partial(getItem, EMOTIONS)),
-        (True, RAW, True, False, 'Energy', 'Energy', 'energy', 100)
+        (True, RAW, True, True, 'Location', 'Device location', 'location', len(REASONS), lambda x: x & (NAL_FLAG - 1)),
+        (True, RAW, True, False, 'LocationN', 'Device location name', 'location', LONGEST_REASON, lambda x: getItem(REASONS, x & (NAL_FLAG - 1))),
+        (True, RAW, True, True, 'LocationA', 'Location actual', 'location', NAL_FLAG, lambda x: '--' if x & NAL_FLAG else '+'),
+        (True, RAW, True, True, 'Neighbor', 'Nearest neighbor', 'neighbor', len(REASONS)),
+        (True, RAW, True, False, 'NeighborN', 'Nearest neighbor name', 'neighbor', LONGEST_REASON, partial(getItem, REASONS)),
+        (True, RAW, True, True, 'Battery', 'Battery', 'battery', 100),
     )
 
 class Device(object): # pylint: disable=R0902
@@ -69,12 +70,11 @@ class Device(object): # pylint: disable=R0902
         self.time = None
         self.td = None
         self.location = None
-        self.reason = None
-        self.emotion = None
-        self.energy = None
+        self.neighbor = None
+        self.battery = None
 
     def update(self, *args):
-        (self.hops, self.time, self.td, self.location, self.reason, self.emotion, self.energy) = ((int(arg) if arg != 'None' else None) for arg in args)
+        (self.hops, self.time, self.td, self.location, self.neighbor, self.battery) = ((int(arg) if arg != 'None' else None) for arg in args)
 
     def settings(self):
-        return ' '.join(str(x) for x in (self.hops, self.time, self.td, self.location, self.reason, self.emotion, self.energy)) if self.time else ''
+        return ' '.join(str(x) for x in (self.hops, self.time, self.td, self.location, self.neighbor, self.battery)) if self.time else ''
