@@ -11,7 +11,6 @@
 #include "peripheral.h"
 #include "application.h"
 #include "RxTable.h"
-
 //#define MESH_DBG        // On/Off Debug Message in MeshLvl
 
 Mesh_t Mesh;
@@ -139,7 +138,7 @@ void Mesh_t::IPktHandler(){
             PriorityID = pSM->TimeOwnerID;
             IResetTimeAge(PriorityID, pSM->TimeAge);
             *PNewCycleN = pSM->CycleN + 1;   // TODO: cycle number increment: nedeed of not? Seems to be needed.
-            *PTimeToWakeUp = MeshMsg.Timestamp - MESH_PKT_TIME - (SLOT_TIME*(PriorityID)) + CYCLE_TIME;
+            *PTimeToWakeUp = MeshMsg.Timestamp - MESH_PKT_TIME - (SLOT_TIME*(PriorityID-1)) + CYCLE_TIME;
         }
     }
     SendEvent(EVTMSK_MESH_RX_END);

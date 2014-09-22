@@ -9,6 +9,7 @@
 #define MESH_LVL_H_
 
 #include "evt_mask.h"
+#include "cc1101.h"
 #include "radio_lvl1.h"
 #include "msg_box.h"
 #include "stdlib.h"
@@ -174,7 +175,7 @@ public:
     bool IsInit;
     uint16_t UndispathedPktCnt;
 
-    void UpdateSleepTime()              { SleepTime = ((App.SelfID-1)*SLOT_TIME); }
+    void UpdateSleepTime()              { SleepTime = ((App.SelfID-1)*SLOT_TIME) - 1; }
     uint32_t GetCycleN()                { return (AbsCycle);             }
     uint32_t GetAbsTimeMS()             { return (AbsCycle*CYCLE_TIME);  }
     uint8_t GetAstronomicTime(char *PToStr, uint8_t MaxLen);
