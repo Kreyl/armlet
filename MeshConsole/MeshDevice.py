@@ -10,13 +10,10 @@ from MeshView import CONST, RAW, PROC
 
 NUM_DEVICES = 300
 
-EMOTIONS_CSV = '../MusicProcessor/Emotions.csv'
-REASONS_CSV = '../MusicProcessor/Reasons.csv'
+REASONS_CSV = '../ReasonProcessor/Reasons.csv'
 
-EMOTIONS = tuple(row[-1].decode('utf-8') for row in CSVReader(open(EMOTIONS_CSV)) if row and not row[0].startswith('#'))
 REASONS = tuple(row[1] for row in CSVReader(open(REASONS_CSV)) if row and not row[0].startswith('#'))
 
-LONGEST_EMOTION = max((len(emotion), n) for (n, emotion) in enumerate(EMOTIONS))[1]
 LONGEST_REASON = max((len(reason), n) for (n, reason) in enumerate(REASONS))[1]
 
 NAL_FLAG = 0x8000 # Non-actual location flag bit
