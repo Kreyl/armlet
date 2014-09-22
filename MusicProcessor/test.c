@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#include "emotions.h"
+#include "reasons.h"
 
 int main() {
-    printf("%d, %d\n", NUMBER_OF_EMOTIONS, NUMBER_OF_REASONS);
+    printf("%d\n", NUMBER_OF_REASONS);
     return 0;
 }
