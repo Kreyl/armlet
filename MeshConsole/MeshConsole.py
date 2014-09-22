@@ -174,7 +174,7 @@ class MeshConsole(QMainWindow):
             self.columnActions.append(action)
         # Starting up!
         self.loadSettings()
-        self.logger.info("Running in %s mode" % ('SLAVE' if self.slave else 'MASTER'))
+        self.logger.info("Running in %s mode", 'SLAVE' if self.slave else 'MASTER')
         self.playing = False # will be toggled immediately by pause()
         self.comConnect.connect(self.processConnect)
         self.comInput.connect(self.processInput)

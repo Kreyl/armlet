@@ -29,6 +29,10 @@ except ImportError, ex:
 
 isWindows = system().lower().startswith('win')
 
+CSV_ENCODING = 'Windows-1251'
+
+CPP_ENCODING = 'Windows-1251'
+
 CONSOLE_ENCODING = stdout.encoding or ('cp866' if isWindows else 'UTF-8')
 
 def encodeForConsole(s):
@@ -107,7 +111,7 @@ def processReasonRange(fileName, tag, startID, maxLength):
     for (rid, row) in enumerate(readCSV(fileName), startID):
         assert len(row) == 1, "Bad file format: %s" % tag
         (reason,) = row
-        addReason(reasons, rid, translify(reason.decode('utf-8')))
+        addReason(reasons, rid, reason.decode(CSV_ENCODING))
     assert maxLength is None or len(reasons) <= maxLength
     return tuple(reasons)
 
@@ -151,22 +155,14 @@ def processReasons():
     assert tuple(r[0] for r in chain.from_iterable(reasons)) == tuple(xrange(sum(len(r) for r in reasons)))
     return reasons
 
-def cChar(c):
-    if c == r'\\':
-        return r'\\'
-    e = c.encode('unicode_escape')
-    if e == c:
-        return c
-    return r'\x' + e[3:].zfill(4)
-
 def cString(s):
-    return '"%s"' % ''.join(cChar(c) for c in s.decode('utf-8'))
+    return '"%s"' % s.encode(CPP_ENCODING)
 
 def cReason(ridWidth, rid, reason):
     return REASON_C_NODE % (str(rid).rjust(ridWidth), cString(reason))
 
 def hReason(rid, reason, padding):
-    return REASON_H_NODE % (reason.upper().replace("'", ''), ' ' * padding, rid)
+    return REASON_H_NODE % (translify(unicode(reason)).upper().replace("'", '').replace('-', '_').replace(' ', '_'), ' ' * padding, rid)
 
 def writeC(reasons):
     ridWidth = len(str(max(r[0] for r in chain.from_iterable(reasons))))
@@ -175,15 +171,15 @@ def writeC(reasons):
         f.write(C_CONTENT % ((currentTime(),) + reasonsTexts))
 
 def writeH(reasons):
-    maxReasonWidth = max(len(reason.replace("'", '')) for (_rid, reason) in chain(*reasons))
-    reasonsTexts = tuple('\n'.join(hReason(rid, reason, maxReasonWidth - len(reason.replace("'", ''))) for (rid, reason) in reason) + ('\n' if reason else '') for reason in reasons)
+    maxReasonWidth = max(len(translify(unicode(reason)).replace("'", '')) for (_rid, reason) in chain(*reasons)) + len(str(MAX_ID))
+    reasonsTexts = tuple('\n'.join(hReason(rid, reason, maxReasonWidth - len(translify(unicode(reason)).replace("'", '')) - len(str(rid)) - int(len(str(rid)) == 1)) for (rid, reason) in reason) + ('\n' if reason else '') for reason in reasons)
     with open(getFileName(H_TARGET), 'wb') as f:
-        f.write(H_CONTENT % ((currentTime(), ' ' * max(1, maxReasonWidth - 10), sum(len(r) for r in reasons)) + reasonsTexts))
+        f.write(H_CONTENT % ((currentTime(), ' ' * max(1, maxReasonWidth - 9 - len(str(MAX_ID))), sum(len(r) for r in reasons)) + reasonsTexts))
 
 def writeCSV(*reasons):
     with open(getFileName(CSV_TARGET), 'wb') as f:
         f.writelines(s + '\r\n' for s in (REASONS_CSV_HEADER % currentTime()).splitlines())
-        CSVWriter(f).writerows((rid, reason) for (rid, reason) in chain.from_iterable(reasons))
+        CSVWriter(f).writerows((rid, reason.encode(CSV_ENCODING)) for (rid, reason) in chain.from_iterable(reasons))
 
 def updateReasons():
     print "\nProcessing reasons..."
