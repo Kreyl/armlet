@@ -60,6 +60,7 @@
 #define TIME_AGE_THRESHOLD  20 /* Cycles */
 #define START_CYCLE         1
 
+#define LOCATION_VALID     0x8000
 
 struct meshradio_t {
     VirtualTimer RxVT;
@@ -70,9 +71,8 @@ struct meshradio_t {
 
 struct state_t {
     uint16_t    Location;
-    uint16_t    Reason;
-    uint8_t     Emotion;
-    uint8_t     Energy;
+    uint16_t    Neighbour;
+    uint8_t     Battery;
 }__attribute__ ((__packed__));
 
 struct sender_mesh_t {

@@ -29,8 +29,6 @@
 #include "flashloader_support.h"
 
 #include "application.h"
-#include "atlantis_music_tree.h"
-#include "..\AtlGui\atlgui.h"
 
 static inline void Init();
 #define CLEAR_SCREEN_FOR_DEBUG
@@ -121,19 +119,9 @@ void Init() {
 #if 1
     SD.Init();
 
-//    Log.Init();
     // Read config
     SD.iniReadInt32("Radio", "id", "settings.ini", &App.SelfID);
-    SD.iniReadInt32("Radio", "locationThreshold", "settings.ini", &App.locationThreshold);
-    SD.iniReadInt32("Radio", "forestTheshold", "settings.ini", &App.forestTheshold);
-    SD.iniReadInt32("Radio", "mistThreshold", "settings.ini", &App.mistThreshold);
-    SD.iniReadInt32("Radio", "characterThreshold", "settings.ini", &App.characterThreshold);
-    SD.iniReadInt32("Radio", "IRlevel", "settings.ini", &App.IRlevel);
-    SD.iniReadInt32("Radio", "lodgeTheshold", "settings.ini", &App.lodgeTheshold);
-    SD.iniReadInt32("Radio", "emotionFixTheshold", "settings.ini", &App.emotionFixTheshold);
-    SD.iniReadInt32("Radio", "mobThreshold", "settings.ini", &App.mobThreshold);
     Uart.Printf("\rID=%u", App.SelfID);
-//    Log.Printf("ID=%u", App.SelfID);
 
     Lcd.Init();
     Lcd.Cls(clAtlBack);
@@ -151,12 +139,10 @@ void Init() {
     Power.Init();
 
     Sound.Init();
-    Sound.SetVolume(START_VOL_CONST);
+    Sound.SetVolume(255);
 
     PillMgr.Init();
-    Init_emotionTreeMusicNodeFiles_FromFileIterrator();
     App.Init();
-    AtlGui.Init();
 
     Radio.Init();
     Mesh.Init();

@@ -175,7 +175,7 @@ public:
     bool IsInit;
     uint16_t UndispathedPktCnt;
 
-    void UpdateSleepTime()              { SleepTime = ((App.SelfID-1)*SLOT_TIME) - 1; }
+    void UpdateSleepTime()              { SleepTime = ((App.SelfID-1)*SLOT_TIME); }
     uint32_t GetCycleN()                { return (AbsCycle);             }
     uint32_t GetAbsTimeMS()             { return (AbsCycle*CYCLE_TIME);  }
     uint8_t GetAstronomicTime(char *PToStr, uint8_t MaxLen);

@@ -56,7 +56,7 @@ public:
                 }
                 PNext = Buf;
             }
-        } while((PNext->Mesh.Timestamp == 0) || (uint16_t)(PNext-Buf) == App.SelfID);
+        } while(PNext->Mesh.Hops == 0);
         return (uint16_t)(PNext - Buf);
     }
     // UpdateState
@@ -68,11 +68,12 @@ public:
     void UpdateSelf(uint32_t NewCycle) {
         if(App.SelfID > ALIEN_BUF_SIZE) return;
         Buf[App.SelfID].Mesh.Timestamp = NewCycle;
+        Buf[App.SelfID].Mesh.TimeDiff = 0;
         Buf[App.SelfID].State = App.CurrInfo;
         Console.Send_Info(App.SelfID, &Buf[App.SelfID]);
     }
 
-    void TimeCorrection(uint32_t CorrValueMS);
+    void TimeCorrection(int32_t Corr);
 };
 
 extern AlienTable_t AlienTable;

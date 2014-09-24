@@ -43,7 +43,7 @@ typedef struct Table_t {
     void Print() {
         Uart.Printf("\rTbl Sz=%u; ID, Level, Loc, Rea, Emo, Eng", Size);
         for(uint32_t i=0; i<Size; i++) {
-            Uart.Printf("\r %u; %u;   %u; %u; %u; %u", Row[i].ID, Row[i].Level, Row[i].State.Location, Row[i].State.Reason, Row[i].State.Emotion, Row[i].State.Energy);
+            Uart.Printf("\r %u; %u;   %u; %u; %u;", Row[i].ID, Row[i].Level, Row[i].State.Location, Row[i].State.Neighbour, Row[i].State.Battery);
         }
     }
 }Table_t;

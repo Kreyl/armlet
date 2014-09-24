@@ -48,7 +48,7 @@ ret_Err AlienTable_t::PutSender(uint32_t CurrentCycle, SenderInfo_t *Ptr) {
    AlienInfo_t iNewString;
    iNewString.Mesh.Hops         = 1; // cause recipient catched pkt straight from sender
    iNewString.Mesh.Timestamp    = CurrentCycle;
-   iNewString.Mesh.TimeDiff     = CurrentCycle - (int32_t)(Ptr->Mesh.CycleN);
+   iNewString.Mesh.TimeDiff     =(int32_t)((Ptr->Mesh.CycleN) - CurrentCycle);
    iNewString.State             = Ptr->State; // copy State part
    write_data(Ptr->Mesh.SelfID, &iNewString);
    Console.Send_Info(Ptr->Mesh.SelfID, &iNewString);
@@ -56,16 +56,14 @@ ret_Err AlienTable_t::PutSender(uint32_t CurrentCycle, SenderInfo_t *Ptr) {
 }
 
 /* TimeCorrection */
-void AlienTable_t::TimeCorrection(uint32_t Corr) {
+void AlienTable_t::TimeCorrection(int32_t Corr) {
     if(Corr == 0) return;
     for(uint16_t i=0; i<ALIEN_BUF_SIZE; i++) {
         if(Buf[i].Mesh.Timestamp != 0) {
-            Uart.Printf("%u: %u, %u ",i, Buf[i].Mesh.Timestamp, Corr);
-            if(Corr > Buf[i].Mesh.Timestamp)
-                 Buf[i].Mesh.Timestamp = 0;
-            else Buf[i].Mesh.Timestamp   -= Corr;
+//            Uart.Printf("%u: %u, %d ",i, Buf[i].Mesh.Timestamp, Corr);
+            Buf[i].Mesh.Timestamp   -= Corr;
             Buf[i].Mesh.TimeDiff    -= Corr;
-            Uart.Printf(" %u\r", Buf[i].Mesh.Timestamp);
+//            Uart.Printf(" %u\r", Buf[i].Mesh.Timestamp);
         } // if valid string
     } // for all Buf
 }

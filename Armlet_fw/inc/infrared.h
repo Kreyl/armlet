@@ -26,13 +26,13 @@
 #define LUSTRA_MIN_ID       75
 #define LUSTRA_MAX_ID       127
 // Atlantis: LOCATION_ID_START <= x <= LOCATION_ID_END and EMOTION_FIX_ID_START <= x.
-#include "emotions.h"
+#include "reasons.h"
 static inline uint8_t IrIdTransform(uint16_t InID, uint16_t *POutID) {
     if(InID < LUSTRA_MIN_ID or InID > LUSTRA_MAX_ID) return FAILURE;
     // Transform ID to LocationID
     *POutID = (InID - LUSTRA_MIN_ID) + LOCATION_ID_START;
     // if rslt is out of range, Transform ID to EmotionID
-    if(*POutID > LOCATIONS_ID_END) *POutID += (EMOTION_FIX_ID_START - LOCATIONS_ID_END - 1);
+    if(*POutID > LOCATIONS_ID_END) *POutID += (LOCATIONS_ID_END - 1);
     return OK;
 }
 
