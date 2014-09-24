@@ -14,10 +14,12 @@
 
 // RIDs are indexes in this array.
 Reason_t reasons[] = {
-%%s	// Locations
-%%s	// end of locations
+%%s	// Master nodes
+%%s	// end of master nodes
 %%s	// Placeholders
 %%s	// end of placeholders
+%%s	// Locations
+%%s	// end of locations
 %%s	// Forest lights
 %%s	// end of forest lights
 %%s	// People
