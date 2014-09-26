@@ -45,10 +45,10 @@ void TmrUartRxCallback(void *p);
 class App_t {
 private:
     void LocationValid() {
-        CurrInfo.Location |= LOCATION_VALID;
+        CurrInfo.Location &= ~LOCATION_VALID;
     }
     void LocationInvalid() {
-        CurrInfo.Location &= ~LOCATION_VALID;
+        CurrInfo.Location |= LOCATION_VALID;
     }
 public:
     int32_t SelfID=0;

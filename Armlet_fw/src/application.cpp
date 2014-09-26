@@ -264,6 +264,7 @@ void App_t::UpdateState() {
     }
     else LocationInvalid();
 }
+
 void App_t::Init() {
     PThd = chThdCreateStatic(waAppThread, sizeof(waAppThread), NORMALPRIO, (tfunc_t)AppThread, NULL);
     Sound.RegisterAppThd(PThd);

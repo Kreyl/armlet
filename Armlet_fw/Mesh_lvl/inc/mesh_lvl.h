@@ -100,9 +100,9 @@ private:
     uint8_t RndTableBuf[RND_TBL_BUFFER_SZ];
     uint8_t *PRndTable;
 
-    uint32_t AbsCycle;
-    uint32_t CurrCycle;
-    uint32_t RxCycleN;
+    uint16_t AbsCycle;
+    uint8_t  CurrCycle;
+    uint8_t  RxCycleN;
     uint32_t SleepTime;
     // Synchronization
     bool GetPrimaryPkt;

@@ -15,12 +15,12 @@ void Console_t::Send_Info(uint16_t ID, AlienInfo_t *Ptr) {
     Cnt++;
     if(Cnt == SEND_IN_COUNT) {
 #ifdef PRINT
-        Uart.Printf("#Node %u %u %u %d %u %u %u\r\n",
+        Uart.Printf("#Node %u %u %d %d %u %u %u\r\n",
                 ID,
                 Ptr->Mesh.Hops,
                 Ptr->Mesh.Timestamp,
                 Ptr->Mesh.TimeDiff,
-                (Ptr->State.Location & ~LOCATION_VALID),
+                Ptr->State.Location,
                 Ptr->State.Neighbour,
                 Ptr->State.Battery);
         Cnt = 0;
