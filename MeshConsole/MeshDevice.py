@@ -33,31 +33,31 @@ def getItem(what, index):
         return index
 
 def getColumnsData(processor):
-    return ( # checked, changing, highlight, alignment, name, description, fieldName, longestValue, formatter, fmt
-        (True, CONST, False, True, 'ID', 'Device ID', 'number', NUM_DEVICES),
-        (True, CONST, False, False, 'Name', 'Device name', 'number', LONGEST_REASON, partial(getItem, REASONS)),
-        (True, RAW, True, True, 'Hops', 'Number of hops from device', 'hops', NUM_DEVICES),
-        (True, RAW, True, True, 'TimestampC', 'Information timestamp', 'time', 9999),
-        (True, RAW, True, True, 'TimestampD', 'Information timestamp date', 'time', 0, processor.cycleDateStr),
-        (True, PROC, False, True, 'AgeC', 'Age of information in cycles', 'time', 9999, processor.cycleAge),
-        (True, PROC, False, True, 'AgeS', 'Age of information in seconds', 'time', 9999, processor.cycleAgeSeconds),
-        (True, PROC, False, True, 'AgeT', 'Age of information as time', 'time', 0, processor.cycleAgeTimeStr),
-        (True, RAW, True, True, 'TimeDiffC', 'Time difference in cycles', 'td', 9999, signedNumber),
-        (True, RAW, True, True, 'TimeDiffS', 'Time difference in seconds', 'td', 9999, lambda x: signedNumber(processor.cycleSeconds(x))),
-        (True, RAW, True, True, 'TimeDiffT', 'Time difference as time', 'td', 0, processor.cycleTimeStr),
-        (True, PROC, False, True, 'LocalTimeC', 'Device local time in cycles', 'td', 9999, processor.tdTime),
-        (True, PROC, False, True, 'LocalTimeD', 'Device local date', 'td', 0, processor.tdDateStr),
-        (True, RAW, True, True, 'Location', 'Device location', 'location', len(REASONS), lambda x: x & (NAL_FLAG - 1)),
-        (True, RAW, True, False, 'LocationN', 'Device location name', 'location', LONGEST_REASON, lambda x: getItem(REASONS, x & (NAL_FLAG - 1))),
-        (True, RAW, True, False, 'LA', 'Location actual', 'location', NAL_FLAG, lambda x: '--' if x & NAL_FLAG else '+'),
-        (True, RAW, True, True, 'Neighbor', 'Nearest neighbor', 'neighbor', len(REASONS)),
-        (True, RAW, True, False, 'NeighborN', 'Nearest neighbor name', 'neighbor', LONGEST_REASON, partial(getItem, REASONS)),
-        (True, RAW, True, False, 'Battery', 'Battery', 'battery', 100, lambda x: BATTERY_SYMBOL * (x // BATTERY_DIVISOR)),
+    return ( # checked, changing, highlight, alignment, sortProcessed, name, description, fieldName, longestValue, formatter, fmt
+        (True, CONST, False, True, False, 'ID', 'Device ID', 'number', NUM_DEVICES),
+        (True, CONST, False, False, True, 'Name', 'Device name', 'number', LONGEST_REASON, partial(getItem, REASONS)),
+        (True, RAW, True, True, False, 'Hops', 'Number of hops from device', 'hops', NUM_DEVICES),
+        (True, RAW, True, True, False, 'TimestampC', 'Information timestamp', 'time', 9999),
+        (True, RAW, True, True, False, 'TimestampD', 'Information timestamp date', 'time', 0, processor.cycleDateStr),
+        (True, PROC, False, True, False, 'AgeC', 'Age of information in cycles', 'time', 9999, processor.cycleAge),
+        (True, PROC, False, True, False, 'AgeS', 'Age of information in seconds', 'time', 9999, processor.cycleAgeSeconds),
+        (True, PROC, False, True, False, 'AgeT', 'Age of information as time', 'time', 0, processor.cycleAgeTimeStr),
+        (True, RAW, True, True, False, 'TimeDiffC', 'Time difference in cycles', 'td', 9999, signedNumber),
+        (True, RAW, True, True, False, 'TimeDiffS', 'Time difference in seconds', 'td', 9999, lambda x: signedNumber(processor.cycleSeconds(x))),
+        (True, RAW, True, True, False, 'TimeDiffT', 'Time difference as time', 'td', 0, processor.cycleTimeStr),
+        (True, PROC, False, True, False, 'LocalTimeC', 'Device local time in cycles', 'td', 9999, processor.tdTime),
+        (True, PROC, False, True, False, 'LocalTimeD', 'Device local date', 'td', 0, processor.tdDateStr),
+        (True, RAW, True, True, False, 'Location', 'Device location', 'location', len(REASONS), lambda x: x & (NAL_FLAG - 1)),
+        (True, RAW, True, False, True, 'LocationN', 'Device location name', 'location', LONGEST_REASON, lambda x: getItem(REASONS, x & (NAL_FLAG - 1))),
+        (True, RAW, True, False, False, 'LA', 'Location actual', 'location', NAL_FLAG, lambda x: '--' if x & NAL_FLAG else '+'),
+        (True, RAW, True, True, False, 'Neighbor', 'Nearest neighbor', 'neighbor', len(REASONS)),
+        (True, RAW, True, False, True, 'NeighborN', 'Nearest neighbor name', 'neighbor', LONGEST_REASON, partial(getItem, REASONS)),
+        (True, RAW, True, False, False, 'Battery', 'Battery', 'battery', 100, lambda x: BATTERY_SYMBOL * (x // BATTERY_DIVISOR)),
     )
 
 class Device(object): # pylint: disable=R0902
     def __init__(self, number, parent):
-        assert number in xrange(1, NUM_DEVICES + 1)
+        assert number in xrange(1, NUM_DEVICES)
         self.number = number
         self.name = ('Device#%%0%dd' % len(str(NUM_DEVICES))) % number
         self.parent = parent
@@ -65,7 +65,7 @@ class Device(object): # pylint: disable=R0902
 
     @classmethod
     def configure(cls, parent):
-        cls.devices = tuple(cls(i, parent) for i in xrange(1, NUM_DEVICES + 1))
+        cls.devices = tuple(cls(i, parent) for i in xrange(1, NUM_DEVICES))
 
     def reset(self):
         self.hops = None

@@ -15,8 +15,9 @@ FONT_METRICS_CORRECTION = 1.1
 INVALID_DATA = QVariant()
 
 RAW_ROLE = Qt.UserRole
-CHANGED_ROLE = Qt.UserRole + 1
-ACCENT_ROLE = Qt.UserRole + 2
+SORT_ROLE = Qt.UserRole + 1
+CHANGED_ROLE = Qt.UserRole + 2
+ACCENT_ROLE = Qt.UserRole + 3
 
 # Column types
 CONST = 0
@@ -24,12 +25,13 @@ RAW = 1
 PROC = 2
 
 class Column(object):
-    def __init__(self, number, checked, changing, highlight, alignment, name, description, fieldName, longestValue = 999, formatter = None, fmt = None):
+    def __init__(self, number, checked, changing, highlight, alignment, sortProcessed, name, description, fieldName, longestValue = 999, formatter = None, fmt = None):
         self.number = number
         self.checked = checked
         self.changing = changing
         self.highlight = highlight
         self.alignment = Qt.AlignRight if alignment else Qt.AlignLeft
+        self.sortRole = Qt.DisplayRole if sortProcessed else RAW_ROLE
         self.name = name
         self.description = description
         self.fieldName = fieldName
@@ -96,6 +98,7 @@ class Cell(dict):
             if self.column.highlight:
                 self[CHANGED_ROLE] = False if data == self[Qt.DisplayRole] else not initial
             self[Qt.DisplayRole] = data
+        self[SORT_ROLE] = self[self.column.sortRole]
         self[ACCENT_ROLE] = self.device.hops
 
     def getData(self, role):
@@ -174,7 +177,7 @@ class DevicesTableDelegate(QItemDelegate): # QStyledItemDelegate doesn't handle 
 
 class DevicesTableView(QTableView):
     def configure(self, devicesModel, changedDataSample, accentSamples):
-        self.setModel(RoleDefaultSortProxyModel(devicesModel, RAW_ROLE))
+        self.setModel(RoleDefaultSortProxyModel(devicesModel, SORT_ROLE))
         self.columnWidths = tuple(self.fontMetrics().boundingRect(column.longestValue).width() * FONT_METRICS_CORRECTION for column in devicesModel.columns)
         #for column in devicesModel.columns: # It works for width but not for height, find current row height?
         #    column.headers[Qt.SizeHintRole] = QSize(self.fontMetrics().boundingRect(column.longestValue).size().width(), self.rowHeight(0))
