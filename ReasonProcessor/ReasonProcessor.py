@@ -16,6 +16,7 @@ from platform import system
 from subprocess import Popen, PIPE, STDOUT
 from sys import argv, stdout
 
+from Settings import MASTER_ID_START, MASTER_ID_END, MASTER_IDS
 from Settings import LOCATION_ID_START, LOCATION_ID_END, LOCATION_IDS
 from Settings import PLACEHOLDER_ID_START, PLACEHOLDER_ID_END, PLACEHOLDER_IDS
 from Settings import FOREST_ID_START, FOREST_ID_END, FOREST_IDS
@@ -46,6 +47,7 @@ def getFileName(name):
 
 SETTINGS_CSV = 'Settings.csv'
 
+MASTER_CSV = 'Master.csv'
 LOCATIONS_CSV = 'Locations.csv'
 PEOPLE_CSV = 'People.csv'
 
@@ -62,6 +64,7 @@ CSV_TARGET = 'Reasons.csv'
 C_CONTENT = open('reasons_cpp.tpl').read() % ', '.join(SOURCE_CSVS)
 
 H_CONTENT = open('reasons_h.tpl').read() % (', '.join(SOURCE_CSVS),
+       MASTER_ID_START, MASTER_ID_END,
        LOCATION_ID_START, LOCATION_ID_END,
        PLACEHOLDER_ID_START, PLACEHOLDER_ID_END,
        FOREST_ID_START, FOREST_ID_END,
@@ -120,16 +123,22 @@ def processReasons():
         return (rid, pattern % rid)
     reasons = []
     num = 0
-    r = tuple(reserveReason('ZER%d', rid) for rid in xrange(num, LOCATION_ID_START))
+    r = tuple(reserveReason('ZER%d', rid) for rid in xrange(num, MASTER_ID_START))
     reasons.append(r)
     num += len(r)
-    r = processReasonRange(getFileName(LOCATIONS_CSV), 'location', LOCATION_ID_START, len(LOCATION_IDS))
+    r = processReasonRange(getFileName(MASTER_CSV), 'master', MASTER_ID_START, len(MASTER_IDS))
     reasons.append(r)
     num += len(r)
     r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, PLACEHOLDER_ID_START))
     reasons.append(r)
     num += len(r)
     r = tuple(reserveReason(PLACEHOLDER_REASON, rid) for rid in PLACEHOLDER_IDS)
+    reasons.append(r)
+    num += len(r)
+    r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, LOCATION_ID_START))
+    reasons.append(r)
+    num += len(r)
+    r = processReasonRange(getFileName(LOCATIONS_CSV), 'location', LOCATION_ID_START, len(LOCATION_IDS))
     reasons.append(r)
     num += len(r)
     r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, FOREST_ID_START))

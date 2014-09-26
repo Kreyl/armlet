@@ -17,11 +17,14 @@
 // ID limits
 //
 
-#define LOCATION_ID_START %d
-#define LOCATIONS_ID_END %d
+#define MASTER_ID_START %d
+#define MASTER_ID_END %d
 
 #define PLACEHOLDER_ID_START %d
 #define PLACEHOLDER_ID_END %d
+
+#define LOCATION_ID_START %d
+#define LOCATIONS_ID_END %d
 
 #define FOREST_ID_START %d
 #define FOREST_ID_END %d
@@ -45,10 +48,12 @@ extern Reason_t reasons[];
 
 #define NUMBER_OF_REASONS%%s%%d
 
-%%s	// Locations
-%%s	// end of locations
+%%s	// Master nodes
+%%s	// end of master nodes
 %%s	// Placeholders
 %%s	// end of placeholders
+%%s	// Locations
+%%s	// end of locations
 %%s	// Forest lights
 %%s	// end of forest lights
 %%s	// People
