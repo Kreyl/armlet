@@ -31,6 +31,8 @@
 #include "mesh_lvl.h"
 #include "reasons.h"
 
+#include "gui.h"
+
 App_t App;
 //#define SCREEN_SUSPEND_TIMER
 
@@ -192,12 +194,15 @@ void App_t::Task() {
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
             Uart.Printf("App TabGet, s=%u, t=%u\r\n", RxTable.PTable->Size, chTimeNow());
+            GUI.clean_RxTable();
+            GUI.draw_RxTable(&RxTable);
 /*
             for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
                 Uart.Printf("\r\nID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
             }
 */
-            UpdateState();//эта штука берет локацию из таблицы
+            UpdateState();
+            GUI.draw_Location(CurrInfo.Location);
         }
 #endif
 

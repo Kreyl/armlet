@@ -21,7 +21,7 @@ void Console_t::Send_Info(uint16_t ID, AlienInfo_t *Ptr) {
                 Ptr->Mesh.Timestamp,
                 Ptr->Mesh.TimeDiff,
                 Ptr->State.Location,
-                Ptr->State.Neighbour,
+                Ptr->State.Neighbor,
                 Ptr->State.Battery);
         Cnt = 0;
 #endif

@@ -5,11 +5,11 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.1536143963" moduleId="org.eclipse.cdt.core.settings" name="Debug">
 				<externalSettings/>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -58,8 +58,6 @@
 									<listOptionValue builtIn="false" value="../Common_fw/os/hal/include"/>
 									<listOptionValue builtIn="false" value="../Common_fw/os/kernel/include"/>
 									<listOptionValue builtIn="false" value="../Fonts"/>
-									<listOptionValue builtIn="false" value="../AtlLogic"/>
-									<listOptionValue builtIn="false" value="../AtlGui"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.1413889343" name="Language standard" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std" value="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.gnu99" valueType="enumerated"/>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.858342779" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
@@ -67,6 +65,7 @@
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.5720997" name="Cross ARM C++ Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.include.paths.1278881137" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../inc"/>
+									<listOptionValue builtIn="false" value="../gui"/>
 									<listOptionValue builtIn="false" value="../Mesh_lvl/inc"/>
 									<listOptionValue builtIn="false" value="../Mesh_lvl"/>
 									<listOptionValue builtIn="false" value="../Common_fw"/>
@@ -79,8 +78,6 @@
 									<listOptionValue builtIn="false" value="../Common_fw/os/kernel/include"/>
 									<listOptionValue builtIn="false" value="../usb"/>
 									<listOptionValue builtIn="false" value="../Fonts"/>
-									<listOptionValue builtIn="false" value="../AtlLogic"/>
-									<listOptionValue builtIn="false" value="../AtlGui"/>
 									<listOptionValue builtIn="false" value="../SharedAtlLogic"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.std.415641982" name="Language standard" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.std" value="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.std.gnucpp11" valueType="enumerated"/>
