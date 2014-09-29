@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-09-24 21:24:34
+ * Generated at 2014-09-26 20:09:57
  */
 #ifndef REASONS_H
 #define REASONS_H
@@ -108,18 +108,18 @@ extern Reason_t reasons[];
 #define REASON_BOLSHAYA      52
 #define REASON_MALAYA        53
 #define REASON_PEREGOVORKA   54
-#define REASON_LESTNITSA     55
-#define REASON_A2            56
-#define REASON_A3            57
-#define REASON_A4            58
-#define REASON_A5            59
-#define REASON_1_HOLL        60
-#define REASON_1_LEVYIJ_1    61
-#define REASON_1_PRAVYIJ_1   62
-#define REASON_1_LEVYIJ_2    63
-#define REASON_1_PRAVYIJ_2   64
-#define REASON_1_LEVYIJ_3    65
-#define REASON_1_PRAVYIJ_3   66
+#define REASON_A2            55
+#define REASON_A3            56
+#define REASON_A4            57
+#define REASON_A5            58
+#define REASON_1_HOLL        59
+#define REASON_1_LEVYIJ_1    60
+#define REASON_1_PRAVYIJ_1   61
+#define REASON_1_LEVYIJ_2    62
+#define REASON_1_PRAVYIJ_2   63
+#define REASON_1_LEVYIJ_3    64
+#define REASON_1_PRAVYIJ_3   65
+#define REASON_2_LESTNITSA   66
 #define REASON_2_HOLL        67
 #define REASON_2_LEVYIJ_1    68
 #define REASON_2_PRAVYIJ_1   69
@@ -127,31 +127,31 @@ extern Reason_t reasons[];
 #define REASON_2_PRAVYIJ_2   71
 #define REASON_2_LEVYIJ_3    72
 #define REASON_2_PRAVYIJ_3   73
-#define REASON_3_HOLL        74
-#define REASON_3_LEVYIJ_1    75
-#define REASON_3_PRAVYIJ_1   76
-#define REASON_3_LEVYIJ_2    77
-#define REASON_3_PRAVYIJ_2   78
-#define REASON_3_LEVYIJ_3    79
-#define REASON_3_PRAVYIJ_3   80
-#define REASON_4_HOLL        81
-#define REASON_4_LEVYIJ_1    82
-#define REASON_4_PRAVYIJ_1   83
-#define REASON_4_LEVYIJ_2    84
-#define REASON_4_PRAVYIJ_2   85
-#define REASON_4_LEVYIJ_3    86
-#define REASON_4_PRAVYIJ_3   87
-#define REASON_5_HOLL        88
-#define REASON_5_LEVYIJ_1    89
-#define REASON_5_PRAVYIJ_1   90
-#define REASON_5_LEVYIJ_2    91
-#define REASON_5_PRAVYIJ_2   92
-#define REASON_5_LEVYIJ_3    93
-#define REASON_5_PRAVYIJ_3   94
+#define REASON_3_LESTNITSA   74
+#define REASON_3_HOLL        75
+#define REASON_3_LEVYIJ_1    76
+#define REASON_3_PRAVYIJ_1   77
+#define REASON_3_LEVYIJ_2    78
+#define REASON_3_PRAVYIJ_2   79
+#define REASON_3_LEVYIJ_3    80
+#define REASON_3_PRAVYIJ_3   81
+#define REASON_4_LESTNITSA   82
+#define REASON_4_HOLL        83
+#define REASON_4_LEVYIJ_1    84
+#define REASON_4_PRAVYIJ_1   85
+#define REASON_4_LEVYIJ_2    86
+#define REASON_4_PRAVYIJ_2   87
+#define REASON_4_LEVYIJ_3    88
+#define REASON_4_PRAVYIJ_3   89
+#define REASON_5_LESTNITSA   90
+#define REASON_5_HOLL        91
+#define REASON_5_LEVYIJ_1    92
+#define REASON_5_PRAVYIJ_1   93
+#define REASON_5_LEVYIJ_2    94
+#define REASON_5_PRAVYIJ_2   95
+#define REASON_5_LEVYIJ_3    96
+#define REASON_5_PRAVYIJ_3   97
 	// end of locations
-#define REASON_R095          95
-#define REASON_R096          96
-#define REASON_R097          97
 #define REASON_R098          98
 #define REASON_R099          99
 	// Forest lights
