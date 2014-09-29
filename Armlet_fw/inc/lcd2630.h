@@ -65,9 +65,15 @@ struct FontParams_t {
 #define BAT_RECT_TOP        4
 #define BAT_RECT_WIDTH      9
 #define BAT_RECT_HEIGHT     4
-#define BAT_RECT_FORE_CLR   COLOR_RGB_TO_565(0x61, 0x3E, 0x10)
-#define BAT_RECT_BACK_CLR   COLOR_RGB_TO_565(0xFF, 0xEE, 0xAF)
+#define BAT_RECT_FORE_CLR   COLOR_RGB_TO_565(0x00, 0x00, 0x00)
+#define BAT_RECT_BACK_CLR   COLOR_RGB_TO_565(0x00, 0x00, 0x00)
 #define BAT_RECT_CHARGE_CLR COLOR_RGB_TO_565(0x00, 0x00, 0xFF)
+
+#define BAT_BORD_LEFT       144
+#define BAT_BORD_TOP        2
+#define BAT_BORD_WIDTH      14
+#define BAT_BORD_HEIGHT     8
+#define BAT_BACK_COLOR      COLOR_RGB_TO_565(0xFF, 0x11, 0x00)
 
 class Lcd_t {
 private:
@@ -96,6 +102,7 @@ public:
 //    void DrawSymbol(const uint8_t x, const uint8_t y, const uint8_t ACode);
     void DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename);
     void DrawBatteryState();
+    void DrawBatteryBounds();
 };
 
 extern Lcd_t Lcd;

@@ -103,19 +103,6 @@ void Init() {
     Uart.Init(115200);
     Uart.Printf("\rAtlantis   AHB freq=%uMHz", Clk.AHBFreqHz/1000000);
 
-    //in case uart not working 0
-#if 0 //const_cast for defines test
-#define DSTRING "GAGAGA"
-#define DSTRING2 "GAGAGA2"
-    char * str1 =const_cast<char *> ("GAGAGA");
-    char * str2;
-    str2= const_cast<char *> (DSTRING2);
-
-    if(strcmp(str1,const_cast<char *> (DSTRING))==0)
-        Uart.Printf("\r DSTRING  str %s OK\r",str1);
-    if(strcmp(str2,const_cast<char *> (DSTRING2))==0)
-        Uart.Printf("\r DSTRING2  str %s OK\r",str2);
-#endif
 #if 1
     SD.Init();
 
@@ -124,24 +111,19 @@ void Init() {
     Uart.Printf("\rID=%u", App.SelfID);
 
     Lcd.Init();
-    Lcd.Cls(clAtlBack);
 
-    #ifndef CLEAR_SCREEN_FOR_DEBUG
-    Lcd.Printf(11, 11, clGreen, clBlack, "Ostranna BBS Tx %u", ID);
-    #endif
+//    Keys.Init();
+//    Beeper.Init();
+//    Vibro.Init();
 
-    Keys.Init();
-    Beeper.Init();
-    Vibro.Init();
-
-    IR.RxInit();
-    MassStorage.Init();
+//    IR.RxInit();
+//    MassStorage.Init();
     Power.Init();
 
-    Sound.Init();
-    Sound.SetVolume(255);
+//    Sound.Init();
+//    Sound.SetVolume(255);
 
-    PillMgr.Init();
+//    PillMgr.Init();
     App.Init();
 
     Radio.Init();

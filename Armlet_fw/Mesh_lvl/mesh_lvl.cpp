@@ -105,7 +105,7 @@ void Mesh_t::INewCycle() {
     IIncCurrCycle();
     ITimeAgeCounter();
     AlienTable.UpdateSelf(AbsCycle);  /* Timestamp = AbsCycle; Send info to console */
-    //Uart.Printf("\r\nCycle=%u, t=%u", AbsCycle, chTimeNow());
+//    Uart.Printf("\r\nCycle=%u, t=%u", AbsCycle, chTimeNow());
     // ==== RX ====
     if(CurrCycle == RxCycleN) chEvtSignal(Radio.rThd, EVTMSK_MESH_RX);
     // ==== TX ====
@@ -192,7 +192,7 @@ uint8_t Mesh_t::GetAstronomicTime(char *PToStr, uint8_t MaxLen) {
         mm = Time/60;
         if(mm > 0) Time -= mm*60;
     //    ss = Time;
-//        TimeSeparator = (TimeSeparator == ':')? ' ' : ':';
+        TimeSeparator = (TimeSeparator == ':')? ' ' : ':';
         Time::PutTimeTo(PToStr, hh, mm, TimeSeparator);
         return OK;
     }

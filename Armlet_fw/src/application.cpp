@@ -202,12 +202,12 @@ void App_t::Task() {
             }
 */
             UpdateState();
-            GUI.draw_Location(CurrInfo.Location);
         }
 #endif
 
 #if 1 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
+            GUI.draw_Time();
         } // New second
 #endif
 #if 1   // ==== Check pill ====
@@ -279,6 +279,7 @@ void App_t::UpdateState() {
         CurrInfo.Neighbor = NeighborID;
     }
     else CurrInfo.Neighbor = 0;
+    GUI.draw_Location(CurrInfo.Location, SignalPwr);
 }
 
 void App_t::Init() {
@@ -292,6 +293,7 @@ void App_t::Init() {
 
     Time.Init();
     Time.Reset();
+    GUI.Init();
 }
 
 #if 1 // ======================= Command processing ============================

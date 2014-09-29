@@ -4,7 +4,9 @@
 #include <stdarg.h>
 #include "core_cmInstr.h"
 
-#include "lcdFont8x8.h"
+//#include "lcdFont8x8.h"
+#include "lcd_font.h"
+
 #include <string.h>
 
 #include "power.h"  // for battery state
@@ -126,14 +128,14 @@ __attribute__ ((always_inline)) static inline void SetBounds(uint8_t Left, uint8
 }
 
 void Lcd_t::PutChar(char c) {
-    char *PFont = (char*)Font8x8;  // Font to use
+    char *PFont = (char*)Font_6x8_Data;  // Font to use
     // Read font params
     uint8_t nCols = PFont[0];
     uint8_t nRows = PFont[1];
     uint16_t nBytes = PFont[2];
     SetBounds(Fnt.X, nCols, Fnt.Y, nRows);
     // Get pointer to the first byte of the desired character
-    const char *PChar = Font8x8 + (nBytes * (c - 0x1F));
+    const char *PChar = Font_6x8_Data + (nBytes * c);
     // Write RAM
     WriteByte(0x2C);    // Memory write
     DC_Hi();
@@ -321,6 +323,30 @@ void Lcd_t::DrawBatteryState() {
             else {
                 WriteByte(clr2bHi);
                 WriteByte(clr2bLo);
+            }
+        } // x
+    } // y
+    DC_Lo();
+}
+
+void Lcd_t::DrawBatteryBounds() {
+    uint8_t clrbHi, clrbLo, backClrHi, backClrLo;
+    SetBounds(BAT_BORD_LEFT, BAT_BORD_WIDTH, BAT_BORD_TOP, BAT_BORD_HEIGHT);
+    clrbHi = (BAT_RECT_BACK_CLR >> 8) & 0x00FF;
+    clrbLo = BAT_RECT_BACK_CLR & 0x00FF;
+    backClrHi = (BAT_BACK_COLOR >> 8) & 0x00FF;
+    backClrLo = BAT_BACK_COLOR & 0x00FF;
+    WriteByte(0x2C); // Memory write
+    DC_Hi();
+    for(int y=0; y < BAT_BORD_HEIGHT; y++) {
+        for(int x=1; x <= BAT_BORD_WIDTH; x++) {
+            if( ((x>2 && x<14) && (y>0 && y<7)) || ((x == 1) && (y == 0 || y == 7))) {
+                WriteByte(backClrHi);
+                WriteByte(backClrLo);
+            }
+            else {
+                WriteByte(clrbHi);
+                WriteByte(clrbLo);
             }
         } // x
     } // y
