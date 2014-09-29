@@ -71,7 +71,7 @@ struct meshradio_t {
 
 struct state_t {
     uint16_t    Location;
-    uint16_t    Neighbour;
+    uint16_t    Neighbor;
     uint8_t     Battery;
 }__attribute__ ((__packed__));
 

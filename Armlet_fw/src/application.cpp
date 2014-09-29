@@ -248,7 +248,7 @@ void App_t::Task() {
 void App_t::UpdateState() {
     uint8_t SignalPwr = 0;
     uint16_t LocationID = 0;
-    uint16_t NeighbourID = 0;
+    uint16_t NeighborID = 0;
     uint16_t tmpID=0;
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
         tmpID = RxTable.PTable->Row[i].ID;
@@ -261,7 +261,7 @@ void App_t::UpdateState() {
         else if(tmpID < PERSON_ID_START || PERSON_ID_END > tmpID) {
             if(RxTable.PTable->Row[i].Level > SignalPwr) {
                 SignalPwr = RxTable.PTable->Row[i].Level;
-                NeighbourID = tmpID;
+                NeighborID = tmpID;
             } // if Signal present
         }
     }
@@ -270,10 +270,10 @@ void App_t::UpdateState() {
         LocationValid();
     }
     else LocationInvalid();
-    if(NeighbourID) {
-        CurrInfo.Neighbour = NeighbourID;
+    if(NeighborID) {
+        CurrInfo.Neighbor = NeighborID;
     }
-    else CurrInfo.Neighbour = 0;
+    else CurrInfo.Neighbor = 0;
 }
 
 void App_t::Init() {
