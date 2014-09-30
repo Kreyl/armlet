@@ -266,7 +266,7 @@ class PillControl(QMainWindow):
         self.comInput.connect(self.processInput)
         self.port = SerialPort(self.logger, pingCommand.prefix, ackResponse.prefix,
                                self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit,
-                               EmulatedSerial() if self.emulated else None)
+                               EmulatedSerial() if self.emulated else None, (115200,))
         if self.savedMaximized:
             self.showMaximized()
         else:

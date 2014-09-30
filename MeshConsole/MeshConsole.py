@@ -180,7 +180,7 @@ class MeshConsole(QMainWindow):
         self.comInput.connect(self.processInput)
         self.port = SerialPort(self.logger, meshGetSettingsCommand.prefix, meshGetSettingsResponse.prefix,
                                self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit,
-                               EmulatedSerial() if self.emulated else None)
+                               EmulatedSerial() if self.emulated else None, (115200,))
         self.pause()
         self.updateTime()
         if self.savedMaximized:

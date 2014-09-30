@@ -15,7 +15,7 @@ try:
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install pySerial v2.6 or later: http://pypi.python.org/pypi/pyserial\n" % (ex.__class__.__name__, ex))
 
-BAUD_RATES = (115200, ) #, 57600, 38400, 28800, 19200, 14400, 9600, 4800, 2400, 1200, 300)
+BAUD_RATES = (512000, 256000, 230000, 115200, 57600, 38400, 28800, 19200, 14400, 9600, 4800, 2400, 1200, 300)
 NUM_CONNECT_ATTEMPTS = 3
 TIMEOUT = 1
 DT = 0.1
@@ -27,11 +27,12 @@ class SerialPort(object):
     ERROR = 3
     NONE = 4
 
-    def __init__(self, logger, ping = None, pong = '', connectCallBack = None, readCallBack = None, portTryCallBack = None, externalPort = None):
+    def __init__(self, logger, ping = None, pong = '', connectCallBack = None, readCallBack = None, portTryCallBack = None, externalPort = None, baudRates = BAUD_RATES):
         self.logger = logger
         self.ping = ping
         self.pong = pong
-        self.baudRate = BAUD_RATES[0]
+        self.baudRates = baudRates
+        self.baudRate = self.baudRates[0]
         self.connectCallBack = connectCallBack
         self.readCallBack = readCallBack
         self.portTryCallBack = portTryCallBack
@@ -98,7 +99,7 @@ class SerialPort(object):
             portNames = (self.externalPort.name,) if self.externalPort else tuple(portName for (portName, _description, _address) in comports())
             if portNames:
                 for portName in portNames:
-                    for self.baudRate in chain((self.baudRate,), tuple(br for br in BAUD_RATES if br != self.baudRate)):
+                    for self.baudRate in chain((self.baudRate,), tuple(br for br in self.baudRates if br != self.baudRate)):
                         try:
                             displayPortName = sub('^/dev/', '', portName)
                             self.statusUpdate(displayPortName, self.TRYING)
@@ -123,7 +124,7 @@ class SerialPort(object):
                             self.statusUpdate(displayPortName, self.ERROR)
                         self.reset()
                     else:
-                        self.baudRate = BAUD_RATES[0]
+                        self.baudRate = self.baudRates[0]
                         continue
                     break
             else:
