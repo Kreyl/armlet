@@ -55,6 +55,10 @@ UART_MESH_CYCLE_SET = 'meshCycle'
 
 UART_MESH_NODE_INFO = 'node'
 
+UART_FF = 'ff'
+UART_FF_GET = 'ffGet'
+UART_FF_SET = 'ffSet'
+
 # Command definitions
 
 pingCommand = Command(UART_PING, '', UART_ACK)
@@ -85,5 +89,9 @@ meshSetCycleCommand = Command(UART_MESH_SET_CYCLE, 'd', UART_MESH_CYCLE_SET)
 meshSetCycleResponse = Command(UART_MESH_CYCLE_SET, 'd')
 
 meshNodeInfoResponse = Command(UART_MESH_NODE_INFO, 'ddddddd')
+
+ffGetCommand = Command(UART_FF_GET, '', UART_FF)
+ffSetCommand = Command(UART_FF_SET, 's*', UART_ACK)
+ffResponse = Command(UART_FF, 's*')
 
 Command.linkReplies()
