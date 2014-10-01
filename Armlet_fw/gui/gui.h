@@ -17,16 +17,11 @@
 #include "lcd2630.h"
 #include "reasons.h"
 
-#define clOrangeClr     ((Color_t){0xFF, 0x15, 0x00}) // Orange
-#define clWhiteClr      ((Color_t){0xFF, 0xFF, 0xFF}) // White ()
-#define clBlackClr      ((Color_t){0x00, 0x00, 0x00}) // Black
-
-
 #define TIME_X                  104
 #define TIME_Y                  0
 
 #define SELF_NAME       "RedArrow\0"
-#define MAX_REASON_BUF_SIZE     14
+#define MAX_REASON_BUF_SIZE     12
 
 
 #define MAX_GUI_NEIGHBOR_LINES  9

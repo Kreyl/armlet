@@ -24,25 +24,27 @@ void gui_t::Init() {
 
 void gui_t::draw_RxTable(RxTable_t *P) {
     clean_RxTable();
-    if(P->PTable->Size == 0) {
-        draw_EmptyLine(REASON_NAME_START_Y, clOrangeClr, clBlackClr);
-    }
-    else {
+//    if(P->PTable->Size == 0) {
+//        draw_EmptyLine(REASON_NAME_START_Y, clOrangeClr, clBlackClr);
+//    }
+//    else {
         for(uint8_t vert_str=0; vert_str < P->PTable->Size; vert_str++) {
-            if((P->PTable->Row[RxTable_lines].ID >= PERSON_ID_START) && (PERSON_ID_END >= P->PTable->Row[RxTable_lines].ID)) {
-                draw_Line(REASON_NAME_START_Y + (RxTable_lines*REASON_NAME_HEIGHT), clOrangeClr, clBlackClr, P->PTable->Row[RxTable_lines].ID, P->PTable->Row[RxTable_lines].Level);
+            if((P->PTable->Row[vert_str].ID >= PERSON_ID_START) && (PERSON_ID_END >= P->PTable->Row[vert_str].ID)) {
+                if(RxTable_lines < MAX_GUI_NEIGHBOR_LINES) draw_Line(REASON_NAME_START_Y + (RxTable_lines*REASON_NAME_HEIGHT), clOrangeClr, clBlackClr, P->PTable->Row[vert_str].ID, P->PTable->Row[vert_str].Level);
                 RxTable_lines++;
             } // if reason is human number
         } // for string in RxTable
-    }
+//    }
 }
 
 void gui_t::clean_RxTable() {
-    if(RxTable_lines == 0) return;
-    do {
-        RxTable_lines--;
-        erase_Line(REASON_NAME_START_Y + (RxTable_lines*REASON_NAME_HEIGHT), clOrangeClr, clBlackClr);
-    } while(RxTable_lines != 0);
+    if(RxTable_lines != 0) {
+        do {
+            RxTable_lines--;
+            erase_Line(REASON_NAME_START_Y + (RxTable_lines*REASON_NAME_HEIGHT), clOrangeClr, clBlackClr);
+        } while(RxTable_lines != 0);
+    }
+    draw_EmptyLine(REASON_NAME_START_Y, clOrangeClr, clBlackClr);
 }
 
 

@@ -6,7 +6,6 @@
 
 //#include "lcdFont8x8.h"
 #include "lcd_font.h"
-
 #include <string.h>
 
 #include "power.h"  // for battery state
@@ -352,6 +351,24 @@ void Lcd_t::DrawBatteryBounds() {
     } // y
     DC_Lo();
 }
+
+//void Lcd_t::DrawSignalPower(uint8_t y, Color_t Color, uint8_t Pwr) {
+//    uint8_t clrbHi, clrbLo, backClrHi, backClrLo;
+//    SetBounds(PWR_BORD_LEFT, PWR_BORD_WIDTH, y + PWR_BORD_TOP, PWR_BORD_HEIGHT);
+//    clrbHi = (PWR_ORG_COLOR >> 8) & 0x00FF;
+//    clrbLo = PWR_ORG_COLOR & 0x00FF;
+//    backClrHi = (PWR_BCK_COLOR >> 8) & 0x00FF;
+//    backClrLo = PWR_BCK_COLOR & 0x00FF;
+//    WriteByte(0x2C); // Memory write
+//    DC_Hi();
+//    for(int y=0; y < PWR_BORD_HEIGHT; y++) {
+//        for(int x=1; x <= PWR_BORD_WIDTH; x++) {
+//            WriteByte(clrbHi);
+//            WriteByte(clrbLo);
+//        } // x
+//    } // y
+//    DC_Lo();
+//}
 
 #if 1 // ============================= BMP =====================================
 struct BmpHeader_t {

@@ -250,21 +250,22 @@ void App_t::Task() {
     } // while true
 }
 void App_t::UpdateState() {
-    uint8_t SignalPwr = 0;
+    uint8_t LocSignalPwr = 0;
+    uint8_t ReasonSigPwr = 0;
     uint16_t LocationID = 0;
     uint16_t NeighborID = 0;
     uint16_t tmpID=0;
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
         tmpID = RxTable.PTable->Row[i].ID;
         if((tmpID >= PLACEHOLDER_ID_START) && (PLACEHOLDER_ID_END >= tmpID))    {
-            if(RxTable.PTable->Row[i].Level > SignalPwr) {
-                SignalPwr = RxTable.PTable->Row[i].Level;
+            if(RxTable.PTable->Row[i].Level > LocSignalPwr) {
+                LocSignalPwr = RxTable.PTable->Row[i].Level;
                 LocationID = tmpID;
             } // if Signal present
         } // if location correct
         else if((tmpID >= PERSON_ID_START) && (PERSON_ID_END >= tmpID)) {
-            if(RxTable.PTable->Row[i].Level > SignalPwr) {
-                SignalPwr = RxTable.PTable->Row[i].Level;
+            if(RxTable.PTable->Row[i].Level > ReasonSigPwr) {
+                ReasonSigPwr = RxTable.PTable->Row[i].Level;
                 NeighborID = tmpID;
             } // if Signal present
         }
@@ -274,11 +275,11 @@ void App_t::UpdateState() {
         LocationValid();
     }
     else LocationInvalid();
+    GUI.draw_Location(CurrInfo.Location, LocSignalPwr);
     if(NeighborID) {
         CurrInfo.Neighbor = NeighborID;
     }
     else CurrInfo.Neighbor = 0;
-    GUI.draw_Location(CurrInfo.Location, SignalPwr);
 }
 
 void App_t::Init() {
