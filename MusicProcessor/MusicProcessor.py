@@ -34,6 +34,10 @@ except ImportError, ex:
 from EmotionConverter import convert, convertEmotion, convertTitle
 from EmotionProcessor import guessEmotion, updateEmotions, verifyCharacter
 
+#
+# ToDo: Make sure personal music doesn't contain (warn about them) common track names like smert', tuman etc.
+#
+
 MUSIC_LOCATION_VARIABLE = 'ATLANTIS_MUSIC'
 
 SOURCE_DIR = 'src'
