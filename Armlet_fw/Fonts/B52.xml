@@ -5,7 +5,7 @@
     <style>Normal</style>
     <widthType>monospaced</widthType>
     <antialiasing>true</antialiasing>
-    <string> !"#$%&amp;'()*+,-./0123456789:;&lt;=>?\x0040ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~</string>
+    <string> !"#$%&amp;'()*+,-./0123456789:;&lt;=&gt;?\x0040ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~</string>
     <converted>B52.c</converted>
     <chars>
         <char code="0020" character=" ">
@@ -98,7 +98,7 @@
         <char code="003d" character="=">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAUklEQVQYlbWOwQ3AIBRC+Z2lU7hBF9Gjq7iM/mE+u+DFNGnqseX4gIBJwk7Hlv5h0J0LeLHiACApWnqmUwvZukvyBBi9A0CtF6SRXwN53I0P7k4PsiHntQkAdQAAAABJRU5ErkJggg==</picture>
         </char>
-        <char code="003e" character=">">
+        <char code="003e" character="&gt;">
             <picture format="png">iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAIAAADQ/GvKAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAASUlEQVQYlaXPwQ0AEBSD4T5jGYh1TMMwhvkdRDyJi+ix36GpAbolXNsfaNkst0MAoJcoSamyInZqcuhhUiz9BFdumBNuAez5+QC9zmYwO8cAcgAAAABJRU5ErkJggg==</picture>
         </char>
         <char code="003f" character="?">

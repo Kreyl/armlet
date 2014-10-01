@@ -28,6 +28,7 @@ typedef struct {
 } tFont;
 
 // Fonts
+extern const tFont CourierNew;
 extern const tFont Impact;
 extern const tFont B52;
 extern const tFont DSMoster;
