@@ -28,7 +28,7 @@
 
 //pyton translation for db
 //[22:19:36] Jolaf: str(tuple(1 + int(sqrt(float(i) / 65) * 99) for i in xrange(0, 65 + 1)))
-const int DbTranslate[66] ={1, 13, 18, 22, 25, 28, 31, 33, 35, 37, 39, 41, 43, 45, 46, 48, 50, 51, 53, 54, 55, 57, 58, 59, 61, 62, 63, 64, 65, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 86, 87, 88, 89, 90, 91, 92, 92, 93, 94, 95, 96, 96, 97, 98, 99, 100};
+const int DbTranslate[66] ={1, 13, 18, 22, 25, 28, 31, 33, 35, 37, 39, 41, 43, 45, 46, 48, 50, 51, 53, 54, 55, 57, 58, 59, 61, 62, 63, 64, 65, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 86, 87, 88, 89, 90, 91, 92, 92, 93, 94, 95, 96, 96, 97, 98, 99, 99};
 
 
 struct RxTableRow_t {
@@ -43,7 +43,7 @@ typedef struct Table_t {
     void Print() {
         Uart.Printf("\rTbl Sz=%u; ID, Level, Loc, Rea, Emo, Eng", Size);
         for(uint32_t i=0; i<Size; i++) {
-            Uart.Printf("\r %u; %u;   %u; %u; %u;", Row[i].ID, Row[i].Level, Row[i].State.Location, Row[i].State.Neighbour, Row[i].State.Battery);
+            Uart.Printf("\r %u; %u;   %u; %u; %u;", Row[i].ID, Row[i].Level, Row[i].State.Location, Row[i].State.Neighbor, Row[i].State.Battery);
         }
     }
 }Table_t;

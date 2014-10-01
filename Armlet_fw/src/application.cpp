@@ -31,6 +31,8 @@
 #include "mesh_lvl.h"
 #include "reasons.h"
 
+#include "gui.h"
+
 App_t App;
 //#define SCREEN_SUSPEND_TIMER
 
@@ -192,17 +194,19 @@ void App_t::Task() {
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
             Uart.Printf("App TabGet, s=%u, t=%u\r\n", RxTable.PTable->Size, chTimeNow());
+            GUI.draw_RxTable(&RxTable);
 /*
             for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
                 Uart.Printf("\r\nID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
             }
 */
-            UpdateState();//эта штука берет локацию из таблицы
+            UpdateState();
         }
 #endif
 
 #if 1 // ==== New second ====
         if(EvtMsk & EVTMSK_NEWSECOND) {
+            GUI.draw_Time();
         } // New second
 #endif
 #if 1   // ==== Check pill ====
@@ -246,23 +250,36 @@ void App_t::Task() {
     } // while true
 }
 void App_t::UpdateState() {
-    uint8_t SignalPwr = 0;
+    uint8_t LocSignalPwr = 0;
+    uint8_t ReasonSigPwr = 0;
     uint16_t LocationID = 0;
+    uint16_t NeighborID = 0;
     uint16_t tmpID=0;
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
         tmpID = RxTable.PTable->Row[i].ID;
-        if(tmpID < LOCATION_ID_START || LOCATIONS_ID_END > tmpID )    {
-            if(RxTable.PTable->Row[i].Level > SignalPwr) {
-                SignalPwr = RxTable.PTable->Row[i].Level;
+        if((tmpID >= PLACEHOLDER_ID_START) && (PLACEHOLDER_ID_END >= tmpID))    {
+            if(RxTable.PTable->Row[i].Level > LocSignalPwr) {
+                LocSignalPwr = RxTable.PTable->Row[i].Level;
                 LocationID = tmpID;
             } // if Signal present
         } // if location correct
+        else if((tmpID >= PERSON_ID_START) && (PERSON_ID_END >= tmpID)) {
+            if(RxTable.PTable->Row[i].Level > ReasonSigPwr) {
+                ReasonSigPwr = RxTable.PTable->Row[i].Level;
+                NeighborID = tmpID;
+            } // if Signal present
+        }
     }
     if(LocationID) {
         CurrInfo.Location = LocationID;
         LocationValid();
     }
     else LocationInvalid();
+    GUI.draw_Location(CurrInfo.Location, LocSignalPwr);
+    if(NeighborID) {
+        CurrInfo.Neighbor = NeighborID;
+    }
+    else CurrInfo.Neighbor = 0;
 }
 
 void App_t::Init() {
@@ -276,6 +293,7 @@ void App_t::Init() {
 
     Time.Init();
     Time.Reset();
+    GUI.Init();
 }
 
 #if 1 // ======================= Command processing ============================

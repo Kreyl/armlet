@@ -71,7 +71,7 @@ struct meshradio_t {
 
 struct state_t {
     uint16_t    Location;
-    uint16_t    Neighbour;
+    uint16_t    Neighbor;
     uint8_t     Battery;
 }__attribute__ ((__packed__));
 
@@ -84,7 +84,7 @@ struct sender_mesh_t {
 
 struct alien_mesh_t {
     uint8_t     Hops;
-    int32_t     Timestamp;
+    int64_t     Timestamp;
     int32_t     TimeDiff;
 }__attribute__ ((__packed__));
 
