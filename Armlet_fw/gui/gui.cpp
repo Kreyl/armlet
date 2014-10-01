@@ -47,13 +47,12 @@ void gui_t::clean_RxTable() {
     draw_EmptyLine(REASON_NAME_START_Y, clOrangeClr, clBlackClr);
 }
 
-
 void gui_t::draw_Location(uint8_t LocAddr, uint8_t Power) {
     if(LocAddr == 0) {
         draw_EmptyLine(LOCATION_START_Y, clWhiteClr, clBlackClr);
         return;
     }
-    draw_Line(LOCATION_START_Y, clWhiteClr, clBlackClr, LocAddr, Power);
+    draw_Location(LOCATION_START_Y, clWhiteClr, clBlackClr, LocAddr, Power);
 }
 
 void gui_t::draw_Time() {
@@ -67,11 +66,6 @@ void gui_t::draw_SelfID() {
 }
 
 void gui_t::draw_SelfName() {
-    char* Name[MAX_REASON_BUF_SIZE];
-    uint8_t Len = strlen(reasons[App.SelfID].name);
-    Len = MIN(MAX_REASON_BUF_SIZE-1, Len);
-    memcpy(Name, reasons[App.SelfID].name, Len);
-    Name[Len] = '\0';
-    Lcd.Printf(CourierNew, NAME_START_X, NAME_START_Y, clBlackClr, clOrangeClr, "%s", Name);
+    Lcd.Printf(CourierNew, NAME_START_X, NAME_START_Y, clBlackClr, clOrangeClr, "%s", reasons[App.SelfID].name);
 }
 

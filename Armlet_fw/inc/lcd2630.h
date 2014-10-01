@@ -115,6 +115,7 @@ public:
     void DrawBmpFile(uint8_t x0, uint8_t y0, const char *Filename);
     void DrawBatteryState();
     void DrawBatteryBounds();
+    void DrawSignal(uint8_t x0, uint8_t y0, Color_t ForeClr, Color_t BckClr, uint8_t Pwr);
 //    void DrawSignalPower(uint8_t y, Color_t Color, uint8_t Pwr);
 };
 

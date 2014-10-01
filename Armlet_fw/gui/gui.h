@@ -35,8 +35,8 @@
 
 #define LOCATION_START_X        30
 #define LOCATION_START_Y        12
-#define LOCATION_ID_X           10
-#define LOCATION_POWER_X        142
+#define LOCATION_ID_X           8
+#define LOCATION_POWER_X        145
 
 #define REASON_NAME_START_Y     24
 #define REASON_NAME_HEIGHT      12
@@ -48,11 +48,17 @@ private:
         Lcd.Printf(CourierNew, ID_START_X, y, Text, Bg, "%u ", ID);
         Lcd.Printf(CourierNew, LOCATION_START_X, y, Text, Bg, reasons[ID].name);
         Pwr = (Pwr == 100)? Pwr-1: Pwr;
-        if(Pwr != 0) Lcd.Printf(CourierNew, LOCATION_POWER_X, y, Text, Bg, "%u", Pwr);
-        else Lcd.Printf(CourierNew, LOCATION_POWER_X, y, Text, Bg, "--");
+        Lcd.DrawSignal(LOCATION_POWER_X, y, Text, Bg, Pwr);
+    }
+    void draw_Location(uint8_t y, Color_t Text, Color_t Bg, uint16_t ID, uint8_t Pwr) {
+        erase_Line(y, clBlackClr, clBlackClr);
+        Lcd.Printf(CourierNew, LOCATION_ID_X, y, Text, Bg, "%u ", ID);
+        Lcd.Printf(CourierNew, LOCATION_START_X, y, Text, Bg, reasons[ID].name);
+        Pwr = (Pwr == 100)? Pwr-1: Pwr;
+        Lcd.DrawSignal(LOCATION_POWER_X, y, Text, Bg, Pwr);
     }
     void draw_EmptyLine(uint8_t y, Color_t Text, Color_t Bg) {
-        Lcd.Printf(CourierNew, ID_START_X, y, Text, Bg, "--");
+        Lcd.Printf(CourierNew, ID_START_X, y, Text, Bg, "---");
         Lcd.Printf(CourierNew, LOCATION_START_X, y, Text, Bg, "--");
         Lcd.Printf(CourierNew, LOCATION_POWER_X, y, Text, Bg, "--");
     }

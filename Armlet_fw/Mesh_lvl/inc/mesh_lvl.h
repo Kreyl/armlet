@@ -93,6 +93,9 @@ public:
         digit = MM%10;
         PStr[4] = (digit < 10)? '0'+digit : 'A'+digit-10;
     }
+    static void NotRelevant(char *PStr) {
+        PStr[0] = PStr[1] = PStr[3] = PStr[4] = '-';
+    }
 };
 
 class Mesh_t {
@@ -106,6 +109,7 @@ private:
     uint32_t SleepTime;
     // Synchronization
     bool GetPrimaryPkt;
+    bool WasSynchronize;
     // Time Specific
     char TimeSeparator;
     uint16_t PriorityID;
@@ -161,6 +165,7 @@ public:
                 RxCycleN(*PRndTable),
                 SleepTime(0),
                 GetPrimaryPkt(false),
+                WasSynchronize(false),
                 TimeSeparator(':'),
                 PriorityID(0),
                 NewCycleN(0),
@@ -185,6 +190,7 @@ public:
         CurrCycle = AbsCycle % MESH_COUNT_OF_CYCLES;
         INewRxCycle();
         Diff = AbsCycle - Diff;
+        if(!WasSynchronize) WasSynchronize = true;
         return Diff;
     }
     void Init();

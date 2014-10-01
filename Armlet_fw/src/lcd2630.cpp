@@ -352,6 +352,40 @@ void Lcd_t::DrawBatteryBounds() {
     DC_Lo();
 }
 
+void Lcd_t::DrawSignal(uint8_t x0, uint8_t y0, Color_t ForeClr, Color_t BckClr, uint8_t Pwr) {
+    const tImage *NeedGisto;
+    if       (Pwr > 90)                 NeedGisto = &Gisto7;
+    else if ((Pwr > 80) && (90 >= Pwr))  NeedGisto = &Gisto6;
+    else if ((Pwr > 70) && (80 >= Pwr))  NeedGisto = &Gisto5;
+    else if ((Pwr > 60) && (70 >= Pwr))  NeedGisto = &Gisto4;
+    else if ((Pwr > 50) && (60 >= Pwr))  NeedGisto = &Gisto3;
+    else if ((Pwr > 40) && (50 >= Pwr))  NeedGisto = &Gisto2;
+    else if ((Pwr > 20) && (40 >= Pwr))  NeedGisto = &Gisto1;
+    else                                 NeedGisto = &Gisto0;
+    uint8_t nCols = NeedGisto->Width;
+    uint8_t nRows = NeedGisto->Height;
+    SetBounds(x0, nCols, y0, nRows);
+    // Get pointer to the first byte of the desired character
+    const uint8_t *p = NeedGisto->PData;
+    Color_t MixClr;
+    // Write RAM
+    WriteByte(0x2C);    // Memory write
+    DC_Hi();
+    // Iterate rows of the char
+    uint8_t row, col;
+    for(row = 0; row < nRows; row++) {
+        if((y0+row) >= LCD_H) break;
+        for(col=0; col < nCols; col++) {
+            if((x0+col) >= LCD_W) break;
+            uint32_t L = *p++;
+            MixClr.MixOf(ForeClr, BckClr, L);
+            WriteByte(MixClr.RGBTo565_HiByte());
+            WriteByte(MixClr.RGBTo565_LoByte());
+        } // col
+    } // row
+    DC_Lo();
+}
+
 //void Lcd_t::DrawSignalPower(uint8_t y, Color_t Color, uint8_t Pwr) {
 //    uint8_t clrbHi, clrbLo, backClrHi, backClrLo;
 //    SetBounds(PWR_BORD_LEFT, PWR_BORD_WIDTH, y + PWR_BORD_TOP, PWR_BORD_HEIGHT);

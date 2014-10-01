@@ -318,7 +318,6 @@ void App_t::OnUartCmd(Cmd_t *PCmd) {
     }
 #endif
 
-
     else if(PCmd->NameIs("#Boot")) {
         Uart.Printf("\rDFU request");
         // Setup TIMER

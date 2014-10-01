@@ -194,6 +194,7 @@ uint8_t Mesh_t::GetAstronomicTime(char *PToStr, uint8_t MaxLen) {
     //    ss = Time;
         TimeSeparator = (TimeSeparator == ':')? ' ' : ':';
         Time::PutTimeTo(PToStr, hh, mm, TimeSeparator);
+        if(!WasSynchronize) Time::NotRelevant(PToStr);
         return OK;
     }
 }
