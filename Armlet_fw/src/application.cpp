@@ -194,7 +194,6 @@ void App_t::Task() {
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
             Uart.Printf("App TabGet, s=%u, t=%u\r\n", RxTable.PTable->Size, chTimeNow());
-            GUI.clean_RxTable();
             GUI.draw_RxTable(&RxTable);
 /*
             for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
@@ -257,13 +256,13 @@ void App_t::UpdateState() {
     uint16_t tmpID=0;
     for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
         tmpID = RxTable.PTable->Row[i].ID;
-        if(tmpID < LOCATION_ID_START || LOCATIONS_ID_END > tmpID )    {
+        if((tmpID >= PLACEHOLDER_ID_START) && (PLACEHOLDER_ID_END >= tmpID))    {
             if(RxTable.PTable->Row[i].Level > SignalPwr) {
                 SignalPwr = RxTable.PTable->Row[i].Level;
                 LocationID = tmpID;
             } // if Signal present
         } // if location correct
-        else if(tmpID < PERSON_ID_START || PERSON_ID_END > tmpID) {
+        else if((tmpID >= PERSON_ID_START) && (PERSON_ID_END >= tmpID)) {
             if(RxTable.PTable->Row[i].Level > SignalPwr) {
                 SignalPwr = RxTable.PTable->Row[i].Level;
                 NeighborID = tmpID;
