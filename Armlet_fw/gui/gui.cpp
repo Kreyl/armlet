@@ -53,7 +53,6 @@ void gui_t::draw_Location(uint8_t LocAddr, uint8_t Power) {
         draw_EmptyLine(LOCATION_START_Y, clWhiteClr, clBlackClr);
         return;
     }
-    if(Power == 0) return;
     draw_Line(LOCATION_START_Y, clWhiteClr, clBlackClr, LocAddr, Power);
 }
 

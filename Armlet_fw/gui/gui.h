@@ -48,7 +48,8 @@ private:
         Lcd.Printf(CourierNew, ID_START_X, y, Text, Bg, "%u ", ID);
         Lcd.Printf(CourierNew, LOCATION_START_X, y, Text, Bg, reasons[ID].name);
         Pwr = (Pwr == 100)? Pwr-1: Pwr;
-        Lcd.Printf(CourierNew, LOCATION_POWER_X, y, Text, Bg, "%u", Pwr);
+        if(Pwr != 0) Lcd.Printf(CourierNew, LOCATION_POWER_X, y, Text, Bg, "%u", Pwr);
+        else Lcd.Printf(CourierNew, LOCATION_POWER_X, y, Text, Bg, "--");
     }
     void draw_EmptyLine(uint8_t y, Color_t Text, Color_t Bg) {
         Lcd.Printf(CourierNew, ID_START_X, y, Text, Bg, "--");
