@@ -5,23 +5,24 @@
 # Was created and used after game to create player music-by-emotion repository.
 #
 from os import fdopen, listdir, mkdir
-from os.path import isdir, join
+from os.path import isdir, isfile, islink, join
 from sys import stdout, argv
 
 stdout = fdopen(stdout.fileno(), 'w', 0)
 
 try: # Filesystem symbolic links configuration
-    from os import symlink # UNIX # pylint: disable=E0611
+    from os import link, symlink # UNIX # pylint: disable=W0611
 except ImportError:
-    global symlink # pylint: disable=W0604
     try:
         from ctypes import windll
         dll = windll.LoadLibrary('kernel32.dll')
+        def link(source, linkName):
+            if not dll.CreateHardLinkW(linkName, source, None):
+                raise OSError("code %d" % dll.GetLastError())
         def symlink(source, linkName):
             if not dll.CreateSymbolicLinkW(linkName, source, 0):
                 raise OSError("code %d" % dll.GetLastError())
     except Exception, ex:
-        symlink = None
         print "%s: %s\nWARNING: Filesystem links are unavailable.\nPlease run on UNIX or Windows Vista or later.\n" % (ex.__class__.__name__, ex)
         raise
 
@@ -57,7 +58,9 @@ def main(*args):
                 print '\n!', encodeForConsole(linkName)
                 raise RuntimeError()
             emotions[emotion].add(linkName)
-            symlink(fullName, join(emotionDir, linkName))
+            fullLinkName = join(emotionDir, linkName)
+            if not isfile(fullLinkName) and not islink(fullLinkName):
+                link(fullName, fullLinkName)
         print
 
 if __name__ == '__main__':
