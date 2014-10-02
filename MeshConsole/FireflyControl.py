@@ -15,7 +15,7 @@ from traceback import format_exc
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
-    from PyQt4.QtGui import QApplication, QColor, QDesktopWidget, QColorDialog, QComboBox, QDialog, QHBoxLayout, QIcon, QIntValidator, QLabel, QLineEdit, QMainWindow, QPushButton, QToolButton, QWidget
+    from PyQt4.QtGui import QApplication, QColor, QDesktopWidget, QColorDialog, QComboBox, QDialog, QHBoxLayout, QIcon, QIntValidator, QLabel, QLayout, QLineEdit, QMainWindow, QPushButton, QStackedWidget, QToolButton, QWidget
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -102,14 +102,14 @@ class AboutDialog(QDialog):
         trigger.connect(self.exec_)
 
 class SelectColorLabel(QLabel):
-    def configure(self, callback = None, color = None):
+    def __init__(self, parent, callback = None, color = None):
+        QLabel.__init__(self, parent)
         self.callback = callback
         self.setColor(color or QColor('black'))
         self.mousePressEvent = self.editColor
 
     def setColor(self, color):
-        self.color = color
-        self.setStyleSheet('background-color: %s' % self.color.name())
+        self.setStyleSheet('background-color: %s' % color.name())
         if self.callback:
             self.callback(color)
 
@@ -124,50 +124,78 @@ class TimeEdit(QLineEdit):
         self.setText(str(0))
 
 class DeleteButton(QToolButton):
-    def __init__(self, callback, parent):
+    def __init__(self, parent, callback):
         QToolButton.__init__(self, parent)
         self.setIcon(QIcon('images/delete.png'))
         self.clicked.connect(callback)
 
 class CommandWidget(QWidget): # ToDo: Make it QObject, use QGridLayout for program?
-    def __init__(self, parent):
-        QWidget.__init__(self, parent)
-        self.parentLayout = parent.layout()
-        layout = QHBoxLayout(self)
-        self.colorLabel = SelectColorLabel(self)
+
+    commandLayout = None
+
+    @classmethod
+    def configure(cls, parentWidget):
+        cls.parentWidget = parentWidget
+        cls.commandLayout = parentWidget.layout()
+        cls.commandLayout.setStretch(cls.commandLayout.count() - 1, 1) # make spacer take all extra space
+
+    @classmethod
+    def setDeleteButtons(cls):
+        widgetCount = cls.commandLayout.count()
+        indexToSet = widgetCount <= 2
+        for i in xrange(widgetCount - 1): # skip spacer
+            cls.commandLayout.itemAt(i).widget().deleteButtonHider.setCurrentIndex(indexToSet)
+
+    def __init__(self, index = None):
+        QWidget.__init__(self, self.parentWidget)
+        self.colorLabel = SelectColorLabel(self, self.setColor)
         self.morphEdit = TimeEdit(self)
         self.delayEdit = TimeEdit(self)
-        self.deleteButton = DeleteButton(self.delete, self)
+        self.deleteButton = DeleteButton(self, self.delete)
+        self.deleteButtonHider = QStackedWidget(self)
+        self.deleteButtonHider.addWidget(self.deleteButton)
+        self.deleteButtonHider.addWidget(QWidget(self))
+        layout = QHBoxLayout(self)
         layout.addWidget(self.colorLabel)
         layout.addWidget(self.morphEdit)
         layout.addWidget(self.delayEdit)
-        layout.addWidget(self.deleteButton)
-        self.colorLabel.configure(self.setColor)
-        for i in xrange(self.parentLayout.count() - 1):
-            self.parentLayout.itemAt(i).widget().deleteButton.setVisible(i)
-        self.parentLayout.setStretch(self.parentLayout.count() - 1, 1)
+        layout.addWidget(self.deleteButtonHider)
+        self.commandLayout.insertWidget(index if index != None else self.commandLayout.count() - 1, self) # skip spacer
+        self.setDeleteButtons()
 
     def setColor(self, color):
         self.color = color
 
     def delete(self):
-        self.parentLayout.removeWidget(self)
-        self.parentLayout.itemAt(0).deleteButton.setDisabled()
+        self.setParent(None)
+        self.setDeleteButtons()
+        InsertCommandButton.deleteExtraButtons(self.commandLayout.count() - 1) # skip spacer
 
 class InsertCommandButton(QToolButton):
-    def __init__(self, programWidget, insertCommandLayout, parent):
-        QToolButton.__init__(self, parent)
+
+    insertCommandLayout = None
+
+    @classmethod
+    def configure(cls, parentWidget):
+        cls.parentWidget = parentWidget
+        cls.insertCommandLayout = parentWidget.layout()
+        cls.insertCommandLayout.setStretch(cls.insertCommandLayout.count() - 1, 1) # make spacer take all extra space
+
+    @classmethod
+    def deleteExtraButtons(cls, count):
+        for i in xrange(count + 1, cls.insertCommandLayout.count() - 1): # skip spacer
+            cls.insertCommandLayout.itemAt(i).widget().setParent(None)
+
+    def __init__(self):
+        QToolButton.__init__(self, self.parentWidget)
         self.setIcon(QIcon('images/add.png'))
-        self.programWidget = programWidget
-        self.insertCommandLayout = insertCommandLayout
-        self.index = insertCommandLayout.count() - 1
-        insertCommandLayout.insertWidget(self.index, self)
-        insertCommandLayout.setStretch(insertCommandLayout.count() - 1, 1)
+        self.index = self.insertCommandLayout.count() - 1
         self.clicked.connect(self.addCommand)
+        self.insertCommandLayout.insertWidget(self.index, self)
 
     def addCommand(self):
-        self.programWidget.layout().insertWidget(self.index, CommandWidget(self.programWidget))
-        InsertCommandButton(self.programWidget, self.insertCommandLayout, self.parentWidget())
+        CommandWidget(self.index)
+        InsertCommandButton()
 
 class FireflyControl(QMainWindow):
     comConnect = pyqtSignal(str)
@@ -196,7 +224,9 @@ class FireflyControl(QMainWindow):
         self.resetButton.configure(self.reset)
         self.consoleEdit.configure(self.consoleEnter)
         self.aboutDialog = AboutDialog(self.aboutAction.triggered)
-        InsertCommandButton(self.programWidget, self.insertCommandLayout, self).addCommand()
+        CommandWidget.configure(self.commandsWidget)
+        InsertCommandButton.configure(self.insertCommandWidget)
+        InsertCommandButton().addCommand()
         # Setup logging
         formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
         handlers = (FileHandler(LOG_FILE_NAME), CallableHandler(self.logTextEdit.appendPlainText))

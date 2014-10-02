@@ -71,7 +71,7 @@
      </widget>
     </item>
     <item row="0" column="0">
-     <widget class="QWidget" name="leftWidget" native="true">
+     <widget class="QWidget" name="programmingWidget" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
         <horstretch>0</horstretch>
@@ -80,17 +80,19 @@
       </property>
       <layout class="QVBoxLayout" name="leftLayout">
        <item>
-        <layout class="QHBoxLayout" name="outerProgramLayout">
+        <layout class="QHBoxLayout" name="programmingLayout">
          <item>
-          <layout class="QVBoxLayout" name="insertCommandLayout">
-           <item>
-            <spacer name="insertCommandSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-            </spacer>
-           </item>
-          </layout>
+          <widget class="QWidget" name="insertCommandWidget" native="true">
+           <layout class="QVBoxLayout" name="insertCommandLayout">
+            <item>
+             <spacer name="insertCommandSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
          </item>
          <item>
           <widget class="QScrollArea" name="programScrollArea">
@@ -100,8 +102,8 @@
            <property name="widgetResizable">
             <bool>true</bool>
            </property>
-           <widget class="QWidget" name="programWidget">
-            <layout class="QVBoxLayout" name="programLayout">
+           <widget class="QWidget" name="commandsWidget">
+            <layout class="QVBoxLayout" name="commandsLayout">
              <item>
               <spacer name="programSpacer">
                <property name="orientation">
