@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>943</width>
-    <height>616</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Firefly Control</string>
   </property>
@@ -79,39 +71,22 @@
      </widget>
     </item>
     <item row="0" column="0">
-     <widget class="QWidget" name="commandWidget" native="true">
-      <layout class="QVBoxLayout" name="verticalLayout">
+     <widget class="QWidget" name="leftWidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="leftLayout">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
+        <layout class="QHBoxLayout" name="outerProgramLayout">
          <item>
-          <layout class="QVBoxLayout" name="insertSpacerLayout">
+          <layout class="QVBoxLayout" name="insertCommandLayout">
            <item>
-            <widget class="SelectColorLabel" name="selectColorLabel">
-             <property name="styleSheet">
-              <string notr="true">background-color: red</string>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::Box</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QToolButton" name="insertButton">
-             <property name="text">
-              <string>&gt;</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="insertSpacer">
+            <spacer name="insertCommandSpacer">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
              </property>
             </spacer>
            </item>
@@ -119,58 +94,18 @@
          </item>
          <item>
           <widget class="QScrollArea" name="programScrollArea">
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
            <property name="widgetResizable">
             <bool>true</bool>
            </property>
            <widget class="QWidget" name="programWidget">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>466</width>
-              <height>441</height>
-             </rect>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_2">
-             <item>
-              <layout class="QHBoxLayout" name="commandLayout">
-               <item>
-                <widget class="QLineEdit" name="greenEdit"/>
-               </item>
-               <item>
-                <widget class="QLabel" name="colorLabel">
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="redEdit"/>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="blueEdit"/>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="morphEdit"/>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="waitEdit"/>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="gotoEdit"/>
-               </item>
-              </layout>
-             </item>
+            <layout class="QVBoxLayout" name="programLayout">
              <item>
               <spacer name="programSpacer">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>392</height>
-                </size>
                </property>
               </spacer>
              </item>
@@ -187,7 +122,7 @@
      </widget>
     </item>
     <item row="1" column="0">
-     <widget class="QWidget" name="controlWidget" native="true">
+     <widget class="QWidget" name="graphWidget" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
         <horstretch>0</horstretch>
@@ -269,14 +204,6 @@
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>943</width>
-     <height>21</height>
-    </rect>
-   </property>
    <widget class="QMenu" name="fileMenu">
     <property name="title">
      <string>File</string>
@@ -326,11 +253,6 @@
    <extends>QPushButton</extends>
    <header>FireflyControl</header>
   </customwidget>
-  <customwidget>
-   <class>SelectColorLabel</class>
-   <extends>QLabel</extends>
-   <header>FireflyControl</header>
-  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>logTextEdit</tabstop>
@@ -342,16 +264,6 @@
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
   </connection>
  </connections>
 </ui>

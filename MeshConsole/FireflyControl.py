@@ -15,7 +15,7 @@ from traceback import format_exc
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
-    from PyQt4.QtGui import QApplication, QColor, QDesktopWidget, QColorDialog, QComboBox, QDialog, QIntValidator, QLabel, QLineEdit, QMainWindow, QPushButton, QWidget
+    from PyQt4.QtGui import QApplication, QColor, QDesktopWidget, QColorDialog, QComboBox, QDialog, QHBoxLayout, QIcon, QIntValidator, QLabel, QLineEdit, QMainWindow, QPushButton, QToolButton, QWidget
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -32,6 +32,11 @@ LOG_FILE_NAME = 'FireflyControl.log'
 
 WINDOW_SIZE = 2.0 / 3
 WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
+
+#
+# ToDo:
+# - Set LED color immediately when color is selected in GUI
+#
 
 def fixWidgetSize(widget, adjustment = 1):
     widget.setFixedWidth(widget.fontMetrics().boundingRect(widget.text()).width() * adjustment) # This is a bad hack, but there's no better idea
@@ -57,20 +62,6 @@ class EventLogger(getLoggerClass(), QObject):
     def _log(self, *args, **kwargs):
         self.logSignal.emit(args, kwargs)
 
-class SelectColorLabel(QLabel):
-    def configure(self):
-        self.setColor('black')
-        self.mousePressEvent = self.editColor
-
-    def setColor(self, color):
-        self.color = QColor(color)
-        self.setStyleSheet('background-color: %s' % self.color.name())
-
-    def editColor(self, *_args):
-        colorDialog = QColorDialog()#self.color)
-        if colorDialog.exec_():
-            self.setColor(colorDialog.selectedColor().name())
-
 class PortLabel(QLabel):
     STATUS_COLORS = {
         SerialPort.TRYING: 'black',
@@ -90,8 +81,8 @@ class PortLabel(QLabel):
         self.setStyleSheet(self.savedStyleSheet + '; color: %s' % self.STATUS_COLORS.get(portStatus, 'gray'))
 
 class CompactButton(QPushButton):
-    def configure(self, callback):
-        fixWidgetSize(self, 1.5)
+    def configure(self, callback, adjustment = 1.5):
+        fixWidgetSize(self, adjustment)
         self.clicked.connect(callback)
 
 class ConsoleEdit(QLineEdit):
@@ -109,6 +100,74 @@ class AboutDialog(QDialog):
         QDialog.__init__(self)
         uic.loadUi(ABOUT_UI_FILE_NAME, self)
         trigger.connect(self.exec_)
+
+class SelectColorLabel(QLabel):
+    def configure(self, callback = None, color = None):
+        self.callback = callback
+        self.setColor(color or QColor('black'))
+        self.mousePressEvent = self.editColor
+
+    def setColor(self, color):
+        self.color = color
+        self.setStyleSheet('background-color: %s' % self.color.name())
+        if self.callback:
+            self.callback(color)
+
+    def editColor(self):
+        colorDialog = QColorDialog(self.color)
+        if colorDialog.exec_():
+            self.setColor(colorDialog.selectedColor())
+
+class TimeEdit(QLineEdit):
+    def __init__(self, parent):
+        QLineEdit.__init__(self, parent)
+        self.setText(str(0))
+
+class DeleteButton(QToolButton):
+    def __init__(self, callback, parent):
+        QToolButton.__init__(self, parent)
+        self.setIcon(QIcon('images/delete.png'))
+        self.clicked.connect(callback)
+
+class CommandWidget(QWidget): # ToDo: Make it QObject, use QGridLayout for program?
+    def __init__(self, parent):
+        QWidget.__init__(self, parent)
+        self.parentLayout = parent.layout()
+        layout = QHBoxLayout(self)
+        self.colorLabel = SelectColorLabel(self)
+        self.morphEdit = TimeEdit(self)
+        self.delayEdit = TimeEdit(self)
+        self.deleteButton = DeleteButton(self.delete, self)
+        layout.addWidget(self.colorLabel)
+        layout.addWidget(self.morphEdit)
+        layout.addWidget(self.delayEdit)
+        layout.addWidget(self.deleteButton)
+        self.colorLabel.configure(self.setColor)
+        for i in xrange(self.parentLayout.count() - 1):
+            self.parentLayout.itemAt(i).widget().deleteButton.setVisible(i)
+        self.parentLayout.setStretch(self.parentLayout.count() - 1, 1)
+
+    def setColor(self, color):
+        self.color = color
+
+    def delete(self):
+        self.parentLayout.removeWidget(self)
+        self.parentLayout.itemAt(0).deleteButton.setDisabled()
+
+class InsertCommandButton(QToolButton):
+    def __init__(self, programWidget, insertCommandLayout, parent):
+        QToolButton.__init__(self, parent)
+        self.setIcon(QIcon('images/add.png'))
+        self.programWidget = programWidget
+        self.insertCommandLayout = insertCommandLayout
+        self.index = insertCommandLayout.count() - 1
+        insertCommandLayout.insertWidget(self.index, self)
+        insertCommandLayout.setStretch(insertCommandLayout.count() - 1, 1)
+        self.clicked.connect(self.addCommand)
+
+    def addCommand(self):
+        self.programWidget.layout().insertWidget(self.index, CommandWidget(self.programWidget))
+        InsertCommandButton(self.programWidget, self.insertCommandLayout, self.parentWidget())
 
 class FireflyControl(QMainWindow):
     comConnect = pyqtSignal(str)
@@ -137,8 +196,7 @@ class FireflyControl(QMainWindow):
         self.resetButton.configure(self.reset)
         self.consoleEdit.configure(self.consoleEnter)
         self.aboutDialog = AboutDialog(self.aboutAction.triggered)
-        # Configuring ...
-        self.selectColorLabel.configure()
+        InsertCommandButton(self.programWidget, self.insertCommandLayout, self).addCommand()
         # Setup logging
         formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
         handlers = (FileHandler(LOG_FILE_NAME), CallableHandler(self.logTextEdit.appendPlainText))
