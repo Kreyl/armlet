@@ -11,7 +11,7 @@ from sys import stdout, argv
 stdout = fdopen(stdout.fileno(), 'w', 0)
 
 try: # Filesystem symbolic links configuration
-    from os import link, symlink # UNIX # pylint: disable=W0611
+    from os import link, symlink # UNIX # pylint: disable=E0611, W0611
 except ImportError:
     try:
         from ctypes import windll
@@ -31,7 +31,7 @@ from MusicProcessor import deepListDir
 
 def main(*args):
     emotions = dict((s.strip(' ,\r\n').decode('utf-8'), set()) for s in open(EMOTIONS_CSV).readlines() if s.strip())
-    (musicDir, targetDir) = args
+    (musicDir, targetDir) = args # pylint: disable=W0632
     for character in listdir(musicDir):
         characterDir = join(musicDir, character)
         if not isdir(characterDir):
