@@ -41,6 +41,10 @@ WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
 def fixWidgetSize(widget, adjustment = 1):
     widget.setFixedWidth(widget.fontMetrics().boundingRect(widget.text()).width() * adjustment) # This is a bad hack, but there's no better idea
 
+def setTip(widget, tip):
+    widget.setToolTip(tip)
+    widget.setStatusTip(tip)
+
 class CallableHandler(Handler):
     def __init__(self, emitCallable, level = NOTSET):
         Handler.__init__(self, level)
@@ -66,13 +70,13 @@ class VerticalScrollArea(QScrollArea):
     def __init__(self, parent = None):
         QScrollArea.__init__(self, parent)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.verticalScrollBarWidth = None
+        self.scrollBarSet = False
 
     def resizeEvent(self, event):
-        if self.verticalScrollBarWidth is None:
-            self.verticalScrollBarWidth = self.verticalScrollBar().width()
+        if not self.scrollBarSet:
             self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.setMinimumWidth(self.widget().sizeHint().width() + self.verticalScrollBarWidth)
+            self.scrollBarSet = True
+        self.setMinimumWidth(self.widget().sizeHint().width() + self.verticalScrollBar().width())
         QScrollArea.resizeEvent(self, event)
 
 class PortLabel(QLabel):
@@ -118,6 +122,7 @@ class SelectColorLabel(QLabel):
     def __init__(self, parent, callback = None, color = None):
         QLabel.__init__(self, parent)
         self.setFrameStyle(self.Box | self.Plain)
+        setTip(self, "Select color")
         self.callback = callback
         self.setColor(color or QColor('black'))
         self.mousePressEvent = self.editColor
@@ -147,33 +152,49 @@ class DeleteButton(QToolButton):
     def __init__(self, parent, callback):
         QToolButton.__init__(self, parent)
         self.setIcon(QIcon('images/delete.png'))
+        setTip(self, "Delete command")
         self.clicked.connect(callback)
 
     def setCorrectSize(self, size):
         self.setFixedSize(size, size)
 
-class CommandWidget(QWidget): # ToDo: Make it QObject, use QGridLayout for program?
-
+class CommandWidget(QWidget):
     commandsLayout = None
     correctHeight = None
+    sizesSet = None
 
     @classmethod
     def configure(cls, parentWidget):
         cls.parentWidget = parentWidget
         cls.commandsLayout = parentWidget.layout()
+        cls.headerWidget = cls.commandsLayout.itemAt(0).widget()
+        cls.headerLayout = cls.headerWidget.layout()
 
     @classmethod
     def setDeleteButtons(cls):
-        widgetCount = cls.commandsLayout.count()
+        widgetCount = cls.commandsLayout.count() - 2
         indexToSet = widgetCount < 2
-        for i in xrange(widgetCount):
+        for i in xrange(1, widgetCount + 1):
             cls.commandsLayout.itemAt(i).widget().deleteButtonHider.setCurrentIndex(indexToSet)
 
     @classmethod
-    def adjustSizes(cls, size):
-        if size > cls.correctHeight:
+    def adjustSizesAndTips(cls, size):
+        if not cls.sizesSet:
             cls.correctHeight = size
-            for i in xrange(cls.commandsLayout.count()):
+            sampleLayout = cls.commandsLayout.itemAt(1).widget().layout()
+            count = sampleLayout.count()
+            assert cls.headerLayout.count() == count
+            cls.headerLayout.setContentsMargins(sampleLayout.contentsMargins())
+            widthChanged = False
+            for (h, w) in (tuple(layout.itemAt(i).widget() for layout in (cls.headerLayout, sampleLayout)) for i in xrange(count)):
+                if h.width() < w.width():
+                    widthChanged = True
+                    h.setFixedWidth(w.width())
+                if not w.toolTip() and hasattr(h, 'text'):
+                    setTip(w, h.text())
+            if not widthChanged:
+                cls.sizesSet = True
+            for i in xrange(1, cls.commandsLayout.count() - 1):
                 cls.commandsLayout.itemAt(i).widget().setCorrectSize()
             InsertCommandButton.adjustSizes(size)
 
@@ -194,11 +215,12 @@ class CommandWidget(QWidget): # ToDo: Make it QObject, use QGridLayout for progr
         layout.addWidget(self.deleteButtonHider)
         layout.setContentsMargins(0, 3, 5, 3)
         self.setCorrectSize()
-        self.commandsLayout.insertWidget(index if index != None else -1, self)
+        index = index + 1 if index != None else self.commandsLayout.count() - 1
+        self.commandsLayout.insertWidget(index, self)
         self.setDeleteButtons()
 
     def resizeEvent(self, event):
-        self.adjustSizes(self.setCorrectSize())
+        self.adjustSizesAndTips(self.setCorrectSize())
         QWidget.resizeEvent(self, event)
 
     def setCorrectSize(self):
@@ -213,10 +235,9 @@ class CommandWidget(QWidget): # ToDo: Make it QObject, use QGridLayout for progr
     def delete(self):
         self.setParent(None)
         self.setDeleteButtons()
-        InsertCommandButton.deleteExtraButtons(self.commandsLayout.count())
+        InsertCommandButton.deleteExtraButtons(self.commandsLayout.count() - 2)
 
 class InsertCommandButton(QToolButton):
-
     insertCommandLayout = None
     correctHeight = None
 
@@ -227,23 +248,24 @@ class InsertCommandButton(QToolButton):
 
     @classmethod
     def deleteExtraButtons(cls, count):
-        for _i in xrange(count + 1, cls.insertCommandLayout.count()):
-            cls.insertCommandLayout.itemAt(cls.insertCommandLayout.count() - 1).widget().setParent(None)
+        for _i in xrange(count + 1, cls.insertCommandLayout.count() - 1):
+            cls.insertCommandLayout.itemAt(cls.insertCommandLayout.count() - 2).widget().setParent(None)
 
     @classmethod
     def adjustSizes(cls, size):
         if size > cls.correctHeight:
             cls.correctHeight = size
             cls.insertCommandLayout.setContentsMargins(0, size // 2, 0, 0)
-            for i in xrange(cls.insertCommandLayout.count()):
+            for i in xrange(cls.insertCommandLayout.count() - 1):
                 cls.insertCommandLayout.itemAt(i).widget().setCorrectSize(size)
 
     def __init__(self):
         QToolButton.__init__(self, self.parentWidget)
         self.setIcon(QIcon('images/add.png'))
-        self.index = self.insertCommandLayout.count()
+        setTip(self, "Insert command")
+        self.index = self.insertCommandLayout.count() - 1
         self.clicked.connect(self.addCommand)
-        self.insertCommandLayout.addWidget(self)
+        self.insertCommandLayout.insertWidget(self.index, self)
         self.setCorrectSize()
 
     def setCorrectSize(self, size = None):
