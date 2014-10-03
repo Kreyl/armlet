@@ -14,8 +14,8 @@ from traceback import format_exc
 
 try:
     from PyQt4 import uic
-    from PyQt4.QtCore import QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
-    from PyQt4.QtGui import QApplication, QColor, QDesktopWidget, QColorDialog, QComboBox, QDialog, QHBoxLayout, QIcon, QIntValidator, QLabel, QLayout, QLineEdit, QMainWindow, QPushButton, QStackedWidget, QToolButton, QWidget
+    from PyQt4.QtCore import Qt, QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
+    from PyQt4.QtGui import QApplication, QColor, QDesktopWidget, QColorDialog, QComboBox, QDialog, QFrame, QHBoxLayout, QIcon, QIntValidator, QLabel, QLayout, QLineEdit, QMainWindow, QPushButton, QScrollArea, QSizePolicy, QStackedWidget, QToolButton, QWidget
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -62,6 +62,19 @@ class EventLogger(getLoggerClass(), QObject):
     def _log(self, *args, **kwargs):
         self.logSignal.emit(args, kwargs)
 
+class VerticalScrollArea(QScrollArea):
+    def __init__(self, parent = None):
+        QScrollArea.__init__(self, parent)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.verticalScrollBarWidth = None
+
+    def resizeEvent(self, event):
+        if self.verticalScrollBarWidth is None:
+            self.verticalScrollBarWidth = self.verticalScrollBar().width()
+            self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setMinimumWidth(self.widget().sizeHint().width() + self.verticalScrollBarWidth)
+        QScrollArea.resizeEvent(self, event)
+
 class PortLabel(QLabel):
     STATUS_COLORS = {
         SerialPort.TRYING: 'black',
@@ -104,16 +117,23 @@ class AboutDialog(QDialog):
 class SelectColorLabel(QLabel):
     def __init__(self, parent, callback = None, color = None):
         QLabel.__init__(self, parent)
+        self.setFrameStyle(self.Box | self.Plain)
         self.callback = callback
         self.setColor(color or QColor('black'))
         self.mousePressEvent = self.editColor
 
+    def setCorrectSize(self, size):
+        size -= 2 * self.lineWidth()
+        if size > 0:
+            self.setFixedSize(size, size)
+
     def setColor(self, color):
+        self.color = color
         self.setStyleSheet('background-color: %s' % color.name())
         if self.callback:
             self.callback(color)
 
-    def editColor(self):
+    def editColor(self, _event):
         colorDialog = QColorDialog(self.color)
         if colorDialog.exec_():
             self.setColor(colorDialog.selectedColor())
@@ -129,25 +149,37 @@ class DeleteButton(QToolButton):
         self.setIcon(QIcon('images/delete.png'))
         self.clicked.connect(callback)
 
+    def setCorrectSize(self, size):
+        self.setFixedSize(size, size)
+
 class CommandWidget(QWidget): # ToDo: Make it QObject, use QGridLayout for program?
 
-    commandLayout = None
+    commandsLayout = None
+    correctHeight = None
 
     @classmethod
     def configure(cls, parentWidget):
         cls.parentWidget = parentWidget
-        cls.commandLayout = parentWidget.layout()
-        cls.commandLayout.setStretch(cls.commandLayout.count() - 1, 1) # make spacer take all extra space
+        cls.commandsLayout = parentWidget.layout()
 
     @classmethod
     def setDeleteButtons(cls):
-        widgetCount = cls.commandLayout.count()
-        indexToSet = widgetCount <= 2
-        for i in xrange(widgetCount - 1): # skip spacer
-            cls.commandLayout.itemAt(i).widget().deleteButtonHider.setCurrentIndex(indexToSet)
+        widgetCount = cls.commandsLayout.count()
+        indexToSet = widgetCount < 2
+        for i in xrange(widgetCount):
+            cls.commandsLayout.itemAt(i).widget().deleteButtonHider.setCurrentIndex(indexToSet)
+
+    @classmethod
+    def adjustSizes(cls, size):
+        if size > cls.correctHeight:
+            cls.correctHeight = size
+            for i in xrange(cls.commandsLayout.count()):
+                cls.commandsLayout.itemAt(i).widget().setCorrectSize()
+            InsertCommandButton.adjustSizes(size)
 
     def __init__(self, index = None):
         QWidget.__init__(self, self.parentWidget)
+        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.colorLabel = SelectColorLabel(self, self.setColor)
         self.morphEdit = TimeEdit(self)
         self.delayEdit = TimeEdit(self)
@@ -160,8 +192,20 @@ class CommandWidget(QWidget): # ToDo: Make it QObject, use QGridLayout for progr
         layout.addWidget(self.morphEdit)
         layout.addWidget(self.delayEdit)
         layout.addWidget(self.deleteButtonHider)
-        self.commandLayout.insertWidget(index if index != None else self.commandLayout.count() - 1, self) # skip spacer
+        layout.setContentsMargins(0, 3, 5, 3)
+        self.setCorrectSize()
+        self.commandsLayout.insertWidget(index if index != None else -1, self)
         self.setDeleteButtons()
+
+    def resizeEvent(self, event):
+        self.adjustSizes(self.setCorrectSize())
+        QWidget.resizeEvent(self, event)
+
+    def setCorrectSize(self):
+        size = max(self.correctHeight, self.morphEdit.height())
+        self.colorLabel.setCorrectSize(size)
+        self.deleteButton.setCorrectSize(size)
+        return size
 
     def setColor(self, color):
         self.color = color
@@ -169,29 +213,43 @@ class CommandWidget(QWidget): # ToDo: Make it QObject, use QGridLayout for progr
     def delete(self):
         self.setParent(None)
         self.setDeleteButtons()
-        InsertCommandButton.deleteExtraButtons(self.commandLayout.count() - 1) # skip spacer
+        InsertCommandButton.deleteExtraButtons(self.commandsLayout.count())
 
 class InsertCommandButton(QToolButton):
 
     insertCommandLayout = None
+    correctHeight = None
 
     @classmethod
     def configure(cls, parentWidget):
         cls.parentWidget = parentWidget
         cls.insertCommandLayout = parentWidget.layout()
-        cls.insertCommandLayout.setStretch(cls.insertCommandLayout.count() - 1, 1) # make spacer take all extra space
 
     @classmethod
     def deleteExtraButtons(cls, count):
-        for i in xrange(count + 1, cls.insertCommandLayout.count() - 1): # skip spacer
-            cls.insertCommandLayout.itemAt(i).widget().setParent(None)
+        for _i in xrange(count + 1, cls.insertCommandLayout.count()):
+            cls.insertCommandLayout.itemAt(cls.insertCommandLayout.count() - 1).widget().setParent(None)
+
+    @classmethod
+    def adjustSizes(cls, size):
+        if size > cls.correctHeight:
+            cls.correctHeight = size
+            cls.insertCommandLayout.setContentsMargins(0, size // 2, 0, 0)
+            for i in xrange(cls.insertCommandLayout.count()):
+                cls.insertCommandLayout.itemAt(i).widget().setCorrectSize(size)
 
     def __init__(self):
         QToolButton.__init__(self, self.parentWidget)
         self.setIcon(QIcon('images/add.png'))
-        self.index = self.insertCommandLayout.count() - 1
+        self.index = self.insertCommandLayout.count()
         self.clicked.connect(self.addCommand)
-        self.insertCommandLayout.insertWidget(self.index, self)
+        self.insertCommandLayout.addWidget(self)
+        self.setCorrectSize()
+
+    def setCorrectSize(self, size = None):
+        size = size or self.correctHeight
+        if size:
+            self.setFixedHeight(size)
 
     def addCommand(self):
         CommandWidget(self.index)
