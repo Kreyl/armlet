@@ -2,28 +2,23 @@
 #
 # Firefly Control
 #
-from codecs import open as codecsOpen
-from collections import deque
-from functools import partial
 from getopt import getopt
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
-from random import randint
 from sys import argv, exit # pylint: disable=W0622
-from time import sleep, time
 from traceback import format_exc
 
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import Qt, QCoreApplication, QDateTime, QObject, QSettings, QSize, pyqtSignal
     from PyQt4.QtGui import QApplication, QDesktopWidget, QColorDialog, QDialog, QMainWindow
-    from PyQt4.QtGui import QFrame, QHBoxLayout, QLayout, QScrollArea, QStackedWidget, QWidget
-    from PyQt4.QtGui import QButtonGroup, QComboBox, QIcon, QLabel, QLineEdit, QPushButton, QRadioButton, QToolButton
-    from PyQt4.QtGui import QBrush, QColor, QIntValidator, QLinearGradient, QPalette, QSizePolicy
+    from PyQt4.QtGui import QHBoxLayout, QScrollArea, QStackedWidget, QWidget
+    from PyQt4.QtGui import QButtonGroup, QIcon, QLabel, QLineEdit, QPushButton, QRadioButton, QToolButton
+    from PyQt4.QtGui import QColor, QIntValidator, QSizePolicy
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
 from UARTTextProtocol import Command, COMMAND_MARKER
-from UARTTextCommands import ackResponse, ffGetCommand, ffSetCommand, ffResponse
+from UARTTextCommands import ackResponse, ffGetCommand, ffSetCommand, ffResponse, UART_FF_RGB, UART_FF_WAIT, UART_FF_GOTO
 from SerialPort import SerialPort, DT, TIMEOUT
 
 LONG_DATETIME_FORMAT = 'yyyy.MM.dd hh:mm:ss'
@@ -39,6 +34,7 @@ WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
 #
 # ToDo:
 # - Optimize resize events with sizes updating
+# - Open and Save commands
 # - Set LED color immediately when color is selected in GUI
 #
 
@@ -157,7 +153,7 @@ class TimeEdit(QLineEdit):
     MAX_VALUE = 2 ** 31 - 1
     MAX_LENGTH = len(str(MAX_VALUE))
 
-    def __init__(self, parent):
+    def __init__(self, parent, callback = None):
         QLineEdit.__init__(self, parent)
         self.setAlignment(Qt.AlignRight)
         self.setMaxLength(self.MAX_LENGTH)
@@ -165,6 +161,8 @@ class TimeEdit(QLineEdit):
         self.setText(str(self.MAX_VALUE))
         fixWidgetSize(self, 1.4)
         self.setText(str(0))
+        if callback:
+            self.textEdited.connect(callback)
 
 class DeleteButton(QToolButton):
     def __init__(self, parent, callback):
@@ -182,8 +180,9 @@ class CommandWidget(QWidget):
     sizeDidntChange = None
 
     @classmethod
-    def configure(cls, parentWidget):
+    def configure(cls, parentWidget, updateProgramCallback):
         cls.parentWidget = parentWidget
+        cls.updateProgramCallback = updateProgramCallback
         cls.commandsLayout = parentWidget.layout()
         cls.headerWidget = cls.commandsLayout.itemAt(0).widget()
         cls.headerLayout = cls.headerWidget.layout()
@@ -201,6 +200,11 @@ class CommandWidget(QWidget):
     def updateLoop(cls):
         for command in cls.commands():
             command.setLoopIcon()
+        cls.updateProgram()
+
+    @classmethod
+    def updateProgram(cls):
+        cls.updateProgramCallback(','.join(widget.command() for widget in cls.commands()))
 
     @classmethod
     def adjustSizes(cls, size):
@@ -225,8 +229,8 @@ class CommandWidget(QWidget):
         QWidget.__init__(self, self.parentWidget)
         self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.colorLabel = SelectColorLabel(self, self.setColor)
-        self.morphEdit = TimeEdit(self)
-        self.delayEdit = TimeEdit(self)
+        self.morphEdit = TimeEdit(self, self.updateProgram)
+        self.delayEdit = TimeEdit(self, self.updateProgram)
         self.radioButton = QRadioButton(self)
         self.radioButton.clicked.connect(self.updateLoop)
         self.radioButton.commandWidget = self
@@ -267,6 +271,10 @@ class CommandWidget(QWidget):
         for i in xrange(cls.HEADER_SIZE, cls.HEADER_SIZE + cls.numCommands()):
             yield cls.commandsLayout.itemAt(i).widget()
 
+    @classmethod
+    def loopEndIndex(cls):
+        return cls.commandsLayout.indexOf(cls.buttonGroup.checkedButton().commandWidget)
+
     def isFirst(self):
         return self.commandsLayout.indexOf(self) == self.HEADER_SIZE
 
@@ -280,7 +288,7 @@ class CommandWidget(QWidget):
         return self.radioButton.isChecked()
 
     def isInLoop(self):
-        return self.commandsLayout.indexOf(self) >= self.commandsLayout.indexOf(self.buttonGroup.checkedButton().commandWidget)
+        return self.commandsLayout.indexOf(self) >= self.loopEndIndex()
 
     @classmethod
     def hasLoop(cls):
@@ -305,6 +313,7 @@ class CommandWidget(QWidget):
 
     def setColor(self, color):
         self.color = color
+        self.updateProgram()
 
     def delete(self):
         if self.isLoopEnd():
@@ -316,6 +325,14 @@ class CommandWidget(QWidget):
         self.updateLoop()
         self.updateDeleteButtons()
         InsertCommandButton.deleteExtraButtons(self.numCommands())
+
+    def command(self):
+        fields = [UART_FF_RGB, self.color.red(), self.color.green(), self.color.blue(), self.morphEdit.text()]
+        if int(self.delayEdit.text()):
+            fields.extend((UART_FF_WAIT, self.delayEdit.text()))
+        if self.isLoopStart() and not self.isLoopEnd():
+            fields.extend((UART_FF_GOTO, self.loopEndIndex() - self.HEADER_SIZE))
+        return ','.join(str(f) for f in fields)
 
 class InsertCommandButton(QToolButton):
     insertCommandLayout = None
@@ -386,7 +403,7 @@ class FireflyControl(QMainWindow):
         self.resetButton.configure(self.reset)
         self.consoleEdit.configure(self.consoleEnter)
         self.aboutDialog = AboutDialog(self.aboutAction.triggered)
-        CommandWidget.configure(self.commandsWidget)
+        CommandWidget.configure(self.commandsWidget, self.updateProgram)
         InsertCommandButton.configure(self.insertCommandWidget)
         InsertCommandButton().addCommand()
         # Setup logging
@@ -412,6 +429,9 @@ class FireflyControl(QMainWindow):
             self.showMaximized()
         else:
             self.show()
+
+    def updateProgram(self, program):
+        self.programEdit.setText(program)
 
     def processConnect(self, pong): # pylint: disable=W0613
         self.logger.info("connected device detected")
