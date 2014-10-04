@@ -10,22 +10,60 @@
     <normaloff>images/icon.png</normaloff>images/icon.png</iconset>
   </property>
   <widget class="QWidget" name="mainWidget">
-   <layout class="QGridLayout" name="mainLayout" rowstretch="1,0,0" columnstretch="0,1">
-    <item row="2" column="0">
-     <widget class="QSlider" name="horizontalSlider">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="invertedAppearance">
-       <bool>false</bool>
-      </property>
-      <property name="invertedControls">
-       <bool>true</bool>
-      </property>
-      <property name="tickPosition">
-       <enum>QSlider::TicksAbove</enum>
-      </property>
-     </widget>
+   <layout class="QGridLayout" name="mainLayout" rowstretch="1,0,0,0" columnstretch="0,1">
+    <item row="1" column="0">
+     <layout class="QHBoxLayout" name="controlLayout">
+      <item>
+       <widget class="CompactButton" name="resetButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="statusTip">
+         <string>Reset connection</string>
+        </property>
+        <property name="text">
+         <string>Reset</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="PortLabel" name="portLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>65</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="statusTip">
+         <string>Current connected port</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background: rgb(192,192,192)</string>
+        </property>
+        <property name="text">
+         <string>No COM</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item row="0" column="1">
      <widget class="QWidget" name="consoleWidget" native="true">
@@ -179,85 +217,28 @@
       </widget>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QWidget" name="graphWidget" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+    <item row="1" column="1">
+     <widget class="ConsoleEdit" name="consoleEdit">
+      <property name="placeholderText">
+       <string>Enter console command here</string>
       </property>
-      <layout class="QHBoxLayout" name="controlLayout">
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </widget>
     </item>
-    <item row="2" column="1">
-     <layout class="QHBoxLayout" name="controlLayout_2">
-      <item>
-       <widget class="ConsoleEdit" name="consoleEdit">
-        <property name="placeholderText">
-         <string>Enter console command here</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="CompactButton" name="resetButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="statusTip">
-         <string>Reset connection</string>
-        </property>
-        <property name="text">
-         <string>Reset</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="PortLabel" name="portLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>65</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="statusTip">
-         <string>Current connected port</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background: rgb(192,192,192)</string>
-        </property>
-        <property name="text">
-         <string>No COM</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
+    <item row="3" column="0" colspan="2">
+     <widget class="QLineEdit" name="programEdit"/>
+    </item>
+    <item row="2" column="0" colspan="2">
+     <widget class="QSlider" name="graphSlider">
+      <property name="styleSheet">
+       <string notr="true">background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 white, stop:1 green)</string>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="tickInterval">
+       <number>999999999</number>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

@@ -18,7 +18,7 @@ try:
     from PyQt4.QtGui import QApplication, QDesktopWidget, QColorDialog, QDialog, QMainWindow
     from PyQt4.QtGui import QFrame, QHBoxLayout, QLayout, QScrollArea, QStackedWidget, QWidget
     from PyQt4.QtGui import QButtonGroup, QComboBox, QIcon, QLabel, QLineEdit, QPushButton, QRadioButton, QToolButton
-    from PyQt4.QtGui import QColor, QIntValidator, QSizePolicy
+    from PyQt4.QtGui import QBrush, QColor, QIntValidator, QLinearGradient, QPalette, QSizePolicy
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -132,7 +132,7 @@ class SelectColorLabel(QLabel):
         self.setFrameStyle(self.Box | self.Plain)
         setTip(self, "Select color")
         self.callback = callback
-        self.setColor(color or QColor('white'))
+        self.setColor(color or QColor(Qt.white))
         self.mousePressEvent = self.editColor
 
     def setCorrectSize(self, size):
