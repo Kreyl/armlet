@@ -15,7 +15,10 @@ from traceback import format_exc
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import Qt, QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
-    from PyQt4.QtGui import QApplication, QColor, QDesktopWidget, QColorDialog, QComboBox, QDialog, QFrame, QHBoxLayout, QIcon, QIntValidator, QLabel, QLayout, QLineEdit, QMainWindow, QPushButton, QScrollArea, QSizePolicy, QStackedWidget, QToolButton, QWidget
+    from PyQt4.QtGui import QApplication, QDesktopWidget, QColorDialog, QDialog, QMainWindow
+    from PyQt4.QtGui import QFrame, QHBoxLayout, QLayout, QScrollArea, QStackedWidget, QWidget
+    from PyQt4.QtGui import QButtonGroup, QComboBox, QIcon, QLabel, QLineEdit, QPushButton, QRadioButton, QToolButton
+    from PyQt4.QtGui import QColor, QIntValidator, QSizePolicy
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -161,7 +164,7 @@ class DeleteButton(QToolButton):
 class CommandWidget(QWidget):
     commandsLayout = None
     correctHeight = None
-    sizesSet = None
+    sizeDidntChange = None
 
     @classmethod
     def configure(cls, parentWidget):
@@ -169,6 +172,7 @@ class CommandWidget(QWidget):
         cls.commandsLayout = parentWidget.layout()
         cls.headerWidget = cls.commandsLayout.itemAt(0).widget()
         cls.headerLayout = cls.headerWidget.layout()
+        cls.buttonGroup = QButtonGroup(parentWidget)
 
     @classmethod
     def setDeleteButtons(cls):
@@ -179,7 +183,7 @@ class CommandWidget(QWidget):
 
     @classmethod
     def adjustSizesAndTips(cls, size):
-        if not cls.sizesSet:
+        if cls.sizeDidntChange < 2: # This is a hack, but I couldn't find a better way to coordinate technically independent layouts.
             cls.correctHeight = size
             sampleLayout = cls.commandsLayout.itemAt(1).widget().layout()
             count = sampleLayout.count()
@@ -192,8 +196,10 @@ class CommandWidget(QWidget):
                     h.setFixedWidth(w.width())
                 if not w.toolTip() and hasattr(h, 'text'):
                     setTip(w, h.text())
-            if not widthChanged:
-                cls.sizesSet = True
+            if widthChanged:
+                cls.sizeDidntChange = 0
+            else:
+                cls.sizeDidntChange += 1
             for i in xrange(1, cls.commandsLayout.count() - 1):
                 cls.commandsLayout.itemAt(i).widget().setCorrectSize()
             InsertCommandButton.adjustSizes(size)
@@ -208,15 +214,23 @@ class CommandWidget(QWidget):
         self.deleteButtonHider = QStackedWidget(self)
         self.deleteButtonHider.addWidget(self.deleteButton)
         self.deleteButtonHider.addWidget(QWidget(self))
+        self.radioButton = QRadioButton(self)
+        self.buttonGroup.addButton(self.radioButton)
         layout = QHBoxLayout(self)
         layout.addWidget(self.colorLabel)
         layout.addWidget(self.morphEdit)
         layout.addWidget(self.delayEdit)
         layout.addWidget(self.deleteButtonHider)
         layout.setContentsMargins(0, 3, 5, 3)
+        layout.addWidget(self.radioButton)
         self.setCorrectSize()
-        index = index + 1 if index != None else self.commandsLayout.count() - 1
+        lastIndex = self.commandsLayout.count() - 1
+        index = index + 1 if index != None else lastIndex
+        checkedButton = self.buttonGroup.checkedButton()
+        if not checkedButton or index == lastIndex and self.commandsLayout.indexOf(checkedButton.parentWidget()) == lastIndex - 1:
+            self.radioButton.setChecked(True)
         self.commandsLayout.insertWidget(index, self)
+        print self.commandsLayout.itemAt(self.commandsLayout.count() - 1)
         self.setDeleteButtons()
 
     def resizeEvent(self, event):
@@ -233,6 +247,11 @@ class CommandWidget(QWidget):
         self.color = color
 
     def delete(self):
+        if self.radioButton.isChecked():
+            index = self.commandsLayout.indexOf(self)
+            index = index - 1 if index > 1 else index + 1
+            self.commandsLayout.itemAt(index).widget().radioButton.setChecked(True)
+        self.buttonGroup.removeButton(self.radioButton)
         self.setParent(None)
         self.setDeleteButtons()
         InsertCommandButton.deleteExtraButtons(self.commandsLayout.count() - 2)
