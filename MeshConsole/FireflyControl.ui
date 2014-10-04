@@ -92,6 +92,9 @@
         <item>
          <widget class="QWidget" name="insertCommandWidget" native="true">
           <layout class="QVBoxLayout" name="insertCommandLayout" stretch="1">
+           <property name="spacing">
+            <number>2</number>
+           </property>
            <property name="margin">
             <number>0</number>
            </property>
@@ -109,17 +112,14 @@
          <widget class="QWidget" name="commandsWidget" native="true">
           <layout class="QVBoxLayout" name="commandsLayout" stretch="0,1">
            <property name="spacing">
-            <number>0</number>
+            <number>2</number>
            </property>
            <property name="margin">
             <number>0</number>
            </property>
            <item>
-            <widget class="QWidget" name="programHeaderWidget" native="true">
+            <widget class="QWidget" name="commandsHeaderWidget" native="true">
              <layout class="QHBoxLayout" name="programHeaderLayout">
-              <property name="margin">
-               <number>0</number>
-              </property>
               <item>
                <widget class="QWidget" name="selectColorHeader" native="true"/>
               </item>
@@ -169,7 +169,7 @@
             </widget>
            </item>
            <item>
-            <spacer name="programSpacer">
+            <spacer name="commandsSpacer">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
