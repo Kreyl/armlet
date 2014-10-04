@@ -38,6 +38,7 @@ WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
 
 #
 # ToDo:
+# - Optimize resize events with sizes updating
 # - Set LED color immediately when color is selected in GUI
 #
 
@@ -48,8 +49,8 @@ def setTip(widget, tip):
     widget.setToolTip(tip)
     widget.setStatusTip(tip)
 
-def widgets(layout): # generator
-    for i in xrange(layout.count()):
+def widgets(layout, headerSize = 0, tailSize = 0): # generator
+    for i in xrange(headerSize, layout.count() - tailSize):
         yield layout.itemAt(i).widget()
 
 class CallableHandler(Handler):
@@ -153,8 +154,16 @@ class SelectColorLabel(QLabel):
             self.setColor(previousColor)
 
 class TimeEdit(QLineEdit):
+    MAX_VALUE = 2 ** 31 - 1
+    MAX_LENGTH = len(str(MAX_VALUE))
+
     def __init__(self, parent):
         QLineEdit.__init__(self, parent)
+        self.setAlignment(Qt.AlignRight)
+        self.setMaxLength(self.MAX_LENGTH)
+        self.setValidator(QIntValidator(0, self.MAX_VALUE))
+        self.setText(str(self.MAX_VALUE))
+        fixWidgetSize(self, 1.4)
         self.setText(str(0))
 
 class DeleteButton(QToolButton):
@@ -184,9 +193,9 @@ class CommandWidget(QWidget):
 
     @classmethod
     def updateDeleteButtons(cls):
-        deleteButtonHiderIndexToSet = cls.numCommands() < 2
+        hiderIndexToSet = cls.numCommands() < 2
         for command in cls.commands():
-            command.deleteButtonHider.setCurrentIndex(deleteButtonHiderIndexToSet)
+            command.hider.setCurrentIndex(hiderIndexToSet)
 
     @classmethod
     def updateLoop(cls):
@@ -220,19 +229,24 @@ class CommandWidget(QWidget):
         self.delayEdit = TimeEdit(self)
         self.radioButton = QRadioButton(self)
         self.radioButton.clicked.connect(self.updateLoop)
+        self.radioButton.commandWidget = self
         self.buttonGroup.addButton(self.radioButton)
         self.deleteButton = DeleteButton(self, self.delete)
-        self.deleteButtonHider = QStackedWidget(self)
-        self.deleteButtonHider.addWidget(self.deleteButton)
-        self.deleteButtonHider.addWidget(QWidget(self))
+        self.hider = QStackedWidget(self)
+        self.hiderWidget = QWidget(self)
+        hiderLayout = QHBoxLayout(self.hiderWidget)
+        hiderLayout.setContentsMargins(0, 0, 0, 0)
+        hiderLayout.addWidget(self.radioButton)
+        hiderLayout.addWidget(self.deleteButton)
+        self.hider.addWidget(self.hiderWidget)
+        self.hider.addWidget(QWidget(self))
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.colorLabel)
         layout.addWidget(self.morphEdit)
         layout.addWidget(self.delayEdit)
-        layout.addWidget(self.radioButton)
-        layout.addWidget(self.deleteButtonHider)
-        for (h, w) in (tuple(layout.itemAt(i).widget() for layout in (self.headerLayout, layout)) for i in xrange(layout.count())):
+        layout.addWidget(self.hider)
+        for (h, w) in zip(widgets(self.headerLayout), widgets(layout)):
             if not w.toolTip() and hasattr(h, 'text'):
                 setTip(w, h.text())
         self.setCorrectSize()
@@ -266,11 +280,11 @@ class CommandWidget(QWidget):
         return self.radioButton.isChecked()
 
     def isInLoop(self):
-        return self.commandsLayout.indexOf(self) >= self.commandsLayout.indexOf(self.buttonGroup.checkedButton().parentWidget())
+        return self.commandsLayout.indexOf(self) >= self.commandsLayout.indexOf(self.buttonGroup.checkedButton().commandWidget)
 
     @classmethod
     def hasLoop(cls):
-        return not cls.buttonGroup.checkedButton().parentWidget().isLast()
+        return not cls.buttonGroup.checkedButton().commandWidget.isLast()
 
     def setLoopIcon(self):
         self.radioButton.setIcon(QIcon('images/%s.png' % ( \
@@ -286,7 +300,7 @@ class CommandWidget(QWidget):
         self.colorLabel.setCorrectSize(size)
         self.deleteButton.setCorrectSize(size)
         self.radioButton.setFixedWidth(size + self.radioButton.icon().actualSize(QSize(100, 100)).width())
-        self.deleteButtonHider.setFixedSize(size, size)
+        #self.hider.setFixedSize(self.hiderWidget.size())
         return size
 
     def setColor(self, color):
@@ -311,25 +325,27 @@ class InsertCommandButton(QToolButton):
     def configure(cls, parentWidget):
         cls.parentWidget = parentWidget
         cls.insertCommandLayout = parentWidget.layout()
+        cls.TAIL_SIZE = 1
+        cls.HEADER_SIZE = cls.insertCommandLayout.count() - cls.TAIL_SIZE
 
     @classmethod
     def deleteExtraButtons(cls, count):
-        for _i in xrange(count + 1, cls.insertCommandLayout.count() - 1):
-            cls.insertCommandLayout.itemAt(cls.insertCommandLayout.count() - 2).widget().setParent(None)
+        for button in widgets(cls.insertCommandLayout, cls.HEADER_SIZE + count + 1, cls.TAIL_SIZE):
+            button.setParent(None)
 
     @classmethod
     def adjustSizes(cls, lineSize, headerSize):
         if lineSize > cls.correctHeight:
             cls.correctHeight = lineSize
             cls.insertCommandLayout.setContentsMargins(0, headerSize - lineSize // 2, 0, 0)
-            for i in xrange(cls.insertCommandLayout.count() - 1):
-                cls.insertCommandLayout.itemAt(i).widget().setCorrectSize(lineSize)
+            for button in widgets(cls.insertCommandLayout, cls.HEADER_SIZE, cls.TAIL_SIZE):
+                button.setCorrectSize(lineSize)
 
     def __init__(self):
         QToolButton.__init__(self, self.parentWidget)
         self.setIcon(QIcon('images/add.png'))
         setTip(self, "Insert command")
-        self.index = self.insertCommandLayout.count() - 1
+        self.index = self.insertCommandLayout.count() - self.TAIL_SIZE
         self.clicked.connect(self.addCommand)
         self.insertCommandLayout.insertWidget(self.index, self)
         self.setCorrectSize()

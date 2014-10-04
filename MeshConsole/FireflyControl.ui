@@ -150,7 +150,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="radioButtonHeader">
+               <widget class="QLabel" name="loopHeader">
                 <property name="font">
                  <font>
                   <weight>75</weight>
@@ -161,9 +161,6 @@
                  <string>Loop</string>
                 </property>
                </widget>
-              </item>
-              <item>
-               <widget class="QWidget" name="deleteButtonHeader" native="true"/>
               </item>
              </layout>
             </widget>
