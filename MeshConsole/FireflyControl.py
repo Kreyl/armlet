@@ -173,17 +173,23 @@ class CommandWidget(QWidget):
         cls.headerWidget = cls.commandsLayout.itemAt(0).widget()
         cls.headerLayout = cls.headerWidget.layout()
         cls.buttonGroup = QButtonGroup(parentWidget)
+        cls.TAIL_SIZE = 1
+        cls.HEADER_SIZE = cls.commandsLayout.count() - cls.TAIL_SIZE
 
     @classmethod
     def setDeleteButtons(cls):
-        widgetCount = cls.commandsLayout.count() - 2
-        indexToSet = widgetCount < 2
-        for i in xrange(1, widgetCount + 1):
-            cls.commandsLayout.itemAt(i).widget().deleteButtonHider.setCurrentIndex(indexToSet)
+        deleteButtonHiderIndexToSet = cls.numCommands() < 2
+        for command in cls.commands():
+            command.deleteButtonHider.setCurrentIndex(deleteButtonHiderIndexToSet)
 
     @classmethod
-    def adjustSizesAndTips(cls, size):
-        if cls.sizeDidntChange < 2: # This is a hack, but I couldn't find a better way to coordinate technically independent layouts.
+    def updateLoop(cls):
+        for command in cls.commands():
+            command.setLoopIcon()
+
+    @classmethod
+    def adjustSizes(cls, size):
+        if cls.sizeDidntChange < 2: # This is a hack, but I couldn't find a better way to coordinate technically independent layouts
             cls.correctHeight = size
             sampleLayout = cls.commandsLayout.itemAt(1).widget().layout()
             count = sampleLayout.count()
@@ -191,11 +197,9 @@ class CommandWidget(QWidget):
             cls.headerLayout.setContentsMargins(sampleLayout.contentsMargins())
             widthChanged = False
             for (h, w) in (tuple(layout.itemAt(i).widget() for layout in (cls.headerLayout, sampleLayout)) for i in xrange(count)):
-                if h.width() < w.width():
+                if h.width() != w.width():
                     widthChanged = True
                     h.setFixedWidth(w.width())
-                if not w.toolTip() and hasattr(h, 'text'):
-                    setTip(w, h.text())
             if widthChanged:
                 cls.sizeDidntChange = 0
             else:
@@ -210,31 +214,67 @@ class CommandWidget(QWidget):
         self.colorLabel = SelectColorLabel(self, self.setColor)
         self.morphEdit = TimeEdit(self)
         self.delayEdit = TimeEdit(self)
+        self.radioButton = QRadioButton(self)
+        self.radioButton.clicked.connect(self.updateLoop)
+        self.buttonGroup.addButton(self.radioButton)
         self.deleteButton = DeleteButton(self, self.delete)
         self.deleteButtonHider = QStackedWidget(self)
         self.deleteButtonHider.addWidget(self.deleteButton)
         self.deleteButtonHider.addWidget(QWidget(self))
-        self.radioButton = QRadioButton(self)
-        self.buttonGroup.addButton(self.radioButton)
         layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 3, 5, 3)
         layout.addWidget(self.colorLabel)
         layout.addWidget(self.morphEdit)
         layout.addWidget(self.delayEdit)
-        layout.addWidget(self.deleteButtonHider)
-        layout.setContentsMargins(0, 3, 5, 3)
         layout.addWidget(self.radioButton)
+        layout.addWidget(self.deleteButtonHider)
+        for (h, w) in (tuple(layout.itemAt(i).widget() for layout in (self.headerLayout, layout)) for i in xrange(layout.count())):
+            if not w.toolTip() and hasattr(h, 'text'):
+                setTip(w, h.text())
         self.setCorrectSize()
-        lastIndex = self.commandsLayout.count() - 1
-        index = index + 1 if index != None else lastIndex
-        checkedButton = self.buttonGroup.checkedButton()
-        if not checkedButton or index == lastIndex and self.commandsLayout.indexOf(checkedButton.parentWidget()) == lastIndex - 1:
+        lastIndex = self.commandsLayout.count() - self.TAIL_SIZE
+        insertIndex = index + self.HEADER_SIZE if index != None else lastIndex
+        if not self.buttonGroup.checkedButton() or insertIndex == lastIndex and not self.hasLoop():
             self.radioButton.setChecked(True)
-        self.commandsLayout.insertWidget(index, self)
-        print self.commandsLayout.itemAt(self.commandsLayout.count() - 1)
+        self.commandsLayout.insertWidget(insertIndex, self)
+        self.updateLoop()
         self.setDeleteButtons()
 
+    @classmethod
+    def numCommands(cls):
+        return cls.commandsLayout.count() - cls.HEADER_SIZE - cls.TAIL_SIZE
+
+    @classmethod
+    def commands(cls): # generator
+        for i in xrange(cls.HEADER_SIZE, cls.HEADER_SIZE + cls.numCommands()):
+            yield cls.commandsLayout.itemAt(i).widget()
+
+    def isFirst(self):
+        return self.commandsLayout.indexOf(self) == self.HEADER_SIZE
+
+    def isLast(self):
+        return self.commandsLayout.indexOf(self) == self.commandsLayout.count() - 1 - self.TAIL_SIZE
+
+    def isLoopStart(self):
+        return self.isLast()
+
+    def isLoopEnd(self):
+        return self.radioButton.isChecked()
+
+    def isInLoop(self):
+        return self.commandsLayout.indexOf(self) >= self.commandsLayout.indexOf(self.buttonGroup.checkedButton().parentWidget())
+
+    @classmethod
+    def hasLoop(cls):
+        return not cls.buttonGroup.checkedButton().parentWidget().isLast()
+
+    def setLoopIcon(self):
+        self.radioButton.setIcon(QIcon('images/%s.png' % ( \
+                ('noloop' if self.isLoopStart() else 'loopend') if self.isLoopEnd() else \
+                'loopstart' if self.isLoopStart() else 'inloop' if self.isInLoop() else 'outofloop')))
+
     def resizeEvent(self, event):
-        self.adjustSizesAndTips(self.setCorrectSize())
+        self.adjustSizes(self.setCorrectSize())
         QWidget.resizeEvent(self, event)
 
     def setCorrectSize(self):
@@ -249,12 +289,13 @@ class CommandWidget(QWidget):
     def delete(self):
         if self.radioButton.isChecked():
             index = self.commandsLayout.indexOf(self)
-            index = index - 1 if index > 1 else index + 1
+            index = index - 1 if self.isLast() else index + 1
             self.commandsLayout.itemAt(index).widget().radioButton.setChecked(True)
         self.buttonGroup.removeButton(self.radioButton)
         self.setParent(None)
+        self.updateLoop()
         self.setDeleteButtons()
-        InsertCommandButton.deleteExtraButtons(self.commandsLayout.count() - 2)
+        InsertCommandButton.deleteExtraButtons(self.numCommands())
 
 class InsertCommandButton(QToolButton):
     insertCommandLayout = None
