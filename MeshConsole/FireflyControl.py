@@ -207,12 +207,12 @@ class CommandWidget(QWidget):
 
     @classmethod
     def updateProgram(cls):
-        commands = []
+        commands = tuple(command.command() for command in cls.commands())
+        program = ','.join(command for (_rgb, _morphLength, _editLength, command) in commands)
+        programLength = sum(morphLength + editLength for (_rgb, morphLength, editLength, _command) in commands)
         stops = []
-        for command in cls.commands():
-            commands.append(command.command())
-            # ToDo
-        cls.updateProgramCallback(','.join(commands),
+        # ToDo for command in cls.commands():
+        cls.updateProgramCallback(program,
                 cls.GRADIENT_TEMPLATE % ' '.join(cls.GRADIENT_STOP % stop for stop in stops))
 
     @classmethod
@@ -317,7 +317,6 @@ class CommandWidget(QWidget):
         self.colorLabel.setCorrectSize(size)
         self.deleteButton.setCorrectSize(size)
         self.radioButton.setFixedWidth(size + self.radioButton.icon().actualSize(QSize(100, 100)).width())
-        #self.hider.setFixedSize(self.hiderWidget.size())
         return size
 
     def setColor(self, color):
@@ -341,7 +340,8 @@ class CommandWidget(QWidget):
             fields.extend((UART_FF_WAIT, self.delayEdit.text()))
         if self.isLoopStart() and not self.isLoopEnd():
             fields.extend((UART_FF_GOTO, self.loopEndIndex() - self.HEADER_SIZE))
-        return ','.join(str(f) for f in fields)
+        return ((self.color.red(), self.color.green(), self.color.blue()),
+                int(self.morphEdit.text()), int(self.delayEdit.text()), ','.join(str(f) for f in fields))
 
 class InsertCommandButton(QToolButton):
     insertCommandLayout = None
