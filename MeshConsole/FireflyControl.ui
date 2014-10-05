@@ -226,11 +226,11 @@
     </item>
     <item row="2" column="0" colspan="2">
      <widget class="QSlider" name="graphSlider">
+      <property name="styleSheet">
+       <string notr="true">border: 1px solid black</string>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="tickInterval">
-       <number>999999999</number>
       </property>
      </widget>
     </item>

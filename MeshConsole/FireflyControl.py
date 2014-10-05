@@ -3,6 +3,7 @@
 # Firefly Control
 #
 from getopt import getopt
+from itertools import chain
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
 from sys import argv, exit # pylint: disable=W0622
 from traceback import format_exc
@@ -35,6 +36,7 @@ WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
 # ToDo:
 # - Optimize resize events with sizes updating
 # - Open and Save commands
+# - Hide "fade in" for first command, and "stay for" for last one (if there's no loop)
 # - Set LED color immediately when color is selected in GUI
 #
 
@@ -175,8 +177,8 @@ class DeleteButton(QToolButton):
         self.setFixedSize(size, size)
 
 class CommandWidget(QWidget):
-    GRADIENT_TEMPLATE = 'background: qlineargradient(x1:0, y1:0, x2:1, y2:0, %s)'
-    GRADIENT_STOP = 'stop:%f rgb(%d, %d, %d)'
+    GRADIENT_TEMPLATE = 'border: 1px solid; background: qlineargradient(x1:0, x2:1, %s)'
+    GRADIENT_STOP = 'stop: %f rgb(%d, %d, %d)'
 
     commandsLayout = None
     correctHeight = None
@@ -207,12 +209,24 @@ class CommandWidget(QWidget):
 
     @classmethod
     def updateProgram(cls):
-        commands = tuple(command.command() for command in cls.commands())
-        program = ','.join(command for (_rgb, _morphLength, _editLength, command) in commands)
-        programLength = sum(morphLength + editLength for (_rgb, morphLength, editLength, _command) in commands)
-        stops = []
-        # ToDo for command in cls.commands():
-        cls.updateProgramCallback(program,
+        commands = []
+        programCommands = []
+        programLength = 1.0
+        for (rgb, morphLength, delayLength, command) in (c.command() for c in chain(cls.commands(), cls.loopCommands())):
+            commands.append((rgb, morphLength or 1, delayLength or 1))
+            programCommands.append(command)
+            programLength += (morphLength or 1) + (delayLength or 1)
+        dx = programLength / 1000
+        for (rgb, morphLength, delayLength) in commands:
+            programLength += max(0, dx - morphLength) + max(0, dx - delayLength)
+        stops = [(0, 0, 0, 0),]
+        position = 0.0
+        for (rgb, morphLength, delayLength) in commands:
+            position += max(morphLength, dx)
+            stops.append((position / programLength,) + rgb)
+            position += max(delayLength, dx)
+            stops.append((position / programLength,) + rgb)
+        cls.updateProgramCallback(','.join(programCommands),
                 cls.GRADIENT_TEMPLATE % ' '.join(cls.GRADIENT_STOP % stop for stop in stops))
 
     @classmethod
@@ -278,6 +292,13 @@ class CommandWidget(QWidget):
     @classmethod
     def commands(cls): # generator
         for i in xrange(cls.HEADER_SIZE, cls.HEADER_SIZE + cls.numCommands()):
+            yield cls.commandsLayout.itemAt(i).widget()
+
+    @classmethod
+    def loopCommands(cls): # generator
+        if not cls.buttonGroup.checkedButton():
+            return
+        for i in xrange(cls.loopEndIndex(), cls.HEADER_SIZE + cls.numCommands()):
             yield cls.commandsLayout.itemAt(i).widget()
 
     @classmethod
