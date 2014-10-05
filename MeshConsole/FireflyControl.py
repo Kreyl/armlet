@@ -175,6 +175,9 @@ class DeleteButton(QToolButton):
         self.setFixedSize(size, size)
 
 class CommandWidget(QWidget):
+    GRADIENT_TEMPLATE = 'background: qlineargradient(x1:0, y1:0, x2:1, y2:0, %s)'
+    GRADIENT_STOP = 'stop:%f rgb(%d, %d, %d)'
+
     commandsLayout = None
     correctHeight = None
     sizeDidntChange = None
@@ -204,7 +207,13 @@ class CommandWidget(QWidget):
 
     @classmethod
     def updateProgram(cls):
-        cls.updateProgramCallback(','.join(widget.command() for widget in cls.commands()))
+        commands = []
+        stops = []
+        for command in cls.commands():
+            commands.append(command.command())
+            # ToDo
+        cls.updateProgramCallback(','.join(commands),
+                cls.GRADIENT_TEMPLATE % ' '.join(cls.GRADIENT_STOP % stop for stop in stops))
 
     @classmethod
     def adjustSizes(cls, size):
@@ -430,8 +439,9 @@ class FireflyControl(QMainWindow):
         else:
             self.show()
 
-    def updateProgram(self, program):
+    def updateProgram(self, program, gradient):
         self.programEdit.setText(program)
+        self.graphSlider.setStyleSheet(gradient)
 
     def processConnect(self, pong): # pylint: disable=W0613
         self.logger.info("connected device detected")
