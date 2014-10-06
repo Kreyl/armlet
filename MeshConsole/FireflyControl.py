@@ -4,7 +4,7 @@
 #
 from collections import deque
 from getopt import getopt
-from itertools import chain
+from itertools import chain, islice
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
 from os.path import basename
 from sys import argv, exit # pylint: disable=W0622
@@ -21,7 +21,8 @@ except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
 from UARTTextProtocol import Command, COMMAND_MARKER
-from UARTTextCommands import ackResponse, ffGetCommand, ffSetCommand, ffResponse, UART_FF_RGB, UART_FF_WAIT, UART_FF_GOTO
+from UARTTextCommands import ackResponse, ffGetCommand, ffSetCommand, ffResponse
+from UARTTextCommands import UART_FF_RGB, UART_FF_WAIT, UART_FF_GOTO, UART_FF_LIGHT
 from SerialPort import SerialPort, DT, TIMEOUT
 
 LONG_DATETIME_FORMAT = 'yyyy.MM.dd hh:mm:ss'
@@ -48,6 +49,11 @@ WINDOW_TITLE = '%s :: %s%s'
 
 WINDOW_SIZE = 2.0 / 3
 WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
+
+MAX_INT = 2 ** 31 - 1
+
+MIN_COLOR = 0
+MAX_COLOR = 255
 
 #
 # ToDo:
@@ -163,17 +169,17 @@ class SelectColorLabel(QLabel):
             self.setColor(previousColor)
 
 class TimeEdit(QLineEdit):
-    MAX_VALUE = 2 ** 31 - 1
+    MAX_VALUE = MAX_INT
     MAX_LENGTH = len(str(MAX_VALUE))
 
-    def __init__(self, parent, callback = None):
+    def __init__(self, parent, callback = None, initialValue = None):
         QLineEdit.__init__(self, parent)
         self.setAlignment(Qt.AlignRight)
         self.setMaxLength(self.MAX_LENGTH)
         self.setValidator(QIntValidator(0, self.MAX_VALUE))
         self.setText(str(self.MAX_VALUE))
         fixWidgetSize(self, 1.4)
-        self.setText(str(0))
+        self.setText(str(initialValue or 0))
         if callback:
             self.textEdited.connect(callback)
 
@@ -239,6 +245,103 @@ class CommandWidget(QWidget):
                 cls.GRADIENT_TEMPLATE % ' '.join(cls.GRADIENT_STOP % stop for stop in stops))
 
     @classmethod
+    def parseProgram(cls, source):
+        def parseInt(words, index, minValue = 0, maxValue = MAX_INT):
+            try:
+                ret = float(words[index])
+                if ret % 1:
+                    raise ValueError()
+                ret = int(ret)
+                if not minValue <= ret <= maxValue:
+                    raise ValueError()
+            except ValueError:
+                raise ValueError("Bad program data at word %d: expected a %d..%d integer" % (index, minValue, maxValue))
+            return ret
+
+        def parseColor(words, index):
+            return parseInt(words, index, MIN_COLOR, MAX_COLOR)
+
+        words = []
+        for line in source:
+            words.extend(w.lower() for w in (w.strip() for w in line.strip().split('#')[0].split(',')) if w)
+        if not words:
+            raise ValueError("No commands found in the file")
+        commands = []
+        index = 0
+        numCommands = 0
+        gotoPosition = None
+        conditionsPresent = False
+        positionsToVerify = []
+        while index < len(words):
+            if words[index] == UART_FF_RGB:
+                if len(words) < index + 5:
+                    raise ValueError("Abrupt program end")
+                index += 1
+                r = parseColor(words, index)
+                index += 1
+                g = parseColor(words, index)
+                index += 1
+                b = parseColor(words, index)
+                index += 1
+                morphLength = parseInt(words, index)
+                commands.append([r, g, b, morphLength, 0, numCommands])
+            elif words[index] == UART_FF_WAIT:
+                if len(words) < index + 2:
+                    raise ValueError("Abrupt program end")
+                if not commands:
+                    commands.append([0, 0, 0, 0, 0, 0])
+                index += 1
+                commands[-1][4] += parseInt(words, index)
+            elif words[index] == UART_FF_GOTO:
+                if len(words) < index + 2:
+                    raise ValueError("Abrupt program end")
+                if conditionsPresent:
+                    index += 1
+                    positionsToVerify.append(index)
+                else:
+                    if len(words) > index + 2:
+                        raise ValueError("Unexpected program data at word %d after GOTO command" % (index + 2))
+                    if not commands:
+                        raise ValueError("Unexpected GOTO command at the start of the program")
+                    index += 1
+                    gotoPosition = parseInt(words, index, 0, numCommands - 1)
+            elif words[index] == UART_FF_LIGHT:
+                if len(words) < index + 3:
+                    raise ValueError("Abrupt program end")
+                index += 1
+                _light = parseInt(words, index)
+                index += 1
+                positionsToVerify.append(index)
+                conditionsPresent = True
+            numCommands += 1
+            index += 1
+        for index in positionsToVerify:
+            parseInt(words, index, 0, numCommands - 1) # verify jump targets
+        if not conditionsPresent and gotoPosition:
+            for (index, command) in enumerate(commands):
+                if command[-1] == gotoPosition:
+                    command[-1] = True
+                    break
+                if command[-1] > gotoPosition:
+                    raise ValueError("GOTO command targeted to a non-color command")
+        for command in tuple(cls.commands()):
+            command.delete()
+        if conditionsPresent:
+            # ToDo
+            return ','.join(words)
+        else:
+            gotoCommand = None
+            for (r, g, b, morphLength, delayLength, gotoHere) in commands:
+                commandWidget = CommandWidget(QColor(r, g, b), morphLength, delayLength)
+                if gotoHere is True:
+                    gotoCommand = commandWidget
+                InsertCommandButton()
+            if gotoCommand:
+                gotoCommand.radioButton.setChecked(True)
+            cls.updateLoop()
+            cls.updateDeleteButtons()
+
+    @classmethod
     def adjustSizes(cls, size):
         if cls.sizeDidntChange < 2: # This is a hack, but I couldn't find a better way to coordinate technically independent layouts
             cls.correctHeight = size
@@ -257,12 +360,12 @@ class CommandWidget(QWidget):
             command.setCorrectSize()
         InsertCommandButton.adjustSizes(size, cls.headerWidget.height() + cls.commandsLayout.spacing())
 
-    def __init__(self, index = None):
+    def __init__(self, color = None, morphLength = None, delayLength = None, index = None):
         QWidget.__init__(self, self.parentWidget)
         self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        self.colorLabel = SelectColorLabel(self, self.setColor)
-        self.morphEdit = TimeEdit(self, self.updateProgram)
-        self.delayEdit = TimeEdit(self, self.updateProgram)
+        self.colorLabel = SelectColorLabel(self, self.setColor, color)
+        self.morphEdit = TimeEdit(self, self.updateProgram, morphLength)
+        self.delayEdit = TimeEdit(self, self.updateProgram, delayLength)
         self.radioButton = QRadioButton(self)
         self.radioButton.clicked.connect(self.updateLoop)
         self.radioButton.commandWidget = self
@@ -357,7 +460,8 @@ class CommandWidget(QWidget):
         if self.isLoopEnd():
             index = self.commandsLayout.indexOf(self)
             index = index - 1 if self.isLast() else index + 1
-            self.commandsLayout.itemAt(index).widget().radioButton.setChecked(True)
+            if index >= self.HEADER_SIZE:
+                self.commandsLayout.itemAt(index).widget().radioButton.setChecked(True)
         self.buttonGroup.removeButton(self.radioButton)
         self.setParent(None)
         self.updateLoop()
@@ -369,7 +473,10 @@ class CommandWidget(QWidget):
         if int(self.delayEdit.text()):
             fields.extend((UART_FF_WAIT, self.delayEdit.text()))
         if self.isLoopStart() and not self.isLoopEnd():
-            fields.extend((UART_FF_GOTO, self.loopEndIndex() - self.HEADER_SIZE))
+            targetIndex = 0
+            for command in islice(self.commands(), 0, self.loopEndIndex() - self.HEADER_SIZE):
+                targetIndex += 1 + bool(int(command.delayEdit.text()))
+            fields.extend((UART_FF_GOTO, targetIndex))
         return ((self.color.red(), self.color.green(), self.color.blue()),
                 int(self.morphEdit.text()), int(self.delayEdit.text()), ','.join(str(f) for f in fields))
 
@@ -412,7 +519,7 @@ class InsertCommandButton(QToolButton):
             self.setFixedHeight(size)
 
     def addCommand(self):
-        CommandWidget(self.index)
+        CommandWidget(index = self.index)
         InsertCommandButton()
 
 class FireflyControl(QMainWindow):
@@ -484,23 +591,17 @@ class FireflyControl(QMainWindow):
         pass
 
     def openFile(self):
-        # ToDo: Append program name to program title bar
         fileName = QFileDialog.getOpenFileName(self, "Open program", self.currentDirectory, FILE_FILTER)
         if not fileName:
             return
-        words = []
         fileName = unicode(fileName)
         try:
             with open(fileName) as f:
-                for line in f:
-                    words.extend(w for w in (w.strip() for w in line.strip().split('#')[0].split(',')) if w)
-            if not words:
-                raise # ToDo Specify error details
-            # ToDo: process words
-            print words
-            self.fileName = fileName
+                CommandWidget.parseProgram(f)
         except:
             raise # ToDo: Do something with errors
+        self.fileName = fileName
+        self.updateWindowTitle(False)
 
     def openRecentFile(self):
         pass
@@ -525,7 +626,7 @@ class FireflyControl(QMainWindow):
         self.saveFile(True)
 
     def updateProgram(self, program, gradient, programChanged = True):
-        if program != self.programEdit.text():
+        if program != self.programEdit.text(): # ToDo: Wouldn't it block window title update when program contents is accidentially the same?
             self.programEdit.setText(program)
             self.graphLabel.setStyleSheet(gradient)
             self.updateWindowTitle(programChanged)
