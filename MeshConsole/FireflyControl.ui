@@ -10,7 +10,7 @@
     <normaloff>images/icon.png</normaloff>images/icon.png</iconset>
   </property>
   <widget class="QWidget" name="mainWidget">
-   <layout class="QGridLayout" name="mainLayout" rowstretch="1,0,0,0" columnstretch="0,1">
+   <layout class="QGridLayout" name="mainLayout" rowstretch="1,0,0,0,0,0" columnstretch="0,1">
     <item row="0" column="0">
      <widget class="VerticalScrollArea" name="programScrollArea">
       <property name="frameShape">
@@ -26,7 +26,7 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <layout class="QHBoxLayout" name="programmingLayout">
+       <layout class="QHBoxLayout" name="scrollLayout">
         <property name="margin">
          <number>0</number>
         </property>
@@ -40,11 +40,7 @@
             <number>0</number>
            </property>
            <item>
-            <spacer name="insertCommandSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-            </spacer>
+            <widget class="QLabel" name="insertCommandSpacer"/>
            </item>
           </layout>
          </widget>
@@ -60,9 +56,9 @@
            </property>
            <item>
             <widget class="QWidget" name="commandsHeaderWidget" native="true">
-             <layout class="QHBoxLayout" name="programHeaderLayout">
+             <layout class="QHBoxLayout" name="commandsHeaderLayout">
               <item>
-               <widget class="QWidget" name="selectColorHeader" native="true"/>
+               <widget class="QLabel" name="selectColorHeader"/>
               </item>
               <item>
                <widget class="QLabel" name="morphHeader">
@@ -107,11 +103,7 @@
             </widget>
            </item>
            <item>
-            <spacer name="commandsSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-            </spacer>
+            <widget class="QLabel" name="commandsSpacer"/>
            </item>
           </layout>
          </widget>
@@ -120,7 +112,7 @@
       </widget>
      </widget>
     </item>
-    <item row="0" column="1">
+    <item row="0" column="1" rowspan="3">
      <widget class="QWidget" name="consoleWidget" native="true">
       <layout class="QVBoxLayout" name="consoleLayout">
        <property name="leftMargin">
@@ -145,7 +137,7 @@
          </property>
          <property name="font">
           <font>
-           <family>Courier, Courier New, monospace</family>
+           <family>Courier New, Courier, monospace</family>
            <pointsize>7</pointsize>
           </font>
          </property>
@@ -164,77 +156,178 @@
      </widget>
     </item>
     <item row="1" column="0">
+     <widget class="Line" name="horizontalLine"/>
+    </item>
+    <item row="2" column="0" rowspan="2">
      <layout class="QHBoxLayout" name="controlLayout">
       <item>
-       <widget class="CompactButton" name="resetButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+       <widget class="QGroupBox" name="onChangeBox">
+        <property name="title">
+         <string>On change</string>
         </property>
-        <property name="statusTip">
-         <string>Reset connection</string>
-        </property>
-        <property name="text">
-         <string>Reset</string>
-        </property>
+        <layout class="QVBoxLayout" name="onChangeLayout" stretch="0,0,0,1">
+         <item>
+          <widget class="QRadioButton" name="onChangeDoNothingButton">
+           <property name="text">
+            <string>Do nothing</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="onChangeSetColorButton">
+           <property name="text">
+            <string>Set color</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="onChangeSetProgramButton">
+           <property name="text">
+            <string>Set program</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="onChangeSpacer"/>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
-       <widget class="PortLabel" name="portLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+       <widget class="QGroupBox" name="onConnectBox">
+        <property name="title">
+         <string>On connect</string>
         </property>
-        <property name="minimumSize">
-         <size>
-          <width>65</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="statusTip">
-         <string>Current connected port</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background: rgb(192,192,192)</string>
-        </property>
-        <property name="text">
-         <string>No COM</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
+        <layout class="QVBoxLayout" name="onConnectLayout" stretch="0,0,0,0,1">
+         <item>
+          <widget class="QRadioButton" name="onConnectDoNothingButton">
+           <property name="text">
+            <string>Do nothing</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="onConnectSetColorButton">
+           <property name="text">
+            <string>Set color</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="onConnectSetProgramButton">
+           <property name="text">
+            <string>Set program</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="onConnectGetProgramButton">
+           <property name="text">
+            <string>Get program</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="onConnectSpacer"/>
+         </item>
+        </layout>
        </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="buttonLayout">
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item>
+         <widget class="PortLabel" name="portLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="statusTip">
+           <string>Current connected port</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background: rgb(192,192,192)</string>
+          </property>
+          <property name="text">
+           <string>No COM</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="resetButton">
+          <property name="statusTip">
+           <string>Reset connection</string>
+          </property>
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="setColorButton">
+          <property name="text">
+           <string>Set color</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="setProgramButton">
+          <property name="text">
+           <string>Set program</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="getProgramButton">
+          <property name="text">
+           <string>Get program</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
-    <item row="1" column="1">
+    <item row="3" column="1">
      <widget class="ConsoleEdit" name="consoleEdit">
       <property name="placeholderText">
        <string>Enter console command here</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="0" colspan="2">
-     <widget class="QSlider" name="graphSlider">
+    <item row="4" column="0" colspan="2">
+     <widget class="QLabel" name="graphLabel">
       <property name="styleSheet">
        <string notr="true">border: 1px solid black</string>
       </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
      </widget>
     </item>
-    <item row="3" column="0" colspan="2">
+    <item row="5" column="0" colspan="2">
      <widget class="QLineEdit" name="programEdit">
       <property name="readOnly">
        <bool>true</bool>
@@ -246,31 +339,100 @@
   <widget class="QMenuBar" name="menuBar">
    <widget class="QMenu" name="fileMenu">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
+    <addaction name="newAction"/>
+    <addaction name="openAction"/>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
+    <addaction name="saveAction"/>
+    <addaction name="saveAsAction"/>
+    <addaction name="separator"/>
     <addaction name="quitAction"/>
    </widget>
-   <widget class="QMenu" name="menuHelp">
+   <widget class="QMenu" name="helpMenu">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="aboutAction"/>
    </widget>
    <addaction name="fileMenu"/>
-   <addaction name="menuHelp"/>
+   <addaction name="helpMenu"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="quitAction">
+  <action name="newAction">
    <property name="text">
-    <string>Quit</string>
+    <string>&amp;New</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new program</string>
    </property>
    <property name="statusTip">
-    <string>Quit</string>
+    <string>Create new program</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="openAction">
+   <property name="text">
+    <string>&amp;Open...</string>
+   </property>
+   <property name="toolTip">
+    <string>Open a program</string>
+   </property>
+   <property name="statusTip">
+    <string>Open a program</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="saveAction">
+   <property name="text">
+    <string>&amp;Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Save current program</string>
+   </property>
+   <property name="statusTip">
+    <string>Save current program</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="saveAsAction">
+   <property name="text">
+    <string>Save &amp;As...</string>
+   </property>
+   <property name="toolTip">
+    <string>Save current program to a new file</string>
+   </property>
+   <property name="statusTip">
+    <string>Save current program to a new file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="quitAction">
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+   <property name="toolTip">
+    <string>Quit application</string>
+   </property>
+   <property name="statusTip">
+    <string>Quit application</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="aboutAction">
    <property name="text">
-    <string>About</string>
+    <string>&amp;About</string>
    </property>
    <property name="statusTip">
     <string>About</string>
@@ -286,11 +448,6 @@
   <customwidget>
    <class>ConsoleEdit</class>
    <extends>QLineEdit</extends>
-   <header>FireflyControl</header>
-  </customwidget>
-  <customwidget>
-   <class>CompactButton</class>
-   <extends>QPushButton</extends>
    <header>FireflyControl</header>
   </customwidget>
   <customwidget>

@@ -103,11 +103,6 @@ class PortLabel(QLabel):
         self.setText(portName)
         self.setStyleSheet(self.savedStyleSheet + '; color: %s' % self.STATUS_COLORS.get(portStatus, 'gray'))
 
-class CompactButton(QPushButton):
-    def configure(self, callback, adjustment = 1.5):
-        fixWidgetSize(self, adjustment)
-        self.clicked.connect(callback)
-
 class ConsoleEdit(QLineEdit):
     def configure(self, callback):
         self.setStatusTip(self.placeholderText())
@@ -296,7 +291,7 @@ class CommandWidget(QWidget):
 
     @classmethod
     def loopCommands(cls): # generator
-        if not cls.buttonGroup.checkedButton():
+        if not cls.hasLoop():
             return
         for i in xrange(cls.loopEndIndex(), cls.HEADER_SIZE + cls.numCommands()):
             yield cls.commandsLayout.itemAt(i).widget()
@@ -322,7 +317,7 @@ class CommandWidget(QWidget):
 
     @classmethod
     def hasLoop(cls):
-        return not cls.buttonGroup.checkedButton().commandWidget.isLast()
+        return cls.buttonGroup.checkedButton() and not cls.buttonGroup.checkedButton().commandWidget.isLast()
 
     def setLoopIcon(self):
         self.radioButton.setIcon(QIcon('images/%s.png' % ( \
@@ -430,7 +425,7 @@ class FireflyControl(QMainWindow):
         self.setGeometry(width * WINDOW_POSITION, height * WINDOW_POSITION, width * WINDOW_SIZE, height * WINDOW_SIZE)
         # Configuring widgets
         self.portLabel.configure()
-        self.resetButton.configure(self.reset)
+        self.resetButton.clicked.connect(self.reset)
         self.consoleEdit.configure(self.consoleEnter)
         self.aboutDialog = AboutDialog(self.aboutAction.triggered)
         CommandWidget.configure(self.commandsWidget, self.updateProgram)
@@ -462,7 +457,7 @@ class FireflyControl(QMainWindow):
 
     def updateProgram(self, program, gradient):
         self.programEdit.setText(program)
-        self.graphSlider.setStyleSheet(gradient)
+        self.graphLabel.setStyleSheet(gradient)
 
     def processConnect(self, pong): # pylint: disable=W0613
         self.logger.info("connected device detected")
@@ -511,7 +506,6 @@ class FireflyControl(QMainWindow):
         data = self.consoleEdit.getInput()
         if data:
             self.lastCommandButton = None
-            self.highlightCommandButton()
             self.port.write(data)
 
     def closeEvent(self, _event):
@@ -522,7 +516,6 @@ class FireflyControl(QMainWindow):
         self.logger.info("reset")
         self.port.reset()
         self.lastCommandButton = None
-        self.highlightCommandButton()
 
     def saveSettings(self):
         settings = QSettings()
