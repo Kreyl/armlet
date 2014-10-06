@@ -6,6 +6,7 @@ from collections import deque
 from getopt import getopt
 from itertools import chain
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
+from os.path import basename
 from sys import argv, exit # pylint: disable=W0622
 from traceback import format_exc
 
@@ -42,6 +43,8 @@ FILE_TEMPLATE = '''\
 
 # End of program
 '''
+
+WINDOW_TITLE = '%s :: %s%s'
 
 WINDOW_SIZE = 2.0 / 3
 WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
@@ -434,10 +437,11 @@ class FireflyControl(QMainWindow):
         height = resolution.height()
         self.setGeometry(width * WINDOW_POSITION, height * WINDOW_POSITION, width * WINDOW_SIZE, height * WINDOW_SIZE)
         # Setting variables
-        self.programName = "New"
+        self.title = self.windowTitle()
         self.fileName = None
+        self.programChanged = False
         self.currentDirectory = '.'
-        self.recentFiles = deque((), 9) # pylint: disable=E1121 # ToDo: Update list and add actions to menu
+        self.recentFiles = deque((), 9) # ToDo: Update list and add actions to menu # pylint: disable=E1121
         # Configuring widgets
         self.portLabel.configure()
         self.resetButton.clicked.connect(self.reset)
@@ -485,6 +489,7 @@ class FireflyControl(QMainWindow):
         if not fileName:
             return
         words = []
+        fileName = unicode(fileName)
         try:
             with open(fileName) as f:
                 for line in f:
@@ -502,24 +507,36 @@ class FireflyControl(QMainWindow):
 
     def saveFile(self, saveAs = False):
         if saveAs or not self.fileName:
-            fileName = QFileDialog.getSaveFileName(self, "Save program as", self.currentDirectory, FILE_FILTER)
+            fileName = QFileDialog.getSaveFileName(self, "Save program as", self.fileName or 'New.ff', FILE_FILTER)
             if not fileName:
                 return
+            fileName = unicode(fileName)
         else:
             fileName = self.fileName
         try:
             with open(fileName, 'w') as f:
                 f.write(FILE_TEMPLATE % self.programEdit.text())
-            self.fileName = fileName
         except:
             raise # ToDo: Do something with errors
+        self.fileName = fileName
+        self.updateWindowTitle(False)
 
     def saveFileAs(self):
         self.saveFile(True)
 
-    def updateProgram(self, program, gradient):
-        self.programEdit.setText(program)
-        self.graphLabel.setStyleSheet(gradient)
+    def updateProgram(self, program, gradient, programChanged = True):
+        if program != self.programEdit.text():
+            self.programEdit.setText(program)
+            self.graphLabel.setStyleSheet(gradient)
+            self.updateWindowTitle(programChanged)
+
+    def updateWindowTitle(self, programChanged):
+        self.programChanged = self.isVisible() and programChanged
+        programName = basename(self.fileName or 'New')
+        dotIndex = programName.rfind('.')
+        if dotIndex > 0:
+            programName = programName[:dotIndex]
+        self.setWindowTitle(WINDOW_TITLE % (self.title, programName, '*' if self.programChanged else ''))
 
     def processConnect(self, pong): # pylint: disable=W0613
         self.logger.info("connected device detected")
