@@ -2,6 +2,7 @@
 #
 # Firefly Control
 #
+from collections import deque
 from getopt import getopt
 from itertools import chain
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
@@ -11,9 +12,9 @@ from traceback import format_exc
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import Qt, QCoreApplication, QDateTime, QObject, QSettings, QSize, pyqtSignal
-    from PyQt4.QtGui import QApplication, QDesktopWidget, QColorDialog, QDialog, QMainWindow
+    from PyQt4.QtGui import QApplication, QDesktopWidget, QColorDialog, QDialog, QFileDialog, QMainWindow
     from PyQt4.QtGui import QHBoxLayout, QScrollArea, QStackedWidget, QWidget
-    from PyQt4.QtGui import QButtonGroup, QIcon, QLabel, QLineEdit, QPushButton, QRadioButton, QToolButton
+    from PyQt4.QtGui import QButtonGroup, QIcon, QLabel, QLineEdit, QRadioButton, QToolButton
     from PyQt4.QtGui import QColor, QIntValidator, QSizePolicy
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
@@ -28,6 +29,19 @@ MAIN_UI_FILE_NAME = 'FireflyControl.ui'
 ABOUT_UI_FILE_NAME = 'AboutFC.ui'
 
 LOG_FILE_NAME = 'FireflyControl.log'
+
+FILE_FILTER = 'Firefly programs (*.ff);; All files(*)'
+
+FILE_TEMPLATE = '''\
+#
+# Ostranna CG http://ostranna.ru
+# Firefly program
+#
+
+%s
+
+# End of program
+'''
 
 WINDOW_SIZE = 2.0 / 3
 WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
@@ -114,10 +128,9 @@ class ConsoleEdit(QLineEdit):
         return ret
 
 class AboutDialog(QDialog):
-    def __init__(self, trigger):
+    def __init__(self):
         QDialog.__init__(self)
         uic.loadUi(ABOUT_UI_FILE_NAME, self)
-        trigger.connect(self.exec_)
 
 class SelectColorLabel(QLabel):
     def __init__(self, parent, callback = None, color = None):
@@ -205,11 +218,9 @@ class CommandWidget(QWidget):
     @classmethod
     def updateProgram(cls):
         commands = []
-        programCommands = []
         programLength = 1.0
-        for (rgb, morphLength, delayLength, command) in (c.command() for c in chain(cls.commands(), cls.loopCommands())):
+        for (rgb, morphLength, delayLength, _command) in (c.command() for c in chain(cls.commands(), cls.loopCommands())):
             commands.append((rgb, morphLength or 1, delayLength or 1))
-            programCommands.append(command)
             programLength += (morphLength or 1) + (delayLength or 1)
         dx = programLength / 1000
         for (rgb, morphLength, delayLength) in commands:
@@ -221,7 +232,7 @@ class CommandWidget(QWidget):
             stops.append((position / programLength,) + rgb)
             position += max(delayLength, dx)
             stops.append((position / programLength,) + rgb)
-        cls.updateProgramCallback(','.join(programCommands),
+        cls.updateProgramCallback(','.join(c.command()[-1] for c in cls.commands()),
                 cls.GRADIENT_TEMPLATE % ' '.join(cls.GRADIENT_STOP % stop for stop in stops))
 
     @classmethod
@@ -408,6 +419,7 @@ class FireflyControl(QMainWindow):
     def __init__(self, args):
         QMainWindow.__init__(self)
         uic.loadUi(MAIN_UI_FILE_NAME, self)
+        # Processing command line options
         self.emulated = False
         self.advanced = False
         (options, _parameters) = getopt(args, 'ae', ('advanced', 'emulated'))
@@ -416,18 +428,26 @@ class FireflyControl(QMainWindow):
                 self.advanced = True
             elif option in ('-e', '--emulated'):
                 self.emulated = True
-
-    def configure(self):
         # Setting window size
         resolution = QDesktopWidget().screenGeometry()
         width = resolution.width()
         height = resolution.height()
         self.setGeometry(width * WINDOW_POSITION, height * WINDOW_POSITION, width * WINDOW_SIZE, height * WINDOW_SIZE)
+        # Setting variables
+        self.programName = "New"
+        self.fileName = None
+        self.currentDirectory = '.'
+        self.recentFiles = deque((), 9) # pylint: disable=E1121 # ToDo: Update list and add actions to menu
         # Configuring widgets
         self.portLabel.configure()
         self.resetButton.clicked.connect(self.reset)
         self.consoleEdit.configure(self.consoleEnter)
-        self.aboutDialog = AboutDialog(self.aboutAction.triggered)
+        self.newAction.triggered.connect(self.newFile)
+        self.openAction.triggered.connect(self.openFile)
+        self.saveAction.triggered.connect(self.saveFile)
+        self.saveAsAction.triggered.connect(self.saveFileAs)
+        self.aboutDialog = AboutDialog()
+        self.aboutAction.triggered.connect(self.aboutDialog.exec_)
         CommandWidget.configure(self.commandsWidget, self.updateProgram)
         InsertCommandButton.configure(self.insertCommandWidget)
         InsertCommandButton().addCommand()
@@ -445,6 +465,7 @@ class FireflyControl(QMainWindow):
         self.logger.info("start")
         # Starting up!
         self.loadSettings()
+        # ToDo: Setup current directory and recent file name
         self.comConnect.connect(self.processConnect)
         self.comInput.connect(self.processInput)
         self.port = SerialPort(self.logger, ffGetCommand.prefix, ffResponse.prefix,
@@ -454,6 +475,47 @@ class FireflyControl(QMainWindow):
             self.showMaximized()
         else:
             self.show()
+
+    def newFile(self):
+        pass
+
+    def openFile(self):
+        # ToDo: Append program name to program title bar
+        fileName = QFileDialog.getOpenFileName(self, "Open program", self.currentDirectory, FILE_FILTER)
+        if not fileName:
+            return
+        words = []
+        try:
+            with open(fileName) as f:
+                for line in f:
+                    words.extend(w for w in (w.strip() for w in line.strip().split('#')[0].split(',')) if w)
+            if not words:
+                raise # ToDo Specify error details
+            # ToDo: process words
+            print words
+            self.fileName = fileName
+        except:
+            raise # ToDo: Do something with errors
+
+    def openRecentFile(self):
+        pass
+
+    def saveFile(self, saveAs = False):
+        if saveAs or not self.fileName:
+            fileName = QFileDialog.getSaveFileName(self, "Save program as", self.currentDirectory, FILE_FILTER)
+            if not fileName:
+                return
+        else:
+            fileName = self.fileName
+        try:
+            with open(fileName, 'w') as f:
+                f.write(FILE_TEMPLATE % self.programEdit.text())
+            self.fileName = fileName
+        except:
+            raise # ToDo: Do something with errors
+
+    def saveFileAs(self):
+        self.saveFile(True)
 
     def updateProgram(self, program, gradient):
         self.programEdit.setText(program)
@@ -564,8 +626,7 @@ class FireflyControl(QMainWindow):
 def main(args):
     try:
         application = QApplication(args)
-        fireflyControl = FireflyControl(args[1:]) # retain reference
-        fireflyControl.configure()
+        _fireflyControl = FireflyControl(args[1:]) # retain reference
         return application.exec_()
     except KeyboardInterrupt:
         pass
