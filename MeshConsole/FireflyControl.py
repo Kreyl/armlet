@@ -194,7 +194,8 @@ class DeleteButton(QToolButton):
         self.setFixedSize(size, size)
 
 class CommandWidget(QWidget):
-    GRADIENT_TEMPLATE = 'border: 1px solid; background: qlineargradient(x1:0, x2:1, %s)'
+    BASIC_STYLESHEET = 'border: 1px solid'
+    GRADIENT_TEMPLATE = 'background: qlineargradient(x1:0, x2:1, %s)'
     GRADIENT_STOP = 'stop: %f rgb(%d, %d, %d)'
 
     commandsLayout = None
@@ -202,11 +203,12 @@ class CommandWidget(QWidget):
     sizeDidntChange = None
 
     @classmethod
-    def configure(cls, parentWidget, updateProgramCallback):
+    def configure(cls, stackedWidget, parentWidget, updateProgramCallback):
+        cls.stackedWidget = stackedWidget
         cls.parentWidget = parentWidget
         cls.updateProgramCallback = updateProgramCallback
         cls.commandsLayout = parentWidget.layout()
-        cls.headerWidget = cls.commandsLayout.itemAt(0).widget()
+        cls.headerWidget = widgets(cls.commandsLayout).next()
         cls.headerLayout = cls.headerWidget.layout()
         cls.buttonGroup = QButtonGroup(parentWidget)
         cls.TAIL_SIZE = 1
@@ -219,13 +221,13 @@ class CommandWidget(QWidget):
             command.hider.setCurrentIndex(hiderIndexToSet)
 
     @classmethod
-    def updateLoop(cls):
+    def updateLoop(cls, programChanged = True):
         for command in cls.commands():
             command.setLoopIcon()
-        cls.updateProgram()
+        cls.updateProgram(programChanged)
 
     @classmethod
-    def updateProgram(cls):
+    def updateProgram(cls, programChanged = True):
         commands = []
         programLength = 1.0
         for (rgb, morphLength, delayLength, _command) in (c.command() for c in chain(cls.commands(), cls.loopCommands())):
@@ -242,10 +244,11 @@ class CommandWidget(QWidget):
             position += max(delayLength, dx)
             stops.append((position / programLength,) + rgb)
         cls.updateProgramCallback(','.join(c.command()[-1] for c in cls.commands()),
-                cls.GRADIENT_TEMPLATE % ' '.join(cls.GRADIENT_STOP % stop for stop in stops))
+                '; '.join((cls.BASIC_STYLESHEET, cls.GRADIENT_TEMPLATE % ' '.join(cls.GRADIENT_STOP % stop for stop in stops))),
+                programChanged)
 
     @classmethod
-    def parseProgram(cls, source):
+    def setupProgram(cls, source = None):
         def parseInt(words, index, minValue = 0, maxValue = MAX_INT):
             try:
                 ret = float(words[index])
@@ -262,10 +265,11 @@ class CommandWidget(QWidget):
             return parseInt(words, index, MIN_COLOR, MAX_COLOR)
 
         words = []
-        for line in source:
-            words.extend(w.lower() for w in (w.strip() for w in line.strip().split('#')[0].split(',')) if w)
-        if not words:
-            raise ValueError("No commands found in the file")
+        if source is not None:
+            for line in source:
+                words.extend(w.lower() for w in (w.strip() for w in line.strip().split('#')[0].split(',')) if w)
+            if not words:
+                raise ValueError("No commands found in the file")
         commands = []
         index = 0
         numCommands = 0
@@ -324,21 +328,25 @@ class CommandWidget(QWidget):
                     break
                 if command[-1] > gotoPosition:
                     raise ValueError("GOTO command targeted to a non-color command")
-        for command in tuple(cls.commands()):
-            command.delete()
+        cls.stackedWidget.setCurrentIndex(conditionsPresent)
         if conditionsPresent:
-            # ToDo
-            return ','.join(words)
+            cls.updateProgramCallback(','.join(words), cls.BASIC_STYLESHEET, False)
         else:
-            gotoCommand = None
-            for (r, g, b, morphLength, delayLength, gotoHere) in commands:
-                commandWidget = CommandWidget(QColor(r, g, b), morphLength, delayLength)
-                if gotoHere is True:
-                    gotoCommand = commandWidget
+            for command in tuple(cls.commands()):
+                command.delete(False)
+            if commands:
+                gotoCommand = None
+                for (r, g, b, morphLength, delayLength, gotoHere) in commands:
+                    commandWidget = CommandWidget(QColor(r, g, b), morphLength, delayLength, False)
+                    if gotoHere is True:
+                        gotoCommand = commandWidget
+                    InsertCommandButton()
+                if gotoCommand:
+                    gotoCommand.radioButton.setChecked(True)
+            else:
+                CommandWidget(programChanged = False)
                 InsertCommandButton()
-            if gotoCommand:
-                gotoCommand.radioButton.setChecked(True)
-            cls.updateLoop()
+            cls.updateLoop(False) # ToDo: Make this the only program update
             cls.updateDeleteButtons()
 
     @classmethod
@@ -360,7 +368,7 @@ class CommandWidget(QWidget):
             command.setCorrectSize()
         InsertCommandButton.adjustSizes(size, cls.headerWidget.height() + cls.commandsLayout.spacing())
 
-    def __init__(self, color = None, morphLength = None, delayLength = None, index = None):
+    def __init__(self, color = None, morphLength = None, delayLength = None, index = None, programChanged = True):
         QWidget.__init__(self, self.parentWidget)
         self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.colorLabel = SelectColorLabel(self, self.setColor, color)
@@ -394,7 +402,7 @@ class CommandWidget(QWidget):
         if not self.buttonGroup.checkedButton() or insertIndex == lastIndex and not self.hasLoop():
             self.radioButton.setChecked(True)
         self.commandsLayout.insertWidget(insertIndex, self)
-        self.updateLoop()
+        self.updateLoop(programChanged)
         self.updateDeleteButtons()
 
     @classmethod
@@ -403,15 +411,15 @@ class CommandWidget(QWidget):
 
     @classmethod
     def commands(cls): # generator
-        for i in xrange(cls.HEADER_SIZE, cls.HEADER_SIZE + cls.numCommands()):
-            yield cls.commandsLayout.itemAt(i).widget()
+        for w in widgets(cls.commandsLayout, cls.HEADER_SIZE, cls.TAIL_SIZE):
+            yield w
 
     @classmethod
     def loopCommands(cls): # generator
         if not cls.hasLoop():
             return
-        for i in xrange(cls.loopEndIndex(), cls.HEADER_SIZE + cls.numCommands()):
-            yield cls.commandsLayout.itemAt(i).widget()
+        for w in widgets(cls.commandsLayout, cls.loopEndIndex(), cls.TAIL_SIZE):
+            yield w
 
     @classmethod
     def loopEndIndex(cls):
@@ -456,7 +464,7 @@ class CommandWidget(QWidget):
         self.color = color
         self.updateProgram()
 
-    def delete(self):
+    def delete(self, programChanged = True):
         if self.isLoopEnd():
             index = self.commandsLayout.indexOf(self)
             index = index - 1 if self.isLast() else index + 1
@@ -464,7 +472,7 @@ class CommandWidget(QWidget):
                 self.commandsLayout.itemAt(index).widget().radioButton.setChecked(True)
         self.buttonGroup.removeButton(self.radioButton)
         self.setParent(None)
-        self.updateLoop()
+        self.updateLoop(programChanged)
         self.updateDeleteButtons()
         InsertCommandButton.deleteExtraButtons(self.numCommands())
 
@@ -559,9 +567,10 @@ class FireflyControl(QMainWindow):
         self.saveAsAction.triggered.connect(self.saveFileAs)
         self.aboutDialog = AboutDialog()
         self.aboutAction.triggered.connect(self.aboutDialog.exec_)
-        CommandWidget.configure(self.commandsWidget, self.updateProgram)
+        CommandWidget.configure(self.programStackedWidget, self.commandsWidget, self.updateProgram)
         InsertCommandButton.configure(self.insertCommandWidget)
-        InsertCommandButton().addCommand()
+        InsertCommandButton()
+        self.newFile()
         # Setup logging
         formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
         handlers = (FileHandler(LOG_FILE_NAME), CallableHandler(self.logTextEdit.appendPlainText))
@@ -588,7 +597,10 @@ class FireflyControl(QMainWindow):
             self.show()
 
     def newFile(self):
-        pass
+        # ToDo: ask if there're changes
+        CommandWidget.setupProgram()
+        self.fileName = None
+        self.updateWindowTitle(False)
 
     def openFile(self):
         fileName = QFileDialog.getOpenFileName(self, "Open program", self.currentDirectory, FILE_FILTER)
@@ -597,7 +609,7 @@ class FireflyControl(QMainWindow):
         fileName = unicode(fileName)
         try:
             with open(fileName) as f:
-                CommandWidget.parseProgram(f)
+                CommandWidget.setupProgram(f)
         except:
             raise # ToDo: Do something with errors
         self.fileName = fileName

@@ -19,96 +19,120 @@
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="scrollWidget">
+      <widget class="QStackedWidget" name="programStackedWidget">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <layout class="QHBoxLayout" name="scrollLayout">
-        <property name="margin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QWidget" name="insertCommandWidget" native="true">
-          <layout class="QVBoxLayout" name="insertCommandLayout" stretch="1">
-           <property name="spacing">
-            <number>2</number>
+       <widget class="QWidget" name="programWidget">
+        <layout class="QHBoxLayout" name="programLayout">
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QWidget" name="insertCommandWidget" native="true">
+           <layout class="QVBoxLayout" name="insertCommandLayout" stretch="1">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <property name="margin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="insertCommandSpacer"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QWidget" name="commandsWidget" native="true">
+           <layout class="QVBoxLayout" name="commandsLayout" stretch="0,1">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <property name="margin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QWidget" name="commandsHeaderWidget" native="true">
+              <layout class="QHBoxLayout" name="commandsHeaderLayout">
+               <item>
+                <widget class="QLabel" name="selectColorHeader"/>
+               </item>
+               <item>
+                <widget class="QLabel" name="morphHeader">
+                 <property name="font">
+                  <font>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string> Fade in (ms)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="delayHeader">
+                 <property name="font">
+                  <font>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string> Stay for (ms)</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="loopHeader">
+                 <property name="font">
+                  <font>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Loop</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="commandsSpacer"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="conditionsPresentWidget">
+        <layout class="QVBoxLayout" name="conditionsPresentLayout">
+         <item>
+          <widget class="QLabel" name="conditionsPresentLabel">
+           <property name="font">
+            <font>
+             <italic>true</italic>
+            </font>
            </property>
-           <property name="margin">
-            <number>0</number>
+           <property name="text">
+            <string>The loaded program contains conditional jumps&lt;br&gt;and is not editable visually.&lt;br&gt;&lt;br&gt;Please edit the program file manually if necessary.</string>
            </property>
-           <item>
-            <widget class="QLabel" name="insertCommandSpacer"/>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QWidget" name="commandsWidget" native="true">
-          <layout class="QVBoxLayout" name="commandsLayout" stretch="0,1">
-           <property name="spacing">
-            <number>2</number>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
            </property>
-           <property name="margin">
-            <number>0</number>
+           <property name="wordWrap">
+            <bool>true</bool>
            </property>
-           <item>
-            <widget class="QWidget" name="commandsHeaderWidget" native="true">
-             <layout class="QHBoxLayout" name="commandsHeaderLayout">
-              <item>
-               <widget class="QLabel" name="selectColorHeader"/>
-              </item>
-              <item>
-               <widget class="QLabel" name="morphHeader">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string> Fade in (ms)</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="delayHeader">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string> Stay for (ms)</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="loopHeader">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Loop</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="commandsSpacer"/>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </widget>
     </item>
