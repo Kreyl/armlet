@@ -123,6 +123,8 @@ class InsertCommandButton(QToolButton):
     def addCommand(self):
         CommandWidget(index = self.index)
         InsertCommandButton()
+        CommandWidget.updateLoop()
+        CommandWidget.updateDeleteButtons()
 
 class CommandWidget(QWidget):
     BASIC_STYLESHEET = 'border: 1px solid'
@@ -268,16 +270,16 @@ class CommandWidget(QWidget):
             if commands:
                 gotoCommand = None
                 for (r, g, b, morphLength, delayLength, gotoHere) in commands:
-                    commandWidget = CommandWidget(QColor(r, g, b), morphLength, delayLength, False)
+                    commandWidget = CommandWidget(QColor(r, g, b), morphLength, delayLength)
                     if gotoHere is True:
                         gotoCommand = commandWidget
                     InsertCommandButton()
                 if gotoCommand:
                     gotoCommand.radioButton.setChecked(True)
             else:
-                CommandWidget(programChanged = False)
+                CommandWidget()
                 InsertCommandButton()
-            cls.updateLoop(False) # ToDo: Make this the only program update
+            cls.updateLoop(False)
             cls.updateDeleteButtons()
 
     @classmethod
@@ -299,7 +301,7 @@ class CommandWidget(QWidget):
             command.setCorrectSize()
         InsertCommandButton.adjustSizes(size, cls.headerWidget.height() + cls.commandsLayout.spacing())
 
-    def __init__(self, color = None, morphLength = None, delayLength = None, index = None, programChanged = True):
+    def __init__(self, color = None, morphLength = None, delayLength = None, index = None):
         QWidget.__init__(self, self.parentWidget)
         self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.colorLabel = SelectColorLabel(self, self.setColor, color)
@@ -333,8 +335,6 @@ class CommandWidget(QWidget):
         if not self.buttonGroup.checkedButton() or insertIndex == lastIndex and not self.hasLoop():
             self.radioButton.setChecked(True)
         self.commandsLayout.insertWidget(insertIndex, self)
-        self.updateLoop(programChanged)
-        self.updateDeleteButtons()
 
     @classmethod
     def numCommands(cls):

@@ -3,6 +3,7 @@
 # Firefly Control main module
 #
 from collections import deque
+from functools import partial
 from getopt import getopt
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
 from os.path import basename
@@ -12,7 +13,7 @@ from traceback import format_exc
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import Qt, QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
-    from PyQt4.QtGui import QApplication, QDesktopWidget, QDialog, QFileDialog, QLabel, QLineEdit, QMainWindow, QScrollArea
+    from PyQt4.QtGui import QApplication, QDesktopWidget, QDialog, QFileDialog, QLabel, QLineEdit, QMainWindow, QMessageBox, QScrollArea
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -50,8 +51,6 @@ WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
 #
 # ToDo:
 # - Optimize resize events with sizes updating
-# - Open and Save commands
-# - Hide "fade in" for first command, and "stay for" for last one (if there's no loop)
 # - Set LED color immediately when color is selected in GUI
 #
 
@@ -159,6 +158,7 @@ class FireflyControl(QMainWindow):
         self.saveAsAction.triggered.connect(self.saveFileAs)
         self.aboutDialog = AboutDialog()
         self.aboutAction.triggered.connect(self.aboutDialog.exec_)
+        self.aboutQtAction.triggered.connect(partial(QMessageBox.aboutQt, self, "About Qt"))
         CommandWidget.configure(self.programStackedWidget, self.commandsWidget, self.updateProgram)
         InsertCommandButton.configure(self.insertCommandWidget)
         InsertCommandButton()
@@ -188,24 +188,40 @@ class FireflyControl(QMainWindow):
         else:
             self.show()
 
+    def askForSave(self):
+        if not self.programChanged:
+            return True
+        messageBox = QMessageBox(QMessageBox.Question, "The program has unsaved changes",
+                "Do you want to save it?", QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel, self)
+        ret = messageBox.exec_()
+        if ret == QMessageBox.Save:
+            return self.saveFile()
+        return ret == QMessageBox.Discard
+
     def newFile(self):
-        # ToDo: ask if there're changes
+        if not self.askForSave():
+            return False
         CommandWidget.setupProgram()
         self.fileName = None
         self.updateWindowTitle(False)
+        return True
 
     def openFile(self):
+        if not self.askForSave():
+            return False
         fileName = QFileDialog.getOpenFileName(self, "Open program", self.currentDirectory, FILE_FILTER)
         if not fileName:
-            return
+            return False
         fileName = unicode(fileName)
         try:
             with open(fileName) as f:
                 CommandWidget.setupProgram(f)
-        except:
-            raise # ToDo: Do something with errors
+        except Exception, e:
+            QMessageBox(QMessageBox.Warning, "Error opening file", unicode(e), QMessageBox.Ok, self).exec_()
+            return False
         self.fileName = fileName
         self.updateWindowTitle(False)
+        return True
 
     def openRecentFile(self):
         pass
@@ -214,20 +230,22 @@ class FireflyControl(QMainWindow):
         if saveAs or not self.fileName:
             fileName = QFileDialog.getSaveFileName(self, "Save program as", self.fileName or 'New.ff', FILE_FILTER)
             if not fileName:
-                return
+                return False
             fileName = unicode(fileName)
         else:
             fileName = self.fileName
         try:
             with open(fileName, 'w') as f:
                 f.write(FILE_TEMPLATE % self.programEdit.text())
-        except:
-            raise # ToDo: Do something with errors
+        except Exception, e:
+            QMessageBox(QMessageBox.Warning, "Error saving file", unicode(e), QMessageBox.Ok, self).exec_()
+            return False
         self.fileName = fileName
         self.updateWindowTitle(False)
+        return True
 
     def saveFileAs(self):
-        self.saveFile(True)
+        return self.saveFile(True)
 
     def updateProgram(self, program, gradient, programChanged = True):
         if program != self.programEdit.text(): # ToDo: Wouldn't it block window title update when program contents is accidentially the same?
