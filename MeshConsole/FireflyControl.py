@@ -132,14 +132,17 @@ class FireflyControl(QMainWindow):
         QMainWindow.__init__(self)
         uic.loadUi(MAIN_UI_FILE_NAME, self)
         # Processing command line options
-        self.emulated = False
         self.advanced = False
-        (options, _parameters) = getopt(args, 'ae', ('advanced', 'emulated'))
+        self.emulated = False
+        self.needLoadSettings = True
+        (options, _parameters) = getopt(args, 'aer', ('advanced', 'emulated', 'reset'))
         for (option, _value) in options:
             if option in ('-a', '--advanced'):
                 self.advanced = True
             elif option in ('-e', '--emulated'):
                 self.emulated = True
+            elif option in ('-r', '--reset'):
+                self.needLoadSettings = False
         # Setting window size
         resolution = QDesktopWidget().screenGeometry()
         width = resolution.width()
@@ -150,7 +153,7 @@ class FireflyControl(QMainWindow):
         self.fileName = None
         self.programChanged = False
         self.currentDirectory = getcwd()
-        self.recentFiles = deque((), 9) # ToDo: Update list and add actions to menu # pylint: disable=E1121
+        self.recentFiles = deque((), 9) # pylint: disable=E1121
         # Configuring widgets
         self.portLabel.configure()
         self.resetButton.clicked.connect(self.reset)
@@ -165,7 +168,6 @@ class FireflyControl(QMainWindow):
         CommandWidget.configure(self.programStackedWidget, self.commandsWidget, self.updateProgram)
         InsertCommandButton.configure(self.insertCommandWidget)
         InsertCommandButton()
-        self.newFile()
         # Setup logging
         formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
         handlers = (FileHandler(LOG_FILE_NAME), CallableHandler(self.logTextEdit.appendPlainText))
@@ -180,7 +182,6 @@ class FireflyControl(QMainWindow):
         self.logger.info("start")
         # Starting up!
         self.loadSettings()
-        # ToDo: Setup current directory and recent file name
         self.comConnect.connect(self.processConnect)
         self.comInput.connect(self.processInput)
         self.port = SerialPort(self.logger, ffGetCommand.prefix, ffResponse.prefix,
@@ -252,10 +253,11 @@ class FireflyControl(QMainWindow):
     def saveFileAs(self):
         return self.saveFile(True)
 
-    def updateRecentFiles(self, fileName):
-        if fileName in self.recentFiles:
-            self.recentFiles.remove(fileName)
-        self.recentFiles.append(fileName)
+    def updateRecentFiles(self, fileName = None):
+        if fileName is not None:
+            if fileName in self.recentFiles:
+                self.recentFiles.remove(fileName)
+            self.recentFiles.append(fileName)
         found = False
         insertBeforeSeparator = None
         for action in self.fileMenu.actions():
@@ -280,8 +282,9 @@ class FireflyControl(QMainWindow):
             self.graphLabel.setStyleSheet(gradient)
             self.updateWindowTitle(programChanged)
 
-    def updateWindowTitle(self, programChanged):
-        self.programChanged = self.isVisible() and programChanged
+    def updateWindowTitle(self, programChanged = None):
+        if programChanged is not None:
+            self.programChanged = programChanged
         programName = basename(self.fileName or 'New')
         dotIndex = programName.rfind('.')
         if dotIndex > 0:
@@ -337,9 +340,12 @@ class FireflyControl(QMainWindow):
             self.lastCommandButton = None
             self.port.write(data)
 
-    def closeEvent(self, _event):
-        self.saveSettings()
-        self.logger.info("close")
+    def closeEvent(self, event):
+        if self.askForSave():
+            self.saveSettings()
+            self.logger.info("close")
+        else:
+            event.ignore()
 
     def reset(self):
         self.logger.info("reset")
@@ -350,6 +356,11 @@ class FireflyControl(QMainWindow):
         settings = QSettings()
         try:
             settings.setValue('timeStamp', QDateTime.currentDateTime().toString(LONG_DATETIME_FORMAT))
+            settings.setValue('program', self.programEdit.text())
+            settings.setValue('programChanged', self.programChanged)
+            settings.setValue('currentDirectory', self.currentDirectory)
+            settings.setValue('fileName', self.fileName or '')
+            settings.setValue('recentFiles', tuple(self.recentFiles))
             settings.beginGroup('window')
             settings.setValue('width', self.size().width())
             settings.setValue('height', self.size().height())
@@ -358,7 +369,6 @@ class FireflyControl(QMainWindow):
             settings.setValue('maximized', self.isMaximized())
             settings.setValue('state', self.saveState())
             settings.endGroup()
-            # ToDo: Save and load currentdirectory and recent files
         except:
             self.logger.exception("Error saving settings")
             settings.clear()
@@ -367,24 +377,33 @@ class FireflyControl(QMainWindow):
     def loadSettings(self):
         QCoreApplication.setOrganizationName('Ostranna')
         QCoreApplication.setOrganizationDomain('ostranna.ru')
-        QCoreApplication.setApplicationName('Firefly')
+        QCoreApplication.setApplicationName('Firefly Control')
         settings = QSettings()
-        self.logger.info(settings.fileName())
+        program = None
         self.savedMaximized = False
-        try:
-            timeStamp = settings.value('timeStamp').toString()
-            if timeStamp:
-                settings.beginGroup('window')
-                self.resize(settings.value('width').toInt()[0], settings.value('height').toInt()[0])
-                self.move(settings.value('x').toInt()[0], settings.value('y').toInt()[0])
-                self.savedMaximized = settings.value('maximized', False).toBool()
-                self.restoreState(settings.value('state').toByteArray())
-                settings.endGroup()
-                self.logger.info("Loaded settings dated %s", timeStamp)
-            else:
-                self.logger.info("No settings found")
-        except:
-            self.logger.exception("Error loading settings")
+        if self.needLoadSettings:
+            self.logger.info("Loading settings from %s", settings.fileName())
+            try:
+                timeStamp = settings.value('timeStamp').toString()
+                if timeStamp:
+                    program = str(settings.value('program').toString())
+                    self.programChanged = settings.value('programChanged').toBool()
+                    self.currentDirectory = unicode(settings.value('currentDirectory').toString())
+                    self.fileName = unicode(settings.value('fileName').toString())
+                    self.recentFiles = [unicode(r.toString()) for r in settings.value('recentFiles').toList()]
+                    self.updateRecentFiles()
+                    settings.beginGroup('window')
+                    self.resize(settings.value('width').toInt()[0], settings.value('height').toInt()[0])
+                    self.move(settings.value('x').toInt()[0], settings.value('y').toInt()[0])
+                    self.savedMaximized = settings.value('maximized', False).toBool()
+                    self.restoreState(settings.value('state').toByteArray())
+                    settings.endGroup()
+                    self.logger.info("Loaded settings dated %s", timeStamp)
+                else:
+                    self.logger.info("No settings found")
+            except:
+                self.logger.exception("Error loading settings")
+        CommandWidget.setupProgram((program,) if program else None)
 
     def error(self, message):
         print "ERROR:", message
