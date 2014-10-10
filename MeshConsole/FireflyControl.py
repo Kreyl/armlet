@@ -6,14 +6,16 @@ from collections import deque
 from functools import partial
 from getopt import getopt
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
-from os.path import basename
+from os import getcwd
+from os.path import basename, dirname, join, relpath
 from sys import argv, exit # pylint: disable=W0622
 from traceback import format_exc
 
 try:
     from PyQt4 import uic
     from PyQt4.QtCore import Qt, QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
-    from PyQt4.QtGui import QApplication, QDesktopWidget, QDialog, QFileDialog, QLabel, QLineEdit, QMainWindow, QMessageBox, QScrollArea
+    from PyQt4.QtGui import QApplication, QDesktopWidget, QDialog, QFileDialog, QMainWindow
+    from PyQt4.QtGui import QAction, QKeySequence, QLabel, QLineEdit, QMessageBox, QScrollArea
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -51,7 +53,8 @@ WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
 #
 # ToDo:
 # - Optimize resize events with sizes updating
-# - Set LED color immediately when color is selected in GUI
+# - Work with hardware
+# - Remove program table flicker when opening files
 #
 
 class CallableHandler(Handler):
@@ -146,7 +149,7 @@ class FireflyControl(QMainWindow):
         self.title = self.windowTitle()
         self.fileName = None
         self.programChanged = False
-        self.currentDirectory = '.'
+        self.currentDirectory = getcwd()
         self.recentFiles = deque((), 9) # ToDo: Update list and add actions to menu # pylint: disable=E1121
         # Configuring widgets
         self.portLabel.configure()
@@ -206,12 +209,13 @@ class FireflyControl(QMainWindow):
         self.updateWindowTitle(False)
         return True
 
-    def openFile(self):
+    def openFile(self, fileName = None):
         if not self.askForSave():
             return False
-        fileName = QFileDialog.getOpenFileName(self, "Open program", self.currentDirectory, FILE_FILTER)
         if not fileName:
-            return False
+            fileName = QFileDialog.getOpenFileName(self, "Open program", self.currentDirectory, FILE_FILTER)
+            if not fileName:
+                return False
         fileName = unicode(fileName)
         try:
             with open(fileName) as f:
@@ -220,15 +224,14 @@ class FireflyControl(QMainWindow):
             QMessageBox(QMessageBox.Warning, "Error opening file", unicode(e), QMessageBox.Ok, self).exec_()
             return False
         self.fileName = fileName
+        self.currentDirectory = dirname(fileName)
         self.updateWindowTitle(False)
+        self.updateRecentFiles(fileName)
         return True
-
-    def openRecentFile(self):
-        pass
 
     def saveFile(self, saveAs = False):
         if saveAs or not self.fileName:
-            fileName = QFileDialog.getSaveFileName(self, "Save program as", self.fileName or 'New.ff', FILE_FILTER)
+            fileName = QFileDialog.getSaveFileName(self, "Save program as", self.fileName or join(self.currentDirectory, 'New.ff'), FILE_FILTER)
             if not fileName:
                 return False
             fileName = unicode(fileName)
@@ -241,11 +244,35 @@ class FireflyControl(QMainWindow):
             QMessageBox(QMessageBox.Warning, "Error saving file", unicode(e), QMessageBox.Ok, self).exec_()
             return False
         self.fileName = fileName
+        self.currentDirectory = dirname(fileName)
         self.updateWindowTitle(False)
+        self.updateRecentFiles(fileName)
         return True
 
     def saveFileAs(self):
         return self.saveFile(True)
+
+    def updateRecentFiles(self, fileName):
+        if fileName in self.recentFiles:
+            self.recentFiles.remove(fileName)
+        self.recentFiles.append(fileName)
+        found = False
+        insertBeforeSeparator = None
+        for action in self.fileMenu.actions():
+            if not found:
+                if action.isSeparator():
+                    found = True
+            elif action.isSeparator():
+                insertBeforeSeparator = action
+                break
+            else:
+                action.setParent(None)
+        for (i, fileName) in enumerate(reversed(self.recentFiles), 1):
+            relPath = relpath(fileName, self.currentDirectory)
+            action = QAction('%s\tCtrl+&%d' % (relPath if len(relPath) < len(fileName) else fileName, i), self.fileMenu)
+            action.setShortcut(QKeySequence('CTRL+%d' % i))
+            action.triggered.connect(partial(self.openFile, fileName))
+            self.fileMenu.insertAction(insertBeforeSeparator, action)
 
     def updateProgram(self, program, gradient, programChanged = True):
         if program != self.programEdit.text(): # ToDo: Wouldn't it block window title update when program contents is accidentially the same?
@@ -331,6 +358,7 @@ class FireflyControl(QMainWindow):
             settings.setValue('maximized', self.isMaximized())
             settings.setValue('state', self.saveState())
             settings.endGroup()
+            # ToDo: Save and load currentdirectory and recent files
         except:
             self.logger.exception("Error saving settings")
             settings.clear()
