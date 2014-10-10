@@ -129,8 +129,9 @@ void Pwr_t::Task() {
         // Calculate percent
         if(mV2PercentHasChanged(U)) {
             // Indicate if has changed
-//            Uart.Printf("\rAdc=%u; U=%u; %=%u", rslt, U, CapacityPercent);
+            Uart.Printf("Adc=%u; U=%u; %=%u\r", rslt, U, CapacityPercent);
 //            Uart.Printf("\r%u", U);
+            App.CurrInfo.Battery = CapacityPercent;
             if(App.PThd != nullptr) chEvtSignal(App.PThd, EVTMSK_NEW_POWER_STATE);
         }
 #endif

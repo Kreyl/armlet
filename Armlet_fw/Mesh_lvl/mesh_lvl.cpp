@@ -69,8 +69,6 @@ void Mesh_t::Init() {
     IResetTimeAge(App.SelfID, 0);   /* TimeAge = 0; TimeOwner = App.ID */
     IPktPutCycle(AbsCycle);     /* CycleN = AbsCycle */
     AlienTable.UpdateSelf(AbsCycle);  /* Timestamp = AbsCycle; Send info to console */
-    PreparePktPayload();
-
     /* Create Mesh Thread */
     IPThread = chThdCreateStatic(waMeshLvlThread, sizeof(waMeshLvlThread), NORMALPRIO, (tfunc_t)MeshLvlThread, NULL);
 

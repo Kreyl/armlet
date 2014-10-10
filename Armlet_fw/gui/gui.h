@@ -24,7 +24,7 @@
 #define MAX_REASON_BUF_SIZE     12
 
 
-#define MAX_GUI_NEIGHBOR_LINES  9
+#define MAX_GUI_NEIGHBOR_LINES  8
 #define MAX_POWER               100
 
 #define ID_START_X              1

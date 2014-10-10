@@ -30,8 +30,10 @@ void gui_t::draw_RxTable(RxTable_t *P) {
 //    else {
         for(uint8_t vert_str=0; vert_str < P->PTable->Size; vert_str++) {
             if((P->PTable->Row[vert_str].ID >= PERSON_ID_START) && (PERSON_ID_END >= P->PTable->Row[vert_str].ID)) {
-                if(RxTable_lines < MAX_GUI_NEIGHBOR_LINES) draw_Line(REASON_NAME_START_Y + (RxTable_lines*REASON_NAME_HEIGHT), clOrangeClr, clBlackClr, P->PTable->Row[vert_str].ID, P->PTable->Row[vert_str].Level);
-                RxTable_lines++;
+                if(RxTable_lines < MAX_GUI_NEIGHBOR_LINES) {
+                    draw_Line(REASON_NAME_START_Y + (RxTable_lines*REASON_NAME_HEIGHT), clOrangeClr, clBlackClr, P->PTable->Row[vert_str].ID, P->PTable->Row[vert_str].Level);
+                    RxTable_lines++;
+                } // if empty line present
             } // if reason is human number
         } // for string in RxTable
 //    }

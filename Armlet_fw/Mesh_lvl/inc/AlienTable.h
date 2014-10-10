@@ -70,6 +70,7 @@ public:
         Buf[App.SelfID].Mesh.Timestamp = NewCycle;
         Buf[App.SelfID].Mesh.TimeDiff = 0;
         Buf[App.SelfID].State = App.CurrInfo;
+//        Uart.Printf("ATab %u %u %u\r", Buf[App.SelfID].State.Location, Buf[App.SelfID].State.Neighbor, Buf[App.SelfID].State.Battery);
         Console.Send_Info(App.SelfID, &Buf[App.SelfID]);
     }
 
