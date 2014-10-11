@@ -14,9 +14,9 @@ from traceback import format_exc
 
 try:
     from PyQt4 import uic
-    from PyQt4.QtCore import Qt, QByteArray, QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
+    from PyQt4.QtCore import QByteArray, QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
     from PyQt4.QtGui import QApplication, QDesktopWidget, QDialog, QFileDialog, QMainWindow
-    from PyQt4.QtGui import QAction, QColor, QKeySequence, QLabel, QLineEdit, QMessageBox, QScrollArea
+    from PyQt4.QtGui import QAction, QColor, QKeySequence, QLabel, QMessageBox
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -79,19 +79,6 @@ class EventLogger(getLoggerClass(), QObject):
     def _log(self, *args, **kwargs):
         self.logSignal.emit(args, kwargs)
 
-class VerticalScrollArea(QScrollArea):
-    def __init__(self, parent = None):
-        QScrollArea.__init__(self, parent)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.scrollBarSet = False
-
-    def resizeEvent(self, event):
-        if not self.scrollBarSet:
-            self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            self.scrollBarSet = True
-        self.setMinimumWidth(self.widget().sizeHint().width() + self.verticalScrollBar().width())
-        QScrollArea.resizeEvent(self, event)
-
 class EmulatedSerial(object):
     def __init__(self):
         self.name = 'EMUL'
@@ -120,6 +107,11 @@ class EmulatedSerial(object):
     def close(self):
         pass
 
+class AboutDialog(QDialog):
+    def __init__(self):
+        QDialog.__init__(self)
+        uic.loadUi(ABOUT_UI_FILE_NAME, self)
+
 class PortLabel(QLabel):
     STATUS_COLORS = {
         SerialPort.TRYING: 'black',
@@ -137,21 +129,6 @@ class PortLabel(QLabel):
     def setValue(self, portName, portStatus):
         self.setText(portName)
         self.setStyleSheet(self.savedStyleSheet + '; color: %s' % self.STATUS_COLORS.get(portStatus, 'gray'))
-
-class ConsoleEdit(QLineEdit):
-    def configure(self, callback):
-        self.setStatusTip(self.placeholderText())
-        self.returnPressed.connect(callback)
-
-    def getInput(self):
-        ret = self.text()
-        self.clear()
-        return ret
-
-class AboutDialog(QDialog):
-    def __init__(self):
-        QDialog.__init__(self)
-        uic.loadUi(ABOUT_UI_FILE_NAME, self)
 
 class FireflyControl(QMainWindow):
     comConnect = pyqtSignal(str)

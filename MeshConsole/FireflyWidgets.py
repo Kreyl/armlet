@@ -7,7 +7,7 @@ from itertools import chain, islice
 
 try:
     from PyQt4.QtCore import Qt, QSize
-    from PyQt4.QtGui import QColorDialog, QHBoxLayout, QStackedWidget, QWidget
+    from PyQt4.QtGui import QColorDialog, QHBoxLayout, QScrollArea, QStackedWidget, QWidget
     from PyQt4.QtGui import QButtonGroup, QLabel, QLineEdit, QRadioButton, QToolButton
     from PyQt4.QtGui import QColor, QIcon, QIntValidator, QSizePolicy, qRgb
 except ImportError, ex:
@@ -40,6 +40,29 @@ class DeleteButton(QToolButton):
 
     def setCorrectSize(self, size):
         self.setFixedSize(size, size)
+
+class ConsoleEdit(QLineEdit):
+    def configure(self, callback):
+        self.setStatusTip(self.placeholderText())
+        self.returnPressed.connect(callback)
+
+    def getInput(self):
+        ret = self.text()
+        self.clear()
+        return ret
+
+class VerticalScrollArea(QScrollArea):
+    def __init__(self, parent = None):
+        QScrollArea.__init__(self, parent)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.scrollBarSet = False
+
+    def resizeEvent(self, event):
+        if not self.scrollBarSet:
+            self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+            self.scrollBarSet = True
+        self.setMinimumWidth(self.widget().sizeHint().width() + self.verticalScrollBar().width())
+        QScrollArea.resizeEvent(self, event)
 
 class TimeEdit(QLineEdit):
     MAX_VALUE = MAX_INT

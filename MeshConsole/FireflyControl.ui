@@ -550,12 +550,12 @@
   <customwidget>
    <class>ConsoleEdit</class>
    <extends>QLineEdit</extends>
-   <header>FireflyControl</header>
+   <header>FireflyWidgets</header>
   </customwidget>
   <customwidget>
    <class>VerticalScrollArea</class>
    <extends>QScrollArea</extends>
-   <header>FireflyControl</header>
+   <header>FireflyWidgets</header>
    <container>1</container>
   </customwidget>
   <customwidget>
