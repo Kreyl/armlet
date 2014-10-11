@@ -9,6 +9,7 @@ from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Form
 from os import getcwd
 from os.path import basename, dirname, join, relpath
 from sys import argv, exit # pylint: disable=W0622
+from time import sleep
 from traceback import format_exc
 
 try:
@@ -90,6 +91,34 @@ class VerticalScrollArea(QScrollArea):
             self.scrollBarSet = True
         self.setMinimumWidth(self.widget().sizeHint().width() + self.verticalScrollBar().width())
         QScrollArea.resizeEvent(self, event)
+
+class EmulatedSerial(object):
+    def __init__(self):
+        self.name = 'EMUL'
+        self.timeout = TIMEOUT
+        self.buffer = deque()
+        self.ready = False
+
+    def readline(self):
+        while True:
+            if self.buffer:
+                return self.buffer.popleft()
+            sleep(DT)
+
+    def write(self, data):
+        (tag, _args) = Command.decodeCommand(data)
+        if tag == ffSetCommand.tag:
+            ret = ackResponse.encode(0)
+        elif tag == ffGetCommand.tag:
+            ret = ffResponse.encode('rgb,255,0,0,0,rgb,255,255,255,0,wait,1,rgb,0,0,255,0,rgb,255,255,255,0,rgb,0,255,0,0,rgb,255,255,255,0,goto,3')
+        else:
+            assert False
+        self.buffer.append(ret)
+        self.ready = True
+        return len(data)
+
+    def close(self):
+        pass
 
 class PortLabel(QLabel):
     STATUS_COLORS = {
@@ -186,7 +215,7 @@ class FireflyControl(QMainWindow):
         self.comInput.connect(self.processInput)
         self.port = SerialPort(self.logger, ffGetCommand.prefix, ffResponse.prefix,
                                self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit,
-                               None, (115200,))
+                               EmulatedSerial() if self.emulated else None, (115200,))
         if self.savedMaximized:
             self.showMaximized()
         else:
@@ -202,10 +231,10 @@ class FireflyControl(QMainWindow):
             return self.saveFile()
         return ret == QMessageBox.Discard
 
-    def newFile(self):
-        if not self.askForSave():
+    def newFile(self, program = None, force = False):
+        if not force and not self.askForSave():
             return False
-        CommandWidget.setupProgram()
+        CommandWidget.setupProgram((program,) if program else None)
         self.fileName = None
         self.updateWindowTitle(False)
         return True
@@ -292,7 +321,20 @@ class FireflyControl(QMainWindow):
         self.setWindowTitle(WINDOW_TITLE % (self.title, programName, '*' if self.programChanged else ''))
 
     def processConnect(self, pong): # pylint: disable=W0613
-        self.logger.info("connected device detected")
+        if self.onConnectButtonGroup.checkedButton() is self.onConnectSetColorButton:
+            self.logger.info("connected device detected, setting color")
+            # ToDo
+        elif self.onConnectButtonGroup.checkedButton() is self.onConnectSetProgramButton:
+            self.logger.info("connected device detected, setting program")
+            # ToDo
+        elif self.onConnectButtonGroup.checkedButton() is self.onConnectGetProgramButton:
+            self.logger.info("connected device detected, getting program")
+            self.newFile(','.join(Command.decodeCommand(pong)[1]))
+        elif self.onConnectButtonGroup.checkedButton() is self.onConnectForceGetProgramButton:
+            self.logger.info("connected device detected, force getting program")
+            self.newFile(','.join(Command.decodeCommand(pong)[1]), True)
+        else:
+            self.logger.info("connected device detected")
 
     def processCommand(self, source, _checked = False):
         error = True
@@ -359,6 +401,8 @@ class FireflyControl(QMainWindow):
             settings.setValue('recentFiles', tuple(self.recentFiles))
             settings.setValue('program', self.programEdit.text())
             settings.setValue('programChanged', self.programChanged)
+            settings.setValue('onChangeButton', self.onChangeButtonGroup.checkedId())
+            settings.setValue('onConnectButton', self.onConnectButtonGroup.checkedId())
             settings.beginGroup('window')
             settings.setValue('width', self.size().width())
             settings.setValue('height', self.size().height())
@@ -391,6 +435,8 @@ class FireflyControl(QMainWindow):
                     program = str(settings.value('program', type = str))
                     CommandWidget.setupProgram((program,) if program else None)
                     self.updateWindowTitle(settings.value('programChanged', type = bool))
+                    self.onChangeButtonGroup.button(settings.value('onChangeButton', type = int)).setChecked(True)
+                    self.onConnectButtonGroup.button(settings.value('onConnectButton', type = int)).setChecked(True)
                     settings.beginGroup('window')
                     self.resize(settings.value('width', type = int), settings.value('height', type = int))
                     self.move(settings.value('x', type = int), settings.value('y', type = int))

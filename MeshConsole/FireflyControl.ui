@@ -166,7 +166,7 @@
           </font>
          </property>
          <property name="statusTip">
-          <string>Terminal console: &lt; denotes input from device, &gt; output to device, other lines are program status messages and diagnostics</string>
+          <string>Terminal console: &lt; denotes input from device, &gt; output to device, other lines are status messages and diagnostics</string>
          </property>
          <property name="lineWrapMode">
           <enum>QPlainTextEdit::NoWrap</enum>
@@ -198,6 +198,9 @@
            <property name="checked">
             <bool>true</bool>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">onChangeButtonGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -205,6 +208,9 @@
            <property name="text">
             <string>Set color</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">onChangeButtonGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -212,10 +218,13 @@
            <property name="text">
             <string>Set program</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">onChangeButtonGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="onChangeSpacer"/>
+          <widget class="QWidget" name="onChangeSpacer"/>
          </item>
         </layout>
        </widget>
@@ -225,7 +234,7 @@
         <property name="title">
          <string>On connect</string>
         </property>
-        <layout class="QVBoxLayout" name="onConnectLayout" stretch="0,0,0,0,1">
+        <layout class="QVBoxLayout" name="onConnectLayout" stretch="0,0,0,0,0,1">
          <item>
           <widget class="QRadioButton" name="onConnectDoNothingButton">
            <property name="text">
@@ -234,6 +243,9 @@
            <property name="checked">
             <bool>true</bool>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">onConnectButtonGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -241,6 +253,9 @@
            <property name="text">
             <string>Set color</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">onConnectButtonGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -248,6 +263,9 @@
            <property name="text">
             <string>Set program</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">onConnectButtonGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -255,10 +273,23 @@
            <property name="text">
             <string>Get program</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">onConnectButtonGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="onConnectSpacer"/>
+          <widget class="QRadioButton" name="onConnectForceGetProgramButton">
+           <property name="text">
+            <string>Force get</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">onConnectButtonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QWidget" name="onConnectSpacer"/>
          </item>
         </layout>
        </widget>
@@ -502,4 +533,8 @@
    <slot>close()</slot>
   </connection>
  </connections>
+ <buttongroups>
+  <buttongroup name="onConnectButtonGroup"/>
+  <buttongroup name="onChangeButtonGroup"/>
+ </buttongroups>
 </ui>
