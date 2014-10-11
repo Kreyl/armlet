@@ -14,8 +14,8 @@ from traceback import format_exc
 
 try:
     from PyQt4 import uic
-    from PyQt4.QtCore import QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
-    from PyQt4.QtGui import QApplication, QDesktopWidget, QComboBox, QDialog, QIntValidator, QLabel, QLineEdit, QMainWindow, QPushButton, QWidget
+    from PyQt4.QtCore import QByteArray, QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
+    from PyQt4.QtGui import QApplication, QDesktopWidget, QComboBox, QDialog, QIntValidator, QLabel, QLineEdit, QMainWindow, QMessageBox, QPushButton, QWidget
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -192,10 +192,9 @@ class ConsoleEdit(QLineEdit):
         return ret
 
 class AboutDialog(QDialog):
-    def __init__(self, trigger):
+    def __init__(self):
         QDialog.__init__(self)
         uic.loadUi(ABOUT_UI_FILE_NAME, self)
-        trigger.connect(self.exec_)
 
 class PillControl(QMainWindow):
     comConnect = pyqtSignal(str)
@@ -224,7 +223,9 @@ class PillControl(QMainWindow):
         self.portLabel.configure()
         self.resetButton.configure(self.reset)
         self.consoleEdit.configure(self.consoleEnter)
-        self.aboutDialog = AboutDialog(self.aboutAction.triggered)
+        self.aboutDialog = AboutDialog()
+        self.aboutAction.triggered.connect(self.aboutDialog.exec_)
+        self.aboutQtAction.triggered.connect(partial(QMessageBox.aboutQt, self, "About Qt"))
         # Configuring command buttons
         buttonStyleSheets = {
             STATE_SETUP_OK: str(self.setupOKLabel.styleSheet()),
@@ -372,14 +373,14 @@ class PillControl(QMainWindow):
         self.logger.info(settings.fileName())
         self.savedMaximized = False
         try:
-            timeStamp = settings.value('timeStamp').toString()
+            timeStamp = str(settings.value('timeStamp', type = str))
             if timeStamp:
-                #self.doseTopEdit.setText(settings.value('doseTop').toString())
+                #self.doseTopEdit.setText(settings.value('doseTop', type = str))
                 settings.beginGroup('window')
-                self.resize(settings.value('width').toInt()[0], settings.value('height').toInt()[0])
-                self.move(settings.value('x').toInt()[0], settings.value('y').toInt()[0])
-                self.savedMaximized = settings.value('maximized', False).toBool()
-                self.restoreState(settings.value('state').toByteArray())
+                self.resize(settings.value('width', type = int), settings.value('height', type = int))
+                self.move(settings.value('x', type = int), settings.value('y', type = int))
+                self.savedMaximized = settings.value('maximized', False, type = bool)
+                self.restoreState(settings.value('state', type = QByteArray))
                 settings.endGroup()
                 self.logger.info("Loaded settings dated %s", timeStamp)
             else:

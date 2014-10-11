@@ -15,8 +15,8 @@ from traceback import format_exc
 
 try:
     from PyQt4 import uic
-    from PyQt4.QtCore import QCoreApplication, QDate, QDateTime, QObject, QSettings, QTimer, pyqtSignal
-    from PyQt4.QtGui import QApplication, QDesktopWidget, QMainWindow
+    from PyQt4.QtCore import QByteArray, QCoreApplication, QDate, QDateTime, QObject, QSettings, QTimer, pyqtSignal
+    from PyQt4.QtGui import QApplication, QDesktopWidget, QMainWindow, QMessageBox
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -138,7 +138,9 @@ class MeshConsole(QMainWindow):
         self.consoleEdit.configure(self.consoleEnter)
         self.sampleWidget.hide()
         self.statusBar.hide()
-        self.aboutDialog = AboutDialog(self.aboutAction.triggered)
+        self.aboutDialog = AboutDialog()
+        self.aboutAction.triggered.connect(self.aboutDialog.exec_)
+        self.aboutQtAction.triggered.connect(partial(QMessageBox.aboutQt, self, "About Qt"))
         self.confirmationDialog = ConfirmationDialog(DATE_FORMAT)
         # Setup logging
         formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
@@ -332,21 +334,21 @@ class MeshConsole(QMainWindow):
         if self.needLoadSettings:
             self.logger.info("Loading settings from %s", settings.fileName())
             try:
-                timeStamp = settings.value('timeStamp').toString()
+                timeStamp = str(settings.value('timeStamp', type = str))
                 if timeStamp:
                     settings.beginGroup('window')
-                    self.resize(settings.value('width').toInt()[0], settings.value('height').toInt()[0])
-                    self.move(settings.value('x').toInt()[0], settings.value('y').toInt()[0])
-                    self.savedMaximized = settings.value('maximized', False).toBool()
-                    self.restoreState(settings.value('state').toByteArray())
+                    self.resize(settings.value('width', type = int), settings.value('height', type = int))
+                    self.move(settings.value('x', type = int), settings.value('y', type = int))
+                    self.savedMaximized = settings.value('maximized', False, type = bool)
+                    self.restoreState(settings.value('state', type = QByteArray))
                     settings.endGroup()
-                    columnsVisible = str(settings.value('columnsVisible').toString()).strip().split()
+                    columnsVisible = str(settings.value('columnsVisible', type = str)).strip().split()
                     for (action, checked) in zip(self.columnActions, columnsVisible):
                         action.setChecked(int(checked))
-                    startDate = QDate.fromString(settings.value('startDate').toString(), LONG_DATE_FORMAT)
+                    startDate = QDate.fromString(settings.value('startDate', type = str), LONG_DATE_FORMAT)
                     settings.beginGroup('emulated' if self.emulated else 'devices')
                     for tag in settings.childKeys():
-                        data = str(settings.value(tag).toString()).strip()
+                        data = str(settings.value(tag, type = str)).strip()
                         if data:
                             self.devices[int(tag) - 1].update(*data.split())
                     settings.endGroup()

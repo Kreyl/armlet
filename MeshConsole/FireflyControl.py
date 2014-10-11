@@ -13,7 +13,7 @@ from traceback import format_exc
 
 try:
     from PyQt4 import uic
-    from PyQt4.QtCore import Qt, QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
+    from PyQt4.QtCore import Qt, QByteArray, QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
     from PyQt4.QtGui import QApplication, QDesktopWidget, QDialog, QFileDialog, QMainWindow
     from PyQt4.QtGui import QAction, QKeySequence, QLabel, QLineEdit, QMessageBox, QScrollArea
 except ImportError, ex:
@@ -337,7 +337,6 @@ class FireflyControl(QMainWindow):
     def consoleEnter(self):
         data = self.consoleEdit.getInput()
         if data:
-            self.lastCommandButton = None
             self.port.write(data)
 
     def closeEvent(self, event):
@@ -350,17 +349,16 @@ class FireflyControl(QMainWindow):
     def reset(self):
         self.logger.info("reset")
         self.port.reset()
-        self.lastCommandButton = None
 
     def saveSettings(self):
         settings = QSettings()
         try:
             settings.setValue('timeStamp', QDateTime.currentDateTime().toString(LONG_DATETIME_FORMAT))
-            settings.setValue('program', self.programEdit.text())
-            settings.setValue('programChanged', self.programChanged)
             settings.setValue('currentDirectory', self.currentDirectory)
             settings.setValue('fileName', self.fileName or '')
             settings.setValue('recentFiles', tuple(self.recentFiles))
+            settings.setValue('program', self.programEdit.text())
+            settings.setValue('programChanged', self.programChanged)
             settings.beginGroup('window')
             settings.setValue('width', self.size().width())
             settings.setValue('height', self.size().height())
@@ -384,26 +382,27 @@ class FireflyControl(QMainWindow):
         if self.needLoadSettings:
             self.logger.info("Loading settings from %s", settings.fileName())
             try:
-                timeStamp = settings.value('timeStamp').toString()
+                timeStamp = settings.value('timeStamp', type = str)
                 if timeStamp:
-                    program = str(settings.value('program').toString())
-                    self.programChanged = settings.value('programChanged').toBool()
-                    self.currentDirectory = unicode(settings.value('currentDirectory').toString())
-                    self.fileName = unicode(settings.value('fileName').toString())
-                    self.recentFiles = [unicode(r.toString()) for r in settings.value('recentFiles').toList()]
+                    self.currentDirectory = unicode(settings.value('currentDirectory', type = unicode))
+                    self.fileName = unicode(settings.value('fileName', type = unicode))
+                    self.recentFiles.extend(settings.value('recentFiles', type = tuple))
                     self.updateRecentFiles()
+                    program = str(settings.value('program', type = str))
+                    CommandWidget.setupProgram((program,) if program else None)
+                    self.updateWindowTitle(settings.value('programChanged', type = bool))
                     settings.beginGroup('window')
-                    self.resize(settings.value('width').toInt()[0], settings.value('height').toInt()[0])
-                    self.move(settings.value('x').toInt()[0], settings.value('y').toInt()[0])
-                    self.savedMaximized = settings.value('maximized', False).toBool()
-                    self.restoreState(settings.value('state').toByteArray())
+                    self.resize(settings.value('width', type = int), settings.value('height', type = int))
+                    self.move(settings.value('x', type = int), settings.value('y', type = int))
+                    self.savedMaximized = settings.value('maximized', False, type = bool)
+                    self.restoreState(settings.value('state', type = QByteArray))
                     settings.endGroup()
                     self.logger.info("Loaded settings dated %s", timeStamp)
                 else:
                     self.logger.info("No settings found")
             except:
                 self.logger.exception("Error loading settings")
-        CommandWidget.setupProgram((program,) if program else None)
+                CommandWidget.setupProgram()
 
     def error(self, message):
         print "ERROR:", message

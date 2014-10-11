@@ -2,6 +2,7 @@
 #
 # Firefly Control widget definitions
 #
+from functools import partial
 from itertools import chain, islice
 
 try:
@@ -308,10 +309,10 @@ class CommandWidget(QWidget):
         self.morphEdit = TimeEdit(self, self.updateProgram, morphLength)
         self.delayEdit = TimeEdit(self, self.updateProgram, delayLength)
         self.radioButton = QRadioButton(self)
-        self.radioButton.clicked.connect(self.updateLoop)
+        self.radioButton.clicked.connect(partial(self.updateLoop, True))
         self.radioButton.commandWidget = self
         self.buttonGroup.addButton(self.radioButton)
-        self.deleteButton = DeleteButton(self, self.delete)
+        self.deleteButton = DeleteButton(self, partial(self.delete, True))
         self.hider = QStackedWidget(self)
         self.hiderWidget = QWidget(self)
         hiderLayout = QHBoxLayout(self.hiderWidget)

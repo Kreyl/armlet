@@ -326,15 +326,16 @@
   <widget class="QMenuBar" name="menuBar">
    <widget class="QMenu" name="fileMenu">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="quitAction"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="aboutAction"/>
+    <addaction name="aboutQtAction"/>
    </widget>
    <addaction name="fileMenu"/>
    <addaction name="menuHelp"/>
@@ -342,7 +343,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="quitAction">
    <property name="text">
-    <string>Quit</string>
+    <string>&amp;Quit</string>
    </property>
    <property name="statusTip">
     <string>Quit</string>
@@ -350,10 +351,18 @@
   </action>
   <action name="aboutAction">
    <property name="text">
-    <string>About</string>
+    <string>&amp;About</string>
    </property>
    <property name="statusTip">
     <string>About</string>
+   </property>
+  </action>
+  <action name="aboutQtAction">
+   <property name="text">
+    <string>About &amp;Qt</string>
+   </property>
+   <property name="statusTip">
+    <string>About Qt</string>
    </property>
   </action>
  </widget>
