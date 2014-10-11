@@ -328,7 +328,7 @@ class FireflyControl(QMainWindow):
             self.processCommand(ffSetCommand.encode(self.colorLabel.getCommand()))
         elif self.onConnectButtonGroup.checkedButton() is self.onConnectSetProgramButton:
             self.logger.info("connected device detected, setting program")
-            self.processCommand(ffSetCommand.encode(self.programEdit.text()))
+            self.processCommand(ffSetCommand.encode(str(self.programEdit.text())))
         elif self.onConnectButtonGroup.checkedButton() is self.onConnectGetProgramButton:
             self.logger.info("connected device detected, getting program")
             self.newFile(','.join(Command.decodeCommand(pong)[1]))
