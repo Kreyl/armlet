@@ -16,7 +16,7 @@ try:
     from PyQt4 import uic
     from PyQt4.QtCore import Qt, QByteArray, QCoreApplication, QDateTime, QObject, QSettings, pyqtSignal
     from PyQt4.QtGui import QApplication, QDesktopWidget, QDialog, QFileDialog, QMainWindow
-    from PyQt4.QtGui import QAction, QKeySequence, QLabel, QLineEdit, QMessageBox, QScrollArea
+    from PyQt4.QtGui import QAction, QColor, QKeySequence, QLabel, QLineEdit, QMessageBox, QScrollArea
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -24,7 +24,7 @@ from UARTTextProtocol import Command, COMMAND_MARKER
 from UARTTextCommands import ackResponse, ffGetCommand, ffSetCommand, ffResponse
 from SerialPort import SerialPort, DT, TIMEOUT
 
-from FireflyWidgets import CommandWidget, InsertCommandButton
+from FireflyWidgets import CommandWidget, InsertCommandButton, SelectColorLabel
 
 LONG_DATETIME_FORMAT = 'yyyy.MM.dd hh:mm:ss'
 
@@ -184,6 +184,8 @@ class FireflyControl(QMainWindow):
         self.currentDirectory = getcwd()
         self.recentFiles = deque((), 9) # pylint: disable=E1121
         # Configuring widgets
+        SelectColorLabel.configure(self)
+        self.colorLabel.setCorrectSize(self.graphLabel.minimumHeight())
         self.portLabel.configure()
         self.resetButton.clicked.connect(self.reset)
         self.consoleEdit.configure(self.consoleEnter)
@@ -323,10 +325,10 @@ class FireflyControl(QMainWindow):
     def processConnect(self, pong): # pylint: disable=W0613
         if self.onConnectButtonGroup.checkedButton() is self.onConnectSetColorButton:
             self.logger.info("connected device detected, setting color")
-            # ToDo
+            self.processCommand(ffSetCommand.encode(self.colorLabel.getCommand()))
         elif self.onConnectButtonGroup.checkedButton() is self.onConnectSetProgramButton:
             self.logger.info("connected device detected, setting program")
-            # ToDo
+            self.processCommand(ffSetCommand.encode(self.programEdit.text()))
         elif self.onConnectButtonGroup.checkedButton() is self.onConnectGetProgramButton:
             self.logger.info("connected device detected, getting program")
             self.newFile(','.join(Command.decodeCommand(pong)[1]))
@@ -336,19 +338,17 @@ class FireflyControl(QMainWindow):
         else:
             self.logger.info("connected device detected")
 
-    def processCommand(self, source, _checked = False):
+    def processCommand(self, command, expect = COMMAND_MARKER, _checked = False):
         error = True
-        data = self.port.command(source.command, COMMAND_MARKER, QApplication.processEvents)
+        data = self.port.command(command, expect, QApplication.processEvents)
         if data:
             data = str(data).strip()
             (tag, args) = Command.decodeCommand(data)
             if tag == ackResponse.tag:
                 error = args[0]
                 if error:
-                    self.lastCommandButton = None
                     self.logger.warning("Setup ERROR: %d", error)
                 else:
-                    self.lastCommandButton = source
                     self.logger.info("Setup OK")
             elif args is not None: # unexpected valid command
                 self.logger.warning("Unexpected command: %s %s", tag, ' '.join(str(arg) for arg in args))
@@ -403,6 +403,10 @@ class FireflyControl(QMainWindow):
             settings.setValue('programChanged', self.programChanged)
             settings.setValue('onChangeButton', self.onChangeButtonGroup.checkedId())
             settings.setValue('onConnectButton', self.onConnectButtonGroup.checkedId())
+            settings.setValue('onReadMarkChanged', self.onReadMarkChangedCheckBox.isChecked())
+            settings.setValue('onWriteMarkSaved', self.onWriteMarkSavedCheckBox.isChecked())
+            settings.setValue('color', self.colorLabel.color)
+            settings.setValue('customColors', SelectColorLabel.getCustomColors())
             settings.beginGroup('window')
             settings.setValue('width', self.size().width())
             settings.setValue('height', self.size().height())
@@ -437,6 +441,10 @@ class FireflyControl(QMainWindow):
                     self.updateWindowTitle(settings.value('programChanged', type = bool))
                     self.onChangeButtonGroup.button(settings.value('onChangeButton', type = int)).setChecked(True)
                     self.onConnectButtonGroup.button(settings.value('onConnectButton', type = int)).setChecked(True)
+                    self.onReadMarkChangedCheckBox.setChecked(settings.value('onReadMarkChanged', type = bool))
+                    self.onWriteMarkSavedCheckBox.setChecked(settings.value('onWriteMarkSaved', type = bool))
+                    self.colorLabel.setColor(settings.value('color', type = QColor))
+                    SelectColorLabel.setCustomColors(settings.value('customColors', type = tuple))
                     settings.beginGroup('window')
                     self.resize(settings.value('width', type = int), settings.value('height', type = int))
                     self.move(settings.value('x', type = int), settings.value('y', type = int))

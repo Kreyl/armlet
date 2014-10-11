@@ -139,17 +139,8 @@
     <item row="0" column="1" rowspan="3">
      <widget class="QWidget" name="consoleWidget" native="true">
       <layout class="QVBoxLayout" name="consoleLayout">
-       <property name="leftMargin">
+       <property name="margin">
         <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>1</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>2</number>
        </property>
        <item>
         <widget class="QPlainTextEdit" name="logTextEdit">
@@ -182,7 +173,7 @@
     <item row="1" column="0">
      <widget class="Line" name="horizontalLine"/>
     </item>
-    <item row="2" column="0" rowspan="2">
+    <item row="2" column="0">
      <layout class="QHBoxLayout" name="controlLayout">
       <item>
        <widget class="QGroupBox" name="onChangeBox">
@@ -224,7 +215,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QWidget" name="onChangeSpacer"/>
+          <widget class="QWidget" name="onChangeSpacer" native="true"/>
          </item>
         </layout>
        </widget>
@@ -289,7 +280,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QWidget" name="onConnectSpacer"/>
+          <widget class="QWidget" name="onConnectSpacer" native="true"/>
          </item>
         </layout>
        </widget>
@@ -368,6 +359,27 @@
       </item>
      </layout>
     </item>
+    <item row="3" column="0">
+     <layout class="QHBoxLayout" name="markLayout">
+      <item>
+       <widget class="QCheckBox" name="onReadMarkChangedCheckBox">
+        <property name="text">
+         <string>On read, mark changed</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="onWriteMarkSavedCheckBox">
+        <property name="text">
+         <string>On write, mark saved</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
     <item row="3" column="1">
      <widget class="ConsoleEdit" name="consoleEdit">
       <property name="placeholderText">
@@ -376,11 +388,37 @@
      </widget>
     </item>
     <item row="4" column="0" colspan="2">
-     <widget class="QLabel" name="graphLabel">
-      <property name="styleSheet">
-       <string notr="true">border: 1px solid black</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="indicatorLayout" stretch="0,1">
+      <item>
+       <widget class="SelectColorLabel" name="colorLabel">
+        <property name="styleSheet">
+         <string notr="true">background: white</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="graphLabel">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background: white</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item row="5" column="0" colspan="2">
      <widget class="QLineEdit" name="programEdit">
@@ -520,10 +558,12 @@
    <header>FireflyControl</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>SelectColorLabel</class>
+   <extends>QLabel</extends>
+   <header>FireflyWidgets</header>
+  </customwidget>
  </customwidgets>
- <tabstops>
-  <tabstop>logTextEdit</tabstop>
- </tabstops>
  <resources/>
  <connections>
   <connection>

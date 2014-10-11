@@ -9,7 +9,7 @@ try:
     from PyQt4.QtCore import Qt, QSize
     from PyQt4.QtGui import QColorDialog, QHBoxLayout, QStackedWidget, QWidget
     from PyQt4.QtGui import QButtonGroup, QLabel, QLineEdit, QRadioButton, QToolButton
-    from PyQt4.QtGui import QColor, QIcon, QIntValidator, QSizePolicy
+    from PyQt4.QtGui import QColor, QIcon, QIntValidator, QSizePolicy, qRgb
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
 
@@ -57,6 +57,23 @@ class TimeEdit(QLineEdit):
             self.textEdited.connect(callback)
 
 class SelectColorLabel(QLabel):
+    STANDARS_COLORS = ((255, 0, 0), (0, 255, 0), (0, 0, 255),
+                       (255, 255, 0), (255, 0, 255), (0, 255, 255),
+                       (255, 64, 64), (64, 255, 64), (64, 64, 255),
+                       (255, 255, 64), (255, 64, 255), (64, 255, 255),
+                       (255, 128, 128), (128, 255, 128), (128, 128, 255),
+                       (255, 255, 128), (255, 128, 255), (128, 255, 255),
+                       (255, 192, 192), (192, 255, 192), (192, 192, 255),
+                       (255, 255, 192), (255, 192, 255), (192, 255, 255),
+                       (255, 0, 128), (128, 255, 0), (0, 128, 255),
+                       (255, 128, 0), (128, 0, 255), (0, 255, 128),
+                       (128, 0, 0), (0, 128, 0), (0, 0, 128),
+                       (128, 128, 0), (128, 0, 128), (0, 128, 128),
+                       (64, 0, 0), (0, 64, 0), (0, 0, 64),
+                       (64, 64, 0), (64, 0, 64), (0, 64, 64),
+                       (128, 64, 64), (64, 128, 64), (64, 64, 128),
+                       (255, 255, 255), (128, 128, 128), (0, 0, 0))
+
     def __init__(self, parent, callback = None, color = None):
         QLabel.__init__(self, parent)
         self.setFrameStyle(self.Box | self.Plain)
@@ -65,8 +82,28 @@ class SelectColorLabel(QLabel):
         self.setColor(color or QColor(Qt.white))
         self.mousePressEvent = self.editColor
 
-    def setCorrectSize(self, size):
-        size -= 2 * self.lineWidth()
+    @classmethod
+    def configure(cls, parent):
+        cls.colorDialog = QColorDialog(parent)
+        cls.setStandardColors(qRgb(*rgb) for rgb in cls.STANDARS_COLORS)
+
+    @classmethod
+    def getCustomColors(cls):
+        return tuple(cls.colorDialog.customColor(i) for i in xrange(cls.colorDialog.customCount()))
+
+    @classmethod
+    def setCustomColors(cls, colors):
+        for (i, color) in enumerate(colors):
+            cls.colorDialog.setCustomColor(i, color)
+
+    @classmethod
+    def setStandardColors(cls, colors):
+        for (i, color) in enumerate(colors):
+            cls.colorDialog.setStandardColor(i, color)
+
+    def setCorrectSize(self, size, adjustForBorder = False):
+        if adjustForBorder:
+            size -= 2 * self.lineWidth()
         if size > 0:
             self.setFixedSize(size, size)
 
@@ -77,11 +114,18 @@ class SelectColorLabel(QLabel):
             self.callback(color)
 
     def editColor(self, _event):
+        try:
+            self.colorDialog.currentColorChanged.disconnect()
+        except TypeError:
+            pass
+        self.colorDialog.setCurrentColor(self.color)
+        self.colorDialog.currentColorChanged.connect(self.setColor)
         previousColor = self.color
-        colorDialog = QColorDialog(self.color)
-        colorDialog.currentColorChanged.connect(self.setColor)
-        if not colorDialog.exec_():
+        if not self.colorDialog.exec_():
             self.setColor(previousColor)
+
+    def getCommand(self):
+        return ','.join((UART_FF_RGB, str(self.color.red()), str(self.color.green()), str(self.color.blue())))
 
 class InsertCommandButton(QToolButton):
     insertCommandLayout = None
@@ -387,7 +431,7 @@ class CommandWidget(QWidget):
 
     def setCorrectSize(self):
         size = max(self.correctHeight, self.morphEdit.height())
-        self.colorLabel.setCorrectSize(size)
+        self.colorLabel.setCorrectSize(size, True)
         self.deleteButton.setCorrectSize(size)
         self.radioButton.setFixedWidth(size + self.radioButton.icon().actualSize(QSize(100, 100)).width())
         return size
