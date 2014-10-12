@@ -54,7 +54,6 @@ WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
 #
 # ToDo:
 # - Optimize resize events with sizes updating
-# - Work with hardware
 # - Remove program table flicker when opening files
 #
 
@@ -295,6 +294,13 @@ class FireflyControl(QMainWindow):
             self.programEdit.setText(program)
             self.graphLabel.setStyleSheet(gradient)
             self.updateWindowTitle(programChanged)
+        if self.onChangeButtonGroup.checkedButton() is self.onChangeSetColorButton:
+            # ToDo: Make self.colorLabel changes do this too
+            # ToDo: Handle set immediately after get, is it needed?
+            # ToDo: Create some timeout system to avoid too frequent writes
+            self.hardwareSetColor()
+        elif self.onChangeButtonGroup.checkedButton() is self.onChangeSetProgramButton:
+            self.hardwareSetProgram()
 
     def updateWindowTitle(self, programChanged = None):
         if programChanged is not None:
@@ -355,7 +361,7 @@ class FireflyControl(QMainWindow):
 
     def hardwareSetProgram(self):
         self.processCommand(ffSetCommand.encode(str(self.programEdit.text())), ackResponse.prefix)
-        if self.onWriteMarkSavedCheckBox.isChecked():
+        if self.programChanged and self.onWriteMarkSavedCheckBox.isChecked():
             self.updateWindowTitle(False)
 
     def hardwareGetProgram(self, args = None, force = False):
