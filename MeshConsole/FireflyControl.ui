@@ -401,9 +401,6 @@
         <property name="frameShape">
          <enum>QFrame::Box</enum>
         </property>
-        <property name="text">
-         <string/>
-        </property>
        </widget>
       </item>
       <item>
@@ -564,7 +561,7 @@
   </customwidget>
   <customwidget>
    <class>SelectColorLabel</class>
-   <extends>QLabel</extends>
+   <extends>QFrame</extends>
    <header>FireflyWidgets</header>
   </customwidget>
  </customwidgets>

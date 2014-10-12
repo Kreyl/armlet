@@ -8,7 +8,7 @@ from itertools import chain, islice
 try:
     from PyQt4.QtCore import Qt, QSize
     from PyQt4.QtGui import QColorDialog, QHBoxLayout, QScrollArea, QStackedWidget, QWidget
-    from PyQt4.QtGui import QButtonGroup, QLabel, QLineEdit, QRadioButton, QToolButton
+    from PyQt4.QtGui import QButtonGroup, QFrame, QLineEdit, QRadioButton, QToolButton
     from PyQt4.QtGui import QColor, QIcon, QIntValidator, QSizePolicy, qRgb
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
@@ -79,7 +79,7 @@ class TimeEdit(QLineEdit):
         if callback:
             self.textEdited.connect(callback)
 
-class SelectColorLabel(QLabel):
+class SelectColorLabel(QFrame):
     STANDARS_COLORS = ((255, 0, 0), (0, 255, 0), (0, 0, 255),
                        (255, 255, 0), (255, 0, 255), (0, 255, 255),
                        (255, 64, 64), (64, 255, 64), (64, 64, 255),
@@ -102,7 +102,7 @@ class SelectColorLabel(QLabel):
     # QColor(QPixmap.grabWindow(QApplication.desktop().winId()).toImage().pixel(x, y))
 
     def __init__(self, parent, callback = None, color = None):
-        QLabel.__init__(self, parent)
+        QFrame.__init__(self, parent)
         self.setFrameStyle(self.Box | self.Plain)
         setTip(self, "Select color")
         self.callback = callback
@@ -148,7 +148,7 @@ class SelectColorLabel(QLabel):
             self.colorDialog.currentColorChanged.disconnect()
         except TypeError:
             pass
-        if self.globalLabel not in (self, None):
+        if self.globalLabel:
             self.globalLabel.setColor(self.color)
         self.colorDialog.setCurrentColor(self.color)
         self.colorDialog.currentColorChanged.connect(self.setColor)

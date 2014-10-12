@@ -55,6 +55,8 @@ WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
 # ToDo:
 # - Optimize resize events with sizes updating
 # - Remove program table flicker when opening files
+# - Avoid sending too many commands on color edit
+# - Handle set immediately after get, is it needed?
 #
 
 class CallableHandler(Handler):
@@ -169,7 +171,8 @@ class FireflyControl(QMainWindow):
         self.fileName = None
         self.programChanged = False
         self.currentDirectory = getcwd()
-        self.recentFiles = deque((), 9) # pylint: disable=E1121
+        self.recentFiles = deque(maxlen = 9)
+        self.port = None
         # Setting window size
         resolution = QDesktopWidget().screenGeometry()
         width = resolution.width()
@@ -178,6 +181,7 @@ class FireflyControl(QMainWindow):
         # Configuring widgets
         SelectColorLabel.configure(self, self.colorLabel)
         self.colorLabel.setCorrectSize(self.graphLabel.minimumHeight())
+        self.colorLabel.callback = self.updateHardware
         self.portLabel.configure()
         self.resetButton.clicked.connect(self.reset)
         self.consoleEdit.configure(self.consoleEnter)
@@ -289,18 +293,18 @@ class FireflyControl(QMainWindow):
             action.triggered.connect(partial(self.openFile, fileName))
             self.fileMenu.insertAction(insertBeforeSeparator, action)
 
+    def updateHardware(self, color = None):
+        if self.onChangeButtonGroup.checkedButton() is self.onChangeSetColorButton:
+            self.hardwareSetColor()
+        elif not color and self.onChangeButtonGroup.checkedButton() is self.onChangeSetProgramButton:
+            self.hardwareSetProgram()
+
     def updateProgram(self, program, gradient, programChanged = True):
         if program != self.programEdit.text(): # ToDo: Wouldn't it block window title update when program contents is accidentially the same?
             self.programEdit.setText(program)
             self.graphLabel.setStyleSheet(gradient)
             self.updateWindowTitle(programChanged)
-        if self.onChangeButtonGroup.checkedButton() is self.onChangeSetColorButton:
-            # ToDo: Make self.colorLabel changes do this too
-            # ToDo: Handle set immediately after get, is it needed?
-            # ToDo: Create some timeout system to avoid too frequent writes
-            self.hardwareSetColor()
-        elif self.onChangeButtonGroup.checkedButton() is self.onChangeSetProgramButton:
-            self.hardwareSetProgram()
+        self.updateHardware()
 
     def updateWindowTitle(self, programChanged = None):
         if programChanged is not None:
@@ -311,7 +315,7 @@ class FireflyControl(QMainWindow):
             programName = programName[:dotIndex]
         self.setWindowTitle(WINDOW_TITLE % (self.title, programName, '*' if self.programChanged else ''))
 
-    def processConnect(self, pong): # pylint: disable=W0613
+    def processConnect(self, pong):
         if self.onConnectButtonGroup.checkedButton() is self.onConnectSetColorButton:
             self.logger.info("connected device detected, setting color")
             self.hardwareSetColor()
@@ -328,6 +332,8 @@ class FireflyControl(QMainWindow):
             self.logger.info("connected device detected")
 
     def processCommand(self, command, expect = COMMAND_MARKER):
+        if not self.port:
+            return
         data = self.port.command(command, expect, QApplication.processEvents)
         if data:
             data = str(data).strip()
