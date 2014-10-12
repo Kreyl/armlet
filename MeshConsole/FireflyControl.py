@@ -85,6 +85,7 @@ class EmulatedSerial(object):
         self.timeout = TIMEOUT
         self.buffer = deque()
         self.ready = False
+        self.program = 'rgb,255,0,0,0,rgb,255,255,255,0,wait,1,rgb,0,0,255,0,rgb,255,255,255,0,rgb,0,255,0,0,rgb,255,255,255,0,goto,3'
 
     def readline(self):
         while True:
@@ -93,13 +94,17 @@ class EmulatedSerial(object):
             sleep(DT)
 
     def write(self, data):
-        (tag, _args) = Command.decodeCommand(data)
-        if tag == ffSetCommand.tag:
-            ret = ackResponse.encode(0)
-        elif tag == ffGetCommand.tag:
-            ret = ffResponse.encode('rgb,255,0,0,0,rgb,255,255,255,0,wait,1,rgb,0,0,255,0,rgb,255,255,255,0,rgb,0,255,0,0,rgb,255,255,255,0,goto,3')
-        else:
-            assert False
+        try:
+            (tag, args) = Command.decodeCommand(data)
+            if tag == ffSetCommand.tag:
+                self.program = ','.join(args)
+                ret = ackResponse.encode(0)
+            elif tag == ffGetCommand.tag:
+                ret = ffResponse.encode(self.program)
+            else:
+                raise ValueError("Unknown command")
+        except ValueError, e:
+            ret = str(e)
         self.buffer.append(ret)
         self.ready = True
         return len(data)
@@ -316,7 +321,7 @@ class FireflyControl(QMainWindow):
         else:
             self.logger.info("connected device detected")
 
-    def processCommand(self, command, expect = COMMAND_MARKER, _checked = False):
+    def processCommand(self, command, expect = COMMAND_MARKER):
         data = self.port.command(command, expect, QApplication.processEvents)
         if data:
             data = str(data).strip()
