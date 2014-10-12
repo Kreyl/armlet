@@ -177,7 +177,7 @@ class FireflyControl(QMainWindow):
         height = resolution.height()
         self.setGeometry(width * WINDOW_POSITION, height * WINDOW_POSITION, width * WINDOW_SIZE, height * WINDOW_SIZE)
         # Configuring widgets
-        SelectColorLabel.configure(self)
+        SelectColorLabel.configure(self, self.colorLabel)
         self.colorLabel.setCorrectSize(self.graphLabel.minimumHeight())
         self.portLabel.configure()
         self.resetButton.clicked.connect(self.reset)

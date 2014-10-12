@@ -96,19 +96,24 @@ class SelectColorLabel(QLabel):
                        (64, 64, 0), (64, 0, 64), (0, 64, 64),
                        (128, 64, 64), (64, 128, 64), (64, 64, 128),
                        (255, 255, 255), (128, 128, 128), (0, 0, 0))
+    globalLabel = None
+
+    # ToDo: Maybe add color picker using something like this:
+    # QColor(QPixmap.grabWindow(QApplication.desktop().winId()).toImage().pixel(x, y))
 
     def __init__(self, parent, callback = None, color = None):
         QLabel.__init__(self, parent)
         self.setFrameStyle(self.Box | self.Plain)
         setTip(self, "Select color")
         self.callback = callback
-        self.setColor(color or QColor(Qt.white))
+        self.setColor(color or (self.globalLabel.color if self.globalLabel else QColor(Qt.white)))
         self.mousePressEvent = self.editColor
 
     @classmethod
-    def configure(cls, parent):
+    def configure(cls, parent, globalLabel = None):
         cls.colorDialog = QColorDialog(parent)
         cls.setStandardColors(qRgb(*rgb) for rgb in cls.STANDARS_COLORS)
+        cls.globalLabel = globalLabel
 
     @classmethod
     def getCustomColors(cls):
@@ -133,6 +138,8 @@ class SelectColorLabel(QLabel):
     def setColor(self, color):
         self.color = color
         self.setStyleSheet('background-color: %s' % color.name())
+        if self.globalLabel not in (self, None):
+            self.globalLabel.setColor(color)
         if self.callback:
             self.callback(color)
 
@@ -141,6 +148,8 @@ class SelectColorLabel(QLabel):
             self.colorDialog.currentColorChanged.disconnect()
         except TypeError:
             pass
+        if self.globalLabel not in (self, None):
+            self.globalLabel.setColor(self.color)
         self.colorDialog.setCurrentColor(self.color)
         self.colorDialog.currentColorChanged.connect(self.setColor)
         previousColor = self.color
