@@ -79,7 +79,7 @@ class TimeEdit(QLineEdit):
         if callback:
             self.textEdited.connect(callback)
 
-class SelectColorLabel(QFrame):
+class SelectColorFrame(QFrame):
     STANDARS_COLORS = ((255, 0, 0), (0, 255, 0), (0, 0, 255),
                        (255, 255, 0), (255, 0, 255), (0, 255, 255),
                        (255, 64, 64), (64, 255, 64), (64, 64, 255),
@@ -380,7 +380,7 @@ class CommandWidget(QWidget):
 
     def __init__(self, color = None, morphLength = None, delayLength = None, index = None):
         QWidget.__init__(self, self.parentWidget)
-        self.colorLabel = SelectColorLabel(self, self.setColor, color)
+        self.colorFrame = SelectColorFrame(self, self.setColor, color)
         self.morphEdit = TimeEdit(self, self.updateProgram, morphLength)
         self.delayEdit = TimeEdit(self, self.updateProgram, delayLength)
         self.radioButton = QRadioButton(self)
@@ -398,7 +398,7 @@ class CommandWidget(QWidget):
         self.hider.addWidget(QWidget(self))
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.colorLabel)
+        layout.addWidget(self.colorFrame)
         layout.addWidget(self.morphEdit)
         layout.addWidget(self.delayEdit)
         layout.addWidget(self.hider)
@@ -463,7 +463,7 @@ class CommandWidget(QWidget):
 
     def setCorrectSize(self):
         size = max(self.correctHeight, self.morphEdit.height())
-        self.colorLabel.setCorrectSize(size, True)
+        self.colorFrame.setCorrectSize(size, True)
         self.deleteButton.setCorrectSize(size)
         self.radioButton.setFixedWidth(size + self.radioButton.icon().actualSize(QSize(100, 100)).width())
         return size

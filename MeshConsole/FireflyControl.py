@@ -24,7 +24,7 @@ from UARTTextProtocol import Command, COMMAND_MARKER
 from UARTTextCommands import ackResponse, ffGetCommand, ffSetCommand, ffResponse
 from SerialPort import SerialPort, DT, TIMEOUT
 
-from FireflyWidgets import CommandWidget, InsertCommandButton, SelectColorLabel
+from FireflyWidgets import CommandWidget, InsertCommandButton, SelectColorFrame
 
 LONG_DATETIME_FORMAT = 'yyyy.MM.dd hh:mm:ss'
 
@@ -57,6 +57,7 @@ WINDOW_POSITION = (1 - WINDOW_SIZE) / 2
 # - Remove program table flicker when opening files
 # - Avoid sending too many commands on color edit
 # - Handle set immediately after get, is it needed?
+# - Maybe create a modificationInProgress flag to avoid all flicker
 #
 
 class CallableHandler(Handler):
@@ -179,9 +180,9 @@ class FireflyControl(QMainWindow):
         height = resolution.height()
         self.setGeometry(width * WINDOW_POSITION, height * WINDOW_POSITION, width * WINDOW_SIZE, height * WINDOW_SIZE)
         # Configuring widgets
-        SelectColorLabel.configure(self, self.colorLabel)
-        self.colorLabel.setCorrectSize(self.graphLabel.minimumHeight())
-        self.colorLabel.callback = self.updateHardware
+        SelectColorFrame.configure(self, self.colorFrame)
+        self.colorFrame.setCorrectSize(self.graphLabel.minimumHeight())
+        self.colorFrame.callback = self.updateHardware
         self.portLabel.configure()
         self.resetButton.clicked.connect(self.reset)
         self.consoleEdit.configure(self.consoleEnter)
@@ -363,7 +364,7 @@ class FireflyControl(QMainWindow):
         self.port.reset()
 
     def hardwareSetColor(self):
-        self.processCommand(ffSetCommand.encode(self.colorLabel.getCommand()), ackResponse.prefix)
+        self.processCommand(ffSetCommand.encode(self.colorFrame.getCommand()), ackResponse.prefix)
 
     def hardwareSetProgram(self):
         self.processCommand(ffSetCommand.encode(str(self.programEdit.text())), ackResponse.prefix)
@@ -389,8 +390,8 @@ class FireflyControl(QMainWindow):
             settings.setValue('onConnectButton', self.onConnectButtonGroup.checkedId())
             settings.setValue('onReadMarkChanged', self.onReadMarkChangedCheckBox.isChecked())
             settings.setValue('onWriteMarkSaved', self.onWriteMarkSavedCheckBox.isChecked())
-            settings.setValue('color', self.colorLabel.color)
-            settings.setValue('customColors', SelectColorLabel.getCustomColors())
+            settings.setValue('color', self.colorFrame.color)
+            settings.setValue('customColors', SelectColorFrame.getCustomColors())
             settings.beginGroup('window')
             settings.setValue('width', self.size().width())
             settings.setValue('height', self.size().height())
@@ -427,8 +428,8 @@ class FireflyControl(QMainWindow):
                     self.onConnectButtonGroup.button(settings.value('onConnectButton', type = int)).setChecked(True)
                     self.onReadMarkChangedCheckBox.setChecked(settings.value('onReadMarkChanged', type = bool))
                     self.onWriteMarkSavedCheckBox.setChecked(settings.value('onWriteMarkSaved', type = bool))
-                    self.colorLabel.setColor(settings.value('color', type = QColor))
-                    SelectColorLabel.setCustomColors(settings.value('customColors', type = tuple))
+                    self.colorFrame.setColor(settings.value('color', type = QColor))
+                    SelectColorFrame.setCustomColors(settings.value('customColors', type = tuple))
                     settings.beginGroup('window')
                     self.resize(settings.value('width', type = int), settings.value('height', type = int))
                     self.move(settings.value('x', type = int), settings.value('y', type = int))

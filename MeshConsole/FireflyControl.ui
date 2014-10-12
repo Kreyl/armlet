@@ -394,7 +394,13 @@
     <item row="4" column="0" colspan="2">
      <layout class="QHBoxLayout" name="indicatorLayout" stretch="0,1">
       <item>
-       <widget class="SelectColorLabel" name="colorLabel">
+       <widget class="SelectColorFrame" name="colorFrame">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="styleSheet">
          <string notr="true">background: white</string>
         </property>
@@ -560,9 +566,10 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>SelectColorLabel</class>
+   <class>SelectColorFrame</class>
    <extends>QFrame</extends>
    <header>FireflyWidgets</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
