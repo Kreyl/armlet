@@ -371,7 +371,6 @@ class CommandWidget(QWidget):
 
     def __init__(self, color = None, morphLength = None, delayLength = None, index = None):
         QWidget.__init__(self, self.parentWidget)
-        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.colorLabel = SelectColorLabel(self, self.setColor, color)
         self.morphEdit = TimeEdit(self, self.updateProgram, morphLength)
         self.delayEdit = TimeEdit(self, self.updateProgram, delayLength)
@@ -397,6 +396,7 @@ class CommandWidget(QWidget):
         for (h, w) in zip(widgets(self.headerLayout), widgets(layout)):
             if not w.toolTip() and hasattr(h, 'text'):
                 setTip(w, h.text())
+        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         self.setCorrectSize()
         lastIndex = self.commandsLayout.count() - self.TAIL_SIZE
         insertIndex = index + self.HEADER_SIZE if index != None else lastIndex

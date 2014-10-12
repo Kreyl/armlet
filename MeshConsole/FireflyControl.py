@@ -132,7 +132,6 @@ class PortLabel(QLabel):
 
 class FireflyControl(QMainWindow):
     comConnect = pyqtSignal(str)
-    comInput = pyqtSignal(str)
 
     def __init__(self, args):
         QMainWindow.__init__(self)
@@ -149,17 +148,29 @@ class FireflyControl(QMainWindow):
                 self.emulated = True
             elif option in ('-r', '--reset'):
                 self.needLoadSettings = False
-        # Setting window size
-        resolution = QDesktopWidget().screenGeometry()
-        width = resolution.width()
-        height = resolution.height()
-        self.setGeometry(width * WINDOW_POSITION, height * WINDOW_POSITION, width * WINDOW_SIZE, height * WINDOW_SIZE)
+        # Setup logging
+        formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
+        handlers = (FileHandler(LOG_FILE_NAME), CallableHandler(self.logTextEdit.appendPlainText))
+        rootLogger = getLogger('')
+        for handler in handlers:
+            handler.setFormatter(formatter)
+            rootLogger.addHandler(handler)
+        rootLogger.setLevel(INFO)
+        setLoggerClass(EventLogger)
+        self.logger = getLogger('FireflyControl')
+        self.logger.configure(self) # pylint: disable=E1103
+        self.logger.info("start")
         # Setting variables
         self.title = self.windowTitle()
         self.fileName = None
         self.programChanged = False
         self.currentDirectory = getcwd()
         self.recentFiles = deque((), 9) # pylint: disable=E1121
+        # Setting window size
+        resolution = QDesktopWidget().screenGeometry()
+        width = resolution.width()
+        height = resolution.height()
+        self.setGeometry(width * WINDOW_POSITION, height * WINDOW_POSITION, width * WINDOW_SIZE, height * WINDOW_SIZE)
         # Configuring widgets
         SelectColorLabel.configure(self)
         self.colorLabel.setCorrectSize(self.graphLabel.minimumHeight())
@@ -173,27 +184,17 @@ class FireflyControl(QMainWindow):
         self.aboutDialog = AboutDialog()
         self.aboutAction.triggered.connect(self.aboutDialog.exec_)
         self.aboutQtAction.triggered.connect(partial(QMessageBox.aboutQt, self, "About Qt"))
+        self.setColorButton.clicked.connect(self.hardwareSetColor)
+        self.setProgramButton.clicked.connect(self.hardwareSetProgram)
+        self.getProgramButton.clicked.connect(self.hardwareGetProgram)
         CommandWidget.configure(self.programStackedWidget, self.commandsWidget, self.updateProgram)
         InsertCommandButton.configure(self.insertCommandWidget)
         InsertCommandButton()
-        # Setup logging
-        formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
-        handlers = (FileHandler(LOG_FILE_NAME), CallableHandler(self.logTextEdit.appendPlainText))
-        rootLogger = getLogger('')
-        for handler in handlers:
-            handler.setFormatter(formatter)
-            rootLogger.addHandler(handler)
-        rootLogger.setLevel(INFO)
-        setLoggerClass(EventLogger)
-        self.logger = getLogger('FireflyControl')
-        self.logger.configure(self) # pylint: disable=E1103
-        self.logger.info("start")
         # Starting up!
         self.loadSettings()
         self.comConnect.connect(self.processConnect)
-        self.comInput.connect(self.processInput)
         self.port = SerialPort(self.logger, ffGetCommand.prefix, ffResponse.prefix,
-                               self.comConnect.emit, self.comInput.emit, self.portLabel.setPortStatus.emit,
+                               self.comConnect.emit, None, self.portLabel.setPortStatus.emit,
                                EmulatedSerial() if self.emulated else None, (115200,))
         if self.savedMaximized:
             self.showMaximized()
@@ -210,12 +211,12 @@ class FireflyControl(QMainWindow):
             return self.saveFile()
         return ret == QMessageBox.Discard
 
-    def newFile(self, program = None, force = False):
+    def newFile(self, program = None, force = False, markChanged = False):
         if not force and not self.askForSave():
             return False
         CommandWidget.setupProgram((program,) if program else None)
         self.fileName = None
-        self.updateWindowTitle(False)
+        self.updateWindowTitle(markChanged)
         return True
 
     def openFile(self, fileName = None):
@@ -302,56 +303,31 @@ class FireflyControl(QMainWindow):
     def processConnect(self, pong): # pylint: disable=W0613
         if self.onConnectButtonGroup.checkedButton() is self.onConnectSetColorButton:
             self.logger.info("connected device detected, setting color")
-            self.processCommand(ffSetCommand.encode(self.colorLabel.getCommand()))
+            self.hardwareSetColor()
         elif self.onConnectButtonGroup.checkedButton() is self.onConnectSetProgramButton:
             self.logger.info("connected device detected, setting program")
-            self.processCommand(ffSetCommand.encode(str(self.programEdit.text())))
+            self.hardwareSetProgram()
         elif self.onConnectButtonGroup.checkedButton() is self.onConnectGetProgramButton:
-            self.logger.info("connected device detected, getting program")
-            self.newFile(','.join(Command.decodeCommand(pong)[1]))
+            self.logger.info("connected device detected, got program")
+            self.hardwareGetProgram(Command.decodeCommand(pong)[1])
         elif self.onConnectButtonGroup.checkedButton() is self.onConnectForceGetProgramButton:
-            self.logger.info("connected device detected, force getting program")
-            self.newFile(','.join(Command.decodeCommand(pong)[1]), True)
+            self.logger.info("connected device detected, got program")
+            self.hardwareGetProgram(Command.decodeCommand(pong)[1], True)
         else:
             self.logger.info("connected device detected")
 
     def processCommand(self, command, expect = COMMAND_MARKER, _checked = False):
-        error = True
         data = self.port.command(command, expect, QApplication.processEvents)
         if data:
             data = str(data).strip()
             (tag, args) = Command.decodeCommand(data)
-            if tag == ackResponse.tag:
-                error = args[0]
-                if error:
-                    self.logger.warning("Setup ERROR: %d", error)
-                else:
-                    self.logger.info("Setup OK")
-            elif args is not None: # unexpected valid command
-                self.logger.warning("Unexpected command: %s %s", tag, ' '.join(str(arg) for arg in args))
-            elif tag: # unknown command
-                self.logger.warning("Unknown command %s: %s", tag, data)
-            else: # not a command
+            if tag:
+                self.logger.info("OK")
+                return args
+            else:
                 self.logger.warning("Unexpected input: %s", data)
         else:
             self.logger.warning("command timed out")
-
-    def processInput(self, data):
-        error = True
-        data = unicode(data).strip()
-        (tag, args) = Command.decodeCommand(data)
-        if tag == ackResponse.tag:
-            error = args[0]
-            if error:
-                self.logger.warning("ERROR: %d", error)
-            else:
-                self.logger.info("OK")
-        elif args is not None: # unexpected valid command
-            self.logger.warning("Unexpected command: %s %s", tag, ' '.join(str(arg) for arg in args))
-        elif tag: # unknown command
-            self.logger.warning("Unknown command %s: %s", tag, data.rstrip())
-        else: # not a command
-            self.logger.warning("Unexpected input: %s", data.rstrip())
 
     def consoleEnter(self):
         data = self.consoleEdit.getInput()
@@ -368,6 +344,20 @@ class FireflyControl(QMainWindow):
     def reset(self):
         self.logger.info("reset")
         self.port.reset()
+
+    def hardwareSetColor(self):
+        self.processCommand(ffSetCommand.encode(self.colorLabel.getCommand()), ackResponse.prefix)
+
+    def hardwareSetProgram(self):
+        self.processCommand(ffSetCommand.encode(str(self.programEdit.text())), ackResponse.prefix)
+        if self.onWriteMarkSavedCheckBox.isChecked():
+            self.updateWindowTitle(False)
+
+    def hardwareGetProgram(self, args = None, force = False):
+        if not args:
+            args = self.processCommand(ffGetCommand.encode())
+        if args:
+            self.newFile(','.join(args), force, self.onReadMarkChangedCheckBox.isChecked())
 
     def saveSettings(self):
         settings = QSettings()
