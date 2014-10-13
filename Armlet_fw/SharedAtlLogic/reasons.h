@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-09-26 20:09:57
+ * Generated at 2014-10-13 22:19:34
  */
 #ifndef REASONS_H
 #define REASONS_H
@@ -20,11 +20,11 @@
 #define MASTER_ID_START 1
 #define MASTER_ID_END 9
 
-#define PLACEHOLDER_ID_START 50
-#define PLACEHOLDER_ID_END 99
+#define PLACEHOLDER_ID_START 10
+#define PLACEHOLDER_ID_END 49
 
-#define LOCATION_ID_START 10
-#define LOCATIONS_ID_END 49
+#define LOCATION_ID_START 50
+#define LOCATIONS_ID_END 99
 
 #define FOREST_ID_START 100
 #define FOREST_ID_END 199

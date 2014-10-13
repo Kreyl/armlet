@@ -65,8 +65,8 @@ C_CONTENT = open('reasons_cpp.tpl').read() % ', '.join(SOURCE_CSVS)
 
 H_CONTENT = open('reasons_h.tpl').read() % (', '.join(SOURCE_CSVS),
        MASTER_ID_START, MASTER_ID_END,
-       LOCATION_ID_START, LOCATION_ID_END,
        PLACEHOLDER_ID_START, PLACEHOLDER_ID_END,
+       LOCATION_ID_START, LOCATION_ID_END,
        FOREST_ID_START, FOREST_ID_END,
        PERSON_ID_START, PERSON_ID_END,
        MAX_MESH_ID, MAX_ID)
