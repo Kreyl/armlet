@@ -21,7 +21,7 @@ LONGEST_REASON = max((len(reason), n) for (n, reason) in enumerate(REASONS))[1]
 NAL_FLAG = 0x8000 # Non-actual location flag bit
 
 BATTERY_SYMBOL = u'\u25ae'
-BATTERY_DIVISOR = 20
+BATTERY_DIVISOR = 25
 
 def signedNumber(n):
     return ('%+d' % n) if n else '0'
@@ -47,12 +47,12 @@ def getColumnsData(processor):
         (True, RAW, True, True, False, 'TimeDiffT', 'Time difference as time', 'td', 0, processor.cycleTimeStr),
         (True, PROC, False, True, False, 'LocalTimeC', 'Device local time in cycles', 'td', 9999, processor.tdTime),
         (True, PROC, False, True, False, 'LocalTimeD', 'Device local date', 'td', 0, processor.tdDateStr),
-        (True, RAW, True, True, False, 'Location', 'Device location', 'location', len(REASONS), lambda x: x & (NAL_FLAG - 1)),
-        (True, RAW, True, False, True, 'LocationN', 'Device location name', 'location', LONGEST_REASON, lambda x: getItem(REASONS, x & (NAL_FLAG - 1))),
-        (True, RAW, True, False, False, 'LA', 'Location actual', 'location', NAL_FLAG, lambda x: '--' if x & NAL_FLAG else '+'),
+        (True, RAW, True, True, False, 'Location', 'Device location', 'location', len(REASONS)),
+        (True, RAW, True, False, True, 'LocationN', 'Device location name', 'location', LONGEST_REASON, lambda x: getItem(REASONS, x & (NAL_FLAG - 1)) + ('--' if x & NAL_FLAG else '+')),
         (True, RAW, True, True, False, 'Neighbor', 'Nearest neighbor', 'neighbor', len(REASONS)),
         (True, RAW, True, False, True, 'NeighborN', 'Nearest neighbor name', 'neighbor', LONGEST_REASON, partial(getItem, REASONS)),
-        (True, RAW, True, False, False, 'Battery', 'Battery', 'battery', 100, lambda x: BATTERY_SYMBOL * (x // BATTERY_DIVISOR)),
+        (True, RAW, True, False, False, 'Battery', 'Battery', 'battery', 100),
+        (True, RAW, True, False, False, 'BatteryG', 'Battery graph', 'battery', 100, lambda x: BATTERY_SYMBOL * (1 + x // BATTERY_DIVISOR)),
     )
 
 class Device(object): # pylint: disable=R0902

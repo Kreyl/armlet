@@ -252,7 +252,7 @@ class MeshConsole(QMainWindow):
         self.logger.info("connected device detected")
         (numDevices, self.cycleLength) = meshGetSettingsResponse.decode(pong)
         self.logger.info("Mesh settings: %d devices, cycle length %dms", numDevices, self.cycleLength)
-        if numDevices != len(self.devices): # ToDo: Do something clever with it
+        if numDevices - 1 != len(self.devices): # ToDo: Do something clever with it
             self.error("Number of devices mismatch, got %d, expected %d" % (numDevices, len(self.devices)))
         if self.cycleLength < 1:
             self.error("Bad cycle length %d" % self.cycleLength)
