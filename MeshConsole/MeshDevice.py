@@ -30,7 +30,7 @@ def getItem(what, index):
     try:
         return what[index]
     except IndexError:
-        return index
+        return str(index)
 
 def getColumnsData(processor):
     return ( # checked, changing, highlight, alignment, sortProcessed, name, description, fieldName, longestValue, formatter, fmt
@@ -47,7 +47,7 @@ def getColumnsData(processor):
         (True, RAW, True, True, False, 'TimeDiffT', 'Time difference as time', 'td', 0, processor.cycleTimeStr),
         (True, PROC, False, True, False, 'LocalTimeC', 'Device local time in cycles', 'td', 9999, processor.tdTime),
         (True, PROC, False, True, False, 'LocalTimeD', 'Device local date', 'td', 0, processor.tdDateStr),
-        (True, RAW, True, True, False, 'Location', 'Device location', 'location', len(REASONS)),
+        (True, RAW, True, True, False, 'Location', 'Device location', 'location', NAL_FLAG, lambda x: x & (NAL_FLAG - 1)),
         (True, RAW, True, False, True, 'LocationN', 'Device location name', 'location', LONGEST_REASON, lambda x: getItem(REASONS, x & (NAL_FLAG - 1)) + ('--' if x & NAL_FLAG else '+')),
         (True, RAW, True, True, False, 'Neighbor', 'Nearest neighbor', 'neighbor', len(REASONS)),
         (True, RAW, True, False, True, 'NeighborN', 'Nearest neighbor name', 'neighbor', LONGEST_REASON, partial(getItem, REASONS)),
