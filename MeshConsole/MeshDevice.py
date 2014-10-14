@@ -10,7 +10,7 @@ from MeshView import CONST, RAW, PROC
 
 CSV_ENCODING = 'Windows-1251'
 
-NUM_DEVICES = 300
+NUM_DEVICES = 200
 
 REASONS_CSV = '../ReasonProcessor/Reasons.csv'
 

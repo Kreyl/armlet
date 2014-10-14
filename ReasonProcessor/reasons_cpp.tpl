@@ -20,8 +20,6 @@ Reason_t reasons[] = {
 %%s	// end of placeholders
 %%s	// Locations
 %%s	// end of locations
-%%s	// Forest lights
-%%s	// end of forest lights
 %%s	// People
 %%s	// end of people
 %%s};

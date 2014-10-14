@@ -19,7 +19,6 @@ from sys import argv, stdout
 from Settings import MASTER_ID_START, MASTER_ID_END, MASTER_IDS
 from Settings import LOCATION_ID_START, LOCATION_ID_END, LOCATION_IDS
 from Settings import PLACEHOLDER_ID_START, PLACEHOLDER_ID_END, PLACEHOLDER_IDS
-from Settings import FOREST_ID_START, FOREST_ID_END, FOREST_IDS
 from Settings import PERSON_ID_START, PERSON_ID_END, PERSON_IDS
 from Settings import MAX_MESH_ID, MAX_ID
 
@@ -67,7 +66,6 @@ H_CONTENT = open('reasons_h.tpl').read() % (', '.join(SOURCE_CSVS),
        MASTER_ID_START, MASTER_ID_END,
        PLACEHOLDER_ID_START, PLACEHOLDER_ID_END,
        LOCATION_ID_START, LOCATION_ID_END,
-       FOREST_ID_START, FOREST_ID_END,
        PERSON_ID_START, PERSON_ID_END,
        MAX_MESH_ID, MAX_ID)
 
@@ -86,8 +84,6 @@ REASON_H_NODE = '#define REASON_%s%s %2d'
 RESERVED_REASON = 'R%03d'
 
 PLACEHOLDER_REASON = 'PH%02d'
-
-FOREST_REASON = 'FL%03d'
 
 TEST_COMMAND = 'gcc -I "%s" -o test "%s" test.c && ./test && rm test' % (C_PATH, C_TARGET)
 
@@ -139,12 +135,6 @@ def processReasons():
     reasons.append(r)
     num += len(r)
     r = processReasonRange(getFileName(LOCATIONS_CSV), 'location', LOCATION_ID_START, len(LOCATION_IDS))
-    reasons.append(r)
-    num += len(r)
-    r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, FOREST_ID_START))
-    reasons.append(r)
-    num += len(r)
-    r = tuple(reserveReason(FOREST_REASON, rid) for rid in FOREST_IDS)
     reasons.append(r)
     num += len(r)
     r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, PERSON_ID_START))

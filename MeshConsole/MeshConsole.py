@@ -6,12 +6,15 @@
 from collections import deque
 from functools import partial
 from getopt import getopt
+from itertools import chain
 from logging import getLogger, getLoggerClass, setLoggerClass, FileHandler, Formatter, Handler, INFO, NOTSET
 from math import ceil
 from random import randint
-from sys import argv, exit # pylint: disable=W0622
+from sys import argv, exit, path as sysPath # pylint: disable=W0622
 from time import sleep, time
 from traceback import format_exc
+
+sysPath.append('../ReasonProcessor')
 
 try:
     from PyQt4 import uic
@@ -19,6 +22,8 @@ try:
     from PyQt4.QtGui import QApplication, QDesktopWidget, QMainWindow, QMessageBox
 except ImportError, ex:
     raise ImportError("%s: %s\n\nPlease install PyQt4 v4.10.4 or later: http://riverbankcomputing.com/software/pyqt/download\n" % (ex.__class__.__name__, ex))
+
+from Settings import PERSON_ID_START, PERSON_ID_END # pylint: disable=F0401
 
 from MeshDevice import Device, getColumnsData
 from MeshWidgets import * # pylint: disable=W0401
@@ -111,12 +116,15 @@ class MeshConsole(QMainWindow):
     def __init__(self, args):
         QMainWindow.__init__(self)
         uic.loadUi(MAIN_UI_FILE_NAME, self)
+        self.demo = False
         self.emulated = False
         self.needLoadSettings = True
         self.slave = False
-        (options, _parameters) = getopt(args, 'ers', ('emulated', 'reset', 'slave'))
+        (options, _parameters) = getopt(args, 'ders', ('demo', 'emulated', 'reset', 'slave'))
         for (option, _value) in options:
-            if option in ('-e', '--emulated'):
+            if option in ('-d', '--demo'):
+                self.demo = True
+            elif option in ('-e', '--emulated'):
                 self.emulated = True
             elif option in ('-r', '--reset'):
                 self.needLoadSettings = False
@@ -174,6 +182,14 @@ class MeshConsole(QMainWindow):
             action = ColumnAction(column, self.devicesTableView.setColumnHidden, self.columnsMenu)
             self.columnsMenu.addAction(action)
             self.columnActions.append(action)
+        # Demo mode
+        if self.demo:
+            self.menuBar.hide()
+            self.controlWidget.hide()
+            self.logTextEditWidget.hide()
+            for i in chain(xrange(PERSON_ID_START - 1), xrange(PERSON_ID_END, len(self.devices))):
+                self.devicesTableView.hideRow(i)
+
         # Starting up!
         self.loadSettings()
         self.logger.info("Running in %s mode", 'SLAVE' if self.slave else 'MASTER')
@@ -253,7 +269,7 @@ class MeshConsole(QMainWindow):
         (numDevices, self.cycleLength) = meshGetSettingsResponse.decode(pong)
         self.logger.info("Mesh settings: %d devices, cycle length %dms", numDevices, self.cycleLength)
         if numDevices - 1 != len(self.devices): # ToDo: Do something clever with it
-            self.error("Number of devices mismatch, got %d, expected %d" % (numDevices, len(self.devices)))
+            self.error("Number of devices mismatch, got %d, expected %d" % (numDevices, len(self.devices) + 1))
         if self.cycleLength < 1:
             self.error("Bad cycle length %d" % self.cycleLength)
         self.timeSetInterval = int(ceil(float(TIME_SET_INTERVAL * 1000) / self.cycleLength)) * self.cycleLength
