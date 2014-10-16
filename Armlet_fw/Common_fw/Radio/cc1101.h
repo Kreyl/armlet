@@ -58,6 +58,20 @@ public:
     // State change
     void TransmitSync(void *Ptr);
     uint8_t ReceiveSync(uint32_t Timeout_ms, void *Ptr, int8_t *PRssi);
+
+    // Mesh
+    void PreparePkt(void *Ptr) {
+        while(IState != CC_STB_IDLE) EnterIdle();
+        WriteTX((uint8_t*)Ptr, IPktSz);
+    }
+    void StartTransmit() {
+        chSysLock();
+        PWaitingThread = chThdSelf();
+        EnterTX();
+        chSchGoSleepS(THD_STATE_SUSPENDED);
+        chSysUnlock();  // Will be here when IRQ fires
+    }
+
     void EnterIdle()  { WriteStrobe(CC_SIDLE); }
     void Sleep() { WriteStrobe(CC_SPWD); }
     void Recalibrate() {

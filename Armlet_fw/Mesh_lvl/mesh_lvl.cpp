@@ -69,6 +69,7 @@ void Mesh_t::Init() {
     IResetTimeAge(App.SelfID, 0);   /* TimeAge = 0; TimeOwner = App.ID */
     IPktPutCycle(AbsCycle);     /* CycleN = AbsCycle */
     AlienTable.UpdateSelf(AbsCycle);  /* Timestamp = AbsCycle; Send info to console */
+    PreparePktPayload(AbsCycle);
     /* Create Mesh Thread */
     IPThread = chThdCreateStatic(waMeshLvlThread, sizeof(waMeshLvlThread), NORMALPRIO, (tfunc_t)MeshLvlThread, NULL);
 
@@ -103,12 +104,13 @@ void Mesh_t::INewCycle() {
     IIncCurrCycle();
     ITimeAgeCounter();
     AlienTable.UpdateSelf(AbsCycle);  /* Timestamp = AbsCycle; Send info to console */
-//    Uart.Printf("\r\nCycle=%u, t=%u", AbsCycle, chTimeNow());
+//    Uart.Printf(" Cycle=%u, t=%u\r", AbsCycle, chTimeNow());
     // ==== RX ====
     if(CurrCycle == RxCycleN) chEvtSignal(Radio.rThd, EVTMSK_MESH_RX);
     // ==== TX ====
     else {
-        PreparePktPayload();
+        PreparePktPayload(AbsCycle);
+        CC.PreparePkt(&PktTx);
         if(SleepTime > 0) chThdSleepMilliseconds(SleepTime);
         chEvtSignal(Radio.rThd, EVTMSK_MESH_TX);
         IWaitTxEnd();
@@ -119,8 +121,7 @@ void Mesh_t::IPktHandler(){
     PriorityID = IGetTimeOwner();
     while(PktBucket.GetFilledSlots() != 0) {
         PktBucket.ReadPkt(&MeshMsg); /* Read Pkt from Buffer */
-        /* Put information from Pkt */
-        AlienTable.PutSender(AbsCycle, &MeshMsg.RadioPkt.SenderInfo);
+        AlienTable.PutSender(AbsCycle, &MeshMsg.RadioPkt.SenderInfo); /* Put information from Pkt */
         int32_t CycleDiff = AbsCycle - MeshMsg.RadioPkt.SenderInfo.Mesh.CycleN;
         AlienTable.PutAlien(MeshMsg.RadioPkt.AlienID, CycleDiff, &MeshMsg.RadioPkt.AlienInfo);
 
@@ -156,21 +157,25 @@ void Mesh_t::IUpdateTimer() {
         CycleTmr.SetCounter(0);
         GetPrimaryPkt = false;
         if(TimeToWakeUp > chTimeNow()) chThdSleepUntil(TimeToWakeUp); /* TODO: Thinking carefully about asynch switch on Timer with Virtual timer */
-        else Uart.Printf("\r\n[mesh_lvl.cpp] WT!");
+        else Uart.Printf("\r\n[mesh_lvl.cpp] WT!\r");
         CycleTmr.Enable();
     }
 }
 
-void Mesh_t::PreparePktPayload() {
+void Mesh_t::PreparePktPayload(uint32_t CycleN) {
     PktTx.SenderInfo.Mesh.SelfID = App.SelfID;         /* need if App.ID changed by the Uart command */
     PktTx.SenderInfo.State = App.CurrInfo;
-    IPktPutCycle(AbsCycle);
+    IPktPutCycle(CycleN);
     AlienInfo_t *AlienDataStr;
     uint16_t NextID = 0;
     NextID = AlienTable.GetID();
     AlienDataStr = AlienTable.GetInfo(NextID);
     PktTx.AlienID = NextID;
     PktTx.AlienInfo = *AlienDataStr;
+}
+
+void Mesh_t::PrepareNextPkt() {
+    PreparePktPayload(AbsCycle + 1);
 }
 
 uint8_t Mesh_t::GetAstronomicTime(char *PToStr, uint8_t MaxLen) {

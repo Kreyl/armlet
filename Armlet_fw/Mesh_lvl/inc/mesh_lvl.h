@@ -218,7 +218,8 @@ public:
     void IIrqHandler();
     void IPktHandler();
     void SendEvent(eventmask_t mask)  { chEvtSignal(IPThread,mask); }
-    void PreparePktPayload();
+    void PreparePktPayload(uint32_t CycleN);
+    void PrepareNextPkt();
 };
 
 extern Mesh_t Mesh;

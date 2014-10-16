@@ -59,7 +59,8 @@ void rLevel1_t::ITask() {
 //                            Mesh.PktTx.AlienInfo.State.Emotion
 //                            );
 #endif
-                CC.TransmitSync(&Mesh.PktTx); /* Pkt was prepared in Mesh Thd */
+                CC.StartTransmit();
+//                CC.TransmitSync(&Mesh.PktTx); /* Pkt was prepared in Mesh Thd */
                 Mesh.ITxEnd();
             } // Mesh Tx
         } // Mesh Init
