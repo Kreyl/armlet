@@ -40,7 +40,7 @@
      <item>
       <widget class="QLabel" name="textLabel">
        <property name="text">
-        <string>Pill Control is a tool to configure&lt;br&gt;Ostranna electronic Pills&lt;br&gt;using an interface device connected&lt;br&gt;via UART (RS-232 COM port)&lt;br&gt;&lt;br&gt;Copyright &amp;copy; 2014 &lt;a href=&quot;http://ostranna.ru&quot;&gt;Ostranna CG&lt;/a&gt;</string>
+        <string>&lt;strong&gt;Pill Control&lt;/strong&gt;&lt;br&gt;is a tool to configure&lt;br&gt;Ostranna electronic Pills&lt;br&gt;using an interface device connected&lt;br&gt;via UART (RS-232 COM port)&lt;br&gt;&lt;br&gt;Copyright &amp;copy; 2014 &lt;a href=&quot;http://ostranna.ru&quot;&gt;Ostranna CG&lt;/a&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -71,32 +71,12 @@
    <signal>accepted()</signal>
    <receiver>aboutDialog</receiver>
    <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
   </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
    <receiver>aboutDialog</receiver>
    <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
   </connection>
  </connections>
 </ui>

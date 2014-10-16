@@ -37,7 +37,7 @@ class SerialPort(object):
         self.readCallBack = readCallBack
         self.portTryCallBack = portTryCallBack
         self.externalPort = externalPort
-        self.writeBuffer = deque()
+        self.writeBuffer = deque(maxlen = 1)
         self.port = None
         self.ready = None
         self.expectTimeout = None

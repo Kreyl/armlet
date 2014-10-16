@@ -26,9 +26,6 @@
 #define LOCATION_ID_START %d
 #define LOCATIONS_ID_END %d
 
-#define FOREST_ID_START %d
-#define FOREST_ID_END %d
-
 #define PERSON_ID_START %d
 #define PERSON_ID_END %d
 
@@ -54,8 +51,6 @@ extern Reason_t reasons[];
 %%s	// end of placeholders
 %%s	// Locations
 %%s	// end of locations
-%%s	// Forest lights
-%%s	// end of forest lights
 %%s	// People
 %%s	// end of people
 %%s

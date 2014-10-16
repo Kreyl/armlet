@@ -12,122 +12,124 @@
   <widget class="QWidget" name="mainWidget">
    <layout class="QVBoxLayout" name="mainLayout">
     <item>
-     <layout class="QHBoxLayout" name="controlLayout">
-      <item>
-       <widget class="PortLabel" name="portLabel">
-        <property name="minimumSize">
-         <size>
-          <width>65</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="statusTip">
-         <string>Current connected port</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background: rgb(192,192,192)</string>
-        </property>
-        <property name="text">
-         <string>No COM</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="PauseButton" name="pauseButton">
-        <property name="toolTip">
-         <string>Pause</string>
-        </property>
-        <property name="statusTip">
-         <string>Pause</string>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>images/pause.png</normaloff>
-          <normalon>images/play.png</normalon>images/pause.png</iconset>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="default">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="CompactButton" name="resetButton">
-        <property name="statusTip">
-         <string>Reset connection</string>
-        </property>
-        <property name="text">
-         <string>Reset</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="startDateLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">padding-left: 0.5em</string>
-        </property>
-        <property name="text">
-         <string>Start date</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="StartDateEdit" name="startDateEdit">
-        <property name="keyboardTracking">
-         <bool>false</bool>
-        </property>
-        <property name="calendarPopup">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="timeLabel">
-        <property name="text">
-         <string>Current time</string>
-        </property>
-        <property name="indent">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="DateTimeValueLabel" name="dateTimeValueLabel">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="statusTip">
-         <string>Time</string>
-        </property>
-        <property name="text">
-         <string>99  99:99:99  9999999</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <widget class="QWidget" name="controlWidget" native="true">
+      <layout class="QHBoxLayout" name="controlLayout">
+       <item>
+        <widget class="PortLabel" name="portLabel">
+         <property name="minimumSize">
+          <size>
+           <width>65</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="statusTip">
+          <string>Current connected port</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: rgb(192,192,192)</string>
+         </property>
+         <property name="text">
+          <string>No COM</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="PauseButton" name="pauseButton">
+         <property name="toolTip">
+          <string>Pause</string>
+         </property>
+         <property name="statusTip">
+          <string>Pause</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>images/pause.png</normaloff>
+           <normalon>images/play.png</normalon>images/pause.png</iconset>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="default">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="CompactButton" name="resetButton">
+         <property name="statusTip">
+          <string>Reset connection</string>
+         </property>
+         <property name="text">
+          <string>Reset</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="startDateLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">padding-left: 0.5em</string>
+         </property>
+         <property name="text">
+          <string>Start date</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="StartDateEdit" name="startDateEdit">
+         <property name="keyboardTracking">
+          <bool>false</bool>
+         </property>
+         <property name="calendarPopup">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="timeLabel">
+         <property name="text">
+          <string>Current time</string>
+         </property>
+         <property name="indent">
+          <number>5</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="DateTimeValueLabel" name="dateTimeValueLabel">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="statusTip">
+          <string>Time</string>
+         </property>
+         <property name="text">
+          <string>99  99:99:99  9999999</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
     <item>
      <widget class="QSplitter" name="splitter">
@@ -190,7 +192,7 @@
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QWidget" name="logTextEditWidget">
+      <widget class="QWidget" name="logTextEditWidget" native="true">
        <layout class="QVBoxLayout" name="logTextEditLayout">
         <item>
          <widget class="QPlainTextEdit" name="logTextEdit">
@@ -367,20 +369,21 @@
   <widget class="QMenuBar" name="menuBar">
    <widget class="QMenu" name="fileMenu">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="quitAction"/>
    </widget>
    <widget class="QMenu" name="columnsMenu">
     <property name="title">
-     <string>Columns</string>
+     <string>&amp;Columns</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="aboutAction"/>
+    <addaction name="aboutQtAction"/>
    </widget>
    <addaction name="fileMenu"/>
    <addaction name="columnsMenu"/>
@@ -389,7 +392,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="quitAction">
    <property name="text">
-    <string>Quit</string>
+    <string>&amp;Quit</string>
    </property>
    <property name="statusTip">
     <string>Quit</string>
@@ -397,10 +400,18 @@
   </action>
   <action name="aboutAction">
    <property name="text">
-    <string>About</string>
+    <string>&amp;About</string>
    </property>
    <property name="statusTip">
     <string>About</string>
+   </property>
+  </action>
+  <action name="aboutQtAction">
+   <property name="text">
+    <string>About &amp;Qt</string>
+   </property>
+   <property name="statusTip">
+    <string>About Qt</string>
    </property>
   </action>
  </widget>

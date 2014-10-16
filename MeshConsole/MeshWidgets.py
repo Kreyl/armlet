@@ -103,10 +103,9 @@ class ConsoleEdit(QLineEdit):
         return ret
 
 class AboutDialog(QDialog):
-    def __init__(self, trigger):
+    def __init__(self):
         QDialog.__init__(self)
         uic.loadUi(ABOUT_UI_FILE_NAME, self)
-        trigger.connect(self.exec_)
 
 class ConfirmationDialog(QDialog):
     def __init__(self, dateFormat):

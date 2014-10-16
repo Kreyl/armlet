@@ -59,6 +59,11 @@ UART_FF = 'ff'
 UART_FF_GET = 'ffGet'
 UART_FF_SET = 'ffSet'
 
+UART_FF_RGB = 'rgb'
+UART_FF_WAIT = 'wait'
+UART_FF_GOTO = 'goto'
+UART_FF_LIGHT = 'light'
+
 # Command definitions
 
 pingCommand = Command(UART_PING, '', UART_ACK)
