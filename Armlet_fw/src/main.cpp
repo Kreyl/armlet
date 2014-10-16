@@ -117,7 +117,7 @@ void Init() {
 //    Vibro.Init();
 
 //    IR.RxInit();
-//    MassStorage.Init();
+    MassStorage.Init();
     Power.Init();
 
 //    Sound.Init();

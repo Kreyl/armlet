@@ -32,7 +32,7 @@
 
 
 // ==== MESH PARAMS ====
-#define MAX_ABONENTS            300   /* max ID, started from 1 */
+#define MAX_ABONENTS            200   /* max ID, started from 1 */
 #define MESH_CHANNEL            10     /* mesh RF channel */
 #define MESH_PKT_TIME           1     /* ms */
 #define MESH_GUARD_TIME         1     /* ms */

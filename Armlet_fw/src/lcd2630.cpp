@@ -331,10 +331,10 @@ void Lcd_t::DrawBatteryState() {
 void Lcd_t::DrawBatteryBounds() {
     uint8_t clrbHi, clrbLo, backClrHi, backClrLo;
     SetBounds(BAT_BORD_LEFT, BAT_BORD_WIDTH, BAT_BORD_TOP, BAT_BORD_HEIGHT);
-    clrbHi = (BAT_RECT_BACK_CLR >> 8) & 0x00FF;
-    clrbLo = BAT_RECT_BACK_CLR & 0x00FF;
-    backClrHi = (BAT_BACK_COLOR >> 8) & 0x00FF;
-    backClrLo = BAT_BACK_COLOR & 0x00FF;
+    clrbHi = (BAT_RECT_FORE_CLR >> 8) & 0x00FF;
+    clrbLo = BAT_RECT_FORE_CLR & 0x00FF;
+    backClrHi = (BAT_RECT_BACK_CLR >> 8) & 0x00FF;
+    backClrLo = BAT_RECT_BACK_CLR & 0x00FF;
     WriteByte(0x2C); // Memory write
     DC_Hi();
     for(int y=0; y < BAT_BORD_HEIGHT; y++) {
