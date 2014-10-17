@@ -174,6 +174,7 @@ class FireflyControl(QMainWindow):
         self.currentDirectory = getcwd()
         self.recentFiles = deque(maxlen = 9)
         self.port = None
+        self.allowHardwareUpdate = False
         # Setting window size
         resolution = QDesktopWidget().screenGeometry()
         width = resolution.width()
@@ -196,11 +197,14 @@ class FireflyControl(QMainWindow):
         self.setColorButton.clicked.connect(self.hardwareSetColor)
         self.setProgramButton.clicked.connect(self.hardwareSetProgram)
         self.getProgramButton.clicked.connect(self.hardwareGetProgram)
+        self.onChangeButtonGroup = self.onChangeSetColorButton.group() # Qt Designer doesn't export QButtonGroup names
+        self.onConnectButtonGroup = self.onConnectSetColorButton.group()
         CommandWidget.configure(self.programStackedWidget, self.commandsWidget, self.updateProgram)
         InsertCommandButton.configure(self.insertCommandWidget)
         InsertCommandButton()
         # Starting up!
         self.loadSettings()
+        self.allowHardwareUpdate = True
         self.comConnect.connect(self.processConnect)
         self.port = SerialPort(self.logger, ffGetCommand.prefix, ffResponse.prefix,
                                self.comConnect.emit, None, self.portLabel.setPortStatus.emit,
@@ -295,6 +299,8 @@ class FireflyControl(QMainWindow):
             self.fileMenu.insertAction(insertBeforeSeparator, action)
 
     def updateHardware(self, color = None):
+        if not self.allowHardwareUpdate:
+            return
         if self.onChangeButtonGroup.checkedButton() is self.onChangeSetColorButton:
             self.hardwareSetColor()
         elif not color and self.onChangeButtonGroup.checkedButton() is self.onChangeSetProgramButton:
@@ -375,7 +381,9 @@ class FireflyControl(QMainWindow):
         if not args:
             args = self.processCommand(ffGetCommand.encode())
         if args:
+            self.allowHardwareUpdate = False
             self.newFile(','.join(args), force, self.onReadMarkChangedCheckBox.isChecked())
+            self.allowHardwareUpdate = True
 
     def saveSettings(self):
         settings = QSettings()
@@ -437,11 +445,12 @@ class FireflyControl(QMainWindow):
                     self.restoreState(settings.value('state', type = QByteArray))
                     settings.endGroup()
                     self.logger.info("Loaded settings dated %s", timeStamp)
+                    return
                 else:
                     self.logger.info("No settings found")
             except:
                 self.logger.exception("Error loading settings")
-                CommandWidget.setupProgram()
+        CommandWidget.setupProgram()
 
     def error(self, message):
         print "ERROR:", message
