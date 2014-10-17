@@ -56,7 +56,7 @@ static void MeshPktHandlerThd(void *arg) {
 #endif
 
 void Mesh_t::Init() {
-    if(App.SelfID == 0) {
+    if((App.SelfID == 0) || (App.SelfID > MAX_ABONENTS)) {
         Uart.Printf("\rMsh: WrongID");
         return;
     }
