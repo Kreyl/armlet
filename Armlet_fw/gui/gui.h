@@ -75,8 +75,7 @@ private:
     void CleanUpDisplayBuf() {
         uint8_t Sz = DisplayBufSz;
         for(uint8_t i=0; i < Sz; i++) {
-            if(DisplayBuf[i].LifeTime > NEIGHBOR_LIFETIME) {
-                Uart.Printf("\rDelete %u", DisplayBuf[i].ID);
+            if(DisplayBuf[i].LifeTime >= NEIGHBOR_LIFETIME) {
                 DisplayBufSz--;
                 for(uint8_t j=i; j < Sz-1; j++) {
                     NeighbourLine_t tmp = DisplayBuf[j];
