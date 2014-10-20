@@ -110,7 +110,9 @@ void Mesh_t::INewCycle() {
     // ==== TX ====
     else {
         PreparePktPayload(AbsCycle);
+#ifdef CC_TX_IMMEDIATELY
         CC.PreparePkt(&PktTx);
+#endif
         if(SleepTime > 0) chThdSleepMilliseconds(SleepTime);
         chEvtSignal(Radio.rThd, EVTMSK_MESH_TX);
         IWaitTxEnd();

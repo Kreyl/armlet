@@ -26,6 +26,8 @@
 #include "kl_lib_L15x.h"
 #endif
 
+//#define CC_TX_IMMEDIATELY
+
 //#define SELF_MESH_ID        1
 #define STATIONARY_ID           6
 #define STATIONARY_MIN_LEVEL    -120
