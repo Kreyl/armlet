@@ -63,6 +63,7 @@ public:
     void PreparePkt(void *Ptr) {
         while(IState != CC_STB_IDLE) EnterIdle();
         WriteTX((uint8_t*)Ptr, IPktSz);
+
     }
     void StartTransmit() {
         chSysLock();

@@ -193,13 +193,13 @@ void App_t::Task() {
             }
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
-            Uart.Printf("App TabGet, s=%u, t=%u\r\n", RxTable.PTable->Size, chTimeNow());
-            GUI.draw_RxTable(&RxTable);
+            Uart.Printf("\rApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
 /*
             for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
                 Uart.Printf("\r\nID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);
             }
 */
+            GUI.RxTableParse(&RxTable);
             UpdateState();
         }
 #endif
@@ -325,10 +325,37 @@ void App_t::OnUartCmd(Cmd_t *PCmd) {
     }
 
     // TODO: debug only
-    else if(PCmd->NameIs("#Splash")) {
-    	Uart.Printf("\rManually splash");
-    	Sound.Play("splash.mp3");
+    else if(PCmd->NameIs("#SendTable1")) {
+        RxTable.PutRxInfo(60 , -43, nullptr);
+        RxTable.PutRxInfo(150, -27, nullptr);
+        RxTable.PutRxInfo(103, -50, nullptr);
+        RxTable.PutRxInfo(106, -70, nullptr);
+        RxTable.PutRxInfo(172, -81, nullptr);
     }
+
+    else if(PCmd->NameIs("#SendTable2")) {
+        RxTable.PutRxInfo(150, -52, nullptr);
+        RxTable.PutRxInfo(123, -41, nullptr);
+        RxTable.PutRxInfo(153, -92, nullptr);
+        RxTable.PutRxInfo(111, -21, nullptr);
+        RxTable.PutRxInfo(121, -47, nullptr);
+        RxTable.PutRxInfo(112, -32, nullptr);
+        RxTable.PutRxInfo(143, -73, nullptr);
+        RxTable.PutRxInfo(125, -12, nullptr);
+        RxTable.PutRxInfo(167, -54, nullptr);
+        RxTable.PutRxInfo(131, -23, nullptr);
+        RxTable.PutRxInfo(139, -75, nullptr);
+        RxTable.PutRxInfo(147, -35, nullptr);
+    }
+
+    else if(PCmd->NameIs("#SendTable3")) {
+        RxTable.PutRxInfo(112, -27, nullptr);
+        RxTable.PutRxInfo(144, -50, nullptr);
+        RxTable.PutRxInfo(133, -70, nullptr);
+        RxTable.PutRxInfo(135, -81, nullptr);
+
+    }
+
 
     else if(*PCmd->Name == '#') Uart.Ack(CMD_UNKNOWN);  // reply only #-started stuff
 }

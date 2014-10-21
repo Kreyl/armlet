@@ -20,41 +20,80 @@ void gui_t::Init() {
     draw_SelfID();
     draw_SelfName();
     Lcd.DrawBatteryBounds();
+
 }
 
-void gui_t::draw_RxTable(RxTable_t *P) {
-    clean_RxTable();
-//    if(P->PTable->Size == 0) {
-//        draw_EmptyLine(REASON_NAME_START_Y, clOrangeClr, clBlackClr);
-//    }
-//    else {
-        for(uint8_t vert_str=0; vert_str < P->PTable->Size; vert_str++) {
-            if((P->PTable->Row[vert_str].ID >= PERSON_ID_START) && (PERSON_ID_END >= P->PTable->Row[vert_str].ID)) {
-                if(RxTable_lines < MAX_GUI_NEIGHBOR_LINES) {
-                    draw_Line(REASON_NAME_START_Y + (RxTable_lines*REASON_NAME_HEIGHT), clOrangeClr, clBlackClr, P->PTable->Row[vert_str].ID, P->PTable->Row[vert_str].Level);
-                    RxTable_lines++;
-                } // if empty line present
-            } // if reason is human number
-        } // for string in RxTable
-//    }
+void gui_t::RxTableParse(RxTable_t *P) {
+    for(uint8_t vert_str=0; vert_str < P->PTable->Size; vert_str++) {
+        if((P->PTable->Row[vert_str].ID >= PERSON_ID_START) && (PERSON_ID_END >= P->PTable->Row[vert_str].ID)) {
+            NeighbourTbl.PutNeighbor(P->PTable->Row[vert_str].ID, P->PTable->Row[vert_str].Level);
+        } // if reason is human number
+    } // for string in RxTable
+    NeighbourTbl.PrepareDisplayBuf();
+    NeighbourTbl.DisplayNeighbors();
 }
 
-void gui_t::clean_RxTable() {
-    if(RxTable_lines != 0) {
-        do {
-            RxTable_lines--;
-            erase_Line(REASON_NAME_START_Y + (RxTable_lines*REASON_NAME_HEIGHT), clOrangeClr, clBlackClr);
-        } while(RxTable_lines != 0);
+
+#if 1 // Integlral Neighbours
+void NeighbourTbl_t::PutNeighbor(uint16_t ID, uint8_t Level) {
+    if(LineCnt < MAX_NEIGHBOR_SIZE) { NeighbourBuf[LineCnt].Put(ID, Level); LineCnt++; }
+}
+
+void NeighbourTbl_t::PrepareDisplayBuf() {
+    SortByPower();
+    CleanUpDisplayBuf();
+    if(LineCnt > GUI_NEIGHBOR_LINES) { // All data is freshy
+        for(uint8_t i=0; i<GUI_NEIGHBOR_LINES; i++) {
+            DisplayBuf[i] = NeighbourBuf[i];
+            DisplayBufSz = GUI_NEIGHBOR_LINES;
+        }
     }
-    draw_EmptyLine(REASON_NAME_START_Y, clOrangeClr, clBlackClr);
+    else { // should check the data and fill the display information correctly
+        NeighbourLine_t *P = NeighbourBuf;
+        while(LineCnt-- > 0) {
+            uint8_t Line = WRONG_PARAM;
+            for(uint8_t i=0; i<DisplayBufSz; i++) {
+                if(P->ID == DisplayBuf[i].ID) Line = i;
+            }
+            if(Line != WRONG_PARAM) DisplayBuf[Line] = *P++;
+            else if(DisplayBufSz < GUI_NEIGHBOR_LINES) {
+                    DisplayBuf[DisplayBufSz] = *P++;
+                    DisplayBufSz++;
+            } else { // Find more relevant information
+                Line = FindPlace();
+                if(Line != WRONG_PARAM) DisplayBuf[Line] = *P++;
+            }
+        } // while LineCnt
+    }
 }
 
+void NeighbourTbl_t::DisplayNeighbors() {
+    Cls();
+    if(DisplayBufSz == 0) {
+        GUI.draw_EmptyLine(REASON_NAME_START_Y, clOrangeClr, clBlack);
+    }
+    else {
+        for(uint8_t i=0; i<DisplayBufSz; i++) {
+            GUI.draw_Line(REASON_NAME_START_Y + (i*REASON_NAME_HEIGHT), clOrangeClr, clBlack, DisplayBuf[i].ID, DisplayBuf[i].Level);
+            DisplayBuf[i].LifeTime += 1;
+            DisplayBuf[i].Level = 0;
+        }
+    }
+    LineCntToDelete = DisplayBufSz;
+    LineCnt = 0;
+}
+
+void NeighbourTbl_t::Cls() {
+    for(uint8_t i=0; i<LineCntToDelete; i++) GUI.erase_Line(REASON_NAME_START_Y + (i*REASON_NAME_HEIGHT), clOrangeClr, clBlack);
+}
+
+#endif
 void gui_t::draw_Location(uint8_t LocAddr, uint8_t Power) {
     if(LocAddr == 0) {
         draw_EmptyLine(LOCATION_START_Y, clWhiteClr, clBlackClr);
         return;
     }
-    draw_Location(LOCATION_START_Y, clWhiteClr, clBlackClr, LocAddr, Power);
+    draw_locationI(LOCATION_START_Y, clWhiteClr, clBlackClr, LocAddr, Power);
 }
 
 void gui_t::draw_Time() {
