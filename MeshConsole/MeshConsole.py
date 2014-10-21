@@ -100,7 +100,7 @@ class EmulatedSerial(object):
     def write(self, data):
         (tag, _args) = Command.decodeCommand(data)
         if tag == meshGetSettingsCommand.tag:
-            self.buffer.append(meshGetSettingsResponse.encode(len(Device.devices), 400))
+            self.buffer.append(meshGetSettingsResponse.encode(len(Device.devices) + 1, 400))
         elif tag == meshSetCycleCommand.tag:
             self.buffer.append(meshSetCycleResponse.encode(randint(-10, 10)))
         self.ready = True
