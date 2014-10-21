@@ -193,7 +193,7 @@ void App_t::Task() {
             }
 #if 1 //EVTMASK_RADIO on/off
         if(EvtMsk & EVTMSK_SENS_TABLE_READY) {
-            Uart.Printf("App TabGet, s=%u, t=%u\r\n", RxTable.PTable->Size, chTimeNow());
+            Uart.Printf("\rApp TabGet, s=%u, t=%u", RxTable.PTable->Size, chTimeNow());
 /*
             for(uint32_t i=0; i<RxTable.PTable->Size; i++) {
                 Uart.Printf("\r\nID=%u; Pwr=%u", RxTable.PTable->Row[i].ID, RxTable.PTable->Row[i].Level);

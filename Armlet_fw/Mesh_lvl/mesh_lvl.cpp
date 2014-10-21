@@ -138,8 +138,9 @@ void Mesh_t::IPktHandler(){
             GetPrimaryPkt = true;                        // received privilege pkt
             PriorityID = pSM->TimeOwnerID;
             IResetTimeAge(PriorityID, pSM->TimeAge);
-            NewCycleN = pSM->CycleN + 1;   // TODO: cycle number increment: nedeed of not? Seems to be needed.
+            NewCycleN = pSM->CycleN;
             CycleCorrection = AbsCycle - NewCycleN;
+            NewCycleN++;   // TODO: cycle number increment: nedeed of not? Seems to be needed.
             TimeToWakeUp = MeshMsg.Timestamp - MESH_PKT_TIME - (SLOT_TIME*(PriorityID-1)) + CYCLE_TIME;
         }
     }
