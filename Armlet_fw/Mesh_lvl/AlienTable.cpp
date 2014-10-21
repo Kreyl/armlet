@@ -68,13 +68,13 @@ ret_Err AlienTable_t::PutSender(uint32_t CurrentCycle, SenderInfo_t *Ptr) {
 
 /* TimeCorrection */
 void AlienTable_t::TimeCorrection(int32_t Corr) {
-    if(Corr == 0) return;
-    for(uint16_t i=0; i<ALIEN_BUF_SIZE; i++) {
-        if(Buf[i].Mesh.Timestamp != 0) {
-            Uart.Printf("\rCycleCorr %u  {ts:%d, cr:%d}", i, Buf[i].Mesh.Timestamp, Corr);
-            Buf[i].Mesh.Timestamp   -= Corr;
-            Buf[i].Mesh.TimeDiff    -= Corr;
-            Uart.Printf("\rAfterCorr %u  {ts:%d, td:%d}\r", i, Buf[i].Mesh.Timestamp, Buf[i].Mesh.TimeDiff);
-        } // if valid string
-    } // for all Buf
+//    if(Corr == 0) return;
+//    for(uint16_t i=0; i<ALIEN_BUF_SIZE; i++) {
+//        if(Buf[i].Mesh.Timestamp != 0) {
+//            Uart.Printf("\rCycleCorr %u  {ts:%d, cr:%d}", i, Buf[i].Mesh.Timestamp, Corr);
+//            Buf[i].Mesh.Timestamp   -= Corr;
+//            Buf[i].Mesh.TimeDiff    -= Corr;
+//            Uart.Printf("\rAfterCorr %u  {ts:%d, td:%d}\r", i, Buf[i].Mesh.Timestamp, Buf[i].Mesh.TimeDiff);
+//        } // if valid string
+//    } // for all Buf
 }
