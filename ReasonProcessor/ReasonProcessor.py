@@ -85,6 +85,8 @@ RESERVED_REASON = 'R%03d'
 
 PLACEHOLDER_REASON = 'PH%02d'
 
+PERSON_REASON = 'P%03d'
+
 TEST_COMMAND = 'gcc -I "%s" -o test "%s" test.c && ./test && rm test' % (C_PATH, C_TARGET)
 
 def firstCapital(s):
@@ -143,7 +145,7 @@ def processReasons():
     r = processReasonRange(getFileName(PEOPLE_CSV), 'person', PERSON_ID_START, len(PERSON_IDS))
     reasons.append(r)
     num += len(r)
-    r = tuple(reserveReason(RESERVED_REASON, rid) for rid in xrange(num, MAX_ID + 1))
+    r = tuple(reserveReason(PERSON_REASON, rid) for rid in xrange(num, MAX_ID + 1))
     reasons.append(r)
     num += len(r)
     checkSets = tuple(set(r[1].lower() for r in reason) for reason in reasons)
@@ -154,6 +156,9 @@ def processReasons():
     assert tuple(r[0] for r in chain.from_iterable(reasons)) == tuple(xrange(sum(len(r) for r in reasons)))
     return reasons
 
+def processReason(reason):
+    return translify(unicode(reason)).upper().replace("'", '').replace(".", '').replace("#", '').replace('-', '_').replace(' ', '_')
+
 def cString(s):
     return '"%s"' % s.encode(CPP_ENCODING)
 
@@ -161,7 +166,7 @@ def cReason(ridWidth, rid, reason):
     return REASON_C_NODE % (str(rid).rjust(ridWidth), cString(reason))
 
 def hReason(rid, reason, padding):
-    return REASON_H_NODE % (translify(unicode(reason)).upper().replace("'", '').replace("#", '').replace('-', '_').replace(' ', '_'), ' ' * padding, rid)
+    return REASON_H_NODE % (reason, ' ' * padding, rid)
 
 def writeC(reasons):
     ridWidth = len(str(max(r[0] for r in chain.from_iterable(reasons))))
@@ -170,8 +175,8 @@ def writeC(reasons):
         f.write(C_CONTENT % ((currentTime(),) + reasonsTexts))
 
 def writeH(reasons):
-    maxReasonWidth = max(len(translify(unicode(reason)).replace("'", '').replace("#", '')) for (_rid, reason) in chain(*reasons)) + len(str(MAX_ID))
-    reasonsTexts = tuple('\n'.join(hReason(rid, reason, maxReasonWidth - len(translify(unicode(reason)).replace("'", '').replace("#", '')) - len(str(rid)) - int(len(str(rid)) == 1)) for (rid, reason) in reason) + ('\n' if reason else '') for reason in reasons)
+    maxReasonWidth = max(len(processReason(reason)) for (_rid, reason) in chain(*reasons)) + len(str(MAX_ID))
+    reasonsTexts = tuple('\n'.join(hReason(rid, processReason(reason), maxReasonWidth - len(processReason(reason)) - len(str(rid)) - int(len(str(rid)) == 1)) for (rid, reason) in reason) + ('\n' if reason else '') for reason in reasons)
     with open(getFileName(H_TARGET), 'wb') as f:
         f.write(H_CONTENT % ((currentTime(), ' ' * max(1, maxReasonWidth - 9 - len(str(MAX_ID))), sum(len(r) for r in reasons)) + reasonsTexts))
 

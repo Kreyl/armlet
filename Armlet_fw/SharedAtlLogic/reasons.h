@@ -8,7 +8,7 @@
  *
  * !!! DO NOT EDIT !!!
  *
- * Generated at 2014-10-21 05:10:51
+ * Generated at 2014-10-21 17:00:23
  */
 #ifndef REASONS_H
 #define REASONS_H
@@ -180,13 +180,13 @@ extern Reason_t reasons[];
 #define REASON_HEL           125
 #define REASON_KOLENKA       126
 #define REASON_DONNA_ANNA    127
-#define REASON_MASHKA_L.     128
+#define REASON_MASHKA_L      128
 #define REASON_JOLAF         129
 #define REASON_RINGIL        130
 #define REASON_MORKOVKA      131
 #define REASON_VARPO         132
 #define REASON_VER           133
-#define REASON_NASTYA_K.     134
+#define REASON_NASTYA_K      134
 #define REASON_STASKA        135
 #define REASON_RUTA          136
 #define REASON_RUMATA        137
@@ -248,11 +248,11 @@ extern Reason_t reasons[];
 #define REASON_SHIHANA       193
 #define REASON_KAMILL        194
 	// end of people
-#define REASON_R195          195
-#define REASON_R196          196
-#define REASON_R197          197
-#define REASON_R198          198
-#define REASON_R199          199
+#define REASON_P195          195
+#define REASON_P196          196
+#define REASON_P197          197
+#define REASON_P198          198
+#define REASON_P199          199
 
 #endif // ifdef REASONS_H
 
