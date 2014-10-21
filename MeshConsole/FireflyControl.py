@@ -155,18 +155,6 @@ class FireflyControl(QMainWindow):
                 self.emulated = True
             elif option in ('-r', '--reset'):
                 self.needLoadSettings = False
-        # Setup logging
-        formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
-        handlers = (FileHandler(LOG_FILE_NAME), CallableHandler(self.logTextEdit.appendPlainText))
-        rootLogger = getLogger('')
-        for handler in handlers:
-            handler.setFormatter(formatter)
-            rootLogger.addHandler(handler)
-        rootLogger.setLevel(INFO)
-        setLoggerClass(EventLogger)
-        self.logger = getLogger('FireflyControl')
-        self.logger.configure(self) # pylint: disable=E1103
-        self.logger.info("start")
         # Setting variables
         self.title = self.windowTitle()
         self.fileName = None
@@ -202,6 +190,18 @@ class FireflyControl(QMainWindow):
         CommandWidget.configure(self.programStackedWidget, self.commandsWidget, self.updateProgram)
         InsertCommandButton.configure(self.insertCommandWidget)
         InsertCommandButton()
+        # Setup logging
+        formatter = Formatter('%(asctime)s %(levelname)s\t%(message)s', '%Y-%m-%d %H:%M:%S')
+        handlers = (FileHandler(LOG_FILE_NAME), CallableHandler(self.logTextEdit.appendPlainText))
+        rootLogger = getLogger('')
+        for handler in handlers:
+            handler.setFormatter(formatter)
+            rootLogger.addHandler(handler)
+        rootLogger.setLevel(INFO)
+        setLoggerClass(EventLogger)
+        self.logger = getLogger('FireflyControl')
+        self.logger.configure(self) # pylint: disable=E1103
+        self.logger.info("start")
         # Starting up!
         self.loadSettings()
         self.allowHardwareUpdate = True

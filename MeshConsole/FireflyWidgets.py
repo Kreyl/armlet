@@ -157,7 +157,7 @@ class SelectColorFrame(QFrame):
             self.setColor(previousColor)
 
     def getCommand(self):
-        return ','.join((UART_FF_RGB, str(self.color.red()), str(self.color.green()), str(self.color.blue())))
+        return ','.join((UART_FF_RGB, str(self.color.red()), str(self.color.green()), str(self.color.blue()), '0'))
 
 class InsertCommandButton(QToolButton):
     insertCommandLayout = None
