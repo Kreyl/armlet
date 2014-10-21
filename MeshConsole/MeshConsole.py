@@ -189,7 +189,6 @@ class MeshConsole(QMainWindow):
             self.logTextEditWidget.hide()
             for i in chain(xrange(PERSON_ID_START - 1), xrange(PERSON_ID_END, len(self.devices))):
                 self.devicesTableView.hideRow(i)
-
         # Starting up!
         self.loadSettings()
         self.logger.info("Running in %s mode", 'SLAVE' if self.slave else 'MASTER')

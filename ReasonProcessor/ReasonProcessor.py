@@ -97,7 +97,7 @@ def readCSV(csv): # generator
     with open(csv) as f:
         for row in CSVReader(f):
             assert row, "Bad file format, empty line: %s" % csv
-            if not row[0].startswith('#'):
+            if not row[0].strip() == '#' and not row[0].strip().startswith('# '):
                 yield row
 
 def addReason(reasons, rid, reason):
@@ -161,7 +161,7 @@ def cReason(ridWidth, rid, reason):
     return REASON_C_NODE % (str(rid).rjust(ridWidth), cString(reason))
 
 def hReason(rid, reason, padding):
-    return REASON_H_NODE % (translify(unicode(reason)).upper().replace("'", '').replace('-', '_').replace(' ', '_'), ' ' * padding, rid)
+    return REASON_H_NODE % (translify(unicode(reason)).upper().replace("'", '').replace("#", '').replace('-', '_').replace(' ', '_'), ' ' * padding, rid)
 
 def writeC(reasons):
     ridWidth = len(str(max(r[0] for r in chain.from_iterable(reasons))))
@@ -170,8 +170,8 @@ def writeC(reasons):
         f.write(C_CONTENT % ((currentTime(),) + reasonsTexts))
 
 def writeH(reasons):
-    maxReasonWidth = max(len(translify(unicode(reason)).replace("'", '')) for (_rid, reason) in chain(*reasons)) + len(str(MAX_ID))
-    reasonsTexts = tuple('\n'.join(hReason(rid, reason, maxReasonWidth - len(translify(unicode(reason)).replace("'", '')) - len(str(rid)) - int(len(str(rid)) == 1)) for (rid, reason) in reason) + ('\n' if reason else '') for reason in reasons)
+    maxReasonWidth = max(len(translify(unicode(reason)).replace("'", '').replace("#", '')) for (_rid, reason) in chain(*reasons)) + len(str(MAX_ID))
+    reasonsTexts = tuple('\n'.join(hReason(rid, reason, maxReasonWidth - len(translify(unicode(reason)).replace("'", '').replace("#", '')) - len(str(rid)) - int(len(str(rid)) == 1)) for (rid, reason) in reason) + ('\n' if reason else '') for reason in reasons)
     with open(getFileName(H_TARGET), 'wb') as f:
         f.write(H_CONTENT % ((currentTime(), ' ' * max(1, maxReasonWidth - 9 - len(str(MAX_ID))), sum(len(r) for r in reasons)) + reasonsTexts))
 
