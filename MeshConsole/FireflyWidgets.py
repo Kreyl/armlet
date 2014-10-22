@@ -64,6 +64,14 @@ class VerticalScrollArea(QScrollArea):
         self.setMinimumWidth(self.widget().sizeHint().width() + self.verticalScrollBar().width())
         QScrollArea.resizeEvent(self, event)
 
+class TimeValidator(QIntValidator):
+    def validate(self, inp, pos):
+        ret = QIntValidator.validate(self, inp, pos)
+        if ret != self.Invalid and not str(inp).strip():
+            ret = (self.Invalid,) + ret[1:]
+        print repr(ret)
+        return ret
+
 class TimeEdit(QLineEdit):
     MAX_VALUE = MAX_INT
     MAX_LENGTH = len(str(MAX_VALUE))
@@ -72,7 +80,7 @@ class TimeEdit(QLineEdit):
         QLineEdit.__init__(self, parent)
         self.setAlignment(Qt.AlignRight)
         self.setMaxLength(self.MAX_LENGTH)
-        self.setValidator(QIntValidator(0, self.MAX_VALUE))
+        self.setValidator(TimeValidator(0, self.MAX_VALUE))
         self.setText(str(self.MAX_VALUE))
         fixWidgetSize(self, 1.4)
         self.setText(str(initialValue or 0))
