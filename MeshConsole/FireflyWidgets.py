@@ -69,7 +69,6 @@ class TimeValidator(QIntValidator):
         ret = QIntValidator.validate(self, inp, pos)
         if ret != self.Invalid and not str(inp).strip():
             ret = (self.Invalid,) + ret[1:]
-        print repr(ret)
         return ret
 
 class TimeEdit(QLineEdit):
