@@ -244,7 +244,7 @@ def processCharacter(name, number, otherFields, emotions, baseDir = '.', verifyF
         raise ProcessException("Multiple character files found: %s" % ', '.join(characterFiles))
     if characterFiles:
         print "Character file found: %s, verifying" % characterFiles[0]
-        verifyCharacter(emotions, characterFiles[0])
+        verifyCharacter(emotions, join(armletDir, characterFiles[0]))
     # Check music status
     (withErrors, markDate, okNum, okSize, errorText) = checkResultMark(baseDir)
     if markDate:
