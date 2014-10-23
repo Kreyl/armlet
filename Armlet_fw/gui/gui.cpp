@@ -103,7 +103,10 @@ void gui_t::draw_Time() {
 }
 
 void gui_t::draw_SelfID() {
-    Lcd.Printf(CourierNew, ID_START_X, ID_START_Y, clBlackClr, clOrangeClr, "%u", App.SelfID);
+    uint8_t Spacing = ID_START_X;
+    if(App.SelfID < 10) Spacing = 15;
+    if((App.SelfID > 9) && (App.SelfID < 100)) Spacing = LOCATION_ID_X;
+    Lcd.Printf(CourierNew, Spacing, ID_START_Y, clBlackClr, clOrangeClr, "%u", App.SelfID);
 }
 
 void gui_t::draw_SelfName() {

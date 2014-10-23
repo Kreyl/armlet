@@ -25,15 +25,15 @@ extern const tImage Gisto5;
 extern const tImage Gisto6;
 extern const tImage Gisto7;
 
-extern const tImageSequence Gisto = {{
-        Gisto0.PData,
-        Gisto1.PData,
-        Gisto2.PData,
-        Gisto3.PData,
-        Gisto4.PData,
-        Gisto5.PData,
-        Gisto6.PData,
-        Gisto7.PData,
-    }, 8, Gisto0.Width, Gisto0.Height };
+//extern const tImageSequence Gisto = {{
+//        Gisto0.PData,
+//        Gisto1.PData,
+//        Gisto2.PData,
+//        Gisto3.PData,
+//        Gisto4.PData,
+//        Gisto5.PData,
+//        Gisto6.PData,
+//        Gisto7.PData,
+//    }, 8, Gisto0.Width, Gisto0.Height };
 
 #endif /* IMAGES_H_ */
