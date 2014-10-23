@@ -331,6 +331,7 @@ class MeshConsole(QMainWindow):
             settings.setValue('columnsVisible', ' '.join(str(int(action.isChecked())) for action in self.columnActions))
             settings.setValue('startDate', self.startTime.date().toString(LONG_DATE_FORMAT))
             settings.beginGroup('emulated' if self.emulated else 'devices')
+            settings.remove('')
             for device in self.devices:
                 settings.setValue(str(device.number), device.settings())
             settings.endGroup()
