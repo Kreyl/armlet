@@ -20,9 +20,9 @@ SEPARATORS = reCompile(' *[, ] *')
 
 REPEAT = 'repeat'
 
-MAX_COMMAND_ARGS = 16
+MAX_COMMAND_ARGS = 100
 
-MAX_COMMAND_LENGTH = 252
+MAX_COMMAND_LENGTH = 384
 
 def nop(s):
     return s
