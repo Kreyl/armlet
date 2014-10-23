@@ -6,9 +6,9 @@ placeholderThreshold=60
 locationThreshold=60
 forestTheshold=60
 lodgeTheshold=60
-emotionFixTheshold=60
+emotionFixTheshold=55
 mistThreshold=0
-characterThreshold=0
+characterThreshold=60
 IRlevel=75
 
 [character]

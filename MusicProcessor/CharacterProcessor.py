@@ -179,7 +179,7 @@ def updateCharacters():
     print "Processing characters..."
     characters = readCharacters()
     changed = False
-    for (shortName, longName, otherFields) in loadCharacters():
+    for (shortName, longName, otherFields) in ():#loadCharacters():
         (rid, oldLongName, oldOtherFields) = characters.get(shortName, (None, None, None))
         if not rid: # new character
             characterID = len(characters) + CHARACTER_ID_START
