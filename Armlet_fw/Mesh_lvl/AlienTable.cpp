@@ -23,6 +23,7 @@ AlienTable_t AlienTable;
  *      1) if anything unknown happend.
  */
 ret_Err AlienTable_t::PutAlien(uint16_t ID, int32_t TimeStampDiff, AlienInfo_t *Ptr) {
+    Uart.Printf("\rTimeStampDiff = %d", TimeStampDiff);
     Uart.Printf("\rPutAlien %u {h:%u, ts:%d, td:%d}", ID, Ptr->Mesh.Hops, Ptr->Mesh.Timestamp, Ptr->Mesh.TimeDiff);
     if(ID > ALIEN_BUF_SIZE) return CMD_ERROR;
     else if(ID == 0) { Uart.Printf("\rID Err\n"); return FAILURE; }
@@ -32,11 +33,11 @@ ret_Err AlienTable_t::PutAlien(uint16_t ID, int32_t TimeStampDiff, AlienInfo_t *
         Ptr->Mesh.TimeDiff     += TimeStampDiff;
         Uart.Printf("\rBringIntoStep  %u {h:%u, ts:%d, td:%d}", ID, Ptr->Mesh.Hops, Ptr->Mesh.Timestamp, Ptr->Mesh.TimeDiff);
         Uart.Printf("\rInTable        %u {h:%u, ts:%d, td:%d}", ID, Buf[ID].Mesh.Hops, Buf[ID].Mesh.Timestamp, Buf[ID].Mesh.TimeDiff);
-        if(Ptr->Mesh.Timestamp < Buf[ID].Mesh.Timestamp) {
+        if(Ptr->Mesh.Timestamp < Buf[ID].Mesh.Timestamp) { // if data is older then we have
             Uart.Printf("\r1");
             return OK;
         }
-        if((Ptr->Mesh.Timestamp == Buf[ID].Mesh.Timestamp) && (Ptr->Mesh.Hops >= Buf[ID].Mesh.Hops)) {
+        if(Ptr->State == Buf[ID].State) { // if state is the same
             Uart.Printf("\r2");
             return OK;
         }
@@ -68,13 +69,13 @@ ret_Err AlienTable_t::PutSender(uint32_t CurrentCycle, SenderInfo_t *Ptr) {
 
 /* TimeCorrection */
 void AlienTable_t::TimeCorrection(int32_t Corr) {
-//    if(Corr == 0) return;
-//    for(uint16_t i=0; i<ALIEN_BUF_SIZE; i++) {
-//        if(Buf[i].Mesh.Timestamp != 0) {
-//            Uart.Printf("\rCycleCorr %u  {ts:%d, cr:%d}", i, Buf[i].Mesh.Timestamp, Corr);
-//            Buf[i].Mesh.Timestamp   -= Corr;
-//            Buf[i].Mesh.TimeDiff    -= Corr;
-//            Uart.Printf("\rAfterCorr %u  {ts:%d, td:%d}\r", i, Buf[i].Mesh.Timestamp, Buf[i].Mesh.TimeDiff);
-//        } // if valid string
-//    } // for all Buf
+    if(Corr == 0) return;
+    for(uint16_t i=0; i<ALIEN_BUF_SIZE; i++) {
+        if(Buf[i].Mesh.Timestamp != 0) {
+            Uart.Printf("\rCycleCorr %u  {ts:%d, cr:%d}", i, Buf[i].Mesh.Timestamp, Corr);
+            Buf[i].Mesh.Timestamp   -= Corr;
+            Buf[i].Mesh.TimeDiff    -= Corr;
+            Uart.Printf("\rAfterCorr %u  {ts:%d, td:%d}\r", i, Buf[i].Mesh.Timestamp, Buf[i].Mesh.TimeDiff);
+        } // if valid string
+    } // for all Buf
 }

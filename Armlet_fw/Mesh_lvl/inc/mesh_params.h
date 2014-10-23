@@ -72,6 +72,16 @@ struct meshradio_t {
 };
 
 struct state_t {
+    bool operator == (state_t &AState) {
+        return ((Location == AState.Location) and \
+                (Neighbor == AState.Neighbor) and \
+                (Battery == AState.Battery));
+    }
+    bool operator != (state_t &AState) {
+        return ((Location != AState.Location) or  \
+                (Neighbor != AState.Neighbor) or  \
+                (Battery != AState.Battery));
+    }
     uint16_t    Location;
     uint16_t    Neighbor;
     uint8_t     Battery;
