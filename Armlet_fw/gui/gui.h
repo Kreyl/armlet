@@ -42,7 +42,7 @@
 #define REASON_NAME_START_Y     24
 #define REASON_NAME_HEIGHT      12
 
-#define NEIGHBOR_LIFETIME       3
+#define NEIGHBOR_LIFETIME       8
 #define WRONG_PARAM             0xFF
 
 struct NeighbourLine_t {
