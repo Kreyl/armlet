@@ -27,7 +27,7 @@ private:
     AlienInfo_t Buf[ALIEN_BUF_SIZE];
 
     /* Internal functionality */
-    void write_data(uint16_t ID, AlienInfo_t *Ptr) { Buf[ID] = *Ptr; }
+    void write_data(uint16_t ID, AlienInfo_t *Ptr) { Ptr->Mesh.Hops += 1; Buf[ID] = *Ptr; }
 public:
     AlienInfo_t *PNext;
     AlienTable_t(): PNext(Buf) {}

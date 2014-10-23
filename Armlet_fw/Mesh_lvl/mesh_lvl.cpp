@@ -104,7 +104,7 @@ void Mesh_t::INewCycle() {
     IIncCurrCycle();
     ITimeAgeCounter();
     AlienTable.UpdateSelf(AbsCycle);  /* Timestamp = AbsCycle; Send info to console */
-    Uart.Printf("\rCycle=%u, t=%u", AbsCycle, chTimeNow());
+//    Uart.Printf("\rCycle=%u, t=%u", AbsCycle, chTimeNow());
     // ==== RX ====
     if(CurrCycle == RxCycleN) chEvtSignal(Radio.rThd, EVTMSK_MESH_RX);
     // ==== TX ====

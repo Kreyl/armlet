@@ -7,7 +7,7 @@
 
 #include "console.h"
 
-//#define PRINT
+#define PRINT
 
 Console_t Console;
 
