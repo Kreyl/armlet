@@ -1,0 +1,1 @@
+Armlet code - both firmware and software
